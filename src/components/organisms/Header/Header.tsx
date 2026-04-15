@@ -3,7 +3,7 @@ import { Button } from '../../atoms/Button';
 import { useAuthStore } from '../../../store/authStore';
 import styles from './Header.module.css';
 
-export const Header = () => {
+export const Header = ({ currentSection }: { currentSection?: string }) => {
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
 
@@ -12,6 +12,7 @@ export const Header = () => {
       <div className={styles.brandBlock}>
         <span className={styles.kicker}>Daniel 15K</span>
         <strong className={styles.brand}>Finance Console</strong>
+        {currentSection ? <span className={styles.section}>{currentSection}</span> : null}
       </div>
       <div className={styles.actions}>
         <div className={styles.userCard}>

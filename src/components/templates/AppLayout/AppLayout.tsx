@@ -8,7 +8,7 @@ const getNavClassName = ({ isActive }: { isActive: boolean }) => [styles.navLink
 export const AppLayout = ({ title, children }: { title: string; children: ReactNode }) => (
   <div className={styles.shell}>
     <div className={styles.backdrop} aria-hidden="true" />
-    <Header />
+    <Header currentSection={title} />
     <div className={styles.grid}>
       <aside className={styles.sidebar}>
         <div className={styles.sidebarPanel}>
@@ -36,10 +36,6 @@ export const AppLayout = ({ title, children }: { title: string; children: ReactN
         </div>
       </aside>
       <main className={styles.main}>
-        <div className={styles.pageHeader}>
-          <span className={styles.pageEyebrow}>Operación Manual</span>
-          <h1 className={styles.title}>{title}</h1>
-        </div>
         <div className={styles.content}>{children}</div>
       </main>
     </div>

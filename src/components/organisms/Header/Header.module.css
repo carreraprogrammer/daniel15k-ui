@@ -42,6 +42,13 @@
   overflow-wrap: anywhere;
 }
 
+.section {
+  color: rgba(240, 240, 248, 0.62);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  overflow-wrap: anywhere;
+}
+
 .actions {
   gap: var(--space-4);
   min-width: 0;
