@@ -1,7 +1,6 @@
 import { useRef } from 'react';
-import { IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding } from '@ionic/react';
+import { IonButton, IonIcon, IonItem, IonItemOptions, IonItemSliding } from '@ionic/react';
 import { createOutline, trashOutline } from 'ionicons/icons';
-import { IconButton } from '../../atoms/IconButton';
 import type { Transaction } from '../../../types/finance.types';
 import styles from './TransactionSlidingCard.module.css';
 
@@ -60,30 +59,19 @@ export const TransactionSlidingCard = ({ transaction, onEdit, onDelete }: Transa
               {statusLabels[status] ?? status}
             </span>
             <strong className={styles.amount}>{formatCop(transaction.attributes.amount)}</strong>
-            <div className={styles.actions}>
-              <IconButton
-                label="Editar transacción"
-                icon={<IonIcon icon={createOutline} />}
-                onClick={handleEdit}
-              />
-              <IconButton
-                label="Borrar transacción"
-                icon={<IonIcon icon={trashOutline} />}
-                variant="danger"
-                onClick={handleDelete}
-              />
-            </div>
           </div>
         </div>
       </IonItem>
 
-      <IonItemOptions side="end">
-        <IonItemOption className={styles.optionEdit} onClick={handleEdit}>
-          <IonIcon icon={createOutline} />
-        </IonItemOption>
-        <IonItemOption className={styles.optionDelete} onClick={handleDelete}>
-          <IonIcon icon={trashOutline} />
-        </IonItemOption>
+      <IonItemOptions side="end" className={styles.options}>
+        <div className={styles.buttonsWrapper}>
+          <IonButton fill="clear" onClick={handleEdit}>
+            <IonIcon icon={createOutline} className={`${styles.buttonIcon} ${styles.editIcon}`} />
+          </IonButton>
+          <IonButton fill="clear" onClick={handleDelete}>
+            <IonIcon icon={trashOutline} className={`${styles.buttonIcon} ${styles.deleteIcon}`} />
+          </IonButton>
+        </div>
       </IonItemOptions>
     </IonItemSliding>
   );

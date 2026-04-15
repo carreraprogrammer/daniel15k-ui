@@ -3,18 +3,42 @@
   overflow: hidden;
 }
 
-.optionEdit,
-.optionDelete {
-  --color: var(--color-text-primary);
-  min-width: 72px;
+.options {
+  background: rgba(10, 15, 25, 0.96);
+  width: auto;
 }
 
-.optionEdit {
-  --background: linear-gradient(135deg, rgba(0, 229, 204, 0.16), rgba(91, 106, 240, 0.18));
+.buttonsWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 144px;
 }
 
-.optionDelete {
-  --background: rgba(239, 68, 68, 0.16);
+.buttonsWrapper ion-button {
+  margin: 0;
+  padding: 16px;
+  min-height: 0;
+  --padding-top: 6px;
+  --padding-bottom: 6px;
+}
+
+.buttonsWrapper ion-button::part(native) {
+  padding: 0;
+  height: 32px;
+  min-height: 24px;
+}
+
+.buttonIcon {
+  font-size: 24px;
+}
+
+.editIcon {
+  color: #8fe9dd;
+}
+
+.deleteIcon {
+  color: #ff8f8f;
 }
 
 .item {
@@ -48,12 +72,6 @@
 .secondary {
   justify-items: end;
   align-content: start;
-}
-
-.actions {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.15rem;
 }
 
 .header {
@@ -125,9 +143,5 @@
 
   .secondary {
     justify-items: start;
-  }
-
-  .actions {
-    margin-top: 0.35rem;
   }
 }
