@@ -54,6 +54,35 @@
   gap: 0.65rem;
 }
 
+.segmentWrap {
+  display: grid;
+  padding: 0.35rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.segmentWrap ion-segment {
+  --background: transparent;
+}
+
+.segmentWrap ion-segment-button {
+  --color: rgba(231, 236, 244, 0.62);
+  --color-checked: #fff;
+  --indicator-color: transparent;
+  min-height: 46px;
+  border-radius: 18px;
+}
+
+.segmentWrap ion-segment-button::part(native) {
+  border-radius: 18px;
+  transition: background-color var(--transition-base), color var(--transition-base);
+}
+
+.segmentWrap ion-segment-button.segment-button-checked::part(native) {
+  background: linear-gradient(135deg, rgba(0, 229, 204, 0.12), rgba(91, 106, 240, 0.15));
+}
+
 .headline {
   margin: 0;
   color: #fff;

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { IonIcon } from '@ionic/react';
+import { IonIcon, IonLabel, IonSegment, IonSegmentButton } from '@ionic/react';
 import { addOutline } from 'ionicons/icons';
 import { AppLayout } from '../../templates/AppLayout';
 import { IconButton } from '../../atoms/IconButton';
@@ -65,6 +65,7 @@ export const RecurringObligationsPage = () => {
   const [incomeSortOpen, setIncomeSortOpen] = useState(false);
   const [incomeFiltersOpen, setIncomeFiltersOpen] = useState(false);
   const [draftIncomeFilters, setDraftIncomeFilters] = useState<IncomeSourceQueryParams>(initialIncomeFilters);
+  const [activeView, setActiveView] = useState<'income' | 'obligations'>('obligations');
 
   const load = async () => {
     setLoading(true);
@@ -230,9 +231,21 @@ export const RecurringObligationsPage = () => {
         {loading ? <Spinner size="lg" /> : null}
         {error ? <ErrorState message={error} onRetry={() => void load()} /> : null}
 
+        <section className={styles.segmentWrap}>
+          <IonSegment value={activeView} onIonChange={(event) => setActiveView((event.detail.value as 'income' | 'obligations') ?? 'obligations')}>
+            <IonSegmentButton value="obligations">
+              <IonLabel>Obligaciones</IonLabel>
+            </IonSegmentButton>
+            <IonSegmentButton value="income">
+              <IonLabel>Ingresos</IonLabel>
+            </IonSegmentButton>
+          </IonSegment>
+        </section>
+
         {!loading && !error ? (
-          <div className={styles.columns}>
-            <section className={styles.panel}>
+          <>
+            {activeView === 'income' ? (
+              <section className={styles.panel}>
               <h3 className={styles.panelTitle}>Fuentes de ingreso</h3>
               <ListToolbar
                 searchLabel="Buscar ingresos"
@@ -280,9 +293,9 @@ export const RecurringObligationsPage = () => {
                   ))}
                 </div>
               )}
-            </section>
-
-            <section className={styles.panel}>
+              </section>
+            ) : (
+              <section className={styles.panel}>
               <h3 className={styles.panelTitle}>Obligaciones recurrentes</h3>
               <ListToolbar
                 searchLabel="Buscar recurrentes"
@@ -347,8 +360,9 @@ export const RecurringObligationsPage = () => {
                   ))}
                 </div>
               )}
-            </section>
-          </div>
+              </section>
+            )}
+          </>
         ) : null}
       </section>
 
