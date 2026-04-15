@@ -1,0 +1,40 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.035);
+  color: #fff;
+  cursor: pointer;
+  transition:
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    transform var(--transition-base);
+}
+
+.button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.primary {
+  border-color: rgba(0, 229, 204, 0.28);
+  background: linear-gradient(135deg, rgba(0, 229, 204, 0.12), rgba(91, 106, 240, 0.15));
+}
+
+.ghost {
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.danger {
+  border-color: rgba(255, 110, 110, 0.28);
+  background: rgba(255, 110, 110, 0.12);
+  color: #ffb3b3;
+}

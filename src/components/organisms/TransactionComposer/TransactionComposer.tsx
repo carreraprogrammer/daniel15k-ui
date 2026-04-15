@@ -88,7 +88,7 @@ export interface TransactionComposerProps {
   loading?: boolean;
   onCreate: (payload: TransactionCreatePayload) => Promise<void>;
   onUpdate: (id: string, payload: TransactionUpdatePayload) => Promise<void>;
-  onCancelEdit?: () => void;
+  onCancel?: () => void;
 }
 
 export const TransactionComposer = ({
@@ -96,13 +96,13 @@ export const TransactionComposer = ({
   loading,
   onCreate,
   onUpdate,
-  onCancelEdit,
+  onCancel,
 }: TransactionComposerProps) => {
   const [values, setValues] = useState<TransactionComposerValues>(emptyValues);
   const [error, setError] = useState<string | null>(null);
 
   const isEditing = Boolean(transaction);
-  const title = useMemo(() => (isEditing ? 'Editar transacción' : 'Nueva transacción manual'), [isEditing]);
+  const submitLabel = useMemo(() => (isEditing ? 'Guardar cambios' : 'Crear transacción'), [isEditing]);
 
   useEffect(() => {
     setValues(valuesFromTransaction(transaction));
@@ -148,21 +148,11 @@ export const TransactionComposer = ({
 
   const handleCancel = () => {
     reset();
-    onCancelEdit?.();
+    onCancel?.();
   };
 
   return (
     <section className={styles.panel}>
-      <div className={styles.header}>
-        <div>
-          <span className={styles.eyebrow}>CRUD Manual</span>
-          <h3 className={styles.title}>{title}</h3>
-        </div>
-        {isEditing ? (
-          <Button label="Cancelar edición" variant="ghost" size="sm" onClick={handleCancel} />
-        ) : null}
-      </div>
-
       <div className={styles.grid}>
         <DateInput
           name="transaction-date"
@@ -224,8 +214,9 @@ export const TransactionComposer = ({
       {error ? <p className={styles.error}>{error}</p> : null}
 
       <div className={styles.actions}>
+        <Button label="Cancelar" variant="ghost" onClick={handleCancel} disabled={loading} />
         <Button
-          label={isEditing ? 'Guardar cambios' : 'Crear transacción'}
+          label={submitLabel}
           onClick={() => void handleSubmit()}
           loading={loading}
         />

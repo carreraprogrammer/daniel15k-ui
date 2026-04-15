@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
+import { IonIcon } from '@ionic/react';
+import { addOutline, trashOutline } from 'ionicons/icons';
 import { AppLayout } from '../../templates/AppLayout';
-import { Button } from '../../atoms/Button';
+import { IconButton } from '../../atoms/IconButton';
 import { Spinner } from '../../atoms/Spinner';
 import { ErrorState } from '../../molecules/ErrorState';
 import { EmptyState } from '../../molecules/EmptyState';
 import { ConfirmModal } from '../../molecules/ConfirmModal';
+import { CrudModal } from '../../molecules/CrudModal';
 import { TransactionComposer } from '../../organisms/TransactionComposer';
 import { TransactionSlidingCard } from '../../organisms/TransactionSlidingCard';
 import { financeService } from '../../../services/financeService';
@@ -16,6 +19,7 @@ export const TransactionsPage = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [composerOpen, setComposerOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [deletingTransaction, setDeletingTransaction] = useState<Transaction | null>(null);
 
@@ -40,6 +44,7 @@ export const TransactionsPage = () => {
     setSubmitting(true);
     try {
       await financeService.createTransaction(payload);
+      setComposerOpen(false);
       await load();
     } finally {
       setSubmitting(false);
@@ -51,6 +56,7 @@ export const TransactionsPage = () => {
     try {
       await financeService.updateTransaction(id, payload);
       setEditingTransaction(null);
+      setComposerOpen(false);
       await load();
     } finally {
       setSubmitting(false);
@@ -81,20 +87,27 @@ export const TransactionsPage = () => {
     <AppLayout title="Transacciones">
       <section className={styles.stack}>
         <div className={styles.hero}>
-          <span className={styles.eyebrow}>Finanzas</span>
-          <h2 className={styles.headline}>Operación manual del mes</h2>
-          <p className={styles.description}>
-            Vista inicial de transacciones confirmadas y pendientes para reemplazar el trabajo manual disperso.
-          </p>
+          <div className={styles.listItem}>
+            <div className={styles.listPrimary}>
+              <span className={styles.eyebrow}>Finanzas</span>
+              <h2 className={styles.headline}>Operación manual del mes</h2>
+              <p className={styles.description}>
+                Vista inicial de transacciones confirmadas y pendientes para reemplazar el trabajo manual disperso.
+              </p>
+            </div>
+            <div className={styles.listSecondary}>
+              <IconButton
+                label="Nueva transacción"
+                variant="primary"
+                icon={<IonIcon icon={addOutline} />}
+                onClick={() => {
+                  setEditingTransaction(null);
+                  setComposerOpen(true);
+                }}
+              />
+            </div>
+          </div>
         </div>
-
-        <TransactionComposer
-          transaction={editingTransaction}
-          loading={submitting}
-          onCreate={handleCreate}
-          onUpdate={handleUpdate}
-          onCancelEdit={() => setEditingTransaction(null)}
-        />
 
         {!loading ? (
           <div className={styles.hero}>
@@ -115,7 +128,10 @@ export const TransactionsPage = () => {
               <TransactionSlidingCard
                 key={transaction.id}
                 transaction={transaction}
-                onEdit={setEditingTransaction}
+                onEdit={(nextTransaction) => {
+                  setEditingTransaction(nextTransaction);
+                  setComposerOpen(true);
+                }}
                 onDelete={setDeletingTransaction}
               />
             ))}
@@ -136,6 +152,26 @@ export const TransactionsPage = () => {
         onCancel={() => setDeletingTransaction(null)}
         onConfirm={() => void handleDelete()}
       />
+
+      <CrudModal
+        isOpen={composerOpen}
+        title={editingTransaction ? 'Editar transacción' : 'Nueva transacción'}
+        onClose={() => {
+          setComposerOpen(false);
+          setEditingTransaction(null);
+        }}
+      >
+        <TransactionComposer
+          transaction={editingTransaction}
+          loading={submitting}
+          onCreate={handleCreate}
+          onUpdate={handleUpdate}
+          onCancel={() => {
+            setComposerOpen(false);
+            setEditingTransaction(null);
+          }}
+        />
+      </CrudModal>
     </AppLayout>
   );
 };

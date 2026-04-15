@@ -2,32 +2,6 @@
   display: grid;
   gap: 1.25rem;
   padding: 1.25rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.035);
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  align-items: flex-start;
-}
-
-.eyebrow {
-  display: inline-flex;
-  margin-bottom: 0.45rem;
-  color: #7ce0d3;
-  font-size: 0.74rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
-.title {
-  margin: 0;
-  color: #fff;
-  font-size: 1.2rem;
 }
 
 .grid {
@@ -43,6 +17,7 @@
 .actions {
   display: flex;
   justify-content: flex-end;
+  gap: 0.75rem;
 }
 
 .error {
@@ -52,7 +27,6 @@
 }
 
 @media (max-width: 720px) {
-  .header,
   .actions {
     flex-direction: column;
   }
