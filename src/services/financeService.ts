@@ -7,6 +7,8 @@ import type {
   RecurringObligation,
   SummaryResponse,
   Transaction,
+  TransactionCreatePayload,
+  TransactionUpdatePayload,
 } from '../types/finance.types';
 
 const now = new Date();
@@ -53,6 +55,11 @@ const normalizeCollection = <T extends Record<string, unknown>>(
   };
 };
 
+const normalizeSingle = <T extends Record<string, unknown>>(payload: unknown): ResourceWithAttributes<T> => {
+  const envelope = (payload ?? {}) as { data?: unknown };
+  return normalizeResource<T>(envelope.data);
+};
+
 export const financeService = {
   async fetchSummary(month = defaultMonth, year = defaultYear): Promise<SummaryResponse> {
     const { data } = await api.get('/api/v1/summary', { params: { month, year } });
@@ -87,5 +94,19 @@ export const financeService = {
   async fetchRecurringObligations(): Promise<JsonApiCollection<RecurringObligation>> {
     const { data } = await api.get('/api/v1/recurring_obligations');
     return normalizeCollection<RecurringObligation['attributes']>(data) as JsonApiCollection<RecurringObligation>;
+  },
+
+  async createTransaction(payload: TransactionCreatePayload): Promise<Transaction> {
+    const { data } = await api.post('/api/v1/transactions', payload);
+    return normalizeSingle<Transaction['attributes']>(data) as Transaction;
+  },
+
+  async updateTransaction(id: string, payload: TransactionUpdatePayload): Promise<Transaction> {
+    const { data } = await api.patch(`/api/v1/transactions/${id}`, payload);
+    return normalizeSingle<Transaction['attributes']>(data) as Transaction;
+  },
+
+  async deleteTransaction(id: string): Promise<void> {
+    await api.delete(`/api/v1/transactions/${id}`);
   },
 };

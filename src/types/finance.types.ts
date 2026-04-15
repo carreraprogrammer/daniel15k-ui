@@ -8,6 +8,9 @@ export interface SummaryBalance {
   balance_total: number;
 }
 
+export type TransactionType = 'expense' | 'income';
+export type TransactionStatus = 'confirmed' | 'pending' | 'projected';
+
 export interface BurnRateCategory {
   category: string;
   category_id: number;
@@ -62,14 +65,33 @@ export interface Transaction {
     concept: string;
     product: string;
     amount: number;
-    transaction_type?: string;
-    status?: string;
+    transaction_type?: TransactionType;
+    status?: TransactionStatus;
     source?: string;
     category_id?: number | null;
     subcategory_id?: number | null;
     month?: number;
     year?: number;
   };
+}
+
+export interface TransactionCreatePayload {
+  date: string;
+  concept: string;
+  product: string;
+  amount: number;
+  transaction_type: TransactionType;
+  status: TransactionStatus;
+  source?: 'manual';
+}
+
+export interface TransactionUpdatePayload {
+  date: string;
+  concept: string;
+  product: string;
+  amount: number;
+  status: TransactionStatus;
+  source?: 'manual';
 }
 
 export interface Debt {

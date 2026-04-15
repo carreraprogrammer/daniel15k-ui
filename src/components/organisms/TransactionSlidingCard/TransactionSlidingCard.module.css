@@ -1,0 +1,109 @@
+.sliding {
+  border-radius: 22px;
+  overflow: hidden;
+}
+
+.item {
+  --inner-padding-end: 0;
+  --inner-padding-start: 0;
+  --padding-start: 0;
+  --background: transparent;
+}
+
+.item::part(native) {
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.035);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+}
+
+.card {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  padding: 1rem 1.1rem;
+}
+
+.primary,
+.secondary {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.secondary {
+  justify-items: end;
+  align-content: start;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.date,
+.product {
+  color: rgba(231, 236, 244, 0.64);
+  font-size: 0.85rem;
+}
+
+.concept,
+.amount {
+  color: #fff;
+}
+
+.concept {
+  font-size: 1rem;
+}
+
+.amount {
+  font-size: 1.05rem;
+  letter-spacing: -0.03em;
+}
+
+.pill,
+.status {
+  display: inline-flex;
+  width: fit-content;
+  padding: 0.28rem 0.62rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.pillIncome {
+  background: rgba(143, 233, 221, 0.14);
+  color: #8fe9dd;
+}
+
+.pillExpense {
+  background: rgba(255, 178, 138, 0.14);
+  color: #ffb28a;
+}
+
+.status_confirmed {
+  background: rgba(143, 233, 221, 0.14);
+  color: #8fe9dd;
+}
+
+.status_pending {
+  background: rgba(255, 226, 145, 0.14);
+  color: #ffe291;
+}
+
+.status_projected {
+  background: rgba(124, 140, 255, 0.16);
+  color: #aab4ff;
+}
+
+@media (max-width: 640px) {
+  .card {
+    flex-direction: column;
+  }
+
+  .secondary {
+    justify-items: start;
+  }
+}

@@ -1,0 +1,63 @@
+import { IonItem, IonItemOption, IonItemOptions, IonItemSliding } from '@ionic/react';
+import type { Transaction } from '../../../types/finance.types';
+import styles from './TransactionSlidingCard.module.css';
+
+const formatCop = (value: number) =>
+  new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(value);
+
+const statusLabels: Record<string, string> = {
+  confirmed: 'Confirmada',
+  pending: 'Pendiente',
+  projected: 'Proyectada',
+};
+
+const typeLabels: Record<string, string> = {
+  expense: 'Gasto',
+  income: 'Ingreso',
+};
+
+export interface TransactionSlidingCardProps {
+  transaction: Transaction;
+  onEdit: (transaction: Transaction) => void;
+  onDelete: (transaction: Transaction) => void;
+}
+
+export const TransactionSlidingCard = ({ transaction, onEdit, onDelete }: TransactionSlidingCardProps) => {
+  const status = transaction.attributes.status ?? 'confirmed';
+  const type = transaction.attributes.transaction_type ?? 'expense';
+
+  return (
+    <IonItemSliding className={styles.sliding}>
+      <IonItem className={styles.item} lines="none">
+        <div className={styles.card}>
+          <div className={styles.primary}>
+            <div className={styles.header}>
+              <span className={styles.date}>{transaction.attributes.date}</span>
+              <span className={`${styles.pill} ${type === 'income' ? styles.pillIncome : styles.pillExpense}`}>
+                {typeLabels[type] ?? type}
+              </span>
+            </div>
+            <strong className={styles.concept}>{transaction.attributes.concept}</strong>
+            <span className={styles.product}>{transaction.attributes.product}</span>
+          </div>
+
+          <div className={styles.secondary}>
+            <span className={`${styles.status} ${styles[`status_${status}`] ?? ''}`}>
+              {statusLabels[status] ?? status}
+            </span>
+            <strong className={styles.amount}>{formatCop(transaction.attributes.amount)}</strong>
+          </div>
+        </div>
+      </IonItem>
+
+      <IonItemOptions side="end">
+        <IonItemOption color="primary" onClick={() => onEdit(transaction)}>
+          Editar
+        </IonItemOption>
+        <IonItemOption color="danger" onClick={() => onDelete(transaction)}>
+          Borrar
+        </IonItemOption>
+      </IonItemOptions>
+    </IonItemSliding>
+  );
+};
