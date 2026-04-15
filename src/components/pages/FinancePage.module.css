@@ -165,6 +165,21 @@
   gap: 0.75rem;
 }
 
+.infiniteSentinel {
+  width: 100%;
+  height: 1px;
+}
+
+.infiniteStatus {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem 0.25rem;
+  color: rgba(231, 236, 244, 0.62);
+  font-size: 0.88rem;
+}
+
 .listItem {
   display: flex;
   justify-content: space-between;

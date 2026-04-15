@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { IonIcon, useIonAlert, useIonToast } from '@ionic/react';
 import { addOutline } from 'ionicons/icons';
 import { AppLayout } from '../../templates/AppLayout';
@@ -32,10 +32,13 @@ const initialFilters: TransactionQueryParams = {
   sort_dir: 'desc',
 };
 
+const PAGE_SIZE = 20;
+
 export const TransactionsPage = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [summary, setSummary] = useState<SummaryResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [composerOpen, setComposerOpen] = useState(false);
@@ -46,21 +49,42 @@ export const TransactionsPage = () => {
   const [draftFilters, setDraftFilters] = useState<TransactionQueryParams>(initialFilters);
   const [presentAlert] = useIonAlert();
   const [presentToast] = useIonToast();
+  const [page, setPage] = useState(1);
+  const [hasNextPage, setHasNextPage] = useState(false);
+  const [totalResults, setTotalResults] = useState(0);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
 
-  const load = async () => {
-    setLoading(true);
+  const load = async (nextPage = 1, options?: { append?: boolean; withSummary?: boolean }) => {
+    const append = options?.append ?? false;
+    const withSummary = options?.withSummary ?? nextPage === 1;
+
+    if (append) {
+      setLoadingMore(true);
+    } else {
+      setLoading(true);
+    }
     setError(null);
     try {
       const [transactionsResponse, summaryResponse] = await Promise.all([
-        financeService.fetchTransactions(filters),
-        financeService.fetchSummary(),
+        financeService.fetchTransactions({ ...filters, page: nextPage, per_page: PAGE_SIZE }),
+        withSummary ? financeService.fetchSummary() : Promise.resolve(null),
       ]);
-      setTransactions(transactionsResponse.data);
-      setSummary(summaryResponse);
+
+      setTransactions((current) =>
+        append ? [...current, ...transactionsResponse.data] : transactionsResponse.data,
+      );
+      setPage(transactionsResponse.meta?.page ?? nextPage);
+      setHasNextPage(Boolean(transactionsResponse.meta?.has_next_page));
+      setTotalResults(transactionsResponse.meta?.total ?? transactionsResponse.data.length);
+
+      if (summaryResponse) {
+        setSummary(summaryResponse);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No fue posible cargar las transacciones.');
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
 
@@ -73,7 +97,7 @@ export const TransactionsPage = () => {
     try {
       await financeService.createTransaction(payload);
       setComposerOpen(false);
-      await load();
+      await load(1, { withSummary: true });
     } finally {
       setSubmitting(false);
     }
@@ -85,7 +109,7 @@ export const TransactionsPage = () => {
       await financeService.updateTransaction(id, payload);
       setEditingTransaction(null);
       setComposerOpen(false);
-      await load();
+      await load(1, { withSummary: true });
     } finally {
       setSubmitting(false);
     }
@@ -103,7 +127,7 @@ export const TransactionsPage = () => {
       if (editingTransaction?.id === transaction.id) {
         setEditingTransaction(null);
       }
-      await load();
+      await load(1, { withSummary: true });
       await presentToast({
         message: 'Transacción borrada con éxito',
         duration: 2200,
@@ -165,12 +189,39 @@ export const TransactionsPage = () => {
     const pendingCount = transactions.filter((transaction) => transaction.attributes.status === 'pending').length;
 
     return {
-      count: transactions.length,
+      count: totalResults,
       incomeTotal,
       expenseTotal,
       pendingCount,
     };
-  }, [transactions]);
+  }, [totalResults, transactions]);
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel || loading || loadingMore || !hasNextPage) {
+      return undefined;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (!entry?.isIntersecting) {
+          return;
+        }
+
+        void load(page + 1, { append: true, withSummary: false });
+      },
+      {
+        root: null,
+        rootMargin: '0px 0px 320px 0px',
+        threshold: 0.1,
+      },
+    );
+
+    observer.observe(sentinel);
+
+    return () => observer.disconnect();
+  }, [hasNextPage, loading, loadingMore, page]);
 
   const activeFilterCount = useMemo(
     () => [filters.status, filters.transaction_type, filters.source].filter(Boolean).length,
@@ -321,6 +372,19 @@ export const TransactionsPage = () => {
                 }}
               />
             ))}
+            {hasNextPage ? (
+              <>
+                <div ref={sentinelRef} className={styles.infiniteSentinel} aria-hidden="true" />
+                <div className={styles.infiniteStatus}>
+                  <Spinner size="sm" />
+                  <span>Cargando más transacciones...</span>
+                </div>
+              </>
+            ) : transactions.length > PAGE_SIZE ? (
+              <div className={styles.infiniteStatus}>
+                <span>Mostrando todas las transacciones del período.</span>
+              </div>
+            ) : null}
           </div>
         ) : null}
       </section>

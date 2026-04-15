@@ -78,6 +78,8 @@ export const financeService = {
       params: {
         month: params.month ?? defaultMonth,
         year: params.year ?? defaultYear,
+        page: params.page,
+        per_page: params.per_page,
         q: params.q,
         status: params.status,
         transaction_type: params.transaction_type,

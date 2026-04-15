@@ -174,12 +174,18 @@ export interface JsonApiCollection<T> {
   data: T[];
   meta?: {
     total?: number;
+    page?: number;
+    per_page?: number;
+    total_pages?: number;
+    has_next_page?: boolean;
   };
 }
 
 export interface TransactionQueryParams {
   month?: number;
   year?: number;
+  page?: number;
+  per_page?: number;
   q?: string;
   status?: string;
   transaction_type?: string;
