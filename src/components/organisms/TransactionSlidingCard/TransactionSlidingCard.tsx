@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding } from '@ionic/react';
 import { createOutline, trashOutline } from 'ionicons/icons';
 import type { Transaction } from '../../../types/finance.types';
@@ -26,9 +27,20 @@ export interface TransactionSlidingCardProps {
 export const TransactionSlidingCard = ({ transaction, onEdit, onDelete }: TransactionSlidingCardProps) => {
   const status = transaction.attributes.status ?? 'confirmed';
   const type = transaction.attributes.transaction_type ?? 'expense';
+  const slidingRef = useRef<HTMLIonItemSlidingElement | null>(null);
+
+  const handleEdit = async () => {
+    await slidingRef.current?.close();
+    onEdit(transaction);
+  };
+
+  const handleDelete = async () => {
+    await slidingRef.current?.close();
+    onDelete(transaction);
+  };
 
   return (
-    <IonItemSliding className={styles.sliding}>
+    <IonItemSliding ref={slidingRef} className={styles.sliding}>
       <IonItem className={styles.item} lines="none">
         <div className={styles.card}>
           <div className={styles.primary}>
@@ -52,10 +64,10 @@ export const TransactionSlidingCard = ({ transaction, onEdit, onDelete }: Transa
       </IonItem>
 
       <IonItemOptions side="end">
-        <IonItemOption className={styles.optionEdit} onClick={() => onEdit(transaction)}>
+        <IonItemOption className={styles.optionEdit} onClick={() => void handleEdit()}>
           <IonIcon icon={createOutline} />
         </IonItemOption>
-        <IonItemOption className={styles.optionDelete} onClick={() => onDelete(transaction)}>
+        <IonItemOption className={styles.optionDelete} onClick={() => void handleDelete()}>
           <IonIcon icon={trashOutline} />
         </IonItemOption>
       </IonItemOptions>

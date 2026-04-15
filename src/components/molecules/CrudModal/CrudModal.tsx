@@ -27,6 +27,6 @@ export const CrudModal = ({ isOpen, title, children, onClose }: CrudModalProps) 
         </IonButtons>
       </IonToolbar>
     </IonHeader>
-    <IonContent color="tertiary">{children}</IonContent>
+    <IonContent className="crud-modal__content">{children}</IonContent>
   </IonModal>
 );

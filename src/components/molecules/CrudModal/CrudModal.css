@@ -37,3 +37,7 @@
   --background: rgba(10, 15, 25, 0.96);
   --color: var(--color-text-primary);
 }
+
+.crud-modal__content::part(background) {
+  background: rgba(10, 15, 25, 0.96);
+}
