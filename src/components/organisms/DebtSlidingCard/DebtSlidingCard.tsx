@@ -1,0 +1,53 @@
+import { IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding } from '@ionic/react';
+import { createOutline, trashOutline } from 'ionicons/icons';
+import type { Debt } from '../../../types/finance.types';
+import styles from './DebtSlidingCard.module.css';
+
+const formatCop = (value: number) =>
+  new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(value);
+
+const statusLabels: Record<string, string> = {
+  active: 'Activa',
+  paid_off: 'Pagada',
+  paused: 'Pausada',
+  disputed: 'Disputa',
+};
+
+export interface DebtSlidingCardProps {
+  debt: Debt;
+  onEdit: (debt: Debt) => void;
+  onDelete: (debt: Debt) => void;
+}
+
+export const DebtSlidingCard = ({ debt, onEdit, onDelete }: DebtSlidingCardProps) => (
+  <IonItemSliding className={styles.sliding}>
+    <IonItem className={styles.item} lines="none">
+      <div className={styles.card}>
+        <div className={styles.primary}>
+          <div className={styles.header}>
+            <span className={styles.type}>{debt.attributes.debt_type}</span>
+            <span className={`${styles.status} ${styles[`status_${debt.attributes.status}`] ?? ''}`}>
+              {statusLabels[debt.attributes.status] ?? debt.attributes.status}
+            </span>
+          </div>
+          <strong className={styles.name}>{debt.attributes.name}</strong>
+          <span className={styles.meta}>Pago mensual {formatCop(debt.attributes.monthly_payment)}</span>
+        </div>
+
+        <div className={styles.secondary}>
+          <span className={styles.label}>Saldo</span>
+          <strong className={styles.amount}>{formatCop(debt.attributes.current_balance)}</strong>
+        </div>
+      </div>
+    </IonItem>
+
+    <IonItemOptions side="end">
+      <IonItemOption className={styles.optionEdit} onClick={() => onEdit(debt)}>
+        <IonIcon icon={createOutline} />
+      </IonItemOption>
+      <IonItemOption className={styles.optionDelete} onClick={() => onDelete(debt)}>
+        <IonIcon icon={trashOutline} />
+      </IonItemOption>
+    </IonItemOptions>
+  </IonItemSliding>
+);

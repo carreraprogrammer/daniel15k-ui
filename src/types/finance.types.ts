@@ -106,7 +106,20 @@ export interface Debt {
     interest_rate: number;
     status: string;
     payoff_date?: string | null;
+    notes?: string | null;
   };
+}
+
+export interface DebtPayload {
+  name: string;
+  debt_type: string;
+  current_balance: number;
+  monthly_payment: number;
+  interest_rate: number;
+  status: string;
+  original_amount?: number;
+  payoff_date?: string | null;
+  notes?: string;
 }
 
 export interface Budget {
@@ -144,7 +157,17 @@ export interface RecurringObligation {
     active?: boolean;
     category_id?: number | null;
     category_name?: string | null;
+    notes?: string | null;
   };
+}
+
+export interface RecurringObligationPayload {
+  name: string;
+  amount: number;
+  due_day: number | '';
+  active?: boolean;
+  category_id?: number | null;
+  notes?: string;
 }
 
 export interface JsonApiCollection<T> {

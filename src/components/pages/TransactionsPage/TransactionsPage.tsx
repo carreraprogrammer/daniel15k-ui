@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { IonIcon } from '@ionic/react';
 import { addOutline, trashOutline } from 'ionicons/icons';
 import { AppLayout } from '../../templates/AppLayout';
@@ -11,11 +11,25 @@ import { CrudModal } from '../../molecules/CrudModal';
 import { TransactionComposer } from '../../organisms/TransactionComposer';
 import { TransactionSlidingCard } from '../../organisms/TransactionSlidingCard';
 import { financeService } from '../../../services/financeService';
+import type { SummaryResponse } from '../../../types/finance.types';
 import type { Transaction, TransactionCreatePayload, TransactionUpdatePayload } from '../../../types/finance.types';
 import styles from '../FinancePage.module.css';
 
+const formatCop = (value: number) =>
+  new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(value);
+
+const parseDdMmYyyy = (value: string) => {
+  const parts = value.split('/');
+  if (parts.length !== 3) {
+    return 0;
+  }
+
+  return new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0])).getTime();
+};
+
 export const TransactionsPage = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [summary, setSummary] = useState<SummaryResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,8 +41,17 @@ export const TransactionsPage = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await financeService.fetchTransactions();
-      setTransactions(response.data);
+      const [transactionsResponse, summaryResponse] = await Promise.all([
+        financeService.fetchTransactions(),
+        financeService.fetchSummary(),
+      ]);
+
+      const sortedTransactions = [...transactionsResponse.data].sort(
+        (left, right) => parseDdMmYyyy(right.attributes.date) - parseDdMmYyyy(left.attributes.date),
+      );
+
+      setTransactions(sortedTransactions);
+      setSummary(summaryResponse);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No fue posible cargar las transacciones.');
     } finally {
@@ -83,6 +106,23 @@ export const TransactionsPage = () => {
     }
   };
 
+  const metrics = useMemo(() => {
+    const incomeTotal = transactions
+      .filter((transaction) => transaction.attributes.transaction_type === 'income')
+      .reduce((sum, transaction) => sum + transaction.attributes.amount, 0);
+    const expenseTotal = transactions
+      .filter((transaction) => transaction.attributes.transaction_type !== 'income')
+      .reduce((sum, transaction) => sum + transaction.attributes.amount, 0);
+    const pendingCount = transactions.filter((transaction) => transaction.attributes.status === 'pending').length;
+
+    return {
+      count: transactions.length,
+      incomeTotal,
+      expenseTotal,
+      pendingCount,
+    };
+  }, [transactions]);
+
   return (
     <AppLayout title="Transacciones">
       <section className={styles.stack}>
@@ -110,11 +150,25 @@ export const TransactionsPage = () => {
         </div>
 
         {!loading ? (
-          <div className={styles.hero}>
-            <span className={styles.eyebrow}>Lista editable</span>
-            <p className={styles.description}>
-              Desliza cada fila para editar o borrar una transacción cuando el agente se equivoque.
-            </p>
+          <div className={styles.metrics}>
+            <article className={styles.metricCard}>
+              <span className={styles.metricLabel}>Balance confirmado</span>
+              <strong className={styles.metricValue}>{formatCop(summary?.balance.balance_confirmed ?? 0)}</strong>
+            </article>
+            <article className={styles.metricCard}>
+              <span className={styles.metricLabel}>Gastos del período</span>
+              <strong className={styles.metricValue}>{formatCop(metrics.expenseTotal)}</strong>
+            </article>
+            <article className={styles.metricCard}>
+              <span className={styles.metricLabel}>Ingresos del período</span>
+              <strong className={styles.metricValue}>{formatCop(metrics.incomeTotal)}</strong>
+            </article>
+            <article className={styles.metricCard}>
+              <span className={styles.metricLabel}>Pendientes / total</span>
+              <strong className={styles.metricValue}>
+                {metrics.pendingCount} / {metrics.count}
+              </strong>
+            </article>
           </div>
         ) : null}
 

@@ -2,9 +2,11 @@ import { api } from './api';
 import type {
   Budget,
   Debt,
+  DebtPayload,
   IncomeSource,
   JsonApiCollection,
   RecurringObligation,
+  RecurringObligationPayload,
   SummaryResponse,
   Transaction,
   TransactionCreatePayload,
@@ -96,6 +98,11 @@ export const financeService = {
     return normalizeCollection<RecurringObligation['attributes']>(data) as JsonApiCollection<RecurringObligation>;
   },
 
+  async fetchCategories() {
+    const { data } = await api.get('/api/v1/categories');
+    return normalizeCollection<Record<string, unknown>>(data);
+  },
+
   async createTransaction(payload: TransactionCreatePayload): Promise<Transaction> {
     const { data } = await api.post('/api/v1/transactions', payload);
     return normalizeSingle<Transaction['attributes']>(data) as Transaction;
@@ -108,5 +115,36 @@ export const financeService = {
 
   async deleteTransaction(id: string): Promise<void> {
     await api.delete(`/api/v1/transactions/${id}`);
+  },
+
+  async createDebt(payload: DebtPayload): Promise<Debt> {
+    const { data } = await api.post('/api/v1/debts', payload);
+    return normalizeSingle<Debt['attributes']>(data) as Debt;
+  },
+
+  async updateDebt(id: string, payload: Partial<DebtPayload>): Promise<Debt> {
+    const { data } = await api.patch(`/api/v1/debts/${id}`, payload);
+    return normalizeSingle<Debt['attributes']>(data) as Debt;
+  },
+
+  async deleteDebt(id: string): Promise<void> {
+    await api.delete(`/api/v1/debts/${id}`);
+  },
+
+  async createRecurringObligation(payload: RecurringObligationPayload): Promise<RecurringObligation> {
+    const { data } = await api.post('/api/v1/recurring_obligations', payload);
+    return normalizeSingle<RecurringObligation['attributes']>(data) as RecurringObligation;
+  },
+
+  async updateRecurringObligation(
+    id: string,
+    payload: Partial<RecurringObligationPayload>,
+  ): Promise<RecurringObligation> {
+    const { data } = await api.patch(`/api/v1/recurring_obligations/${id}`, payload);
+    return normalizeSingle<RecurringObligation['attributes']>(data) as RecurringObligation;
+  },
+
+  async deleteRecurringObligation(id: string): Promise<void> {
+    await api.delete(`/api/v1/recurring_obligations/${id}`);
   },
 };
