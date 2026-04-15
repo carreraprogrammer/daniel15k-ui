@@ -52,10 +52,10 @@ export const TransactionSlidingCard = ({ transaction, onEdit, onDelete }: Transa
       </IonItem>
 
       <IonItemOptions side="end">
-        <IonItemOption color="primary" onClick={() => onEdit(transaction)}>
+        <IonItemOption className={styles.optionEdit} onClick={() => onEdit(transaction)}>
           <IonIcon icon={createOutline} />
         </IonItemOption>
-        <IonItemOption color="danger" onClick={() => onDelete(transaction)}>
+        <IonItemOption className={styles.optionDelete} onClick={() => onDelete(transaction)}>
           <IonIcon icon={trashOutline} />
         </IonItemOption>
       </IonItemOptions>

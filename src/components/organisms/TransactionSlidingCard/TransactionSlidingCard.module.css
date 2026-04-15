@@ -3,6 +3,20 @@
   overflow: hidden;
 }
 
+.optionEdit,
+.optionDelete {
+  --color: var(--color-text-primary);
+  min-width: 72px;
+}
+
+.optionEdit {
+  --background: linear-gradient(135deg, rgba(0, 229, 204, 0.16), rgba(91, 106, 240, 0.18));
+}
+
+.optionDelete {
+  --background: rgba(239, 68, 68, 0.16);
+}
+
 .item {
   --inner-padding-end: 0;
   --inner-padding-start: 0;

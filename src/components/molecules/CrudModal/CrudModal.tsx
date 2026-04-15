@@ -8,6 +8,7 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/react';
+import './CrudModal.css';
 
 export interface CrudModalProps {
   isOpen: boolean;
@@ -17,7 +18,7 @@ export interface CrudModalProps {
 }
 
 export const CrudModal = ({ isOpen, title, children, onClose }: CrudModalProps) => (
-  <IonModal isOpen={isOpen} onDidDismiss={onClose}>
+  <IonModal isOpen={isOpen} onDidDismiss={onClose} className="crud-modal">
     <IonHeader>
       <IonToolbar>
         <IonTitle>{title}</IonTitle>
