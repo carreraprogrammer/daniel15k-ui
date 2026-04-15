@@ -95,13 +95,15 @@
 }
 
 .main {
-  display: block;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
   min-width: 0;
   min-height: 0;
   overflow: hidden;
 }
 
 .content {
+  height: 100%;
   padding: clamp(20px, 3vw, 32px);
   border-radius: 30px;
   min-width: 0;
