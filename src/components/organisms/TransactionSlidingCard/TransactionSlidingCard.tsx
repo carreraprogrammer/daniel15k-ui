@@ -29,13 +29,13 @@ export const TransactionSlidingCard = ({ transaction, onEdit, onDelete }: Transa
   const type = transaction.attributes.transaction_type ?? 'expense';
   const slidingRef = useRef<HTMLIonItemSlidingElement | null>(null);
 
-  const handleEdit = async () => {
-    await slidingRef.current?.close();
+  const handleEdit = () => {
+    void slidingRef.current?.close();
     onEdit(transaction);
   };
 
-  const handleDelete = async () => {
-    await slidingRef.current?.close();
+  const handleDelete = () => {
+    void slidingRef.current?.close();
     onDelete(transaction);
   };
 
@@ -64,10 +64,10 @@ export const TransactionSlidingCard = ({ transaction, onEdit, onDelete }: Transa
       </IonItem>
 
       <IonItemOptions side="end">
-        <IonItemOption className={styles.optionEdit} onClick={() => void handleEdit()}>
+        <IonItemOption className={styles.optionEdit} onClick={handleEdit}>
           <IonIcon icon={createOutline} />
         </IonItemOption>
-        <IonItemOption className={styles.optionDelete} onClick={() => void handleDelete()}>
+        <IonItemOption className={styles.optionDelete} onClick={handleDelete}>
           <IonIcon icon={trashOutline} />
         </IonItemOption>
       </IonItemOptions>
