@@ -54,28 +54,6 @@
   min-width: 0;
 }
 
-.userCard {
-  display: grid;
-  gap: 2px;
-  padding: 0.75rem 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.035);
-  min-width: 0;
-}
-
-.userName {
-  color: #fff;
-  font-weight: var(--font-semibold);
-  overflow-wrap: anywhere;
-}
-
-.userMeta {
-  color: rgba(240, 240, 248, 0.64);
-  font-size: var(--text-sm);
-  overflow-wrap: anywhere;
-}
-
 .nav {
   gap: var(--space-3);
 }
