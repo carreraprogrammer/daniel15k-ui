@@ -18,8 +18,9 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    const { accessToken, user, refreshToken, logout } = useAuthStore.getState();
+    const { accessToken, user, refreshToken, clearSession } = useAuthStore.getState();
     if (!accessToken || !user) {
+      clearSession();
       return Promise.reject(error);
     }
 
@@ -44,7 +45,7 @@ api.interceptors.response.use(
 
       return api(originalRequest);
     } catch (refreshError) {
-      await logout();
+      clearSession();
       return Promise.reject(refreshError);
     }
   },
