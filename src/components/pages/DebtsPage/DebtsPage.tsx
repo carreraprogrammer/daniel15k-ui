@@ -4,6 +4,8 @@ import { addOutline } from 'ionicons/icons';
 import { AppLayout } from '../../templates/AppLayout';
 import { IconButton } from '../../atoms/IconButton';
 import { Spinner } from '../../atoms/Spinner';
+import { TextInput } from '../../atoms/TextInput';
+import { SelectInput } from '../../atoms/SelectInput';
 import { ErrorState } from '../../molecules/ErrorState';
 import { EmptyState } from '../../molecules/EmptyState';
 import { ConfirmModal } from '../../molecules/ConfirmModal';
@@ -11,7 +13,7 @@ import { CrudModal } from '../../molecules/CrudModal';
 import { DebtComposer } from '../../organisms/DebtComposer';
 import { DebtSlidingCard } from '../../organisms/DebtSlidingCard';
 import { financeService } from '../../../services/financeService';
-import type { Debt, DebtPayload } from '../../../types/finance.types';
+import type { Debt, DebtPayload, DebtQueryParams } from '../../../types/finance.types';
 import styles from '../FinancePage.module.css';
 
 const formatCop = (value: number) =>
@@ -25,12 +27,19 @@ export const DebtsPage = () => {
   const [composerOpen, setComposerOpen] = useState(false);
   const [editingDebt, setEditingDebt] = useState<Debt | null>(null);
   const [deletingDebt, setDeletingDebt] = useState<Debt | null>(null);
+  const [filters, setFilters] = useState<DebtQueryParams>({
+    q: '',
+    status: '',
+    debt_type: '',
+    sort_by: 'created_at',
+    sort_dir: 'desc',
+  });
 
   const load = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await financeService.fetchDebts();
+      const response = await financeService.fetchDebts(filters);
       setDebts(response.data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No fue posible cargar las deudas.');
@@ -41,7 +50,7 @@ export const DebtsPage = () => {
 
   useEffect(() => {
     void load();
-  }, []);
+  }, [filters]);
 
   const metrics = useMemo(() => {
     const activeDebts = debts.filter((debt) => debt.attributes.status === 'active');
@@ -142,6 +151,68 @@ export const DebtsPage = () => {
             </article>
           </div>
         ) : null}
+
+        <section className={styles.filters}>
+          <div className={styles.filtersGrid}>
+            <TextInput
+              name="debts-q"
+              label="Buscar"
+              placeholder="Nombre de deuda"
+              value={filters.q ?? ''}
+              onChange={(q) => setFilters((current) => ({ ...current, q }))}
+            />
+            <SelectInput
+              name="debts-status"
+              label="Estado"
+              value={filters.status ?? ''}
+              onChange={(status) => setFilters((current) => ({ ...current, status: String(status) }))}
+              options={[
+                { label: 'Activa', value: 'active' },
+                { label: 'Pagada', value: 'paid_off' },
+                { label: 'Pausada', value: 'paused' },
+                { label: 'En disputa', value: 'disputed' },
+              ]}
+              placeholder="Todos"
+            />
+            <SelectInput
+              name="debts-type"
+              label="Tipo"
+              value={filters.debt_type ?? ''}
+              onChange={(debt_type) => setFilters((current) => ({ ...current, debt_type: String(debt_type) }))}
+              options={[
+                { label: 'Tarjeta de crédito', value: 'credit_card' },
+                { label: 'Préstamo personal', value: 'personal_loan' },
+                { label: 'Familiar', value: 'family' },
+                { label: 'Hipoteca', value: 'mortgage' },
+              ]}
+              placeholder="Todos"
+            />
+            <SelectInput
+              name="debts-sort-by"
+              label="Ordenar por"
+              value={filters.sort_by ?? 'created_at'}
+              onChange={(sort_by) => setFilters((current) => ({ ...current, sort_by: String(sort_by) }))}
+              options={[
+                { label: 'Más recientes', value: 'created_at' },
+                { label: 'Nombre', value: 'name' },
+                { label: 'Saldo', value: 'current_balance' },
+                { label: 'Pago mensual', value: 'monthly_payment' },
+              ]}
+            />
+            <SelectInput
+              name="debts-sort-dir"
+              label="Dirección"
+              value={filters.sort_dir ?? 'desc'}
+              onChange={(sort_dir) =>
+                setFilters((current) => ({ ...current, sort_dir: sort_dir as 'asc' | 'desc' }))
+              }
+              options={[
+                { label: 'Descendente', value: 'desc' },
+                { label: 'Ascendente', value: 'asc' },
+              ]}
+            />
+          </div>
+        </section>
 
         {loading ? <Spinner size="lg" /> : null}
         {error ? <ErrorState message={error} onRetry={() => void load()} /> : null}

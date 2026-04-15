@@ -4,6 +4,8 @@ import { addOutline } from 'ionicons/icons';
 import { AppLayout } from '../../templates/AppLayout';
 import { IconButton } from '../../atoms/IconButton';
 import { Spinner } from '../../atoms/Spinner';
+import { TextInput } from '../../atoms/TextInput';
+import { SelectInput } from '../../atoms/SelectInput';
 import { ErrorState } from '../../molecules/ErrorState';
 import { EmptyState } from '../../molecules/EmptyState';
 import { ConfirmModal } from '../../molecules/ConfirmModal';
@@ -11,7 +13,13 @@ import { CrudModal } from '../../molecules/CrudModal';
 import { RecurringObligationComposer } from '../../organisms/RecurringObligationComposer';
 import { RecurringObligationSlidingCard } from '../../organisms/RecurringObligationSlidingCard';
 import { financeService } from '../../../services/financeService';
-import type { IncomeSource, RecurringObligation, RecurringObligationPayload } from '../../../types/finance.types';
+import type {
+  IncomeSource,
+  IncomeSourceQueryParams,
+  RecurringObligation,
+  RecurringObligationPayload,
+  RecurringObligationQueryParams,
+} from '../../../types/finance.types';
 import styles from '../FinancePage.module.css';
 
 const formatCop = (value: number) =>
@@ -29,14 +37,28 @@ export const RecurringObligationsPage = () => {
   const [composerOpen, setComposerOpen] = useState(false);
   const [editingObligation, setEditingObligation] = useState<RecurringObligation | null>(null);
   const [deletingObligation, setDeletingObligation] = useState<RecurringObligation | null>(null);
+  const [obligationFilters, setObligationFilters] = useState<RecurringObligationQueryParams>({
+    q: '',
+    active: 'all',
+    category_id: '',
+    sort_by: 'due_day',
+    sort_dir: 'asc',
+  });
+  const [incomeFilters, setIncomeFilters] = useState<IncomeSourceQueryParams>({
+    q: '',
+    active: 'all',
+    is_variable: 'all',
+    sort_by: 'expected_day_from',
+    sort_dir: 'asc',
+  });
 
   const load = async () => {
     setLoading(true);
     setError(null);
     try {
       const [obligationsResponse, incomeResponse, categoriesResponse] = await Promise.all([
-        financeService.fetchRecurringObligations(),
-        financeService.fetchIncomeSources(),
+        financeService.fetchRecurringObligations(obligationFilters),
+        financeService.fetchIncomeSources(incomeFilters),
         financeService.fetchCategories(),
       ]);
       setObligations(obligationsResponse.data);
@@ -56,7 +78,7 @@ export const RecurringObligationsPage = () => {
 
   useEffect(() => {
     void load();
-  }, []);
+  }, [incomeFilters, obligationFilters]);
 
   const metrics = useMemo(() => {
     const activeObligations = obligations.filter((obligation) => obligation.attributes.active !== false);
@@ -165,6 +187,57 @@ export const RecurringObligationsPage = () => {
           <div className={styles.columns}>
             <section className={styles.panel}>
               <h3 className={styles.panelTitle}>Fuentes de ingreso</h3>
+              <div className={styles.filtersCompact}>
+                <div className={styles.filtersGrid}>
+                  <TextInput
+                    name="income-q"
+                    label="Buscar"
+                    placeholder="Nombre"
+                    value={incomeFilters.q ?? ''}
+                    onChange={(q) => setIncomeFilters((current) => ({ ...current, q }))}
+                  />
+                  <SelectInput
+                    name="income-variable"
+                    label="Tipo"
+                    value={String(incomeFilters.is_variable ?? 'all')}
+                    onChange={(is_variable) =>
+                      setIncomeFilters((current) => ({
+                        ...current,
+                        is_variable: is_variable === 'all' ? 'all' : is_variable === 'true',
+                      }))
+                    }
+                    options={[
+                      { label: 'Todos', value: 'all' },
+                      { label: 'Variables', value: 'true' },
+                      { label: 'Fijos', value: 'false' },
+                    ]}
+                    placeholder="Todos"
+                  />
+                  <SelectInput
+                    name="income-sort-by"
+                    label="Ordenar por"
+                    value={incomeFilters.sort_by ?? 'expected_day_from'}
+                    onChange={(sort_by) => setIncomeFilters((current) => ({ ...current, sort_by: String(sort_by) }))}
+                    options={[
+                      { label: 'Día esperado', value: 'expected_day_from' },
+                      { label: 'Monto', value: 'expected_amount' },
+                      { label: 'Nombre', value: 'name' },
+                    ]}
+                  />
+                  <SelectInput
+                    name="income-sort-dir"
+                    label="Dirección"
+                    value={incomeFilters.sort_dir ?? 'asc'}
+                    onChange={(sort_dir) =>
+                      setIncomeFilters((current) => ({ ...current, sort_dir: sort_dir as 'asc' | 'desc' }))
+                    }
+                    options={[
+                      { label: 'Ascendente', value: 'asc' },
+                      { label: 'Descendente', value: 'desc' },
+                    ]}
+                  />
+                </div>
+              </div>
               {!incomeSources.length ? (
                 <EmptyState message="No hay fuentes de ingreso cargadas." />
               ) : (
@@ -189,6 +262,67 @@ export const RecurringObligationsPage = () => {
 
             <section className={styles.panel}>
               <h3 className={styles.panelTitle}>Obligaciones recurrentes</h3>
+              <div className={styles.filtersCompact}>
+                <div className={styles.filtersGrid}>
+                  <TextInput
+                    name="recurring-q"
+                    label="Buscar"
+                    placeholder="Nombre"
+                    value={obligationFilters.q ?? ''}
+                    onChange={(q) => setObligationFilters((current) => ({ ...current, q }))}
+                  />
+                  <SelectInput
+                    name="recurring-active"
+                    label="Estado"
+                    value={String(obligationFilters.active ?? 'all')}
+                    onChange={(active) =>
+                      setObligationFilters((current) => ({
+                        ...current,
+                        active: active === 'all' ? 'all' : active === 'true',
+                      }))
+                    }
+                    options={[
+                      { label: 'Todos', value: 'all' },
+                      { label: 'Activos', value: 'true' },
+                      { label: 'Inactivos', value: 'false' },
+                    ]}
+                    placeholder="Todos"
+                  />
+                  <SelectInput
+                    name="recurring-category-filter"
+                    label="Categoría"
+                    value={obligationFilters.category_id ?? ''}
+                    onChange={(category_id) => setObligationFilters((current) => ({ ...current, category_id }))}
+                    options={categoryOptions}
+                    placeholder="Todas"
+                  />
+                  <SelectInput
+                    name="recurring-sort-by"
+                    label="Ordenar por"
+                    value={obligationFilters.sort_by ?? 'due_day'}
+                    onChange={(sort_by) =>
+                      setObligationFilters((current) => ({ ...current, sort_by: String(sort_by) }))
+                    }
+                    options={[
+                      { label: 'Día de vencimiento', value: 'due_day' },
+                      { label: 'Monto', value: 'amount' },
+                      { label: 'Nombre', value: 'name' },
+                    ]}
+                  />
+                  <SelectInput
+                    name="recurring-sort-dir"
+                    label="Dirección"
+                    value={obligationFilters.sort_dir ?? 'asc'}
+                    onChange={(sort_dir) =>
+                      setObligationFilters((current) => ({ ...current, sort_dir: sort_dir as 'asc' | 'desc' }))
+                    }
+                    options={[
+                      { label: 'Ascendente', value: 'asc' },
+                      { label: 'Descendente', value: 'desc' },
+                    ]}
+                  />
+                </div>
+              </div>
               {!obligations.length ? (
                 <EmptyState message="No hay obligaciones recurrentes registradas." />
               ) : (

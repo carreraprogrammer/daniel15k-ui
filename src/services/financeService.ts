@@ -1,15 +1,20 @@
 import { api } from './api';
 import type {
   Budget,
+  BudgetQueryParams,
   Debt,
   DebtPayload,
+  DebtQueryParams,
   IncomeSource,
+  IncomeSourceQueryParams,
   JsonApiCollection,
   RecurringObligation,
   RecurringObligationPayload,
+  RecurringObligationQueryParams,
   SummaryResponse,
   Transaction,
   TransactionCreatePayload,
+  TransactionQueryParams,
   TransactionUpdatePayload,
 } from '../types/finance.types';
 
@@ -68,33 +73,88 @@ export const financeService = {
     return data as SummaryResponse;
   },
 
-  async fetchTransactions(month = defaultMonth, year = defaultYear): Promise<JsonApiCollection<Transaction>> {
-    const { data } = await api.get('/api/v1/transactions', { params: { month, year } });
+  async fetchTransactions(params: TransactionQueryParams = {}): Promise<JsonApiCollection<Transaction>> {
+    const { data } = await api.get('/api/v1/transactions', {
+      params: {
+        month: params.month ?? defaultMonth,
+        year: params.year ?? defaultYear,
+        q: params.q,
+        status: params.status,
+        transaction_type: params.transaction_type,
+        source: params.source,
+        category_id: params.category_id,
+        sort_by: params.sort_by,
+        sort_dir: params.sort_dir,
+      },
+    });
     return normalizeCollection<Transaction['attributes']>(data) as JsonApiCollection<Transaction>;
   },
 
-  async fetchPendingTransactions(): Promise<JsonApiCollection<Transaction>> {
-    const { data } = await api.get('/api/v1/transactions/pending');
+  async fetchPendingTransactions(params: TransactionQueryParams = {}): Promise<JsonApiCollection<Transaction>> {
+    const { data } = await api.get('/api/v1/transactions/pending', {
+      params: {
+        q: params.q,
+        source: params.source,
+        category_id: params.category_id,
+        sort_by: params.sort_by,
+        sort_dir: params.sort_dir,
+      },
+    });
     return normalizeCollection<Transaction['attributes']>(data) as JsonApiCollection<Transaction>;
   },
 
-  async fetchDebts(): Promise<JsonApiCollection<Debt>> {
-    const { data } = await api.get('/api/v1/debts');
+  async fetchDebts(params: DebtQueryParams = {}): Promise<JsonApiCollection<Debt>> {
+    const { data } = await api.get('/api/v1/debts', {
+      params: {
+        q: params.q,
+        status: params.status,
+        debt_type: params.debt_type,
+        sort_by: params.sort_by,
+        sort_dir: params.sort_dir,
+      },
+    });
     return normalizeCollection<Debt['attributes']>(data) as JsonApiCollection<Debt>;
   },
 
-  async fetchBudgets(month = defaultMonth, year = defaultYear): Promise<JsonApiCollection<Budget>> {
-    const { data } = await api.get('/api/v1/budgets', { params: { month, year } });
+  async fetchBudgets(params: BudgetQueryParams = {}): Promise<JsonApiCollection<Budget>> {
+    const { data } = await api.get('/api/v1/budgets', {
+      params: {
+        month: params.month ?? defaultMonth,
+        year: params.year ?? defaultYear,
+        q: params.q,
+        category_id: params.category_id,
+        sort_by: params.sort_by,
+        sort_dir: params.sort_dir,
+      },
+    });
     return normalizeCollection<Budget['attributes']>(data) as JsonApiCollection<Budget>;
   },
 
-  async fetchIncomeSources(): Promise<JsonApiCollection<IncomeSource>> {
-    const { data } = await api.get('/api/v1/income_sources');
+  async fetchIncomeSources(params: IncomeSourceQueryParams = {}): Promise<JsonApiCollection<IncomeSource>> {
+    const { data } = await api.get('/api/v1/income_sources', {
+      params: {
+        q: params.q,
+        active: params.active,
+        is_variable: params.is_variable,
+        sort_by: params.sort_by,
+        sort_dir: params.sort_dir,
+      },
+    });
     return normalizeCollection<IncomeSource['attributes']>(data) as JsonApiCollection<IncomeSource>;
   },
 
-  async fetchRecurringObligations(): Promise<JsonApiCollection<RecurringObligation>> {
-    const { data } = await api.get('/api/v1/recurring_obligations');
+  async fetchRecurringObligations(
+    params: RecurringObligationQueryParams = {},
+  ): Promise<JsonApiCollection<RecurringObligation>> {
+    const { data } = await api.get('/api/v1/recurring_obligations', {
+      params: {
+        q: params.q,
+        active: params.active,
+        category_id: params.category_id,
+        sort_by: params.sort_by,
+        sort_dir: params.sort_dir,
+      },
+    });
     return normalizeCollection<RecurringObligation['attributes']>(data) as JsonApiCollection<RecurringObligation>;
   },
 

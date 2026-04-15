@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { IonIcon } from '@ionic/react';
-import { addOutline, trashOutline } from 'ionicons/icons';
+import { addOutline } from 'ionicons/icons';
 import { AppLayout } from '../../templates/AppLayout';
 import { IconButton } from '../../atoms/IconButton';
 import { Spinner } from '../../atoms/Spinner';
+import { TextInput } from '../../atoms/TextInput';
+import { SelectInput } from '../../atoms/SelectInput';
 import { ErrorState } from '../../molecules/ErrorState';
 import { EmptyState } from '../../molecules/EmptyState';
 import { ConfirmModal } from '../../molecules/ConfirmModal';
@@ -11,21 +13,12 @@ import { CrudModal } from '../../molecules/CrudModal';
 import { TransactionComposer } from '../../organisms/TransactionComposer';
 import { TransactionSlidingCard } from '../../organisms/TransactionSlidingCard';
 import { financeService } from '../../../services/financeService';
-import type { SummaryResponse } from '../../../types/finance.types';
+import type { SummaryResponse, TransactionQueryParams } from '../../../types/finance.types';
 import type { Transaction, TransactionCreatePayload, TransactionUpdatePayload } from '../../../types/finance.types';
 import styles from '../FinancePage.module.css';
 
 const formatCop = (value: number) =>
   new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(value);
-
-const parseDdMmYyyy = (value: string) => {
-  const parts = value.split('/');
-  if (parts.length !== 3) {
-    return 0;
-  }
-
-  return new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0])).getTime();
-};
 
 export const TransactionsPage = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -36,21 +29,23 @@ export const TransactionsPage = () => {
   const [composerOpen, setComposerOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [deletingTransaction, setDeletingTransaction] = useState<Transaction | null>(null);
+  const [filters, setFilters] = useState<TransactionQueryParams>({
+    q: '',
+    status: '',
+    transaction_type: '',
+    sort_by: 'date',
+    sort_dir: 'desc',
+  });
 
   const load = async () => {
     setLoading(true);
     setError(null);
     try {
       const [transactionsResponse, summaryResponse] = await Promise.all([
-        financeService.fetchTransactions(),
+        financeService.fetchTransactions(filters),
         financeService.fetchSummary(),
       ]);
-
-      const sortedTransactions = [...transactionsResponse.data].sort(
-        (left, right) => parseDdMmYyyy(right.attributes.date) - parseDdMmYyyy(left.attributes.date),
-      );
-
-      setTransactions(sortedTransactions);
+      setTransactions(transactionsResponse.data);
       setSummary(summaryResponse);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No fue posible cargar las transacciones.');
@@ -61,7 +56,7 @@ export const TransactionsPage = () => {
 
   useEffect(() => {
     void load();
-  }, []);
+  }, [filters]);
 
   const handleCreate = async (payload: TransactionCreatePayload) => {
     setSubmitting(true);
@@ -171,6 +166,67 @@ export const TransactionsPage = () => {
             </article>
           </div>
         ) : null}
+
+        <section className={styles.filters}>
+          <div className={styles.filtersGrid}>
+            <TextInput
+              name="transactions-q"
+              label="Buscar"
+              placeholder="Concepto o producto"
+              value={filters.q ?? ''}
+              onChange={(q) => setFilters((current) => ({ ...current, q }))}
+            />
+            <SelectInput
+              name="transactions-status"
+              label="Estado"
+              value={filters.status ?? ''}
+              onChange={(status) => setFilters((current) => ({ ...current, status: String(status) }))}
+              options={[
+                { label: 'Confirmada', value: 'confirmed' },
+                { label: 'Pendiente', value: 'pending' },
+                { label: 'Proyectada', value: 'projected' },
+              ]}
+              placeholder="Todos"
+            />
+            <SelectInput
+              name="transactions-type"
+              label="Tipo"
+              value={filters.transaction_type ?? ''}
+              onChange={(transaction_type) =>
+                setFilters((current) => ({ ...current, transaction_type: String(transaction_type) }))
+              }
+              options={[
+                { label: 'Gasto', value: 'expense' },
+                { label: 'Ingreso', value: 'income' },
+              ]}
+              placeholder="Todos"
+            />
+            <SelectInput
+              name="transactions-sort-by"
+              label="Ordenar por"
+              value={filters.sort_by ?? 'date'}
+              onChange={(sort_by) => setFilters((current) => ({ ...current, sort_by: String(sort_by) }))}
+              options={[
+                { label: 'Fecha', value: 'date' },
+                { label: 'Monto', value: 'amount' },
+                { label: 'Concepto', value: 'concept' },
+                { label: 'Estado', value: 'status' },
+              ]}
+            />
+            <SelectInput
+              name="transactions-sort-dir"
+              label="Dirección"
+              value={filters.sort_dir ?? 'desc'}
+              onChange={(sort_dir) =>
+                setFilters((current) => ({ ...current, sort_dir: sort_dir as 'asc' | 'desc' }))
+              }
+              options={[
+                { label: 'Descendente', value: 'desc' },
+                { label: 'Ascendente', value: 'asc' },
+              ]}
+            />
+          </div>
+        </section>
 
         {loading ? <Spinner size="lg" /> : null}
         {error ? <ErrorState message={error} onRetry={() => void load()} /> : null}

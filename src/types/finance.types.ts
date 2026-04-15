@@ -176,3 +176,48 @@ export interface JsonApiCollection<T> {
     total?: number;
   };
 }
+
+export interface TransactionQueryParams {
+  month?: number;
+  year?: number;
+  q?: string;
+  status?: string;
+  transaction_type?: string;
+  source?: string;
+  category_id?: number | string;
+  sort_by?: string;
+  sort_dir?: 'asc' | 'desc';
+}
+
+export interface DebtQueryParams {
+  q?: string;
+  status?: string;
+  debt_type?: string;
+  sort_by?: string;
+  sort_dir?: 'asc' | 'desc';
+}
+
+export interface RecurringObligationQueryParams {
+  q?: string;
+  active?: boolean | 'all';
+  category_id?: number | string;
+  sort_by?: string;
+  sort_dir?: 'asc' | 'desc';
+}
+
+export interface IncomeSourceQueryParams {
+  q?: string;
+  active?: boolean | 'all';
+  is_variable?: boolean | 'all';
+  sort_by?: string;
+  sort_dir?: 'asc' | 'desc';
+}
+
+export interface BudgetQueryParams {
+  month?: number;
+  year?: number;
+  q?: string;
+  category_id?: number | string;
+  sort_by?: string;
+  sort_dir?: 'asc' | 'desc';
+}
