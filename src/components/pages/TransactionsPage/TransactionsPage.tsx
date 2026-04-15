@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { IonIcon } from '@ionic/react';
+import { IonIcon, useIonAlert, useIonToast } from '@ionic/react';
 import { addOutline } from 'ionicons/icons';
 import { AppLayout } from '../../templates/AppLayout';
 import { IconButton } from '../../atoms/IconButton';
@@ -8,7 +8,6 @@ import { Spinner } from '../../atoms/Spinner';
 import { SelectInput } from '../../atoms/SelectInput';
 import { ErrorState } from '../../molecules/ErrorState';
 import { EmptyState } from '../../molecules/EmptyState';
-import { ConfirmModal } from '../../molecules/ConfirmModal';
 import { CrudModal } from '../../molecules/CrudModal';
 import { ListToolbar } from '../../molecules/ListToolbar';
 import { AppliedFiltersBar } from '../../molecules/AppliedFiltersBar';
@@ -43,9 +42,10 @@ export const TransactionsPage = () => {
   const [sortOpen, setSortOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
-  const [deletingTransaction, setDeletingTransaction] = useState<Transaction | null>(null);
   const [filters, setFilters] = useState<TransactionQueryParams>(initialFilters);
   const [draftFilters, setDraftFilters] = useState<TransactionQueryParams>(initialFilters);
+  const [presentAlert] = useIonAlert();
+  const [presentToast] = useIonToast();
 
   const load = async () => {
     setLoading(true);
@@ -91,24 +91,67 @@ export const TransactionsPage = () => {
     }
   };
 
-  const handleDelete = async () => {
-    if (!deletingTransaction) {
-      return;
-    }
-
+  const handleDelete = async (transaction: Transaction) => {
+    console.debug('[TransactionsPage] handleDelete:start', {
+      id: transaction.id,
+      concept: transaction.attributes.concept,
+    });
     setSubmitting(true);
     try {
-      await financeService.deleteTransaction(deletingTransaction.id);
-      setDeletingTransaction(null);
-      if (editingTransaction?.id === deletingTransaction.id) {
+      await financeService.deleteTransaction(transaction.id);
+      console.debug('[TransactionsPage] handleDelete:success', { id: transaction.id });
+      if (editingTransaction?.id === transaction.id) {
         setEditingTransaction(null);
       }
       await load();
+      await presentToast({
+        message: 'Transacción borrada con éxito',
+        duration: 2200,
+        color: 'success',
+        position: 'top',
+      });
     } catch (deleteError) {
+      console.error('[TransactionsPage] handleDelete:error', deleteError);
       setError(deleteError instanceof Error ? deleteError.message : 'No fue posible borrar la transacción.');
+      await presentToast({
+        message: 'No se pudo borrar la transacción',
+        duration: 2600,
+        color: 'danger',
+        position: 'top',
+      });
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const requestDelete = async (transaction: Transaction) => {
+    console.debug('[TransactionsPage] requestDelete', {
+      id: transaction.id,
+      concept: transaction.attributes.concept,
+      amount: transaction.attributes.amount,
+    });
+
+    await presentAlert({
+      header: 'Borrar transacción',
+      message: `¿Seguro que quieres borrar "${transaction.attributes.concept}" por ${formatCop(transaction.attributes.amount)}?`,
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+          handler: () => {
+            console.debug('[TransactionsPage] requestDelete:cancelled', { id: transaction.id });
+          },
+        },
+        {
+          text: 'Borrar',
+          role: 'destructive',
+          handler: () => {
+            console.debug('[TransactionsPage] requestDelete:confirmed', { id: transaction.id });
+            void handleDelete(transaction);
+          },
+        },
+      ],
+    });
   };
 
   const metrics = useMemo(() => {
@@ -272,7 +315,9 @@ export const TransactionsPage = () => {
                   setEditingTransaction(nextTransaction);
                   setComposerOpen(true);
                 }}
-                onDelete={setDeletingTransaction}
+                onDelete={(selectedTransaction) => {
+                  void requestDelete(selectedTransaction);
+                }}
               />
             ))}
           </div>
@@ -349,20 +394,6 @@ export const TransactionsPage = () => {
           />
         </section>
       </FilterSheet>
-
-      <ConfirmModal
-        isOpen={Boolean(deletingTransaction)}
-        title="Borrar transacción"
-        message={
-          deletingTransaction
-            ? `Vas a borrar "${deletingTransaction.attributes.concept}" por ${deletingTransaction.attributes.amount}. Esta acción no se puede deshacer.`
-            : ''
-        }
-        confirmLabel="Borrar"
-        danger
-        onCancel={() => setDeletingTransaction(null)}
-        onConfirm={() => void handleDelete()}
-      />
 
       <CrudModal
         isOpen={composerOpen}

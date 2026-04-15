@@ -30,11 +30,13 @@ export const TransactionSlidingCard = ({ transaction, onEdit, onDelete }: Transa
   const slidingRef = useRef<HTMLIonItemSlidingElement | null>(null);
 
   const handleEdit = () => {
+    console.debug('[TransactionSlidingCard] handleEdit', { id: transaction.id });
     void slidingRef.current?.close();
     onEdit(transaction);
   };
 
   const handleDelete = () => {
+    console.debug('[TransactionSlidingCard] handleDelete', { id: transaction.id });
     void slidingRef.current?.close();
     onDelete(transaction);
   };

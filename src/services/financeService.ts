@@ -174,7 +174,9 @@ export const financeService = {
   },
 
   async deleteTransaction(id: string): Promise<void> {
+    console.debug('[financeService] deleteTransaction:request', { id });
     await api.delete(`/api/v1/transactions/${id}`);
+    console.debug('[financeService] deleteTransaction:success', { id });
   },
 
   async createDebt(payload: DebtPayload): Promise<Debt> {
