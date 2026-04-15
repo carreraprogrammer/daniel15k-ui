@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import { IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding } from '@ionic/react';
 import { createOutline, trashOutline } from 'ionicons/icons';
+import { IconButton } from '../../atoms/IconButton';
 import type { Transaction } from '../../../types/finance.types';
 import styles from './TransactionSlidingCard.module.css';
 
@@ -59,6 +60,19 @@ export const TransactionSlidingCard = ({ transaction, onEdit, onDelete }: Transa
               {statusLabels[status] ?? status}
             </span>
             <strong className={styles.amount}>{formatCop(transaction.attributes.amount)}</strong>
+            <div className={styles.actions}>
+              <IconButton
+                label="Editar transacción"
+                icon={<IonIcon icon={createOutline} />}
+                onClick={handleEdit}
+              />
+              <IconButton
+                label="Borrar transacción"
+                icon={<IonIcon icon={trashOutline} />}
+                variant="danger"
+                onClick={handleDelete}
+              />
+            </div>
           </div>
         </div>
       </IonItem>

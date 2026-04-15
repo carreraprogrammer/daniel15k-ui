@@ -50,6 +50,12 @@
   align-content: start;
 }
 
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.15rem;
+}
+
 .header {
   display: flex;
   flex-wrap: wrap;
@@ -119,5 +125,9 @@
 
   .secondary {
     justify-items: start;
+  }
+
+  .actions {
+    margin-top: 0.35rem;
   }
 }
