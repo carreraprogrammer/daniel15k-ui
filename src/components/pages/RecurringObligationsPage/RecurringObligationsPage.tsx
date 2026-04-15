@@ -3,13 +3,17 @@ import { IonIcon } from '@ionic/react';
 import { addOutline } from 'ionicons/icons';
 import { AppLayout } from '../../templates/AppLayout';
 import { IconButton } from '../../atoms/IconButton';
+import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
-import { TextInput } from '../../atoms/TextInput';
 import { SelectInput } from '../../atoms/SelectInput';
 import { ErrorState } from '../../molecules/ErrorState';
 import { EmptyState } from '../../molecules/EmptyState';
 import { ConfirmModal } from '../../molecules/ConfirmModal';
 import { CrudModal } from '../../molecules/CrudModal';
+import { ListToolbar } from '../../molecules/ListToolbar';
+import { AppliedFiltersBar } from '../../molecules/AppliedFiltersBar';
+import { SortSheet } from '../../molecules/SortSheet';
+import { FilterSheet } from '../../molecules/FilterSheet';
 import { RecurringObligationComposer } from '../../organisms/RecurringObligationComposer';
 import { RecurringObligationSlidingCard } from '../../organisms/RecurringObligationSlidingCard';
 import { financeService } from '../../../services/financeService';
@@ -27,6 +31,22 @@ const formatCop = (value: number) =>
 
 type CategoryOption = { label: string; value: string | number };
 
+const initialObligationFilters: RecurringObligationQueryParams = {
+  q: '',
+  active: 'all',
+  category_id: '',
+  sort_by: 'due_day',
+  sort_dir: 'asc',
+};
+
+const initialIncomeFilters: IncomeSourceQueryParams = {
+  q: '',
+  active: 'all',
+  is_variable: 'all',
+  sort_by: 'expected_day_from',
+  sort_dir: 'asc',
+};
+
 export const RecurringObligationsPage = () => {
   const [obligations, setObligations] = useState<RecurringObligation[]>([]);
   const [incomeSources, setIncomeSources] = useState<IncomeSource[]>([]);
@@ -35,22 +55,16 @@ export const RecurringObligationsPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [composerOpen, setComposerOpen] = useState(false);
+  const [sortOpen, setSortOpen] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [editingObligation, setEditingObligation] = useState<RecurringObligation | null>(null);
   const [deletingObligation, setDeletingObligation] = useState<RecurringObligation | null>(null);
-  const [obligationFilters, setObligationFilters] = useState<RecurringObligationQueryParams>({
-    q: '',
-    active: 'all',
-    category_id: '',
-    sort_by: 'due_day',
-    sort_dir: 'asc',
-  });
-  const [incomeFilters, setIncomeFilters] = useState<IncomeSourceQueryParams>({
-    q: '',
-    active: 'all',
-    is_variable: 'all',
-    sort_by: 'expected_day_from',
-    sort_dir: 'asc',
-  });
+  const [obligationFilters, setObligationFilters] = useState<RecurringObligationQueryParams>(initialObligationFilters);
+  const [draftObligationFilters, setDraftObligationFilters] = useState<RecurringObligationQueryParams>(initialObligationFilters);
+  const [incomeFilters, setIncomeFilters] = useState<IncomeSourceQueryParams>(initialIncomeFilters);
+  const [incomeSortOpen, setIncomeSortOpen] = useState(false);
+  const [incomeFiltersOpen, setIncomeFiltersOpen] = useState(false);
+  const [draftIncomeFilters, setDraftIncomeFilters] = useState<IncomeSourceQueryParams>(initialIncomeFilters);
 
   const load = async () => {
     setLoading(true);
@@ -133,6 +147,39 @@ export const RecurringObligationsPage = () => {
     }
   };
 
+  const obligationActiveFilterCount = useMemo(
+    () =>
+      [obligationFilters.active !== 'all' ? obligationFilters.active : '', obligationFilters.category_id].filter(Boolean).length,
+    [obligationFilters.active, obligationFilters.category_id],
+  );
+
+  const incomeActiveFilterCount = useMemo(
+    () => [incomeFilters.active !== 'all' ? incomeFilters.active : '', incomeFilters.is_variable !== 'all' ? incomeFilters.is_variable : ''].filter(Boolean).length,
+    [incomeFilters.active, incomeFilters.is_variable],
+  );
+
+  const obligationChips = useMemo(() => {
+    const chips = [];
+    if (obligationFilters.q) chips.push({ key: 'q', label: `Buscar: ${obligationFilters.q}` });
+    if (obligationFilters.active !== 'all') {
+      chips.push({ key: 'active', label: obligationFilters.active ? 'Solo activas' : 'Solo inactivas' });
+    }
+    if (obligationFilters.category_id) {
+      const category = categoryOptions.find((item) => String(item.value) === String(obligationFilters.category_id));
+      chips.push({ key: 'category_id', label: `Categoría: ${category?.label ?? obligationFilters.category_id}` });
+    }
+    return chips;
+  }, [categoryOptions, obligationFilters.active, obligationFilters.category_id, obligationFilters.q]);
+
+  const incomeChips = useMemo(() => {
+    const chips = [];
+    if (incomeFilters.q) chips.push({ key: 'q', label: `Buscar: ${incomeFilters.q}` });
+    if (incomeFilters.is_variable !== 'all') {
+      chips.push({ key: 'is_variable', label: incomeFilters.is_variable ? 'Variables' : 'Fijos' });
+    }
+    return chips;
+  }, [incomeFilters.is_variable, incomeFilters.q]);
+
   return (
     <AppLayout title="Recurrentes">
       <section className={styles.stack}>
@@ -187,57 +234,32 @@ export const RecurringObligationsPage = () => {
           <div className={styles.columns}>
             <section className={styles.panel}>
               <h3 className={styles.panelTitle}>Fuentes de ingreso</h3>
-              <div className={styles.filtersCompact}>
-                <div className={styles.filtersGrid}>
-                  <TextInput
-                    name="income-q"
-                    label="Buscar"
-                    placeholder="Nombre"
-                    value={incomeFilters.q ?? ''}
-                    onChange={(q) => setIncomeFilters((current) => ({ ...current, q }))}
-                  />
-                  <SelectInput
-                    name="income-variable"
-                    label="Tipo"
-                    value={String(incomeFilters.is_variable ?? 'all')}
-                    onChange={(is_variable) =>
-                      setIncomeFilters((current) => ({
-                        ...current,
-                        is_variable: is_variable === 'all' ? 'all' : is_variable === 'true',
-                      }))
-                    }
-                    options={[
-                      { label: 'Todos', value: 'all' },
-                      { label: 'Variables', value: 'true' },
-                      { label: 'Fijos', value: 'false' },
-                    ]}
-                    placeholder="Todos"
-                  />
-                  <SelectInput
-                    name="income-sort-by"
-                    label="Ordenar por"
-                    value={incomeFilters.sort_by ?? 'expected_day_from'}
-                    onChange={(sort_by) => setIncomeFilters((current) => ({ ...current, sort_by: String(sort_by) }))}
-                    options={[
-                      { label: 'Día esperado', value: 'expected_day_from' },
-                      { label: 'Monto', value: 'expected_amount' },
-                      { label: 'Nombre', value: 'name' },
-                    ]}
-                  />
-                  <SelectInput
-                    name="income-sort-dir"
-                    label="Dirección"
-                    value={incomeFilters.sort_dir ?? 'asc'}
-                    onChange={(sort_dir) =>
-                      setIncomeFilters((current) => ({ ...current, sort_dir: sort_dir as 'asc' | 'desc' }))
-                    }
-                    options={[
-                      { label: 'Ascendente', value: 'asc' },
-                      { label: 'Descendente', value: 'desc' },
-                    ]}
-                  />
-                </div>
-              </div>
+              <ListToolbar
+                searchLabel="Buscar ingresos"
+                searchPlaceholder="Nombre"
+                searchValue={incomeFilters.q ?? ''}
+                resultLabel={`${incomeSources.length} resultados`}
+                activeFilterCount={incomeActiveFilterCount}
+                onSearchChange={(q) => {
+                  const next = { ...incomeFilters, q };
+                  setIncomeFilters(next);
+                  setDraftIncomeFilters(next);
+                }}
+                onOpenSort={() => setIncomeSortOpen(true)}
+                onOpenFilters={() => setIncomeFiltersOpen(true)}
+              />
+              <AppliedFiltersBar
+                chips={incomeChips}
+                onRemove={(key) => {
+                  const next = { ...incomeFilters, [key]: key === 'is_variable' ? 'all' : '' };
+                  setIncomeFilters(next);
+                  setDraftIncomeFilters(next);
+                }}
+                onClearAll={() => {
+                  setIncomeFilters(initialIncomeFilters);
+                  setDraftIncomeFilters(initialIncomeFilters);
+                }}
+              />
               {!incomeSources.length ? (
                 <EmptyState message="No hay fuentes de ingreso cargadas." />
               ) : (
@@ -262,67 +284,52 @@ export const RecurringObligationsPage = () => {
 
             <section className={styles.panel}>
               <h3 className={styles.panelTitle}>Obligaciones recurrentes</h3>
-              <div className={styles.filtersCompact}>
-                <div className={styles.filtersGrid}>
-                  <TextInput
-                    name="recurring-q"
-                    label="Buscar"
-                    placeholder="Nombre"
-                    value={obligationFilters.q ?? ''}
-                    onChange={(q) => setObligationFilters((current) => ({ ...current, q }))}
-                  />
-                  <SelectInput
-                    name="recurring-active"
-                    label="Estado"
-                    value={String(obligationFilters.active ?? 'all')}
-                    onChange={(active) =>
-                      setObligationFilters((current) => ({
-                        ...current,
-                        active: active === 'all' ? 'all' : active === 'true',
-                      }))
-                    }
-                    options={[
-                      { label: 'Todos', value: 'all' },
-                      { label: 'Activos', value: 'true' },
-                      { label: 'Inactivos', value: 'false' },
-                    ]}
-                    placeholder="Todos"
-                  />
-                  <SelectInput
-                    name="recurring-category-filter"
-                    label="Categoría"
-                    value={obligationFilters.category_id ?? ''}
-                    onChange={(category_id) => setObligationFilters((current) => ({ ...current, category_id }))}
-                    options={categoryOptions}
-                    placeholder="Todas"
-                  />
-                  <SelectInput
-                    name="recurring-sort-by"
-                    label="Ordenar por"
-                    value={obligationFilters.sort_by ?? 'due_day'}
-                    onChange={(sort_by) =>
-                      setObligationFilters((current) => ({ ...current, sort_by: String(sort_by) }))
-                    }
-                    options={[
-                      { label: 'Día de vencimiento', value: 'due_day' },
-                      { label: 'Monto', value: 'amount' },
-                      { label: 'Nombre', value: 'name' },
-                    ]}
-                  />
-                  <SelectInput
-                    name="recurring-sort-dir"
-                    label="Dirección"
-                    value={obligationFilters.sort_dir ?? 'asc'}
-                    onChange={(sort_dir) =>
-                      setObligationFilters((current) => ({ ...current, sort_dir: sort_dir as 'asc' | 'desc' }))
-                    }
-                    options={[
-                      { label: 'Ascendente', value: 'asc' },
-                      { label: 'Descendente', value: 'desc' },
-                    ]}
-                  />
-                </div>
+              <ListToolbar
+                searchLabel="Buscar recurrentes"
+                searchPlaceholder="Nombre"
+                searchValue={obligationFilters.q ?? ''}
+                resultLabel={`${obligations.length} resultados`}
+                activeFilterCount={obligationActiveFilterCount}
+                onSearchChange={(q) => {
+                  const next = { ...obligationFilters, q };
+                  setObligationFilters(next);
+                  setDraftObligationFilters(next);
+                }}
+                onOpenSort={() => setSortOpen(true)}
+                onOpenFilters={() => setFiltersOpen(true)}
+              />
+              <div className={styles.quickFilters}>
+                <Button
+                  label="Activos"
+                  size="sm"
+                  variant={obligationFilters.active === true ? 'primary' : 'ghost'}
+                  onClick={() => {
+                    const next: RecurringObligationQueryParams = {
+                      ...obligationFilters,
+                      active: obligationFilters.active === true ? 'all' : true,
+                    };
+                    setObligationFilters(next);
+                    setDraftObligationFilters(next);
+                  }}
+                />
               </div>
+              <AppliedFiltersBar
+                chips={obligationChips}
+                onRemove={(key) => {
+                  const next: RecurringObligationQueryParams =
+                    key === 'active'
+                      ? { ...obligationFilters, active: 'all' }
+                      : key === 'category_id'
+                        ? { ...obligationFilters, category_id: '' }
+                        : { ...obligationFilters, q: '' };
+                  setObligationFilters(next);
+                  setDraftObligationFilters(next);
+                }}
+                onClearAll={() => {
+                  setObligationFilters(initialObligationFilters);
+                  setDraftObligationFilters(initialObligationFilters);
+                }}
+              />
               {!obligations.length ? (
                 <EmptyState message="No hay obligaciones recurrentes registradas." />
               ) : (
@@ -344,6 +351,116 @@ export const RecurringObligationsPage = () => {
           </div>
         ) : null}
       </section>
+
+      <SortSheet
+        isOpen={sortOpen}
+        title="Ordenar recurrentes"
+        sortBy={String(obligationFilters.sort_by ?? 'due_day')}
+        sortDir={(obligationFilters.sort_dir as 'asc' | 'desc') ?? 'asc'}
+        options={[
+          { label: 'Día de vencimiento', value: 'due_day' },
+          { label: 'Monto', value: 'amount' },
+          { label: 'Nombre', value: 'name' },
+        ]}
+        onClose={() => setSortOpen(false)}
+        onChangeSortBy={(sort_by) => setObligationFilters((current) => ({ ...current, sort_by }))}
+        onChangeSortDir={(sort_dir) => setObligationFilters((current) => ({ ...current, sort_dir }))}
+      />
+
+      <SortSheet
+        isOpen={incomeSortOpen}
+        title="Ordenar ingresos"
+        sortBy={String(incomeFilters.sort_by ?? 'expected_day_from')}
+        sortDir={(incomeFilters.sort_dir as 'asc' | 'desc') ?? 'asc'}
+        options={[
+          { label: 'Día esperado', value: 'expected_day_from' },
+          { label: 'Monto', value: 'expected_amount' },
+          { label: 'Nombre', value: 'name' },
+        ]}
+        onClose={() => setIncomeSortOpen(false)}
+        onChangeSortBy={(sort_by) => setIncomeFilters((current) => ({ ...current, sort_by }))}
+        onChangeSortDir={(sort_dir) => setIncomeFilters((current) => ({ ...current, sort_dir }))}
+      />
+
+      <FilterSheet
+        isOpen={filtersOpen}
+        title="Filtrar recurrentes"
+        resultLabel={`Mostrar ${obligations.length} resultados`}
+        onClose={() => {
+          setDraftObligationFilters(obligationFilters);
+          setFiltersOpen(false);
+        }}
+        onReset={() => setDraftObligationFilters({ ...initialObligationFilters, q: obligationFilters.q })}
+        onApply={() => {
+          setObligationFilters(draftObligationFilters);
+          setFiltersOpen(false);
+        }}
+      >
+        <section className={styles.sheetSection}>
+          <h3 className={styles.sheetSectionTitle}>Estado</h3>
+          <SelectInput
+            name="rec-filter-active"
+            value={String(draftObligationFilters.active ?? 'all')}
+            onChange={(active) =>
+              setDraftObligationFilters((current) => ({
+                ...current,
+                active: active === 'all' ? 'all' : active === 'true',
+              }))
+            }
+            options={[
+              { label: 'Todos', value: 'all' },
+              { label: 'Activos', value: 'true' },
+              { label: 'Inactivos', value: 'false' },
+            ]}
+            placeholder="Todos"
+          />
+        </section>
+        <section className={styles.sheetSection}>
+          <h3 className={styles.sheetSectionTitle}>Categoría</h3>
+          <SelectInput
+            name="rec-filter-category"
+            value={draftObligationFilters.category_id ?? ''}
+            onChange={(category_id) => setDraftObligationFilters((current) => ({ ...current, category_id }))}
+            options={categoryOptions}
+            placeholder="Todas"
+          />
+        </section>
+      </FilterSheet>
+
+      <FilterSheet
+        isOpen={incomeFiltersOpen}
+        title="Filtrar ingresos"
+        resultLabel={`Mostrar ${incomeSources.length} resultados`}
+        onClose={() => {
+          setDraftIncomeFilters(incomeFilters);
+          setIncomeFiltersOpen(false);
+        }}
+        onReset={() => setDraftIncomeFilters({ ...initialIncomeFilters, q: incomeFilters.q })}
+        onApply={() => {
+          setIncomeFilters(draftIncomeFilters);
+          setIncomeFiltersOpen(false);
+        }}
+      >
+        <section className={styles.sheetSection}>
+          <h3 className={styles.sheetSectionTitle}>Tipo</h3>
+          <SelectInput
+            name="income-filter-variable"
+            value={String(draftIncomeFilters.is_variable ?? 'all')}
+            onChange={(is_variable) =>
+              setDraftIncomeFilters((current) => ({
+                ...current,
+                is_variable: is_variable === 'all' ? 'all' : is_variable === 'true',
+              }))
+            }
+            options={[
+              { label: 'Todos', value: 'all' },
+              { label: 'Variables', value: 'true' },
+              { label: 'Fijos', value: 'false' },
+            ]}
+            placeholder="Todos"
+          />
+        </section>
+      </FilterSheet>
 
       <ConfirmModal
         isOpen={Boolean(deletingObligation)}

@@ -3,13 +3,17 @@ import { IonIcon } from '@ionic/react';
 import { addOutline } from 'ionicons/icons';
 import { AppLayout } from '../../templates/AppLayout';
 import { IconButton } from '../../atoms/IconButton';
+import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
-import { TextInput } from '../../atoms/TextInput';
 import { SelectInput } from '../../atoms/SelectInput';
 import { ErrorState } from '../../molecules/ErrorState';
 import { EmptyState } from '../../molecules/EmptyState';
 import { ConfirmModal } from '../../molecules/ConfirmModal';
 import { CrudModal } from '../../molecules/CrudModal';
+import { ListToolbar } from '../../molecules/ListToolbar';
+import { AppliedFiltersBar } from '../../molecules/AppliedFiltersBar';
+import { SortSheet } from '../../molecules/SortSheet';
+import { FilterSheet } from '../../molecules/FilterSheet';
 import { TransactionComposer } from '../../organisms/TransactionComposer';
 import { TransactionSlidingCard } from '../../organisms/TransactionSlidingCard';
 import { financeService } from '../../../services/financeService';
@@ -20,6 +24,15 @@ import styles from '../FinancePage.module.css';
 const formatCop = (value: number) =>
   new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(value);
 
+const initialFilters: TransactionQueryParams = {
+  q: '',
+  status: '',
+  transaction_type: '',
+  source: '',
+  sort_by: 'date',
+  sort_dir: 'desc',
+};
+
 export const TransactionsPage = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [summary, setSummary] = useState<SummaryResponse | null>(null);
@@ -27,15 +40,12 @@ export const TransactionsPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [composerOpen, setComposerOpen] = useState(false);
+  const [sortOpen, setSortOpen] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [deletingTransaction, setDeletingTransaction] = useState<Transaction | null>(null);
-  const [filters, setFilters] = useState<TransactionQueryParams>({
-    q: '',
-    status: '',
-    transaction_type: '',
-    sort_by: 'date',
-    sort_dir: 'desc',
-  });
+  const [filters, setFilters] = useState<TransactionQueryParams>(initialFilters);
+  const [draftFilters, setDraftFilters] = useState<TransactionQueryParams>(initialFilters);
 
   const load = async () => {
     setLoading(true);
@@ -118,6 +128,42 @@ export const TransactionsPage = () => {
     };
   }, [transactions]);
 
+  const activeFilterCount = useMemo(
+    () => [filters.status, filters.transaction_type, filters.source].filter(Boolean).length,
+    [filters.source, filters.status, filters.transaction_type],
+  );
+
+  const appliedChips = useMemo(() => {
+    const chips = [];
+
+    if (filters.q) chips.push({ key: 'q', label: `Buscar: ${filters.q}` });
+    if (filters.status) chips.push({ key: 'status', label: `Estado: ${filters.status}` });
+    if (filters.transaction_type) {
+      chips.push({
+        key: 'transaction_type',
+        label: filters.transaction_type === 'income' ? 'Tipo: Ingreso' : 'Tipo: Gasto',
+      });
+    }
+    if (filters.source) chips.push({ key: 'source', label: `Origen: ${filters.source}` });
+
+    return chips;
+  }, [filters.q, filters.source, filters.status, filters.transaction_type]);
+
+  const removeChip = (key: string) => {
+    const next = { ...filters, [key]: '' };
+    setFilters(next);
+    setDraftFilters(next);
+  };
+
+  const quickToggle = (patch: Partial<TransactionQueryParams>) => {
+    const key = Object.keys(patch)[0] as keyof TransactionQueryParams;
+    const value = patch[key];
+    const nextValue = filters[key] === value ? '' : value;
+    const next = { ...filters, [key]: nextValue };
+    setFilters(next);
+    setDraftFilters(next);
+  };
+
   return (
     <AppLayout title="Transacciones">
       <section className={styles.stack}>
@@ -167,66 +213,50 @@ export const TransactionsPage = () => {
           </div>
         ) : null}
 
-        <section className={styles.filters}>
-          <div className={styles.filtersGrid}>
-            <TextInput
-              name="transactions-q"
-              label="Buscar"
-              placeholder="Concepto o producto"
-              value={filters.q ?? ''}
-              onChange={(q) => setFilters((current) => ({ ...current, q }))}
-            />
-            <SelectInput
-              name="transactions-status"
-              label="Estado"
-              value={filters.status ?? ''}
-              onChange={(status) => setFilters((current) => ({ ...current, status: String(status) }))}
-              options={[
-                { label: 'Confirmada', value: 'confirmed' },
-                { label: 'Pendiente', value: 'pending' },
-                { label: 'Proyectada', value: 'projected' },
-              ]}
-              placeholder="Todos"
-            />
-            <SelectInput
-              name="transactions-type"
-              label="Tipo"
-              value={filters.transaction_type ?? ''}
-              onChange={(transaction_type) =>
-                setFilters((current) => ({ ...current, transaction_type: String(transaction_type) }))
-              }
-              options={[
-                { label: 'Gasto', value: 'expense' },
-                { label: 'Ingreso', value: 'income' },
-              ]}
-              placeholder="Todos"
-            />
-            <SelectInput
-              name="transactions-sort-by"
-              label="Ordenar por"
-              value={filters.sort_by ?? 'date'}
-              onChange={(sort_by) => setFilters((current) => ({ ...current, sort_by: String(sort_by) }))}
-              options={[
-                { label: 'Fecha', value: 'date' },
-                { label: 'Monto', value: 'amount' },
-                { label: 'Concepto', value: 'concept' },
-                { label: 'Estado', value: 'status' },
-              ]}
-            />
-            <SelectInput
-              name="transactions-sort-dir"
-              label="Dirección"
-              value={filters.sort_dir ?? 'desc'}
-              onChange={(sort_dir) =>
-                setFilters((current) => ({ ...current, sort_dir: sort_dir as 'asc' | 'desc' }))
-              }
-              options={[
-                { label: 'Descendente', value: 'desc' },
-                { label: 'Ascendente', value: 'asc' },
-              ]}
-            />
-          </div>
-        </section>
+        <ListToolbar
+          searchLabel="Buscar transacciones"
+          searchPlaceholder="Concepto o producto"
+          searchValue={filters.q ?? ''}
+          resultLabel={`${metrics.count} resultados`}
+          activeFilterCount={activeFilterCount}
+          onSearchChange={(q) => {
+            const next = { ...filters, q };
+            setFilters(next);
+            setDraftFilters(next);
+          }}
+          onOpenSort={() => setSortOpen(true)}
+          onOpenFilters={() => setFiltersOpen(true)}
+        />
+
+        <div className={styles.quickFilters}>
+          <Button
+            label="Pendientes"
+            size="sm"
+            variant={filters.status === 'pending' ? 'primary' : 'ghost'}
+            onClick={() => quickToggle({ status: 'pending' })}
+          />
+          <Button
+            label="Gastos"
+            size="sm"
+            variant={filters.transaction_type === 'expense' ? 'primary' : 'ghost'}
+            onClick={() => quickToggle({ transaction_type: 'expense' })}
+          />
+          <Button
+            label="Ingresos"
+            size="sm"
+            variant={filters.transaction_type === 'income' ? 'primary' : 'ghost'}
+            onClick={() => quickToggle({ transaction_type: 'income' })}
+          />
+        </div>
+
+        <AppliedFiltersBar
+          chips={appliedChips}
+          onRemove={removeChip}
+          onClearAll={() => {
+            setFilters(initialFilters);
+            setDraftFilters(initialFilters);
+          }}
+        />
 
         {loading ? <Spinner size="lg" /> : null}
         {error ? <ErrorState message={error} onRetry={() => void load()} /> : null}
@@ -248,6 +278,77 @@ export const TransactionsPage = () => {
           </div>
         ) : null}
       </section>
+
+      <SortSheet
+        isOpen={sortOpen}
+        title="Ordenar transacciones"
+        sortBy={String(filters.sort_by ?? 'date')}
+        sortDir={(filters.sort_dir as 'asc' | 'desc') ?? 'desc'}
+        options={[
+          { label: 'Fecha', value: 'date' },
+          { label: 'Monto', value: 'amount' },
+          { label: 'Concepto', value: 'concept' },
+          { label: 'Estado', value: 'status' },
+        ]}
+        onClose={() => setSortOpen(false)}
+        onChangeSortBy={(sort_by) => setFilters((current) => ({ ...current, sort_by }))}
+        onChangeSortDir={(sort_dir) => setFilters((current) => ({ ...current, sort_dir }))}
+      />
+
+      <FilterSheet
+        isOpen={filtersOpen}
+        title="Filtrar transacciones"
+        resultLabel={`Mostrar ${metrics.count} resultados`}
+        onClose={() => {
+          setDraftFilters(filters);
+          setFiltersOpen(false);
+        }}
+        onReset={() => setDraftFilters({ ...initialFilters, q: filters.q })}
+        onApply={() => {
+          setFilters(draftFilters);
+          setFiltersOpen(false);
+        }}
+      >
+        <section className={styles.sheetSection}>
+          <h3 className={styles.sheetSectionTitle}>Estado</h3>
+          <SelectInput
+            name="tx-filter-status"
+            value={draftFilters.status ?? ''}
+            onChange={(status) => setDraftFilters((current) => ({ ...current, status: String(status) }))}
+            options={[
+              { label: 'Confirmada', value: 'confirmed' },
+              { label: 'Pendiente', value: 'pending' },
+              { label: 'Proyectada', value: 'projected' },
+            ]}
+            placeholder="Todos"
+          />
+        </section>
+        <section className={styles.sheetSection}>
+          <h3 className={styles.sheetSectionTitle}>Tipo</h3>
+          <SelectInput
+            name="tx-filter-type"
+            value={draftFilters.transaction_type ?? ''}
+            onChange={(transaction_type) =>
+              setDraftFilters((current) => ({ ...current, transaction_type: String(transaction_type) }))
+            }
+            options={[
+              { label: 'Gasto', value: 'expense' },
+              { label: 'Ingreso', value: 'income' },
+            ]}
+            placeholder="Todos"
+          />
+        </section>
+        <section className={styles.sheetSection}>
+          <h3 className={styles.sheetSectionTitle}>Origen</h3>
+          <SelectInput
+            name="tx-filter-source"
+            value={draftFilters.source ?? ''}
+            onChange={(source) => setDraftFilters((current) => ({ ...current, source: String(source) }))}
+            options={[{ label: 'Manual', value: 'manual' }]}
+            placeholder="Todos"
+          />
+        </section>
+      </FilterSheet>
 
       <ConfirmModal
         isOpen={Boolean(deletingTransaction)}

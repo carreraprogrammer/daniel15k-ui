@@ -34,6 +34,26 @@
   font-size: 0.96rem;
 }
 
+.sheetSection {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.sheetSectionTitle {
+  margin: 0;
+  color: rgba(231, 236, 244, 0.7);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.quickFilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
 .headline {
   margin: 0;
   color: #fff;

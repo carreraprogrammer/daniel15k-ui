@@ -1,0 +1,47 @@
+.content {
+  display: grid;
+  gap: 1.2rem;
+  padding: 1rem 1rem 1.25rem;
+}
+
+.section {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.heading {
+  margin: 0;
+  color: rgba(231, 236, 244, 0.7);
+  font-size: 0.84rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.option {
+  padding: 0.72rem 0.95rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.035);
+  color: #fff;
+  font: inherit;
+}
+
+.optionActive {
+  border-color: rgba(0, 229, 204, 0.28);
+  background: linear-gradient(135deg, rgba(0, 229, 204, 0.12), rgba(91, 106, 240, 0.15));
+  color: #9df5ea;
+}
+
+.footer {
+  position: sticky;
+  bottom: 0;
+  padding-top: 0.25rem;
+  background: linear-gradient(180deg, rgba(10, 15, 25, 0), rgba(10, 15, 25, 0.96) 18%);
+}

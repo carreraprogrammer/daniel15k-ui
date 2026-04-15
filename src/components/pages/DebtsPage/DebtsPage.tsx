@@ -3,13 +3,17 @@ import { IonIcon } from '@ionic/react';
 import { addOutline } from 'ionicons/icons';
 import { AppLayout } from '../../templates/AppLayout';
 import { IconButton } from '../../atoms/IconButton';
+import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
-import { TextInput } from '../../atoms/TextInput';
 import { SelectInput } from '../../atoms/SelectInput';
 import { ErrorState } from '../../molecules/ErrorState';
 import { EmptyState } from '../../molecules/EmptyState';
 import { ConfirmModal } from '../../molecules/ConfirmModal';
 import { CrudModal } from '../../molecules/CrudModal';
+import { ListToolbar } from '../../molecules/ListToolbar';
+import { AppliedFiltersBar } from '../../molecules/AppliedFiltersBar';
+import { SortSheet } from '../../molecules/SortSheet';
+import { FilterSheet } from '../../molecules/FilterSheet';
 import { DebtComposer } from '../../organisms/DebtComposer';
 import { DebtSlidingCard } from '../../organisms/DebtSlidingCard';
 import { financeService } from '../../../services/financeService';
@@ -19,21 +23,26 @@ import styles from '../FinancePage.module.css';
 const formatCop = (value: number) =>
   new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(value);
 
+const initialFilters: DebtQueryParams = {
+  q: '',
+  status: '',
+  debt_type: '',
+  sort_by: 'created_at',
+  sort_dir: 'desc',
+};
+
 export const DebtsPage = () => {
   const [debts, setDebts] = useState<Debt[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [composerOpen, setComposerOpen] = useState(false);
+  const [sortOpen, setSortOpen] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [editingDebt, setEditingDebt] = useState<Debt | null>(null);
   const [deletingDebt, setDeletingDebt] = useState<Debt | null>(null);
-  const [filters, setFilters] = useState<DebtQueryParams>({
-    q: '',
-    status: '',
-    debt_type: '',
-    sort_by: 'created_at',
-    sort_dir: 'desc',
-  });
+  const [filters, setFilters] = useState<DebtQueryParams>(initialFilters);
+  const [draftFilters, setDraftFilters] = useState<DebtQueryParams>(initialFilters);
 
   const load = async () => {
     setLoading(true);
@@ -105,6 +114,34 @@ export const DebtsPage = () => {
     }
   };
 
+  const activeFilterCount = useMemo(
+    () => [filters.status, filters.debt_type].filter(Boolean).length,
+    [filters.debt_type, filters.status],
+  );
+
+  const appliedChips = useMemo(() => {
+    const chips = [];
+    if (filters.q) chips.push({ key: 'q', label: `Buscar: ${filters.q}` });
+    if (filters.status) chips.push({ key: 'status', label: `Estado: ${filters.status}` });
+    if (filters.debt_type) chips.push({ key: 'debt_type', label: `Tipo: ${filters.debt_type}` });
+    return chips;
+  }, [filters.debt_type, filters.q, filters.status]);
+
+  const removeChip = (key: string) => {
+    const next = { ...filters, [key]: '' };
+    setFilters(next);
+    setDraftFilters(next);
+  };
+
+  const quickToggle = (patch: Partial<DebtQueryParams>) => {
+    const key = Object.keys(patch)[0] as keyof DebtQueryParams;
+    const value = patch[key];
+    const nextValue = filters[key] === value ? '' : value;
+    const next = { ...filters, [key]: nextValue };
+    setFilters(next);
+    setDraftFilters(next);
+  };
+
   return (
     <AppLayout title="Deudas">
       <section className={styles.stack}>
@@ -152,67 +189,44 @@ export const DebtsPage = () => {
           </div>
         ) : null}
 
-        <section className={styles.filters}>
-          <div className={styles.filtersGrid}>
-            <TextInput
-              name="debts-q"
-              label="Buscar"
-              placeholder="Nombre de deuda"
-              value={filters.q ?? ''}
-              onChange={(q) => setFilters((current) => ({ ...current, q }))}
-            />
-            <SelectInput
-              name="debts-status"
-              label="Estado"
-              value={filters.status ?? ''}
-              onChange={(status) => setFilters((current) => ({ ...current, status: String(status) }))}
-              options={[
-                { label: 'Activa', value: 'active' },
-                { label: 'Pagada', value: 'paid_off' },
-                { label: 'Pausada', value: 'paused' },
-                { label: 'En disputa', value: 'disputed' },
-              ]}
-              placeholder="Todos"
-            />
-            <SelectInput
-              name="debts-type"
-              label="Tipo"
-              value={filters.debt_type ?? ''}
-              onChange={(debt_type) => setFilters((current) => ({ ...current, debt_type: String(debt_type) }))}
-              options={[
-                { label: 'Tarjeta de crédito', value: 'credit_card' },
-                { label: 'Préstamo personal', value: 'personal_loan' },
-                { label: 'Familiar', value: 'family' },
-                { label: 'Hipoteca', value: 'mortgage' },
-              ]}
-              placeholder="Todos"
-            />
-            <SelectInput
-              name="debts-sort-by"
-              label="Ordenar por"
-              value={filters.sort_by ?? 'created_at'}
-              onChange={(sort_by) => setFilters((current) => ({ ...current, sort_by: String(sort_by) }))}
-              options={[
-                { label: 'Más recientes', value: 'created_at' },
-                { label: 'Nombre', value: 'name' },
-                { label: 'Saldo', value: 'current_balance' },
-                { label: 'Pago mensual', value: 'monthly_payment' },
-              ]}
-            />
-            <SelectInput
-              name="debts-sort-dir"
-              label="Dirección"
-              value={filters.sort_dir ?? 'desc'}
-              onChange={(sort_dir) =>
-                setFilters((current) => ({ ...current, sort_dir: sort_dir as 'asc' | 'desc' }))
-              }
-              options={[
-                { label: 'Descendente', value: 'desc' },
-                { label: 'Ascendente', value: 'asc' },
-              ]}
-            />
-          </div>
-        </section>
+        <ListToolbar
+          searchLabel="Buscar deudas"
+          searchPlaceholder="Nombre de deuda"
+          searchValue={filters.q ?? ''}
+          resultLabel={`${metrics.totalCount} resultados`}
+          activeFilterCount={activeFilterCount}
+          onSearchChange={(q) => {
+            const next = { ...filters, q };
+            setFilters(next);
+            setDraftFilters(next);
+          }}
+          onOpenSort={() => setSortOpen(true)}
+          onOpenFilters={() => setFiltersOpen(true)}
+        />
+
+        <div className={styles.quickFilters}>
+          <Button
+            label="Activas"
+            size="sm"
+            variant={filters.status === 'active' ? 'primary' : 'ghost'}
+            onClick={() => quickToggle({ status: 'active' })}
+          />
+          <Button
+            label="Pagadas"
+            size="sm"
+            variant={filters.status === 'paid_off' ? 'primary' : 'ghost'}
+            onClick={() => quickToggle({ status: 'paid_off' })}
+          />
+        </div>
+
+        <AppliedFiltersBar
+          chips={appliedChips}
+          onRemove={removeChip}
+          onClearAll={() => {
+            setFilters(initialFilters);
+            setDraftFilters(initialFilters);
+          }}
+        />
 
         {loading ? <Spinner size="lg" /> : null}
         {error ? <ErrorState message={error} onRetry={() => void load()} /> : null}
@@ -234,6 +248,68 @@ export const DebtsPage = () => {
           </div>
         ) : null}
       </section>
+
+      <SortSheet
+        isOpen={sortOpen}
+        title="Ordenar deudas"
+        sortBy={String(filters.sort_by ?? 'created_at')}
+        sortDir={(filters.sort_dir as 'asc' | 'desc') ?? 'desc'}
+        options={[
+          { label: 'Más recientes', value: 'created_at' },
+          { label: 'Nombre', value: 'name' },
+          { label: 'Saldo', value: 'current_balance' },
+          { label: 'Pago mensual', value: 'monthly_payment' },
+        ]}
+        onClose={() => setSortOpen(false)}
+        onChangeSortBy={(sort_by) => setFilters((current) => ({ ...current, sort_by }))}
+        onChangeSortDir={(sort_dir) => setFilters((current) => ({ ...current, sort_dir }))}
+      />
+
+      <FilterSheet
+        isOpen={filtersOpen}
+        title="Filtrar deudas"
+        resultLabel={`Mostrar ${metrics.totalCount} resultados`}
+        onClose={() => {
+          setDraftFilters(filters);
+          setFiltersOpen(false);
+        }}
+        onReset={() => setDraftFilters({ ...initialFilters, q: filters.q })}
+        onApply={() => {
+          setFilters(draftFilters);
+          setFiltersOpen(false);
+        }}
+      >
+        <section className={styles.sheetSection}>
+          <h3 className={styles.sheetSectionTitle}>Estado</h3>
+          <SelectInput
+            name="debt-filter-status"
+            value={draftFilters.status ?? ''}
+            onChange={(status) => setDraftFilters((current) => ({ ...current, status: String(status) }))}
+            options={[
+              { label: 'Activa', value: 'active' },
+              { label: 'Pagada', value: 'paid_off' },
+              { label: 'Pausada', value: 'paused' },
+              { label: 'En disputa', value: 'disputed' },
+            ]}
+            placeholder="Todos"
+          />
+        </section>
+        <section className={styles.sheetSection}>
+          <h3 className={styles.sheetSectionTitle}>Tipo</h3>
+          <SelectInput
+            name="debt-filter-type"
+            value={draftFilters.debt_type ?? ''}
+            onChange={(debt_type) => setDraftFilters((current) => ({ ...current, debt_type: String(debt_type) }))}
+            options={[
+              { label: 'Tarjeta de crédito', value: 'credit_card' },
+              { label: 'Préstamo personal', value: 'personal_loan' },
+              { label: 'Familiar', value: 'family' },
+              { label: 'Hipoteca', value: 'mortgage' },
+            ]}
+            placeholder="Todos"
+          />
+        </section>
+      </FilterSheet>
 
       <ConfirmModal
         isOpen={Boolean(deletingDebt)}

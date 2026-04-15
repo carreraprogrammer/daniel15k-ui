@@ -1,10 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AppLayout } from '../../templates/AppLayout';
 import { Spinner } from '../../atoms/Spinner';
-import { TextInput } from '../../atoms/TextInput';
 import { SelectInput } from '../../atoms/SelectInput';
 import { ErrorState } from '../../molecules/ErrorState';
 import { EmptyState } from '../../molecules/EmptyState';
+import { ListToolbar } from '../../molecules/ListToolbar';
+import { AppliedFiltersBar } from '../../molecules/AppliedFiltersBar';
+import { SortSheet } from '../../molecules/SortSheet';
+import { FilterSheet } from '../../molecules/FilterSheet';
 import { financeService } from '../../../services/financeService';
 import type { Budget, BudgetQueryParams, SummaryResponse } from '../../../types/finance.types';
 import styles from '../FinancePage.module.css';
@@ -13,18 +16,23 @@ const formatCop = (value: number) => new Intl.NumberFormat('es-CO', { style: 'cu
 
 type CategoryOption = { label: string; value: string | number };
 
+const initialFilters: BudgetQueryParams = {
+  q: '',
+  category_id: '',
+  sort_by: 'category_id',
+  sort_dir: 'asc',
+};
+
 export const BudgetsPage = () => {
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [summary, setSummary] = useState<SummaryResponse | null>(null);
   const [categoryOptions, setCategoryOptions] = useState<CategoryOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState<BudgetQueryParams>({
-    q: '',
-    category_id: '',
-    sort_by: 'category_id',
-    sort_dir: 'asc',
-  });
+  const [sortOpen, setSortOpen] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [filters, setFilters] = useState<BudgetQueryParams>(initialFilters);
+  const [draftFilters, setDraftFilters] = useState<BudgetQueryParams>(initialFilters);
 
   const load = async () => {
     setLoading(true);
@@ -54,6 +62,18 @@ export const BudgetsPage = () => {
     void load();
   }, [filters]);
 
+  const activeFilterCount = useMemo(() => [filters.category_id].filter(Boolean).length, [filters.category_id]);
+
+  const chips = useMemo(() => {
+    const next = [];
+    if (filters.q) next.push({ key: 'q', label: `Buscar: ${filters.q}` });
+    if (filters.category_id) {
+      const category = categoryOptions.find((item) => String(item.value) === String(filters.category_id));
+      next.push({ key: 'category_id', label: `Categoría: ${category?.label ?? filters.category_id}` });
+    }
+    return next;
+  }, [categoryOptions, filters.category_id, filters.q]);
+
   return (
     <AppLayout title="Presupuestos">
       <section className={styles.stack}>
@@ -65,46 +85,33 @@ export const BudgetsPage = () => {
           </p>
         </div>
 
-        <section className={styles.filters}>
-          <div className={styles.filtersGrid}>
-            <TextInput
-              name="budgets-q"
-              label="Buscar"
-              placeholder="Categoría"
-              value={filters.q ?? ''}
-              onChange={(q) => setFilters((current) => ({ ...current, q }))}
-            />
-            <SelectInput
-              name="budgets-category"
-              label="Categoría"
-              value={filters.category_id ?? ''}
-              onChange={(category_id) => setFilters((current) => ({ ...current, category_id }))}
-              options={categoryOptions}
-              placeholder="Todas"
-            />
-            <SelectInput
-              name="budgets-sort-by"
-              label="Ordenar por"
-              value={filters.sort_by ?? 'category_id'}
-              onChange={(sort_by) => setFilters((current) => ({ ...current, sort_by: String(sort_by) }))}
-              options={[
-                { label: 'Categoría', value: 'category_name' },
-                { label: 'Límite', value: 'amount_limit' },
-                { label: 'ID categoría', value: 'category_id' },
-              ]}
-            />
-            <SelectInput
-              name="budgets-sort-dir"
-              label="Dirección"
-              value={filters.sort_dir ?? 'asc'}
-              onChange={(sort_dir) => setFilters((current) => ({ ...current, sort_dir: sort_dir as 'asc' | 'desc' }))}
-              options={[
-                { label: 'Ascendente', value: 'asc' },
-                { label: 'Descendente', value: 'desc' },
-              ]}
-            />
-          </div>
-        </section>
+        <ListToolbar
+          searchLabel="Buscar presupuestos"
+          searchPlaceholder="Categoría"
+          searchValue={filters.q ?? ''}
+          resultLabel={`${budgets.length} resultados`}
+          activeFilterCount={activeFilterCount}
+          onSearchChange={(q) => {
+            const next = { ...filters, q };
+            setFilters(next);
+            setDraftFilters(next);
+          }}
+          onOpenSort={() => setSortOpen(true)}
+          onOpenFilters={() => setFiltersOpen(true)}
+        />
+
+        <AppliedFiltersBar
+          chips={chips}
+          onRemove={(key) => {
+            const next = { ...filters, [key]: '' };
+            setFilters(next);
+            setDraftFilters(next);
+          }}
+          onClearAll={() => {
+            setFilters(initialFilters);
+            setDraftFilters(initialFilters);
+          }}
+        />
 
         {loading ? <Spinner size="lg" /> : null}
         {error ? <ErrorState message={error} onRetry={() => void load()} /> : null}
@@ -142,6 +149,47 @@ export const BudgetsPage = () => {
           </div>
         ) : null}
       </section>
+
+      <SortSheet
+        isOpen={sortOpen}
+        title="Ordenar presupuestos"
+        sortBy={String(filters.sort_by ?? 'category_id')}
+        sortDir={(filters.sort_dir as 'asc' | 'desc') ?? 'asc'}
+        options={[
+          { label: 'Categoría', value: 'category_name' },
+          { label: 'Límite', value: 'amount_limit' },
+          { label: 'ID categoría', value: 'category_id' },
+        ]}
+        onClose={() => setSortOpen(false)}
+        onChangeSortBy={(sort_by) => setFilters((current) => ({ ...current, sort_by }))}
+        onChangeSortDir={(sort_dir) => setFilters((current) => ({ ...current, sort_dir }))}
+      />
+
+      <FilterSheet
+        isOpen={filtersOpen}
+        title="Filtrar presupuestos"
+        resultLabel={`Mostrar ${budgets.length} resultados`}
+        onClose={() => {
+          setDraftFilters(filters);
+          setFiltersOpen(false);
+        }}
+        onReset={() => setDraftFilters({ ...initialFilters, q: filters.q })}
+        onApply={() => {
+          setFilters(draftFilters);
+          setFiltersOpen(false);
+        }}
+      >
+        <section className={styles.sheetSection}>
+          <h3 className={styles.sheetSectionTitle}>Categoría</h3>
+          <SelectInput
+            name="budget-filter-category"
+            value={draftFilters.category_id ?? ''}
+            onChange={(category_id) => setDraftFilters((current) => ({ ...current, category_id }))}
+            options={categoryOptions}
+            placeholder="Todas"
+          />
+        </section>
+      </FilterSheet>
     </AppLayout>
   );
 };
