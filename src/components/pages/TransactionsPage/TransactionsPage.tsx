@@ -132,6 +132,7 @@ export const TransactionsPage = () => {
     });
 
     await presentAlert({
+      cssClass: 'brand-alert',
       header: 'Borrar transacción',
       message: `¿Seguro que quieres borrar "${transaction.attributes.concept}" por ${formatCop(transaction.attributes.amount)}?`,
       buttons: [
