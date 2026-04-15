@@ -1,0 +1,4 @@
+import { useAuthStore } from '../store/authStore';
+import type { PermissionSlug } from '../types/authorization.types';
+interface UsePermissionReturn { can:(slug:PermissionSlug)=>boolean; canAny:(slugs:PermissionSlug[])=>boolean; canAll:(slugs:PermissionSlug[])=>boolean; isSuperAdmin:boolean; }
+export const usePermission=():UsePermissionReturn=>{ const user=useAuthStore((state)=>state.user); const check=(slug:PermissionSlug):boolean=>!user ? false : user.superAdmin || user.permissions.includes(slug); return { can:(slug)=>check(slug), canAny:(slugs)=>slugs.some(check), canAll:(slugs)=>slugs.every(check), isSuperAdmin:user?.superAdmin ?? false, }; };

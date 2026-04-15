@@ -1,0 +1,8 @@
+.wrapper { composes: wrapper from '../../../styles/atoms.module.css'; }
+.label { composes: label from '../../../styles/atoms.module.css'; }
+.preview { composes: preview from '../../../styles/atoms.module.css'; }
+.button { composes: button from '../../../styles/atoms.module.css'; }
+.ghost { composes: ghost from '../../../styles/atoms.module.css'; }
+.sm { composes: sm from '../../../styles/atoms.module.css'; }
+.error { composes: error from '../../../styles/atoms.module.css'; }
+.hint { composes: hint from '../../../styles/atoms.module.css'; }

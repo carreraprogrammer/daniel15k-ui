@@ -1,0 +1,5 @@
+import { useState } from 'react'; import styles from './EmailInput.module.css';
+import type { TextInputProps } from '../TextInput/TextInput';
+export interface EmailInputProps extends Omit<TextInputProps,'maxLength'|'autoComplete'> {}
+const emailRegex=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+export const EmailInput=({name,label,placeholder,value,onChange,error,hint,disabled,required}:EmailInputProps)=>{ const [internalError,setInternalError]=useState(''); const merged=error || internalError; return <div className={styles.wrapper}>{label ? <label htmlFor={name} className={`${styles.label} ${required ? styles.required : ''}`.trim()}>{label}</label> : null}<input type='email' autoComplete='email' id={name} name={name} className={`${styles.input} ${merged ? styles.errorInput : ''}`.trim()} placeholder={placeholder} value={value} onChange={(e)=>onChange(e.target.value)} onBlur={()=>setInternalError(value && !emailRegex.test(value) ? 'Correo electrónico inválido' : '')} disabled={disabled} required={required} />{merged ? <p className={styles.error}>{merged}</p> : hint ? <p className={styles.hint}>{hint}</p> : null}</div>; };

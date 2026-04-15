@@ -1,0 +1,3 @@
+import { Button } from '../../atoms/Button';
+export interface ConfirmModalProps { isOpen:boolean; title:string; message:string; confirmLabel?:string; cancelLabel?:string; onConfirm:()=>void; onCancel:()=>void; danger?:boolean; }
+export const ConfirmModal=({isOpen,title,message,confirmLabel='Confirmar',cancelLabel='Cancelar',onConfirm,onCancel,danger}:ConfirmModalProps)=> isOpen ? <div role='dialog'><h2>{title}</h2><p>{message}</p><Button label={cancelLabel} variant='ghost' onClick={onCancel} /><Button label={confirmLabel} variant={danger?'danger':'primary'} onClick={onConfirm} /></div> : null;

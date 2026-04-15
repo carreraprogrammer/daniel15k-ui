@@ -1,0 +1,1 @@
+import { render } from '@testing-library/react'; import { EmptyState } from './EmptyState'; test('renders empty message',()=>{ const view = render(<EmptyState message='No hay elementos' />); expect(view.getByText('No hay elementos')).toBeInTheDocument(); });

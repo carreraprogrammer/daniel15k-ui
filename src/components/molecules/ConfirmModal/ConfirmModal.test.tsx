@@ -1,0 +1,1 @@
+import { render } from '@testing-library/react'; import { ConfirmModal } from './ConfirmModal'; test('renders modal when open',()=>{ const view = render(<ConfirmModal isOpen title='Delete' message='Sure?' onConfirm={()=>undefined} onCancel={()=>undefined} />); expect(view.getByRole('dialog')).toBeInTheDocument(); });

@@ -1,0 +1,58 @@
+/* Shared atom styles — import individual classes via CSS Modules `composes` */
+
+/* Field wrapper and layout */
+.wrapper { display:flex; flex-direction:column; gap:var(--space-2); width:100%; }
+.row { display:flex; align-items:center; gap:var(--space-2); }
+.inline { display:inline-flex; align-items:center; gap:var(--space-2); }
+
+/* Form controls */
+.input, .textarea, .select, .dropzone { width:100%; padding:var(--space-3) var(--space-4); background:var(--color-bg-input); border:1px solid var(--color-border); border-radius:var(--radius-md); color:var(--color-text-primary); font-size:var(--text-base); transition:border-color var(--transition-fast), box-shadow var(--transition-fast); outline:none; }
+.input:focus, .textarea:focus, .select:focus, .dropzone:focus { border-color:var(--color-border-focus); box-shadow:var(--shadow-brand); }
+.errorInput { border-color:var(--color-border-error); }
+
+/* Labels */
+.label { display:block; font-size:var(--text-sm); font-weight:var(--font-medium); color:var(--color-text-secondary); letter-spacing:var(--tracking-wide); text-transform:uppercase; }
+.required::after { content:' *'; color:var(--color-error); }
+.checkboxLabel { display:flex; align-items:center; gap:var(--space-2); }
+
+/* Feedback */
+.error { font-size:var(--text-xs); color:var(--color-error); }
+.hint { font-size:var(--text-xs); color:var(--color-text-disabled); }
+
+/* Button */
+.button { border-radius:var(--radius-md); font-weight:var(--font-semibold); letter-spacing:var(--tracking-wide); text-transform:uppercase; cursor:pointer; transition:background var(--transition-fast), box-shadow var(--transition-fast); display:inline-flex; align-items:center; justify-content:center; gap:var(--space-2); border:1px solid transparent; padding:var(--space-3) var(--space-4); }
+.button:focus-visible { box-shadow:var(--shadow-brand); outline:none; }
+.button:disabled { opacity:.4; cursor:not-allowed; }
+.primary { background:var(--color-brand); color:var(--color-text-inverse); }
+.secondary { background:transparent; color:var(--color-brand); border-color:var(--color-brand); }
+.ghost { background:transparent; color:var(--color-text-primary); border-color:var(--color-border); }
+.danger { background:var(--color-error); color:var(--color-text-inverse); }
+.success { background:var(--color-success); color:var(--color-text-inverse); }
+.sm { padding:var(--space-2) var(--space-3); }
+.md { padding:var(--space-3) var(--space-4); }
+.lg { padding:var(--space-4) var(--space-5); }
+.fullWidth { width:100%; }
+
+/* Badge */
+.badge { display:inline-flex; align-items:center; gap:var(--space-2); border-radius:var(--radius-full); padding:var(--space-1) var(--space-3); font-size:var(--text-xs); }
+.brand { background:var(--color-brand-subtle); color:var(--color-brand); }
+.warning { background:var(--color-warning-subtle); color:var(--color-warning); }
+.neutral { background:var(--color-bg-elevated); color:var(--color-text-secondary); }
+
+/* Spinner */
+.spinner { display:inline-block; border-radius:50%; border:2px solid var(--color-border); border-top-color:var(--spinner-color, var(--color-brand)); animation:spin 600ms linear infinite; }
+.spinnerSm { width:16px; height:16px; }
+.spinnerMd { width:24px; height:24px; }
+.spinnerLg { width:40px; height:40px; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* Image preview */
+.preview { max-width:12rem; border-radius:var(--radius-md); }
+
+/* Password strength */
+.strength { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:var(--space-1); }
+.strengthBar { height:var(--space-2); border-radius:var(--radius-full); background:var(--color-border); }
+.activeError { background:var(--color-error); }
+.activeWarning { background:var(--color-warning); }
+.activeBrand { background:var(--color-brand); }
+.activeSuccess { background:var(--color-success); }

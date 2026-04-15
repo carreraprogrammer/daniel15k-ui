@@ -1,0 +1,10 @@
+.badge { composes: badge from '../../../styles/atoms.module.css'; }
+.brand { composes: brand from '../../../styles/atoms.module.css'; }
+.warning { composes: warning from '../../../styles/atoms.module.css'; }
+.neutral { composes: neutral from '../../../styles/atoms.module.css'; }
+.error { composes: error from '../../../styles/atoms.module.css'; }
+.success { composes: success from '../../../styles/atoms.module.css'; }
+.button { composes: button from '../../../styles/atoms.module.css'; }
+.ghost { composes: ghost from '../../../styles/atoms.module.css'; }
+.sm { composes: sm from '../../../styles/atoms.module.css'; }
+.md { composes: md from '../../../styles/atoms.module.css'; }

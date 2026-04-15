@@ -1,0 +1,1 @@
+import { render } from '@testing-library/react'; import { MemoryRouter } from 'react-router-dom'; import { NotFoundPage } from './NotFoundPage'; test('renders not found page',()=>{ const view = render(<MemoryRouter><NotFoundPage /></MemoryRouter>); expect(view.getByText('Página no encontrada')).toBeInTheDocument(); });

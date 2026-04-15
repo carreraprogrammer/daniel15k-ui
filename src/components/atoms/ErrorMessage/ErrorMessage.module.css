@@ -1,0 +1,1 @@
+.error { composes: error from '../../../styles/atoms.module.css'; }

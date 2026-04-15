@@ -1,0 +1,10 @@
+.button { composes: button from '../../../styles/atoms.module.css'; }
+.primary { composes: primary from '../../../styles/atoms.module.css'; }
+.secondary { composes: secondary from '../../../styles/atoms.module.css'; }
+.ghost { composes: ghost from '../../../styles/atoms.module.css'; }
+.danger { composes: danger from '../../../styles/atoms.module.css'; }
+.success { composes: success from '../../../styles/atoms.module.css'; }
+.sm { composes: sm from '../../../styles/atoms.module.css'; }
+.md { composes: md from '../../../styles/atoms.module.css'; }
+.lg { composes: lg from '../../../styles/atoms.module.css'; }
+.fullWidth { composes: fullWidth from '../../../styles/atoms.module.css'; }

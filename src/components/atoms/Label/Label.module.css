@@ -1,0 +1,2 @@
+.label { composes: label from '../../../styles/atoms.module.css'; }
+.required { composes: required from '../../../styles/atoms.module.css'; }

@@ -1,0 +1,4 @@
+.spinner { composes: spinner from '../../../styles/atoms.module.css'; }
+.spinnerSm { composes: spinnerSm from '../../../styles/atoms.module.css'; }
+.spinnerMd { composes: spinnerMd from '../../../styles/atoms.module.css'; }
+.spinnerLg { composes: spinnerLg from '../../../styles/atoms.module.css'; }

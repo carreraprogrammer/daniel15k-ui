@@ -1,0 +1,1 @@
+import { render } from '@testing-library/react'; import { AuthLayout } from './AuthLayout'; test('renders title',()=>{ const view = render(<AuthLayout title='Login'><div>Content</div></AuthLayout>); expect(view.getByText('Login')).toBeInTheDocument(); });

@@ -1,0 +1,54 @@
+.button {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  border: var(--space-1) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+  line-height: var(--leading-normal);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition:
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    color var(--transition-base),
+    box-shadow var(--transition-base);
+}
+
+.button:hover:not(:disabled) {
+  background: var(--color-bg-elevated);
+  border-color: var(--color-border-focus);
+}
+
+.button:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-brand);
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  color: var(--color-text-disabled);
+  border-color: var(--color-border-subtle);
+}
+
+.content {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+.icon {
+  width: var(--space-5);
+  height: var(--space-5);
+}
+
+.googleBlue { fill: var(--color-info); }
+.googleGreen { fill: var(--color-success); }
+.googleYellow { fill: var(--color-warning); }
+.googleRed { fill: var(--color-error); }

@@ -1,0 +1,4 @@
+import type { ReactNode } from 'react'; import styles from './Button.module.css';
+export type ButtonVariant='primary'|'secondary'|'ghost'|'danger'|'success'; export type ButtonSize='sm'|'md'|'lg';
+export interface ButtonProps { label:string; onClick?:()=>void; type?:'button'|'submit'|'reset'; variant?:ButtonVariant; size?:ButtonSize; loading?:boolean; disabled?:boolean; fullWidth?:boolean; iconLeft?:ReactNode; iconRight?:ReactNode; }
+export const Button=({label,onClick,type='button',variant='primary',size='md',loading,disabled,fullWidth,iconLeft,iconRight}:ButtonProps)=><button type={type} onClick={onClick} disabled={disabled||loading} className={[styles.button,styles[variant],styles[size],fullWidth?styles.fullWidth:''].filter(Boolean).join(' ')}>{iconLeft}{loading?'Cargando...':label}{iconRight}</button>;

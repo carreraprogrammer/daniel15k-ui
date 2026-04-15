@@ -1,0 +1,3 @@
+import styles from './CheckboxInput.module.css';
+export interface CheckboxInputProps { name:string; label:string; checked:boolean; onChange:(checked:boolean)=>void; error?:string; disabled?:boolean; required?:boolean; }
+export const CheckboxInput=({name,label,checked,onChange,error,disabled,required}:CheckboxInputProps)=> <div className={styles.wrapper}><label htmlFor={name} className={styles.checkboxLabel}><input id={name} name={name} type='checkbox' checked={checked} onChange={(e)=>onChange(e.target.checked)} disabled={disabled} required={required} /><span>{label}</span></label>{error ? <p className={styles.error}>{error}</p> : null}</div>;

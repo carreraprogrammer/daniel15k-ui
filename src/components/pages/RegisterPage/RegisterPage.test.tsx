@@ -1,0 +1,1 @@
+import { render } from '@testing-library/react'; import { MemoryRouter } from 'react-router-dom'; import { RegisterPage } from './RegisterPage'; test('renders login link',()=>{ const view = render(<MemoryRouter><RegisterPage /></MemoryRouter>); expect(view.getByText('¿Ya tienes cuenta? Inicia sesión')).toBeInTheDocument(); });

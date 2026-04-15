@@ -1,0 +1,1 @@
+import { render } from '@testing-library/react'; import { ErrorState } from './ErrorState'; test('renders retry action',()=>{ const view = render(<ErrorState message='Error' onRetry={()=>undefined} />); expect(view.getByText('Reintentar')).toBeInTheDocument(); });

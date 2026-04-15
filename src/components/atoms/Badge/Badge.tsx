@@ -1,0 +1,2 @@
+import styles from './Badge.module.css'; export type BadgeVariant='brand'|'success'|'warning'|'error'|'neutral'; export interface BadgeProps { label:string; variant?:BadgeVariant; onRemove?:()=>void; size?:'sm'|'md'; }
+export const Badge=({label,variant='neutral',onRemove,size='md'}:BadgeProps)=><span className={[styles.badge,styles[variant],styles[size]].join(' ')}>{label}{onRemove ? <button type='button' className={`${styles.button} ${styles.ghost} ${styles.sm}`.trim()} onClick={onRemove}>×</button> : null}</span>;

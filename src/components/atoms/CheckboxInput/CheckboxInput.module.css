@@ -1,0 +1,3 @@
+.wrapper { composes: wrapper from '../../../styles/atoms.module.css'; }
+.checkboxLabel { composes: checkboxLabel from '../../../styles/atoms.module.css'; }
+.error { composes: error from '../../../styles/atoms.module.css'; }

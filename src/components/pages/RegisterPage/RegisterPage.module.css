@@ -1,0 +1,17 @@
+.divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--color-text-secondary);
+  margin: var(--space-4) 0;
+}
+
+.line {
+  flex: 1;
+  border-top: var(--space-1) solid var(--color-border);
+}
+
+.dividerText {
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+}

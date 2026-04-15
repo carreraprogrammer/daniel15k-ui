@@ -1,0 +1,51 @@
+.stack {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.contentHeader {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.contentEyebrow {
+  color: var(--color-accent);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.contentText {
+  margin: 0;
+  color: rgba(240, 240, 248, 0.7);
+  line-height: 1.7;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--color-text-secondary);
+}
+
+.line {
+  flex: 1;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.dividerText {
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.link {
+  color: rgba(240, 240, 248, 0.82);
+  text-decoration: none;
+}
+
+.link:hover {
+  color: #fff;
+}
