@@ -69,21 +69,6 @@ export const TransactionSlidingCard = ({ transaction, category, onEdit, onDelete
               {statusLabels[status] ?? status}
             </span>
             <strong className={styles.amount}>{formatCop(transaction.attributes.amount)}</strong>
-            <span className={styles.behaviorHint}>
-              {behaviorTone === 'discretionary'
-                ? 'Elegido'
-                : behaviorTone === 'investment'
-                  ? 'Construye'
-                  : behaviorTone === 'committed'
-                    ? 'Carga fija'
-                    : behaviorTone === 'necessary'
-                      ? 'Sostiene'
-                      : behaviorTone === 'social'
-                        ? 'Vínculo'
-                        : behaviorTone === 'income'
-                          ? 'Entrada'
-                          : 'Revisar'}
-            </span>
           </div>
         </div>
       </IonItem>

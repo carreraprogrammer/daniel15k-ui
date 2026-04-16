@@ -14,6 +14,7 @@ import { ListToolbar } from '../../molecules/ListToolbar';
 import { AppliedFiltersBar } from '../../molecules/AppliedFiltersBar';
 import { SortSheet } from '../../molecules/SortSheet';
 import { FilterSheet } from '../../molecules/FilterSheet';
+import { SheetModal } from '../../molecules/SheetModal';
 import { DebtComposer } from '../../organisms/DebtComposer';
 import { DebtSlidingCard } from '../../organisms/DebtSlidingCard';
 import { financeService } from '../../../services/financeService';
@@ -39,6 +40,7 @@ export const DebtsPage = () => {
   const [composerOpen, setComposerOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [summaryOpen, setSummaryOpen] = useState(false);
   const [editingDebt, setEditingDebt] = useState<Debt | null>(null);
   const [deletingDebt, setDeletingDebt] = useState<Debt | null>(null);
   const [filters, setFilters] = useState<DebtQueryParams>(initialFilters);
@@ -168,27 +170,6 @@ export const DebtsPage = () => {
           </div>
         </div>
 
-        {!loading ? (
-          <div className={styles.metrics}>
-            <article className={styles.metricCard}>
-              <span className={styles.metricLabel}>Saldo activo total</span>
-              <strong className={styles.metricValue}>{formatCop(metrics.totalBalance)}</strong>
-            </article>
-            <article className={styles.metricCard}>
-              <span className={styles.metricLabel}>Pago mensual total</span>
-              <strong className={styles.metricValue}>{formatCop(metrics.totalMonthly)}</strong>
-            </article>
-            <article className={styles.metricCard}>
-              <span className={styles.metricLabel}>Deudas activas</span>
-              <strong className={styles.metricValue}>{metrics.activeCount}</strong>
-            </article>
-            <article className={styles.metricCard}>
-              <span className={styles.metricLabel}>Registros totales</span>
-              <strong className={styles.metricValue}>{metrics.totalCount}</strong>
-            </article>
-          </div>
-        ) : null}
-
         <ListToolbar
           searchLabel="Buscar deudas"
           searchPlaceholder="Nombre de deuda"
@@ -203,6 +184,17 @@ export const DebtsPage = () => {
           onOpenSort={() => setSortOpen(true)}
           onOpenFilters={() => setFiltersOpen(true)}
         />
+
+        {!loading ? (
+          <div className={styles.secondaryActions}>
+            <Button
+              label="Ver resumen de deudas"
+              size="sm"
+              variant="ghost"
+              onClick={() => setSummaryOpen(true)}
+            />
+          </div>
+        ) : null}
 
         <div className={styles.quickFilters}>
           <Button
@@ -344,6 +336,34 @@ export const DebtsPage = () => {
           }}
         />
       </CrudModal>
+
+      <SheetModal
+        isOpen={summaryOpen}
+        title="Resumen de deudas"
+        onClose={() => setSummaryOpen(false)}
+        height="compact"
+      >
+        <div className={styles.summarySheetBody}>
+          <div className={styles.metrics}>
+            <article className={styles.metricCard}>
+              <span className={styles.metricLabel}>Saldo activo total</span>
+              <strong className={styles.metricValue}>{formatCop(metrics.totalBalance)}</strong>
+            </article>
+            <article className={styles.metricCard}>
+              <span className={styles.metricLabel}>Pago mensual total</span>
+              <strong className={styles.metricValue}>{formatCop(metrics.totalMonthly)}</strong>
+            </article>
+            <article className={styles.metricCard}>
+              <span className={styles.metricLabel}>Deudas activas</span>
+              <strong className={styles.metricValue}>{metrics.activeCount}</strong>
+            </article>
+            <article className={styles.metricCard}>
+              <span className={styles.metricLabel}>Registros totales</span>
+              <strong className={styles.metricValue}>{metrics.totalCount}</strong>
+            </article>
+          </div>
+        </div>
+      </SheetModal>
     </AppLayout>
   );
 };
