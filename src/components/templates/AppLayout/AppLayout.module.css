@@ -200,6 +200,12 @@
     gap: 1rem;
   }
 
+  .mobileMenuBrand {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+  }
+
   .mobileMenuKicker,
   .mobileMenuLabel {
     color: var(--color-accent);
@@ -210,10 +216,10 @@
   }
 
   .mobileMenuTitle {
-    margin-top: 0.4rem;
-    color: #fff;
-    font-size: clamp(2rem, 7vw, 2.8rem);
-    letter-spacing: -0.05em;
+    margin-top: 0.3rem;
+    color: #fff8e7;
+    font-size: clamp(1.55rem, 6vw, 2rem);
+    letter-spacing: -0.04em;
   }
 
   .mobileMenuClose {

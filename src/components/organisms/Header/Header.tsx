@@ -2,6 +2,7 @@ import { IonIcon } from '@ionic/react';
 import { menuOutline } from 'ionicons/icons';
 import { Link } from 'react-router-dom';
 import { Button } from '../../atoms/Button';
+import { BrandMark } from '../../atoms/BrandMark';
 import { useAuthStore } from '../../../store/authStore';
 import styles from './Header.module.css';
 
@@ -28,9 +29,14 @@ export const Header = ({
         >
           <IonIcon icon={menuOutline} />
         </button>
-        <span className={styles.kicker}>Daniel 15K</span>
-        <strong className={styles.brand}>Finance Console</strong>
-        {currentSection ? <span className={styles.section}>{currentSection}</span> : null}
+        <div className={styles.brandIdentity}>
+          <BrandMark variant="monoline" size="md" />
+          <div className={styles.brandCopy}>
+            <span className={styles.kicker}>Daniel 15K</span>
+            <strong className={styles.brand}>Ascent Finance</strong>
+            {currentSection ? <span className={styles.section}>{currentSection}</span> : null}
+          </div>
+        </div>
       </div>
       <div className={styles.actions}>
         <nav className={styles.nav}>

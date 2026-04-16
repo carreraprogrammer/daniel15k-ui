@@ -29,6 +29,19 @@
   padding-left: 0;
 }
 
+.brandIdentity {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  min-width: 0;
+}
+
+.brandCopy {
+  display: grid;
+  gap: 0.12rem;
+  min-width: 0;
+}
+
 .menuButton {
   display: none;
   align-items: center;
@@ -100,6 +113,10 @@
     flex-direction: row;
     align-items: center;
     gap: 0.85rem;
+    min-width: 0;
+  }
+
+  .brandIdentity {
     min-width: 0;
   }
 

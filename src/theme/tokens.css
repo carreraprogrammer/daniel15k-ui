@@ -6,20 +6,20 @@
 
 :root {
   /* ── COLORES BASE ── */
-  --color-bg-primary:     #0A0A0F;   /* fondo principal */
-  --color-bg-secondary:   #111118;   /* fondo de cards, sidebars */
-  --color-bg-elevated:    #1A1A24;   /* fondo de modales, dropdowns */
-  --color-bg-input:       #16161F;   /* fondo de inputs */
+  --color-bg-primary:     #05070C;   /* fondo principal */
+  --color-bg-secondary:   #0F172A;   /* fondo de cards, sidebars */
+  --color-bg-elevated:    #111827;   /* fondo de modales, dropdowns */
+  --color-bg-input:       #161E31;   /* fondo de inputs */
 
   /* ── COLORES DE MARCA (cambiar por cliente) ── */
-  --color-brand:          #5B6AF0;   /* primario — azul índigo geométrico */
-  --color-brand-hover:    #6B7AF8;
-  --color-brand-active:   #4A58E0;
-  --color-brand-subtle:   #1E2050;   /* fondo sutil con tono de marca */
+  --color-brand:          #FB923C;   /* primario — ascenso / amanecer */
+  --color-brand-hover:    #FDBA74;
+  --color-brand-active:   #EA580C;
+  --color-brand-subtle:   #3F1D12;   /* fondo sutil con tono de marca */
 
   /* ── COLORES DE ACENTO ── */
-  --color-accent:         #00E5CC;   /* cian para highlights */
-  --color-accent-subtle:  #00302A;
+  --color-accent:         #FCD34D;   /* solar */
+  --color-accent-subtle:  #3B2A07;
 
   /* ── COLORES SEMÁNTICOS ── */
   --color-success:        #22C55E;
@@ -32,16 +32,16 @@
   --color-info-subtle:    #0A1628;
 
   /* ── TEXTO ── */
-  --color-text-primary:   #F0F0F8;   /* texto principal */
-  --color-text-secondary: #8888AA;   /* texto secundario, labels */
-  --color-text-disabled:  #44445A;   /* texto deshabilitado */
-  --color-text-inverse:   #0A0A0F;   /* texto sobre fondos claros */
+  --color-text-primary:   #F8FAFC;   /* texto principal */
+  --color-text-secondary: #94A3B8;   /* texto secundario, labels */
+  --color-text-disabled:  #475569;   /* texto deshabilitado */
+  --color-text-inverse:   #0B0F19;   /* texto sobre fondos claros */
 
   /* ── BORDES ── */
-  --color-border:         #22222E;   /* borde por defecto */
-  --color-border-focus:   #5B6AF0;   /* borde en foco (= brand) */
+  --color-border:         #243147;   /* borde por defecto */
+  --color-border-focus:   #FB923C;   /* borde en foco (= brand) */
   --color-border-error:   #EF4444;
-  --color-border-subtle:  #1A1A24;
+  --color-border-subtle:  #162033;
 
   /* ── TIPOGRAFÍA ── */
   --font-sans:    'Inter', 'SF Pro Display', system-ui, sans-serif;
@@ -94,7 +94,7 @@
   --shadow-sm:  0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-md:  0 4px 12px rgba(0, 0, 0, 0.5);
   --shadow-lg:  0 8px 32px rgba(0, 0, 0, 0.6);
-  --shadow-brand: 0 0 0 3px rgba(91, 106, 240, 0.25);  /* glow en foco */
+  --shadow-brand: 0 0 0 3px rgba(251, 146, 60, 0.24);  /* glow en foco */
 
   /* ── TRANSICIONES ── */
   --transition-fast:   100ms ease;

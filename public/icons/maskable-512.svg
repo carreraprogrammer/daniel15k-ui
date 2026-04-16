@@ -1,16 +1,52 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" fill="none">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#101724"/>
-      <stop offset="100%" stop-color="#070b12"/>
+    <linearGradient id="bg" x1="512" y1="64" x2="512" y2="960" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0F172A"/>
+      <stop offset="0.48" stop-color="#1E1B4B"/>
+      <stop offset="0.78" stop-color="#7C2D12"/>
+      <stop offset="1" stop-color="#F59E0B"/>
     </linearGradient>
-    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#00E5CC"/>
-      <stop offset="100%" stop-color="#5B6AF0"/>
+
+    <radialGradient id="sunGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse"
+      gradientTransform="translate(512 370) rotate(90) scale(220)">
+      <stop offset="0" stop-color="#FFF7D6"/>
+      <stop offset="0.55" stop-color="#FDBA74"/>
+      <stop offset="1" stop-color="#FDBA74" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="sunDisc" x1="512" y1="250" x2="512" y2="470" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFF8DB"/>
+      <stop offset="1" stop-color="#FED7AA"/>
     </linearGradient>
+
+    <linearGradient id="mountainBack" x1="256" y1="540" x2="820" y2="760" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#312E81"/>
+      <stop offset="1" stop-color="#1F2937"/>
+    </linearGradient>
+
+    <linearGradient id="mountainFront" x1="360" y1="520" x2="760" y2="920" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#111827"/>
+      <stop offset="1" stop-color="#030712"/>
+    </linearGradient>
+
+    <clipPath id="clip">
+      <rect x="64" y="64" width="896" height="896" rx="220"/>
+    </clipPath>
   </defs>
-  <rect width="512" height="512" fill="url(#bg)"/>
-  <circle cx="384" cy="128" r="74" fill="#00E5CC" fill-opacity=".12"/>
-  <path d="M144 368V144h56v168h108v56H144Zm160 0V144h52v224h-52Zm84 0V144h52v168h-52Z" fill="#F0F0F8"/>
-  <path d="M200 236h196" stroke="url(#accent)" stroke-width="28" stroke-linecap="round"/>
+
+  <rect x="64" y="64" width="896" height="896" rx="220" fill="url(#bg)"/>
+
+  <g clip-path="url(#clip)">
+    <circle cx="512" cy="370" r="220" fill="url(#sunGlow)"/>
+    <circle cx="512" cy="370" r="112" fill="url(#sunDisc)"/>
+    <path d="M64 760C180 710 260 650 340 590C395 548 445 520 512 520C585 520 648 554 720 608C798 666 866 717 960 756V960H64V760Z"
+          fill="url(#mountainBack)" opacity="0.72"/>
+    <path d="M180 960L470 630C492 606 532 606 554 630L620 699C639 719 671 719 690 699L806 575L960 960H180Z"
+          fill="url(#mountainFront)"/>
+    <path d="M470 630L554 630L620 699L690 699L806 575L732 724L620 830L526 736L470 630Z"
+          fill="#1F2937" opacity="0.32"/>
+    <circle cx="806" cy="575" r="18" fill="#F8FAFC"/>
+    <path d="M180 640C292 600 390 570 512 570C642 570 746 603 860 650"
+          stroke="#FFFFFF" stroke-opacity="0.10" stroke-width="8" stroke-linecap="round"/>
+  </g>
 </svg>

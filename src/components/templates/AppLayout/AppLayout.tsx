@@ -3,6 +3,7 @@ import { IonIcon } from '@ionic/react';
 import { closeOutline, logOutOutline, personCircleOutline } from 'ionicons/icons';
 import { NavLink } from 'react-router-dom';
 import { Header } from '../../organisms/Header';
+import { BrandMark } from '../../atoms/BrandMark';
 import { Button } from '../../atoms/Button';
 import { useAuthStore } from '../../../store/authStore';
 import styles from './AppLayout.module.css';
@@ -63,9 +64,12 @@ export const AppLayout = ({ title, children }: { title: string; children: ReactN
 
       <aside className={[styles.mobileMenu, mobileMenuOpen ? styles.mobileMenuOpen : ''].filter(Boolean).join(' ')}>
         <div className={styles.mobileMenuHeader}>
-          <div>
-            <span className={styles.mobileMenuKicker}>Daniel 15K</span>
-            <h2 className={styles.mobileMenuTitle}>Navegación</h2>
+          <div className={styles.mobileMenuBrand}>
+            <BrandMark variant="principal" size="md" />
+            <div>
+              <span className={styles.mobileMenuKicker}>Daniel 15K</span>
+              <h2 className={styles.mobileMenuTitle}>Ascent Finance</h2>
+            </div>
           </div>
           <button type="button" className={styles.mobileMenuClose} aria-label="Cerrar menú" onClick={closeMenu}>
             <IonIcon icon={closeOutline} />
