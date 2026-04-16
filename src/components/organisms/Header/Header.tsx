@@ -1,14 +1,33 @@
+import { IonIcon } from '@ionic/react';
+import { menuOutline } from 'ionicons/icons';
 import { Link } from 'react-router-dom';
 import { Button } from '../../atoms/Button';
 import { useAuthStore } from '../../../store/authStore';
 import styles from './Header.module.css';
 
-export const Header = ({ currentSection }: { currentSection?: string }) => {
+export const Header = ({
+  currentSection,
+  onMenuToggle,
+  menuOpen = false,
+}: {
+  currentSection?: string;
+  onMenuToggle?: () => void;
+  menuOpen?: boolean;
+}) => {
   const logout = useAuthStore((state) => state.logout);
 
   return (
     <header className={styles.header}>
       <div className={styles.brandBlock}>
+        <button
+          type="button"
+          className={styles.menuButton}
+          aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
+          aria-expanded={menuOpen}
+          onClick={onMenuToggle}
+        >
+          <IonIcon icon={menuOutline} />
+        </button>
         <span className={styles.kicker}>Daniel 15K</span>
         <strong className={styles.brand}>Finance Console</strong>
         {currentSection ? <span className={styles.section}>{currentSection}</span> : null}

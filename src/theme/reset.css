@@ -22,6 +22,10 @@ body {
   overflow-y: auto;
 }
 
+body.menu-open {
+  overflow: hidden;
+}
+
 body,
 #root,
 ion-app {

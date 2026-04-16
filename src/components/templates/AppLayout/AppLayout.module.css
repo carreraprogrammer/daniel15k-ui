@@ -1,6 +1,7 @@
 .shell {
   position: relative;
-  height: 100vh;
+  min-height: 100dvh;
+  height: 100dvh;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   padding: clamp(16px, 3vw, 28px);
@@ -110,28 +111,156 @@
   min-height: 0;
   overflow-y: auto;
   overflow-wrap: anywhere;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mobileMenuBackdrop,
+.mobileMenu {
+  display: none;
 }
 
 @media (max-width: 1024px) {
   .shell {
-    height: auto;
-    overflow: visible;
+    min-height: 100dvh;
+    height: 100dvh;
+    padding: 12px;
+    gap: 12px;
+    overflow: hidden;
   }
 
   .grid {
     grid-template-columns: 1fr;
+    gap: 0;
   }
 
   .sidebar {
-    position: static;
-    max-height: none;
+    display: none;
   }
 
   .main {
-    overflow: visible;
+    min-height: 0;
+    overflow: hidden;
   }
 
   .content {
-    overflow: visible;
+    height: 100%;
+    min-height: 0;
+    padding: 18px 16px 24px;
+    border-radius: 24px;
+    overflow-y: auto;
+  }
+
+  .mobileMenuBackdrop {
+    position: fixed;
+    inset: 0;
+    z-index: calc(var(--z-modal) - 1);
+    background: rgba(3, 6, 12, 0.72);
+    backdrop-filter: blur(10px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-base);
+    display: block;
+  }
+
+  .mobileMenuBackdropVisible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .mobileMenu {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 1.25rem;
+    padding: max(18px, env(safe-area-inset-top)) 18px max(18px, env(safe-area-inset-bottom)) 18px;
+    background:
+      radial-gradient(circle at top right, rgba(91, 106, 240, 0.22), transparent 28%),
+      radial-gradient(circle at left 20%, rgba(0, 229, 204, 0.15), transparent 26%),
+      linear-gradient(180deg, rgba(7, 11, 18, 0.98) 0%, rgba(10, 15, 25, 0.98) 100%);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(12px);
+    transition:
+      opacity var(--transition-base),
+      transform var(--transition-base);
+  }
+
+  .mobileMenuOpen {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .mobileMenuHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .mobileMenuKicker,
+  .mobileMenuLabel {
+    color: var(--color-accent);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .mobileMenuTitle {
+    margin-top: 0.4rem;
+    color: #fff;
+    font-size: clamp(2rem, 7vw, 2.8rem);
+    letter-spacing: -0.05em;
+  }
+
+  .mobileMenuClose {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.04);
+    color: #fff;
+  }
+
+  .mobileMenuClose :global(svg),
+  .mobileMenuClose :global(ion-icon) {
+    font-size: 22px;
+  }
+
+  .mobileMenuSection {
+    display: grid;
+    align-content: start;
+    gap: 0.85rem;
+  }
+
+  .mobileMenu .nav {
+    gap: 0.65rem;
+  }
+
+  .mobileMenu .navLink {
+    padding: 1.05rem 1rem;
+    font-size: 1.05rem;
+    border-radius: 18px;
+  }
+
+  .utilityLink {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 18px;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .utilityLink :global(ion-icon) {
+    font-size: 1.3rem;
   }
 }

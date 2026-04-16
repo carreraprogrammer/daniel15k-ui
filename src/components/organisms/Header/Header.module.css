@@ -25,6 +25,25 @@
   align-items: flex-start;
   gap: var(--space-1);
   min-width: 0;
+  position: relative;
+  padding-left: 0;
+}
+
+.menuButton {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+}
+
+.menuButton :global(ion-icon) {
+  font-size: 1.35rem;
 }
 
 .kicker {
@@ -68,13 +87,24 @@
 }
 
 @media (max-width: 840px) {
-  .header,
-  .actions {
-    flex-direction: column;
-    align-items: stretch;
+  .header {
+    align-items: flex-start;
+    padding: 16px 18px;
   }
 
   .nav {
-    justify-content: space-between;
+    display: none;
+  }
+
+  .menuButton {
+    display: inline-flex;
+  }
+
+  .actions {
+    margin-left: auto;
+  }
+
+  .actions :global(button) {
+    display: none;
   }
 }
