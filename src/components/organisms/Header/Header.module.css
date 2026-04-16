@@ -88,23 +88,44 @@
 
 @media (max-width: 840px) {
   .header {
-    align-items: flex-start;
-    padding: 16px 18px;
+    min-height: 60px;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 12px 14px;
+    border-radius: 18px;
   }
 
-  .nav {
-    display: none;
+  .brandBlock {
+    flex: 1;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.85rem;
+    min-width: 0;
   }
 
   .menuButton {
     display: inline-flex;
+    margin-bottom: 0;
+    flex: 0 0 auto;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
   }
 
+  .kicker,
+  .brand,
+  .nav,
   .actions {
-    margin-left: auto;
+    display: none;
   }
 
-  .actions :global(button) {
-    display: none;
+  .section {
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
