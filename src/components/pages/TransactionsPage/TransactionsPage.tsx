@@ -16,8 +16,9 @@ import { FilterSheet } from '../../molecules/FilterSheet';
 import { TransactionComposer } from '../../organisms/TransactionComposer';
 import { TransactionSlidingCard } from '../../organisms/TransactionSlidingCard';
 import { financeService } from '../../../services/financeService';
-import type { SummaryResponse, TransactionQueryParams } from '../../../types/finance.types';
+import type { CategoryResource, SummaryResponse, TransactionQueryParams } from '../../../types/finance.types';
 import type { Transaction, TransactionCreatePayload, TransactionUpdatePayload } from '../../../types/finance.types';
+import { buildCategoryLookup, buildBehaviorSignals, resolveTransactionCategory, summarizeBehavior } from '../../../utils/financeBehavior';
 import styles from '../FinancePage.module.css';
 
 const formatCop = (value: number) =>
@@ -37,6 +38,7 @@ const PAGE_SIZE = 20;
 export const TransactionsPage = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [summary, setSummary] = useState<SummaryResponse | null>(null);
+  const [categories, setCategories] = useState<CategoryResource[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -91,6 +93,19 @@ export const TransactionsPage = () => {
   useEffect(() => {
     void load();
   }, [filters]);
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const response = await financeService.fetchCategories();
+        setCategories(response.data);
+      } catch (categoryError) {
+        console.error('[TransactionsPage] loadCategories:error', categoryError);
+      }
+    };
+
+    void loadCategories();
+  }, []);
 
   const handleCreate = async (payload: TransactionCreatePayload) => {
     setSubmitting(true);
@@ -195,6 +210,12 @@ export const TransactionsPage = () => {
       pendingCount,
     };
   }, [totalResults, transactions]);
+
+  const categoryLookup = useMemo(() => buildCategoryLookup(categories), [categories]);
+
+  const behaviorSummary = useMemo(() => summarizeBehavior(transactions, categoryLookup), [categoryLookup, transactions]);
+
+  const behaviorSignals = useMemo(() => buildBehaviorSignals(behaviorSummary), [behaviorSummary]);
 
   useEffect(() => {
     const sentinel = sentinelRef.current;
@@ -305,7 +326,36 @@ export const TransactionsPage = () => {
                 {metrics.pendingCount} / {metrics.count}
               </strong>
             </article>
+            <article className={styles.metricCard}>
+              <span className={styles.metricLabel}>Discrecional</span>
+              <strong className={styles.metricValue}>{formatCop(behaviorSummary.totals.discretionary)}</strong>
+              <p className={styles.metricHint}>Gasto elegido. Este es el bloque donde sí existe fricción útil.</p>
+            </article>
+            <article className={styles.metricCard}>
+              <span className={styles.metricLabel}>Inversión</span>
+              <strong className={styles.metricValue}>{formatCop(behaviorSummary.totals.investment)}</strong>
+              <p className={styles.metricHint}>Plata que construye futuro en vez de solo sostener el presente.</p>
+            </article>
           </div>
+        ) : null}
+
+        {!loading && behaviorSignals.length ? (
+          <section className={styles.panel}>
+            <h3 className={styles.panelTitle}>Lectura conductual</h3>
+            <div className={styles.list}>
+              {behaviorSignals.map((signal) => (
+                <article key={`${signal.tone}-${signal.title}`} className={styles.listItem}>
+                  <div className={styles.listPrimary}>
+                    <span className={styles.listLabel}>{signal.title}</span>
+                    <span className={styles.listMeta}>{signal.message}</span>
+                  </div>
+                  <div className={styles.listSecondary}>
+                    <span className={styles.pill}>{signal.tone}</span>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
         ) : null}
 
         <ListToolbar
@@ -363,6 +413,7 @@ export const TransactionsPage = () => {
               <TransactionSlidingCard
                 key={transaction.id}
                 transaction={transaction}
+                category={resolveTransactionCategory(transaction, categoryLookup)}
                 onEdit={(nextTransaction) => {
                   setEditingTransaction(nextTransaction);
                   setComposerOpen(true);

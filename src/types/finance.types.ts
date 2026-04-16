@@ -70,9 +70,56 @@ export interface Transaction {
     source?: string;
     category_id?: number | null;
     subcategory_id?: number | null;
+    source_event_id?: string | null;
     month?: number;
     year?: number;
   };
+  relationships?: {
+    category?: {
+      data?: {
+        id: string;
+        type?: string;
+      } | null;
+    };
+    subcategory?: {
+      data?: {
+        id: string;
+        type?: string;
+      } | null;
+    };
+  };
+}
+
+export interface CategoryResource {
+  id: string;
+  type?: string;
+  attributes: {
+    name?: string;
+    code?: string;
+    category_type?: string;
+  };
+  relationships?: {
+    subcategories?: {
+      data?: Array<{
+        id: string;
+        type?: string;
+        attributes?: {
+          name?: string;
+          code?: string;
+        };
+      }>;
+    };
+  };
+}
+
+export interface ResolvedTransactionCategory {
+  categoryId: string;
+  categoryName: string;
+  categoryCode: string;
+  categoryType: string;
+  subcategoryId?: string;
+  subcategoryName?: string;
+  subcategoryCode?: string;
 }
 
 export interface TransactionCreatePayload {

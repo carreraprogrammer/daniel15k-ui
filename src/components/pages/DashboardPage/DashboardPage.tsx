@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AppLayout } from '../../templates/AppLayout';
 import { useAuthStore } from '../../../store/authStore';
 import { Spinner } from '../../atoms/Spinner';
 import { ErrorState } from '../../molecules/ErrorState';
 import { financeService } from '../../../services/financeService';
-import type { Debt, RecurringObligation, SummaryResponse, Transaction } from '../../../types/finance.types';
+import type { CategoryResource, Debt, RecurringObligation, SummaryResponse, Transaction } from '../../../types/finance.types';
+import { buildCategoryLookup, buildBehaviorSignals, summarizeBehavior } from '../../../utils/financeBehavior';
 import styles from '../FinancePage.module.css';
 
 const formatCop = (value: number) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(value);
@@ -15,6 +16,8 @@ export const DashboardPage = () => {
   const [debts, setDebts] = useState<Debt[]>([]);
   const [pending, setPending] = useState<Transaction[]>([]);
   const [obligations, setObligations] = useState<RecurringObligation[]>([]);
+  const [monthTransactions, setMonthTransactions] = useState<Transaction[]>([]);
+  const [categories, setCategories] = useState<CategoryResource[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -22,16 +25,27 @@ export const DashboardPage = () => {
     setLoading(true);
     setError(null);
     try {
-      const [summaryResponse, debtsResponse, pendingResponse, obligationsResponse] = await Promise.all([
+      const [
+        summaryResponse,
+        debtsResponse,
+        pendingResponse,
+        obligationsResponse,
+        transactionsResponse,
+        categoriesResponse,
+      ] = await Promise.all([
         financeService.fetchSummary(),
         financeService.fetchDebts(),
         financeService.fetchPendingTransactions(),
         financeService.fetchRecurringObligations(),
+        financeService.fetchTransactions({ page: 1, per_page: 200, sort_by: 'date', sort_dir: 'desc' }),
+        financeService.fetchCategories(),
       ]);
       setSummary(summaryResponse);
       setDebts(debtsResponse.data);
       setPending(pendingResponse.data);
       setObligations(obligationsResponse.data);
+      setMonthTransactions(transactionsResponse.data);
+      setCategories(categoriesResponse.data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No fue posible cargar el resumen financiero.');
     } finally {
@@ -42,6 +56,10 @@ export const DashboardPage = () => {
   useEffect(() => {
     void load();
   }, []);
+
+  const categoryLookup = useMemo(() => buildCategoryLookup(categories), [categories]);
+  const behaviorSummary = useMemo(() => summarizeBehavior(monthTransactions, categoryLookup), [categoryLookup, monthTransactions]);
+  const behaviorSignals = useMemo(() => buildBehaviorSignals(behaviorSummary), [behaviorSummary]);
 
   return (
     <AppLayout title="Dashboard">
@@ -79,6 +97,16 @@ export const DashboardPage = () => {
                 <span className={styles.metricLabel}>Pendientes abiertos</span>
                 <strong className={styles.metricValue}>{pending.length}</strong>
                 <p className={styles.metricHint}>Casos que el agente todavía no puede cerrar solo.</p>
+              </article>
+              <article className={styles.metricCard}>
+                <span className={styles.metricLabel}>Discrecional</span>
+                <strong className={styles.metricValue}>{formatCop(behaviorSummary.totals.discretionary)}</strong>
+                <p className={styles.metricHint}>Gasto elegido. Si esto sube, acá está la presión real para cambiar hábito.</p>
+              </article>
+              <article className={styles.metricCard}>
+                <span className={styles.metricLabel}>Inversión</span>
+                <strong className={styles.metricValue}>{formatCop(behaviorSummary.totals.investment)}</strong>
+                <p className={styles.metricHint}>Lo que hoy sí está construyendo futuro, no solo manteniendo el sistema.</p>
               </article>
             </div>
 
@@ -128,6 +156,23 @@ export const DashboardPage = () => {
                 </div>
               </section>
             </div>
+
+            <section className={styles.panel}>
+              <h3 className={styles.panelTitle}>Lectura conductual del mes</h3>
+              <div className={styles.list}>
+                {behaviorSignals.map((signal) => (
+                  <article key={`${signal.tone}-${signal.title}`} className={styles.listItem}>
+                    <div className={styles.listPrimary}>
+                      <span className={styles.listLabel}>{signal.title}</span>
+                      <span className={styles.listMeta}>{signal.message}</span>
+                    </div>
+                    <div className={styles.listSecondary}>
+                      <span className={styles.pill}>{signal.tone}</span>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </section>
 
             <div className={styles.columns}>
               <section className={styles.panel}>

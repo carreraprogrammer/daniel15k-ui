@@ -1,6 +1,7 @@
 import { api } from './api';
 import type {
   Budget,
+  CategoryResource,
   BudgetQueryParams,
   Debt,
   DebtPayload,
@@ -26,6 +27,7 @@ type ResourceWithAttributes<T> = {
   id: string;
   type?: string;
   attributes: T;
+  relationships?: Record<string, unknown>;
 };
 
 const normalizeResource = <T extends Record<string, unknown>>(item: unknown): ResourceWithAttributes<T> => {
@@ -33,12 +35,13 @@ const normalizeResource = <T extends Record<string, unknown>>(item: unknown): Re
     return { id: '', attributes: {} as T };
   }
 
-  const candidate = item as { id?: string | number; type?: string; attributes?: T };
+  const candidate = item as { id?: string | number; type?: string; attributes?: T; relationships?: Record<string, unknown> };
   if (candidate.attributes) {
     return {
       id: String(candidate.id ?? ''),
       type: candidate.type,
       attributes: candidate.attributes,
+      relationships: candidate.relationships,
     };
   }
 
@@ -160,9 +163,9 @@ export const financeService = {
     return normalizeCollection<RecurringObligation['attributes']>(data) as JsonApiCollection<RecurringObligation>;
   },
 
-  async fetchCategories() {
+  async fetchCategories(): Promise<JsonApiCollection<CategoryResource>> {
     const { data } = await api.get('/api/v1/categories');
-    return normalizeCollection<Record<string, unknown>>(data);
+    return normalizeCollection<CategoryResource['attributes']>(data) as JsonApiCollection<CategoryResource>;
   },
 
   async createTransaction(payload: TransactionCreatePayload): Promise<Transaction> {

@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { IonButton, IonIcon, IonItem, IonItemOptions, IonItemSliding } from '@ionic/react';
 import { createOutline, trashOutline } from 'ionicons/icons';
-import type { Transaction } from '../../../types/finance.types';
+import type { ResolvedTransactionCategory, Transaction } from '../../../types/finance.types';
 import styles from './TransactionSlidingCard.module.css';
 
 const formatCop = (value: number) =>
@@ -20,14 +20,16 @@ const typeLabels: Record<string, string> = {
 
 export interface TransactionSlidingCardProps {
   transaction: Transaction;
+  category: ResolvedTransactionCategory;
   onEdit: (transaction: Transaction) => void;
   onDelete: (transaction: Transaction) => void;
 }
 
-export const TransactionSlidingCard = ({ transaction, onEdit, onDelete }: TransactionSlidingCardProps) => {
+export const TransactionSlidingCard = ({ transaction, category, onEdit, onDelete }: TransactionSlidingCardProps) => {
   const status = transaction.attributes.status ?? 'confirmed';
   const type = transaction.attributes.transaction_type ?? 'expense';
   const slidingRef = useRef<HTMLIonItemSlidingElement | null>(null);
+  const behaviorTone = category.categoryType || 'unknown';
 
   const handleEdit = () => {
     console.debug('[TransactionSlidingCard] handleEdit', { id: transaction.id });
@@ -54,6 +56,12 @@ export const TransactionSlidingCard = ({ transaction, onEdit, onDelete }: Transa
             </div>
             <strong className={styles.concept}>{transaction.attributes.concept}</strong>
             <span className={styles.product}>{transaction.attributes.product}</span>
+            <div className={styles.behaviorRow}>
+              <span className={`${styles.behaviorPill} ${styles[`behavior_${behaviorTone}`] ?? styles.behavior_unknown}`}>
+                {category.categoryName}
+              </span>
+              {category.subcategoryName ? <span className={styles.behaviorMeta}>{category.subcategoryName}</span> : null}
+            </div>
           </div>
 
           <div className={styles.secondary}>
@@ -61,6 +69,21 @@ export const TransactionSlidingCard = ({ transaction, onEdit, onDelete }: Transa
               {statusLabels[status] ?? status}
             </span>
             <strong className={styles.amount}>{formatCop(transaction.attributes.amount)}</strong>
+            <span className={styles.behaviorHint}>
+              {behaviorTone === 'discretionary'
+                ? 'Elegido'
+                : behaviorTone === 'investment'
+                  ? 'Construye'
+                  : behaviorTone === 'committed'
+                    ? 'Carga fija'
+                    : behaviorTone === 'necessary'
+                      ? 'Sostiene'
+                      : behaviorTone === 'social'
+                        ? 'Vínculo'
+                        : behaviorTone === 'income'
+                          ? 'Entrada'
+                          : 'Revisar'}
+            </span>
           </div>
         </div>
       </IonItem>

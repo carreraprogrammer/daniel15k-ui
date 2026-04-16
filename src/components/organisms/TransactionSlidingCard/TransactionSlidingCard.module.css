@@ -87,6 +87,64 @@
   font-size: 0.85rem;
 }
 
+.behaviorRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.behaviorMeta,
+.behaviorHint {
+  color: rgba(231, 236, 244, 0.6);
+  font-size: 0.78rem;
+}
+
+.behaviorPill {
+  display: inline-flex;
+  width: fit-content;
+  padding: 0.26rem 0.58rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.behavior_committed {
+  background: rgba(255, 214, 143, 0.14);
+  color: #ffd68f;
+}
+
+.behavior_necessary {
+  background: rgba(167, 209, 255, 0.16);
+  color: #b8d9ff;
+}
+
+.behavior_discretionary {
+  background: rgba(255, 178, 138, 0.14);
+  color: #ffb28a;
+}
+
+.behavior_investment {
+  background: rgba(143, 233, 221, 0.14);
+  color: #8fe9dd;
+}
+
+.behavior_social {
+  background: rgba(255, 164, 214, 0.14);
+  color: #ffb6df;
+}
+
+.behavior_income {
+  background: rgba(168, 244, 175, 0.16);
+  color: #a8f4af;
+}
+
+.behavior_unknown {
+  background: rgba(231, 236, 244, 0.1);
+  color: rgba(231, 236, 244, 0.72);
+}
+
 .concept,
 .amount {
   color: #fff;
