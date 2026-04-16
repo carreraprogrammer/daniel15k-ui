@@ -14,7 +14,7 @@ export const AuthLayout = ({ title, children }: { title: string; children: React
       </div>
       <h1 className={styles.title}>{title}</h1>
       <p className={styles.description}>
-        Entra a un sistema que no solo registra movimientos: te devuelve criterio, contexto y presión útil para tomar mejores decisiones.
+        Entra a tu panel financiero y sincroniza Telegram, correo y dashboard sin fricción.
       </p>
       <div className={styles.metricRow}>
         <div className={styles.metricCard}>

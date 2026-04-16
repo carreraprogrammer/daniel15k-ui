@@ -49,3 +49,33 @@
 .link:hover {
   color: #fff;
 }
+
+@media (max-width: 640px) {
+  .stack {
+    gap: 1rem;
+  }
+
+  .contentHeader {
+    gap: 0.35rem;
+  }
+
+  .contentEyebrow {
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+  }
+
+  .contentText {
+    font-size: 0.92rem;
+    line-height: 1.45;
+    color: rgba(240, 240, 248, 0.66);
+  }
+
+  .divider {
+    gap: 0.65rem;
+  }
+
+  .dividerText {
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+  }
+}

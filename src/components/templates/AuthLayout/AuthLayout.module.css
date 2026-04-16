@@ -124,18 +124,89 @@
 @media (max-width: 960px) {
   .page {
     grid-template-columns: 1fr;
-    gap: var(--space-6);
+    gap: 1rem;
+    padding: 18px 16px 24px;
+    align-content: start;
   }
 
   .hero {
     min-height: auto;
+    justify-content: flex-start;
+    gap: 0.9rem;
+    padding: 0;
   }
 
   .title {
     max-width: none;
+    font-size: clamp(2rem, 9vw, 2.7rem);
+    line-height: 0.98;
   }
 
   .brandLockup {
-    align-items: flex-start;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .brandTitle {
+    font-size: 1.05rem;
+  }
+
+  .description {
+    max-width: none;
+    font-size: 0.98rem;
+    line-height: 1.5;
+  }
+
+  .metricRow {
+    display: none;
+  }
+
+  .panel {
+    align-items: stretch;
+  }
+
+  .panelGlow {
+    inset: 10% 8%;
+    filter: blur(30px);
+  }
+
+  .panelBody {
+    width: 100%;
+    padding: 20px 18px 22px;
+    border-radius: 24px;
+  }
+}
+
+@media (max-width: 640px) {
+  .page {
+    min-height: 100dvh;
+    padding: max(14px, env(safe-area-inset-top)) 14px max(18px, env(safe-area-inset-bottom)) 14px;
+    gap: 0.85rem;
+  }
+
+  .brandLockup {
+    gap: 0.65rem;
+  }
+
+  .brandText {
+    gap: 0.1rem;
+  }
+
+  .eyebrow {
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+  }
+
+  .title {
+    font-size: clamp(1.75rem, 8vw, 2.25rem);
+  }
+
+  .description {
+    font-size: 0.92rem;
+    color: rgba(240, 240, 248, 0.66);
+  }
+
+  .panelBody {
+    padding: 18px 16px 20px;
   }
 }
