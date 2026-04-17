@@ -8,6 +8,7 @@ import type {
   DebtPayload,
   DebtQueryParams,
   IncomeSource,
+  IncomeSourcePayload,
   IncomeSourceQueryParams,
   JsonApiCollection,
   RecurringObligation,
@@ -147,6 +148,20 @@ export const financeService = {
       },
     });
     return normalizeCollection<IncomeSource['attributes']>(data) as JsonApiCollection<IncomeSource>;
+  },
+
+  async createIncomeSource(payload: IncomeSourcePayload): Promise<IncomeSource> {
+    const { data } = await api.post('/api/v1/income_sources', payload);
+    return normalizeSingle<IncomeSource['attributes']>(data) as IncomeSource;
+  },
+
+  async updateIncomeSource(id: string, payload: Partial<IncomeSourcePayload>): Promise<IncomeSource> {
+    const { data } = await api.patch(`/api/v1/income_sources/${id}`, payload);
+    return normalizeSingle<IncomeSource['attributes']>(data) as IncomeSource;
+  },
+
+  async deleteIncomeSource(id: string): Promise<void> {
+    await api.delete(`/api/v1/income_sources/${id}`);
   },
 
   async fetchRecurringObligations(

@@ -206,8 +206,21 @@ export interface IncomeSource {
     expected_day_to: number;
     expected_amount: number;
     is_variable: boolean;
+    classification?: 'base' | 'variable';
+    reliability_score?: number;
     active?: boolean;
   };
+}
+
+export interface IncomeSourcePayload {
+  name: string;
+  expected_day_from: number | '';
+  expected_day_to: number | '';
+  expected_amount: number | '';
+  classification: 'base' | 'variable';
+  reliability_score?: number;
+  is_variable?: boolean;
+  active?: boolean;
 }
 
 export interface RecurringObligation {

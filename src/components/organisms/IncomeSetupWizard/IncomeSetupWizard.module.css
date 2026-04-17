@@ -1,0 +1,75 @@
+.panel {
+  display: grid;
+  gap: 1.25rem;
+  padding: 1.5rem;
+}
+
+.intro {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.spanTwo {
+  grid-column: span 2;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.choiceRow {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.error {
+  margin: 0;
+  color: var(--color-error);
+  font-size: var(--text-sm);
+}
+
+.successIcon {
+  font-size: 2.5rem;
+  text-align: center;
+}
+
+.successTitle {
+  margin: 0;
+  color: var(--color-success);
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  text-align: center;
+}
+
+.successBody {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  text-align: center;
+}
+
+@media (max-width: 720px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .spanTwo {
+    grid-column: span 1;
+  }
+
+  .actions,
+  .choiceRow {
+    flex-direction: column;
+  }
+}
