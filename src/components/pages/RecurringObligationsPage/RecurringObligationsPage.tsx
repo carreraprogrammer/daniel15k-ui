@@ -25,6 +25,7 @@ import type {
   RecurringObligationPayload,
   RecurringObligationQueryParams,
 } from '../../../types/finance.types';
+import { cadenceLabel, classificationLabel, incomeWindowLabel, reliabilityLabel } from '../../../utils/incomeProfile';
 import styles from '../FinancePage.module.css';
 
 const formatCop = (value: number) =>
@@ -274,11 +275,16 @@ export const RecurringObligationsPage = () => {
                       <div className={styles.listPrimary}>
                         <span className={styles.listLabel}>{source.attributes.name}</span>
                         <span className={styles.listMeta}>
-                          Día {source.attributes.expected_day_from} a {source.attributes.expected_day_to}
+                          {incomeWindowLabel(source.attributes)}
+                        </span>
+                        <span className={styles.listMeta}>
+                          {cadenceLabel(source.attributes.cadence)} · {reliabilityLabel(source.attributes.reliability_score)}
                         </span>
                       </div>
                       <div className={styles.listSecondary}>
-                        <span className={styles.pill}>{source.attributes.is_variable ? 'Variable' : 'Fija'}</span>
+                        <span className={styles.pill}>
+                          {classificationLabel(source.attributes.classification, source.attributes.is_variable)}
+                        </span>
                         <span className={styles.listLabel}>{formatCop(source.attributes.expected_amount)}</span>
                       </div>
                     </article>

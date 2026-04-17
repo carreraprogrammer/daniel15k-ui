@@ -26,6 +26,13 @@
   font-size: var(--text-sm);
 }
 
+.hint {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+}
+
 @media (max-width: 720px) {
   .grid {
     grid-template-columns: 1fr;

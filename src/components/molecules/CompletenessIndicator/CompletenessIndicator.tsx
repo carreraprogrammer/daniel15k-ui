@@ -62,7 +62,7 @@ export const CompletenessIndicator = () => {
       blockedByDep,
       depLabel: meta?.dependsOn ? (DIMENSION_META[meta.dependsOn]?.label ?? meta.dependsOn) : undefined,
       status: data.dimensions[key]?.status ?? 'missing',
-      message: data.dimensions[key]?.message ?? '',
+      message: data.dimensions[key]?.reason ?? data.dimensions[key]?.message ?? '',
     };
   });
 

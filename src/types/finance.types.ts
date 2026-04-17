@@ -46,6 +46,43 @@ export interface FinancialContextSummary {
   recommended_action: string | null;
 }
 
+export interface SummaryMonthlyPlan {
+  id: number;
+  status: string;
+  mode: string;
+  base_budget_income: number;
+  expected_variable_income: number;
+  recurring_obligations_total: number;
+  debt_minimums_total: number;
+  protected_buffer_amount: number;
+  discretionary_limit: number;
+  overflow_rule: string;
+  overflow_rule_detail?: Record<string, unknown>;
+  reward_pct: number;
+  debt_strategy?: string | null;
+  assumptions?: Record<string, unknown>;
+  confirmed_at?: string | null;
+}
+
+export interface SummaryOverflowStatus {
+  rule: string;
+  rule_detail?: Record<string, unknown>;
+  base_budget_income: number;
+  confirmed_income: number;
+  expected_variable_income: number;
+  realized_overflow: number;
+  remaining_expected_overflow: number;
+  status: 'waiting' | 'available';
+  suggested_destination?: {
+    type: string;
+    label?: string;
+    debt_id?: number;
+    debt_name?: string;
+    strategy?: string;
+  } | null;
+  suggested_action?: string | null;
+}
+
 export interface SummaryResponse {
   period: {
     month: number;
@@ -54,6 +91,8 @@ export interface SummaryResponse {
   balance: SummaryBalance;
   burn_rate: SummaryBurnRate | null;
   debts: DebtSummary | null;
+  monthly_plan?: SummaryMonthlyPlan | null;
+  overflow_status?: SummaryOverflowStatus | null;
   financial_context: FinancialContextSummary | null;
 }
 
@@ -61,7 +100,9 @@ export type CompletenessStatus = 'missing' | 'partial' | 'sufficient' | 'stale' 
 
 export interface CompletenessDimension {
   status: CompletenessStatus;
-  message: string;
+  reason?: string;
+  message?: string;
+  observed?: Record<string, unknown>;
 }
 
 export interface CompletenessResponse {
@@ -206,8 +247,11 @@ export interface IncomeSource {
     expected_day_to: number;
     expected_amount: number;
     is_variable: boolean;
-    classification?: 'base' | 'variable';
+    classification?: 'base' | 'variable' | 'seasonal' | 'one_time';
+    cadence?: 'monthly' | 'biweekly' | 'irregular';
     reliability_score?: number;
+    last_confirmed_at?: string | null;
+    evidence_source?: string | null;
     active?: boolean;
   };
 }
@@ -217,8 +261,11 @@ export interface IncomeSourcePayload {
   expected_day_from: number | '';
   expected_day_to: number | '';
   expected_amount: number | '';
-  classification: 'base' | 'variable';
+  classification: 'base' | 'variable' | 'seasonal' | 'one_time';
+  cadence?: 'monthly' | 'biweekly' | 'irregular';
   reliability_score?: number;
+  last_confirmed_at?: string | null;
+  evidence_source?: string;
   is_variable?: boolean;
   active?: boolean;
 }

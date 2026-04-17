@@ -4,45 +4,51 @@ import { NumberInput } from '../../atoms/NumberInput';
 import { SelectInput } from '../../atoms/SelectInput';
 import { TextInput } from '../../atoms/TextInput';
 import type { IncomeSource, IncomeSourcePayload } from '../../../types/finance.types';
+import {
+  BIWEEKLY_DAY_OPTIONS,
+  INCOME_CADENCE_OPTIONS,
+  INCOME_CLASSIFICATION_OPTIONS,
+  MONTHLY_WINDOW_OPTIONS,
+  RELIABILITY_OPTIONS,
+  dayWindow,
+  inferWindowKey,
+  windowRange,
+} from '../../../utils/incomeProfile';
 import styles from './IncomeSourceComposer.module.css';
-
-const classificationOptions = [
-  { label: 'Base (ingreso fijo, confiable)', value: 'base' },
-  { label: 'Variable (freelance, comisiones)', value: 'variable' },
-];
-
-const reliabilityOptions = [
-  { label: '25% — muy incierto', value: 25 },
-  { label: '50% — la mitad de las veces', value: 50 },
-  { label: '75% — casi siempre llega', value: 75 },
-  { label: '100% — siempre llega', value: 100 },
-];
 
 interface Values {
   name: string;
   expectedAmount: number | '';
-  expectedDayFrom: number | '';
-  expectedDayTo: number | '';
-  classification: 'base' | 'variable';
+  cadence: 'monthly' | 'biweekly' | 'irregular';
+  windowKey: 'early' | 'week1' | 'q1' | 'mid' | 'q2' | 'late';
+  biweeklyDay1: number | '';
+  biweeklyDay2: number | '';
+  classification: 'base' | 'variable' | 'seasonal' | 'one_time';
   reliabilityScore: number | '';
 }
 
 const emptyValues: Values = {
   name: '',
   expectedAmount: '',
-  expectedDayFrom: '',
-  expectedDayTo: '',
+  cadence: 'monthly',
+  windowKey: 'q2',
+  biweeklyDay1: 5,
+  biweeklyDay2: 20,
   classification: 'base',
   reliabilityScore: 100,
 };
 
 const fromSource = (source: IncomeSource | null): Values => {
   if (!source) return emptyValues;
+  const cadence = source.attributes.cadence ?? 'monthly';
+  const inferredWindow = inferWindowKey(source.attributes.expected_day_from, source.attributes.expected_day_to) ?? 'mid';
   return {
     name: source.attributes.name,
     expectedAmount: source.attributes.expected_amount,
-    expectedDayFrom: source.attributes.expected_day_from,
-    expectedDayTo: source.attributes.expected_day_to,
+    cadence,
+    windowKey: inferredWindow,
+    biweeklyDay1: source.attributes.expected_day_from,
+    biweeklyDay2: source.attributes.expected_day_to,
     classification: source.attributes.classification ?? (source.attributes.is_variable ? 'variable' : 'base'),
     reliabilityScore: source.attributes.reliability_score ?? 100,
   };
@@ -78,19 +84,26 @@ export const IncomeSourceComposer = ({ source = null, loading, onCreate, onUpdat
       setError('Completa el nombre y el monto con valores válidos.');
       return;
     }
-    if (values.expectedDayFrom === '' || values.expectedDayTo === '') {
-      setError('Indica el rango de días en que suele llegar este ingreso.');
+    if (values.cadence === 'biweekly' && (values.biweeklyDay1 === '' || values.biweeklyDay2 === '' || values.biweeklyDay1 === values.biweeklyDay2)) {
+      setError('Configura dos días distintos para el ingreso quincenal.');
       return;
     }
+
+    const range = values.cadence === 'biweekly'
+      ? dayWindow(Number(values.biweeklyDay1))
+      : values.cadence === 'irregular'
+        ? { dayFrom: 1, dayTo: 31 }
+        : windowRange(values.windowKey);
 
     const payload: IncomeSourcePayload = {
       name: values.name.trim(),
       expected_amount: Number(values.expectedAmount),
-      expected_day_from: Number(values.expectedDayFrom),
-      expected_day_to: Number(values.expectedDayTo),
+      expected_day_from: range.dayFrom,
+      expected_day_to: range.dayTo,
       classification: values.classification,
-      reliability_score: values.classification === 'variable' ? Number(values.reliabilityScore || 50) : 100,
-      is_variable: values.classification === 'variable',
+      cadence: values.cadence,
+      reliability_score: values.classification === 'base' ? 100 : Number(values.reliabilityScore || 50),
+      is_variable: values.classification !== 'base',
     };
 
     setError(null);
@@ -132,40 +145,65 @@ export const IncomeSourceComposer = ({ source = null, loading, onCreate, onUpdat
         />
         <SelectInput
           name="income-classification"
-          label="Tipo"
+          label="Clasificación"
           value={values.classification}
-          onChange={(c) => setValues((v) => ({ ...v, classification: String(c) as 'base' | 'variable' }))}
-          options={classificationOptions}
+          onChange={(classification) =>
+            setValues((v) => ({ ...v, classification: String(classification) as Values['classification'] }))
+          }
+          options={INCOME_CLASSIFICATION_OPTIONS}
           required
         />
-        <NumberInput
-          name="income-day-from"
-          label="Llega desde el día"
-          value={values.expectedDayFrom}
-          onChange={(expectedDayFrom) => setValues((v) => ({ ...v, expectedDayFrom }))}
-          format="integer"
-          min={1}
-          max={31}
+        <SelectInput
+          name="income-cadence"
+          label="Cadencia"
+          value={values.cadence}
+          onChange={(cadence) => setValues((v) => ({ ...v, cadence: String(cadence) as Values['cadence'] }))}
+          options={INCOME_CADENCE_OPTIONS}
           required
         />
-        <NumberInput
-          name="income-day-to"
-          label="Hasta el día"
-          value={values.expectedDayTo}
-          onChange={(expectedDayTo) => setValues((v) => ({ ...v, expectedDayTo }))}
-          format="integer"
-          min={1}
-          max={31}
-          required
-        />
-        {values.classification === 'variable' && (
+        {values.cadence === 'biweekly' ? (
+          <>
+            <SelectInput
+              name="income-day-first"
+              label="Primer pago"
+              value={values.biweeklyDay1}
+              onChange={(day) => setValues((v) => ({ ...v, biweeklyDay1: Number(day) }))}
+              options={BIWEEKLY_DAY_OPTIONS}
+              required
+            />
+            <SelectInput
+              name="income-day-second"
+              label="Segundo pago"
+              value={values.biweeklyDay2}
+              onChange={(day) => setValues((v) => ({ ...v, biweeklyDay2: Number(day) }))}
+              options={BIWEEKLY_DAY_OPTIONS}
+              required
+            />
+          </>
+        ) : values.cadence === 'monthly' ? (
+          <div className={styles.spanTwo}>
+            <SelectInput
+              name="income-window"
+              label="Ventana esperada"
+              value={values.windowKey}
+              onChange={(windowKey) => setValues((v) => ({ ...v, windowKey: String(windowKey) as Values['windowKey'] }))}
+              options={MONTHLY_WINDOW_OPTIONS}
+              required
+            />
+          </div>
+        ) : (
+          <p className={[styles.hint, styles.spanTwo].join(' ')}>
+            Los ingresos irregulares se guardan con ventana de mes completo.
+          </p>
+        )}
+        {values.classification !== 'base' && (
           <div className={styles.spanTwo}>
             <SelectInput
               name="income-reliability"
               label="¿Qué tan seguido llega?"
               value={values.reliabilityScore}
               onChange={(r) => setValues((v) => ({ ...v, reliabilityScore: Number(r) }))}
-              options={reliabilityOptions}
+              options={RELIABILITY_OPTIONS}
             />
           </div>
         )}
