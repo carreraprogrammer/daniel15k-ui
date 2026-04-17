@@ -5,6 +5,7 @@ import { NavLink } from 'react-router-dom';
 import { Header } from '../../organisms/Header';
 import { BrandMark } from '../../atoms/BrandMark';
 import { Button } from '../../atoms/Button';
+import { CompletenessIndicator } from '../../molecules/CompletenessIndicator';
 import { useAuthStore } from '../../../store/authStore';
 import styles from './AppLayout.module.css';
 
@@ -99,6 +100,8 @@ export const AppLayout = ({ title, children }: { title: string; children: ReactN
           />
         </section>
       </aside>
+
+      <CompletenessIndicator />
     </div>
   );
 };

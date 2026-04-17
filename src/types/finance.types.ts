@@ -57,6 +57,22 @@ export interface SummaryResponse {
   financial_context: FinancialContextSummary | null;
 }
 
+export type CompletenessStatus = 'missing' | 'partial' | 'sufficient' | 'stale' | 'conflicting';
+
+export interface CompletenessDimension {
+  status: CompletenessStatus;
+  message: string;
+}
+
+export interface CompletenessResponse {
+  period: { month: number; year: number };
+  dimensions: Record<string, CompletenessDimension>;
+  missing: string[];
+  partial: string[];
+  stale: string[];
+  conflicting: string[];
+}
+
 export interface Transaction {
   id: string;
   type?: string;

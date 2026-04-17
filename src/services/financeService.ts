@@ -3,6 +3,7 @@ import type {
   Budget,
   CategoryResource,
   BudgetQueryParams,
+  CompletenessResponse,
   Debt,
   DebtPayload,
   DebtQueryParams,
@@ -161,6 +162,11 @@ export const financeService = {
       },
     });
     return normalizeCollection<RecurringObligation['attributes']>(data) as JsonApiCollection<RecurringObligation>;
+  },
+
+  async fetchCompleteness(month = defaultMonth, year = defaultYear): Promise<CompletenessResponse> {
+    const { data } = await api.get('/api/v1/completeness', { params: { month, year } });
+    return (data as { data: CompletenessResponse }).data;
   },
 
   async fetchCategories(): Promise<JsonApiCollection<CategoryResource>> {
