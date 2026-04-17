@@ -5,12 +5,12 @@ import { financeService } from '../../../services/financeService';
 import type { CompletenessResponse } from '../../../types/finance.types';
 import styles from './CompletenessIndicator.module.css';
 
-const DIMENSION_META: Record<string, { label: string; to?: string; wizard?: string }> = {
-  income_profile:     { label: 'Perfil de ingresos', wizard: 'income_setup' },
-  debts:              { label: 'Deudas', to: '/debts' },
-  recurring_expenses: { label: 'Gastos recurrentes', to: '/recurring' },
+const DIMENSION_META: Record<string, { label: string; to?: string; ctaLabel?: string; wizard?: string }> = {
+  income_profile:     { label: 'Perfil de ingresos', wizard: 'income_setup', ctaLabel: 'Completar →' },
+  debts:              { label: 'Deudas', to: '/debts', ctaLabel: 'Completar →' },
+  recurring_expenses: { label: 'Gastos recurrentes', to: '/recurring', ctaLabel: 'Completar →' },
   strategy:           { label: 'Estrategia financiera' },
-  monthly_plan:       { label: 'Plan mensual', to: '/budgets' },
+  monthly_plan:       { label: 'Plan mensual', to: '/budgets', ctaLabel: 'Ver presupuestos →' },
 };
 
 const STATUS_LABEL: Record<string, string> = {
@@ -50,12 +50,18 @@ export const CompletenessIndicator = () => {
   const gaps = [...data.missing, ...data.partial, ...data.stale, ...data.conflicting];
   if (gaps.length === 0) return null;
 
-  const gapDimensions = gaps.map((key) => ({
-    key,
-    ...DIMENSION_META[key],
-    status: data.dimensions[key]?.status ?? 'missing',
-    message: data.dimensions[key]?.message ?? '',
-  }));
+  const gapDimensions = gaps.map((key) => {
+    const meta = DIMENSION_META[key];
+    return {
+      key,
+      label: meta?.label ?? key,
+      to: meta?.to,
+      wizard: meta?.wizard,
+      ctaLabel: meta?.ctaLabel ?? 'Completar →',
+      status: data.dimensions[key]?.status ?? 'missing',
+      message: data.dimensions[key]?.message ?? '',
+    };
+  });
 
   return (
     <>
@@ -67,7 +73,7 @@ export const CompletenessIndicator = () => {
               El sistema necesita estos datos para ayudarte mejor.
             </p>
             <ul className={styles.list}>
-              {gapDimensions.map(({ key, label, to, wizard, status, message }) => (
+              {gapDimensions.map(({ key, label, to, wizard, ctaLabel, status, message }) => (
                 <li key={key} className={styles.item}>
                   <div className={styles.itemHeader}>
                     <span className={styles.itemLabel}>{label ?? key}</span>
@@ -82,12 +88,12 @@ export const CompletenessIndicator = () => {
                       className={styles.itemCta}
                       onClick={() => { setOpen(false); setIncomeWizardOpen(true); }}
                     >
-                      Completar →
+                      {ctaLabel}
                     </button>
                   )}
                   {to && !wizard && (
                     <Link to={to} className={styles.itemCta} onClick={() => setOpen(false)}>
-                      Completar →
+                      {ctaLabel}
                     </Link>
                   )}
                 </li>

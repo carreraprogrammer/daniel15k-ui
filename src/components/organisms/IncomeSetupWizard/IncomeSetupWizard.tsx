@@ -155,10 +155,10 @@ export const IncomeSetupWizard = ({ isOpen, onClose, onComplete }: IncomeSetupWi
                 min={0}
                 required
               />
-              <div />
               <NumberInput
                 name="wz-base-day-from"
-                label="Llega desde el día"
+                label="Llega desde el día…"
+                hint="Número del mes, ej: 1"
                 value={base.dayFrom}
                 onChange={(dayFrom) => setBase((v) => ({ ...v, dayFrom }))}
                 format="integer"
@@ -168,7 +168,8 @@ export const IncomeSetupWizard = ({ isOpen, onClose, onComplete }: IncomeSetupWi
               />
               <NumberInput
                 name="wz-base-day-to"
-                label="Hasta el día"
+                label="…hasta el día"
+                hint="Número del mes, ej: 5"
                 value={base.dayTo}
                 onChange={(dayTo) => setBase((v) => ({ ...v, dayTo }))}
                 format="integer"
@@ -228,7 +229,8 @@ export const IncomeSetupWizard = ({ isOpen, onClose, onComplete }: IncomeSetupWi
               <div />
               <NumberInput
                 name="wz-var-day-from"
-                label="Llega desde el día"
+                label="Llega desde el día…"
+                hint="Número del mes, ej: 15"
                 value={variable.dayFrom}
                 onChange={(dayFrom) => setVariable((v) => ({ ...v, dayFrom }))}
                 format="integer"
@@ -238,7 +240,8 @@ export const IncomeSetupWizard = ({ isOpen, onClose, onComplete }: IncomeSetupWi
               />
               <NumberInput
                 name="wz-var-day-to"
-                label="Hasta el día"
+                label="…hasta el día"
+                hint="Número del mes, ej: 20"
                 value={variable.dayTo}
                 onChange={(dayTo) => setVariable((v) => ({ ...v, dayTo }))}
                 format="integer"
