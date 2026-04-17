@@ -141,6 +141,13 @@
   line-height: var(--leading-normal);
 }
 
+.itemDep {
+  margin: 0;
+  color: var(--color-text-disabled);
+  font-size: var(--text-xs);
+  font-style: italic;
+}
+
 .itemCta {
   display: inline-block;
   color: var(--color-brand);

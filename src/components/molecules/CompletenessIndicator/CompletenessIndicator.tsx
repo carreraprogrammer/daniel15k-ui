@@ -5,12 +5,12 @@ import { financeService } from '../../../services/financeService';
 import type { CompletenessResponse } from '../../../types/finance.types';
 import styles from './CompletenessIndicator.module.css';
 
-const DIMENSION_META: Record<string, { label: string; to?: string; ctaLabel?: string; wizard?: string }> = {
+const DIMENSION_META: Record<string, { label: string; to?: string; ctaLabel?: string; wizard?: string; dependsOn?: string }> = {
   income_profile:     { label: 'Perfil de ingresos', wizard: 'income_setup', ctaLabel: 'Completar →' },
   debts:              { label: 'Deudas', to: '/debts', ctaLabel: 'Completar →' },
   recurring_expenses: { label: 'Gastos recurrentes', to: '/recurring', ctaLabel: 'Completar →' },
   strategy:           { label: 'Estrategia financiera' },
-  monthly_plan:       { label: 'Plan mensual', to: '/budgets', ctaLabel: 'Ver presupuestos →' },
+  monthly_plan:       { label: 'Plan mensual', to: '/budgets', ctaLabel: 'Armar plan →', dependsOn: 'income_profile' },
 };
 
 const STATUS_LABEL: Record<string, string> = {
@@ -52,12 +52,15 @@ export const CompletenessIndicator = () => {
 
   const gapDimensions = gaps.map((key) => {
     const meta = DIMENSION_META[key];
+    const blockedByDep = meta?.dependsOn ? gaps.includes(meta.dependsOn) : false;
     return {
       key,
       label: meta?.label ?? key,
-      to: meta?.to,
-      wizard: meta?.wizard,
+      to: blockedByDep ? undefined : meta?.to,
+      wizard: blockedByDep ? undefined : meta?.wizard,
       ctaLabel: meta?.ctaLabel ?? 'Completar →',
+      blockedByDep,
+      depLabel: meta?.dependsOn ? (DIMENSION_META[meta.dependsOn]?.label ?? meta.dependsOn) : undefined,
       status: data.dimensions[key]?.status ?? 'missing',
       message: data.dimensions[key]?.message ?? '',
     };
@@ -73,16 +76,19 @@ export const CompletenessIndicator = () => {
               El sistema necesita estos datos para ayudarte mejor.
             </p>
             <ul className={styles.list}>
-              {gapDimensions.map(({ key, label, to, wizard, ctaLabel, status, message }) => (
+              {gapDimensions.map(({ key, label, to, wizard, ctaLabel, blockedByDep, depLabel, status, message }) => (
                 <li key={key} className={styles.item}>
                   <div className={styles.itemHeader}>
-                    <span className={styles.itemLabel}>{label ?? key}</span>
+                    <span className={styles.itemLabel}>{label}</span>
                     <span className={[styles.badge, styles[`badge_${status}`]].join(' ')}>
                       {STATUS_LABEL[status] ?? status}
                     </span>
                   </div>
-                  {message && <p className={styles.itemMessage}>{message}</p>}
-                  {wizard === 'income_setup' && (
+                  {blockedByDep
+                    ? <p className={styles.itemDep}>Primero completa {depLabel}</p>
+                    : message && <p className={styles.itemMessage}>{message}</p>
+                  }
+                  {!blockedByDep && wizard === 'income_setup' && (
                     <button
                       type="button"
                       className={styles.itemCta}
@@ -91,7 +97,7 @@ export const CompletenessIndicator = () => {
                       {ctaLabel}
                     </button>
                   )}
-                  {to && !wizard && (
+                  {!blockedByDep && to && !wizard && (
                     <Link to={to} className={styles.itemCta} onClick={() => setOpen(false)}>
                       {ctaLabel}
                     </Link>
