@@ -13,8 +13,12 @@
 .sheet-modal::part(content) {
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 28px 28px 0 0;
-  background: rgba(10, 15, 25, 0.97);
-  box-shadow: 0 -24px 64px rgba(0, 0, 0, 0.34);
+  background:
+    var(--surface-highlight),
+    var(--surface-glow),
+    rgba(10, 15, 25, 0.97);
+  box-shadow: 0 -24px 64px rgba(0, 0, 0, 0.34), 0 -8px 24px rgba(2, 6, 23, 0.18);
+  backdrop-filter: blur(18px) saturate(124%);
   overflow: hidden;
 }
 

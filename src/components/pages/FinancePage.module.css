@@ -11,13 +11,41 @@
 .focusCard {
   display: grid;
   gap: 1rem;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   padding: 1.3rem;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 28px;
   background:
-    radial-gradient(circle at top left, rgba(245, 158, 11, 0.12), transparent 42%),
-    linear-gradient(145deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.02));
-  box-shadow: 0 24px 80px rgba(2, 6, 23, 0.28);
+    var(--surface-highlight),
+    var(--surface-glow),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.018) 56%),
+    rgba(10, 15, 25, 0.9);
+  box-shadow: var(--shadow-float);
+  backdrop-filter: blur(16px) saturate(120%);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease;
+}
+
+.focusCard::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 18%),
+    radial-gradient(circle at top center, rgba(255, 255, 255, 0.06), transparent 42%);
+  opacity: 0.95;
+}
+
+.focusCard > * {
+  position: relative;
+  z-index: 1;
 }
 
 .focusCardFull {
@@ -128,7 +156,12 @@
   gap: 0.65rem;
   padding: 0.95rem 1rem;
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.035);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
+    rgba(255, 255, 255, 0.03);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 10px 24px rgba(2, 6, 23, 0.16);
 }
 
 .focusSupportHeader {
@@ -332,9 +365,40 @@
 .metricCard,
 .panel,
 .tableWrap {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 24px;
-  background: rgba(255, 255, 255, 0.035);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
+    rgba(255, 255, 255, 0.028);
+  box-shadow: 0 14px 34px rgba(2, 6, 23, 0.22);
+  backdrop-filter: blur(14px) saturate(118%);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease;
+}
+
+.metricCard::before,
+.panel::before,
+.tableWrap::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 16%),
+    radial-gradient(circle at top left, rgba(252, 211, 77, 0.04), transparent 28%);
+}
+
+.metricCard > *,
+.panel > *,
+.tableWrap > * {
+  position: relative;
+  z-index: 1;
 }
 
 .metricCard {
@@ -408,9 +472,34 @@
   display: flex;
   justify-content: space-between;
   gap: 1rem;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   padding: 0.9rem 1rem;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.018)),
+    rgba(255, 255, 255, 0.022);
+  box-shadow: 0 8px 18px rgba(2, 6, 23, 0.16);
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease;
+}
+
+.listItem::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 18%);
+}
+
+.listItem > * {
+  position: relative;
+  z-index: 1;
 }
 
 .listPrimary,
@@ -444,6 +533,33 @@
 
 .tableWrap {
   overflow: auto;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .focusCard:hover,
+  .panel:hover,
+  .tableWrap:hover,
+  .metricCard:hover {
+    transform: translateY(-3px);
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: var(--shadow-float-hover);
+  }
+
+  .listItem:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 16px 28px rgba(2, 6, 23, 0.2);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .focusCard,
+  .panel,
+  .tableWrap,
+  .metricCard,
+  .listItem {
+    transition: none;
+  }
 }
 
 .table {
