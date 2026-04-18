@@ -1,193 +1,432 @@
-.container {
-  position: fixed;
-  top: 5rem;
-  right: 1.5rem;
-  z-index: 140;
-  display: grid;
-  gap: 0.75rem;
-  width: 400px;
-  max-height: calc(100dvh - 6rem);
-  overflow-y: auto;
-  scrollbar-width: none;
+/* ── Toolbar ──────────────────────────────────────────────────────────────── */
+
+.toolbar {
+  --background: #10131a;
+  --color: #fff;
+  padding-top: env(safe-area-inset-top);
 }
 
-.container::-webkit-scrollbar {
-  display: none;
+.toolbarTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
 }
 
-@media (max-width: 768px) {
-  .container {
-    top: auto;
-    bottom: 5rem;
-    right: 1rem;
-    left: 1rem;
-    width: auto;
-  }
+.closeBtn {
+  --color: rgba(231, 236, 244, 0.55);
+  font-size: 1.1rem;
+  margin-right: 0.25rem;
 }
 
-.loadingCard {
+/* ── Step bar ─────────────────────────────────────────────────────────────── */
+
+.stepBarWrap {
+  background: #10131a;
+  padding: 0.75rem 1.25rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.stepBar {
   display: flex;
+  align-items: flex-start;
+  gap: 0;
+  position: relative;
+}
+
+.stepBar::before {
+  content: '';
+  position: absolute;
+  top: 7px;
+  left: 7px;
+  right: 7px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  z-index: 0;
+}
+
+.stepItem {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.75rem;
-  padding: 1rem 1.25rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
-  background: #1a1d23;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  gap: 0.35rem;
+  position: relative;
+  z-index: 1;
 }
 
-.loadingText {
-  color: rgba(231, 236, 244, 0.55);
-  font-size: 0.88rem;
+.stepDot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  transition: background 0.2s, border-color 0.2s;
 }
 
-.card {
-  display: grid;
-  gap: 1rem;
-  padding: 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  background: #1a1d23;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.04);
+.stepDone .stepDot {
+  background: #48bb78;
+  border-color: #48bb78;
 }
 
-.tone_info {
-  border-color: rgba(99, 179, 237, 0.25);
-  background: rgba(99, 179, 237, 0.05);
+.stepActive .stepDot {
+  background: #fff;
+  border-color: #fff;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.15);
 }
 
-.tone_warning {
-  border-color: rgba(246, 173, 85, 0.3);
-  background: rgba(246, 173, 85, 0.06);
-}
-
-.tone_success {
-  border-color: rgba(72, 187, 120, 0.25);
-  background: rgba(72, 187, 120, 0.05);
-}
-
-.cardHeader {
-  display: grid;
-  gap: 0.25rem;
-}
-
-.cardEyebrow {
-  color: rgba(231, 236, 244, 0.45);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
+.stepLabel {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
+  color: rgba(231, 236, 244, 0.3);
+  transition: color 0.2s;
+  text-align: center;
+  white-space: nowrap;
 }
 
-.cardTitle {
+.stepDone .stepLabel {
+  color: #48bb78;
+}
+
+.stepActive .stepLabel {
+  color: rgba(231, 236, 244, 0.85);
+}
+
+/* ── Modal body ───────────────────────────────────────────────────────────── */
+
+.modalBody {
+  --background: #10131a;
+  --color: rgba(231, 236, 244, 0.85);
+}
+
+/* ── Loading state ────────────────────────────────────────────────────────── */
+
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  height: 100%;
+  min-height: 260px;
+  padding: 2rem;
+  text-align: center;
+}
+
+.loadingTitle {
   margin: 0;
   color: #fff;
-  font-size: 1rem;
+  font-size: 1.15rem;
   font-weight: 600;
 }
 
-.cardBody {
+.loadingSubtitle {
   margin: 0;
-  color: rgba(231, 236, 244, 0.72);
+  color: rgba(231, 236, 244, 0.45);
   font-size: 0.9rem;
   line-height: 1.6;
 }
 
-.cardActions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-}
+/* ── Shared content wrapper ───────────────────────────────────────────────── */
 
-/* Plan proposal */
-
-.planGrid {
+.proposalContent,
+.infoContent,
+.selectorContent,
+.editorContent {
   display: grid;
-  gap: 0.5rem;
+  gap: 1.5rem;
+  padding: 1.5rem;
 }
 
-.planRow {
+/* ── Plan proposal ────────────────────────────────────────────────────────── */
+
+.proposalSummary {
+  display: grid;
+  gap: 0.6rem;
+  padding: 1.25rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.summaryItem {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.4rem 0;
+  padding: 0.3rem 0;
 }
 
-.planRowSubtract {
-  opacity: 0.75;
+.summarySubtract {
+  opacity: 0.7;
 }
 
-.planRowResult {
-  margin-top: 0.25rem;
-  padding-top: 0.65rem;
+.summaryResult {
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.planLabel {
-  color: rgba(231, 236, 244, 0.7);
-  font-size: 0.88rem;
+.summaryLabel {
+  color: rgba(231, 236, 244, 0.65);
+  font-size: 0.9rem;
 }
 
-.planValue {
+.summaryValue {
   color: #fff;
   font-size: 0.95rem;
 }
 
-.planValueMuted {
-  color: rgba(231, 236, 244, 0.5);
+.summaryValueMuted {
+  color: rgba(231, 236, 244, 0.45);
   font-size: 0.88rem;
 }
 
-.planValueAccent {
+.summaryValueAccent {
   color: #68d391;
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 700;
+}
+
+.marginDeficit .summaryValueAccent {
+  color: #fc8181;
 }
 
 /* Distribution */
 
-.distribution {
+.distributionSection {
   display: grid;
-  gap: 0.4rem;
-  padding: 0.75rem;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.03);
+  gap: 0.75rem;
 }
 
-.distributionTitle {
-  color: rgba(231, 236, 244, 0.5);
+.sectionLabel {
+  margin: 0;
+  color: rgba(231, 236, 244, 0.4);
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  margin-bottom: 0.25rem;
 }
 
-.distributionRow {
+.distributionGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+.distributionItem {
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .distributionLabel {
-  color: rgba(231, 236, 244, 0.7);
-  font-size: 0.85rem;
+  color: rgba(231, 236, 244, 0.65);
+  font-size: 0.82rem;
 }
 
 .distributionAmount {
   color: #fff;
   font-size: 0.85rem;
+  font-weight: 600;
 }
 
 /* Warnings */
 
-.warnings {
+.warningsList {
   display: grid;
-  gap: 0.4rem;
+  gap: 0.6rem;
 }
 
 .warningItem {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  padding: 0.7rem 0.9rem;
+  border-radius: 10px;
+  background: rgba(246, 173, 85, 0.08);
+  border: 1px solid rgba(246, 173, 85, 0.2);
+}
+
+.warningIcon {
+  flex-shrink: 0;
+  font-size: 0.9rem;
+}
+
+.warningText {
   margin: 0;
   color: #f6ad55;
-  font-size: 0.84rem;
+  font-size: 0.85rem;
   line-height: 1.5;
+}
+
+/* ── Info card ────────────────────────────────────────────────────────────── */
+
+.tone_info {
+  border-top: 3px solid rgba(99, 179, 237, 0.4);
+}
+
+.tone_warning {
+  border-top: 3px solid rgba(246, 173, 85, 0.5);
+}
+
+.tone_success {
+  border-top: 3px solid rgba(72, 187, 120, 0.4);
+}
+
+.infoBody {
+  margin: 0;
+  color: rgba(231, 236, 244, 0.85);
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.infoContext {
+  margin: 0;
+  color: rgba(231, 236, 244, 0.5);
+  font-size: 0.88rem;
+  line-height: 1.6;
+  font-style: italic;
+}
+
+/* ── Category selector ────────────────────────────────────────────────────── */
+
+.selectorSubtitle {
+  margin: 0;
+  color: rgba(231, 236, 244, 0.5);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.categoryList {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.categoryGroup {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.categoryGroupLabel {
+  color: rgba(231, 236, 244, 0.35);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 0.1rem;
+}
+
+.categoryItem {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 12px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.categoryItem:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.categoryCheckbox {
+  width: 1.1rem;
+  height: 1.1rem;
+  accent-color: #68d391;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.categoryName {
+  color: rgba(231, 236, 244, 0.85);
+  font-size: 0.95rem;
+}
+
+.selectionCount {
+  color: rgba(231, 236, 244, 0.45);
+  font-size: 0.85rem;
+  align-self: center;
+  margin-right: auto;
+}
+
+/* ── Amount editor ────────────────────────────────────────────────────────── */
+
+.amountList {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.amountRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.amountLabel {
+  color: rgba(231, 236, 244, 0.75);
+  font-size: 0.92rem;
+  flex: 1;
+}
+
+.amountInput {
+  width: 140px;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  font-size: 0.92rem;
+  text-align: right;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.amountInput:focus {
+  border-color: rgba(104, 211, 145, 0.55);
+}
+
+.amountFixed {
+  color: rgba(231, 236, 244, 0.4);
+  font-size: 0.9rem;
+}
+
+.amountTotalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.85rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ── Modal actions ────────────────────────────────────────────────────────── */
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  align-items: center;
+  padding-top: 0.5rem;
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────────── */
+
+@media (max-width: 480px) {
+  .distributionGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .stepLabel {
+    display: none;
+  }
+
+  .modalActions {
+    flex-direction: column-reverse;
+  }
 }

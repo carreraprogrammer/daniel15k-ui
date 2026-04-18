@@ -370,6 +370,8 @@ export type AgentUiEventType =
   | 'show_card'
   | 'show_form'
   | 'request_confirmation'
+  | 'show_category_selector'
+  | 'show_amount_editor'
   | 'navigate';
 
 export interface MonthlyPlanDraft {
@@ -410,11 +412,39 @@ export interface RequestConfirmationPayload {
   context?: string;
 }
 
+export interface BudgetCategoryOption {
+  code: string;
+  name: string;
+  category_type: string;
+  selected: boolean;
+}
+
+export interface ShowCategorySelectorPayload {
+  categories: BudgetCategoryOption[];
+  title: string;
+  subtitle?: string;
+}
+
+export interface AmountEditorItem {
+  code: string;
+  name: string;
+  amount: number;
+  editable: boolean;
+}
+
+export interface ShowAmountEditorPayload {
+  items: AmountEditorItem[];
+  title: string;
+  subtitle?: string;
+}
+
 export type AgentUiEventPayload =
   | ({ draft: MonthlyPlanDraft } & { warnings?: string[] })
   | ShowCardPayload
   | ShowFormPayload
-  | RequestConfirmationPayload;
+  | RequestConfirmationPayload
+  | ShowCategorySelectorPayload
+  | ShowAmountEditorPayload;
 
 export interface AgentUiEvent {
   id: number;
