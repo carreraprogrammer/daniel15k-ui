@@ -234,7 +234,7 @@ export const RecurringObligationsPage = () => {
   return (
     <AppLayout title="Recurrentes">
       <section className={styles.stack}>
-        {!detailsOpen ? (
+        {!detailsOpen && !loading && !error ? (
           <div className={`${styles.focusCard} ${styles.focusCardFull}`}>
             <div className={styles.focusGrid}>
               <div className={styles.focusCopy}>
@@ -330,17 +330,6 @@ export const RecurringObligationsPage = () => {
         {loading ? <Spinner size="lg" /> : null}
         {error ? <ErrorState message={error} onRetry={() => void load()} /> : null}
 
-        <section className={styles.segmentWrap}>
-          <IonSegment value={activeView} onIonChange={(event) => setActiveView((event.detail.value as 'income' | 'obligations') ?? 'obligations')}>
-            <IonSegmentButton value="obligations">
-              <IonLabel>Obligaciones</IonLabel>
-            </IonSegmentButton>
-            <IonSegmentButton value="income">
-              <IonLabel>Ingresos</IonLabel>
-            </IonSegmentButton>
-          </IonSegment>
-        </section>
-
         {!loading && !error && detailsOpen ? (
           <>
             <div className={styles.detailStageHeader}>
@@ -350,6 +339,16 @@ export const RecurringObligationsPage = () => {
               </div>
               <Button label="Volver al resumen" variant="ghost" onClick={() => setDetailsOpen(false)} />
             </div>
+            <section className={styles.segmentWrap}>
+              <IonSegment value={activeView} onIonChange={(event) => setActiveView((event.detail.value as 'income' | 'obligations') ?? 'obligations')}>
+                <IonSegmentButton value="obligations">
+                  <IonLabel>Obligaciones</IonLabel>
+                </IonSegmentButton>
+                <IonSegmentButton value="income">
+                  <IonLabel>Ingresos</IonLabel>
+                </IonSegmentButton>
+              </IonSegment>
+            </section>
             {activeView === 'income' ? (
               <section className={styles.panel}>
               <h3 className={styles.panelTitle}>Fuentes de ingreso</h3>
