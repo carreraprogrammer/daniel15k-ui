@@ -74,6 +74,9 @@ export const IncomeSourceComposer = ({ source = null, loading, onCreate, onUpdat
 
   const isEditing = Boolean(source);
   const submitLabel = useMemo(() => (isEditing ? 'Guardar cambios' : 'Agregar ingreso'), [isEditing]);
+  const amountLabel = useMemo(() => (
+    values.cadence === 'irregular' ? 'Monto cuando llega' : 'Monto total mensual'
+  ), [values.cadence]);
 
   useEffect(() => {
     setValues(fromSource(source));
@@ -144,7 +147,7 @@ export const IncomeSourceComposer = ({ source = null, loading, onCreate, onUpdat
         </div>
         <NumberInput
           name="income-amount"
-          label="Monto esperado"
+          label={amountLabel}
           value={values.expectedAmount}
           onChange={(expectedAmount) => setValues((v) => ({ ...v, expectedAmount }))}
           format="currency"
