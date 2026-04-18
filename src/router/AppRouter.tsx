@@ -1,1 +1,73 @@
-import { Routes, Route, Navigate } from 'react-router-dom'; import { useAuthStore } from '../store/authStore'; import { LoginPage } from '../components/pages/LoginPage/LoginPage'; import { RegisterPage } from '../components/pages/RegisterPage/RegisterPage'; import { DashboardPage } from '../components/pages/DashboardPage/DashboardPage'; import { ProfilePage } from '../components/pages/ProfilePage/ProfilePage'; import { NotFoundPage } from '../components/pages/NotFoundPage/NotFoundPage'; import { OAuthCallbackPage } from '../components/pages/OAuthCallbackPage'; import { TransactionsPage } from '../components/pages/TransactionsPage'; import { DebtsPage } from '../components/pages/DebtsPage'; import { RecurringObligationsPage } from '../components/pages/RecurringObligationsPage'; import { BudgetsPage } from '../components/pages/BudgetsPage'; const Protected=({children}:{children:JSX.Element})=>{ const isAuthenticated=useAuthStore(s=>s.isAuthenticated); return isAuthenticated?children:<Navigate to="/login" replace />; }; const Guest=({children}:{children:JSX.Element})=>{ const isAuthenticated=useAuthStore(s=>s.isAuthenticated); return isAuthenticated?<Navigate to="/dashboard" replace />:children; }; export const AppRouter=()=>{ const isAuthenticated=useAuthStore(s=>s.isAuthenticated); return <Routes><Route path='/' element={<Navigate to={isAuthenticated?'/dashboard':'/login'} replace />} /><Route path='/login' element={<Guest><LoginPage /></Guest>} /><Route path='/register' element={<Guest><RegisterPage /></Guest>} /><Route path='/auth/callback' element={<OAuthCallbackPage />} /><Route path='/dashboard' element={<Protected><DashboardPage /></Protected>} /><Route path='/transactions' element={<Protected><TransactionsPage /></Protected>} /><Route path='/debts' element={<Protected><DebtsPage /></Protected>} /><Route path='/recurring' element={<Protected><RecurringObligationsPage /></Protected>} /><Route path='/budgets' element={<Protected><BudgetsPage /></Protected>} /><Route path='/profile' element={<Protected><ProfilePage /></Protected>} /><Route path='*' element={<NotFoundPage />} /></Routes>; };
+import { IonRouterOutlet } from '@ionic/react';
+import { Redirect, Route } from 'react-router-dom';
+import { useAuthStore } from '../store/authStore';
+import { LoginPage } from '../components/pages/LoginPage/LoginPage';
+import { RegisterPage } from '../components/pages/RegisterPage/RegisterPage';
+import { DashboardPage } from '../components/pages/DashboardPage/DashboardPage';
+import { ProfilePage } from '../components/pages/ProfilePage/ProfilePage';
+import { NotFoundPage } from '../components/pages/NotFoundPage/NotFoundPage';
+import { OAuthCallbackPage } from '../components/pages/OAuthCallbackPage';
+import { TransactionsPage } from '../components/pages/TransactionsPage';
+import { DebtsPage } from '../components/pages/DebtsPage';
+import { RecurringObligationsPage } from '../components/pages/RecurringObligationsPage';
+import { BudgetsPage } from '../components/pages/BudgetsPage';
+
+const ProtectedRoute = ({
+  component: Component,
+  ...rest
+}: {
+  path: string;
+  exact?: boolean;
+  component: () => JSX.Element;
+}) => {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
+  return (
+    <Route
+      {...rest}
+      render={() => (isAuthenticated ? <Component /> : <Redirect to="/login" />)}
+    />
+  );
+};
+
+const GuestRoute = ({
+  component: Component,
+  ...rest
+}: {
+  path: string;
+  exact?: boolean;
+  component: () => JSX.Element;
+}) => {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
+  return (
+    <Route
+      {...rest}
+      render={() => (isAuthenticated ? <Redirect to="/dashboard" /> : <Component />)}
+    />
+  );
+};
+
+export const AppRouter = () => {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
+  return (
+    <IonRouterOutlet>
+      <Route
+        exact
+        path="/"
+        render={() => <Redirect to={isAuthenticated ? '/dashboard' : '/login'} />}
+      />
+      <GuestRoute exact path="/login" component={LoginPage} />
+      <GuestRoute exact path="/register" component={RegisterPage} />
+      <Route exact path="/auth/callback" component={OAuthCallbackPage} />
+      <ProtectedRoute exact path="/dashboard" component={DashboardPage} />
+      <ProtectedRoute exact path="/transactions" component={TransactionsPage} />
+      <ProtectedRoute exact path="/debts" component={DebtsPage} />
+      <ProtectedRoute exact path="/recurring" component={RecurringObligationsPage} />
+      <ProtectedRoute exact path="/budgets" component={BudgetsPage} />
+      <ProtectedRoute exact path="/profile" component={ProfilePage} />
+      <Route component={NotFoundPage} />
+    </IonRouterOutlet>
+  );
+};

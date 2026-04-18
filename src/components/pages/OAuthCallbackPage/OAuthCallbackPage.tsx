@@ -1,32 +1,28 @@
 import { useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { IonContent, IonPage } from '@ionic/react';
+import { useHistory, useLocation } from 'react-router-dom';
 import { Spinner } from '../../atoms/Spinner';
 import { useAuthStore } from '../../../store/authStore';
 
 export const OAuthCallbackPage = () => {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const history = useHistory();
+  const location = useLocation();
   const hydrateAuth = useAuthStore((state) => state.hydrateAuth);
 
   useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
     const error = searchParams.get('error');
     const message = searchParams.get('message') ?? 'No se pudo completar la autenticación con Google.';
     const accessToken = searchParams.get('access_token');
     const refreshToken = searchParams.get('refresh_token');
 
     if (error) {
-      navigate('/login', {
-        replace: true,
-        state: { oauthError: message },
-      });
+      history.replace('/login', { oauthError: message });
       return;
     }
 
     if (!accessToken || !refreshToken) {
-      navigate('/login', {
-        replace: true,
-        state: { oauthError: 'La autenticación con Google no devolvió tokens válidos.' },
-      });
+      history.replace('/login', { oauthError: 'La autenticación con Google no devolvió tokens válidos.' });
       return;
     }
 
@@ -42,8 +38,14 @@ export const OAuthCallbackPage = () => {
       },
     });
 
-    navigate('/dashboard', { replace: true });
-  }, [hydrateAuth, navigate, searchParams]);
+    history.replace('/dashboard');
+  }, [history, hydrateAuth, location.search]);
 
-  return <Spinner />;
+  return (
+    <IonPage>
+      <IonContent fullscreen className="ion-padding">
+        <Spinner />
+      </IonContent>
+    </IonPage>
+  );
 };

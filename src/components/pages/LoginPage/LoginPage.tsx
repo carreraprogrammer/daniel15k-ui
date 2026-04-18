@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useHistory, useLocation } from 'react-router-dom';
 import { AuthLayout } from '../../templates/AuthLayout';
 import { Spinner } from '../../atoms/Spinner';
 import { DynamicForm } from '../../organisms/DynamicForm';
@@ -27,7 +27,7 @@ export const LoginPage = () => {
   const fetchSchema = useFormStore((state) => state.fetchSchema);
   const hydrateAuth = useAuthStore((state) => state.hydrateAuth);
   const location = useLocation();
-  const navigate = useNavigate();
+  const history = useHistory();
   const { showError, toast } = useToast();
   const oauthError = (location.state as { oauthError?: string } | null)?.oauthError;
 
@@ -41,8 +41,8 @@ export const LoginPage = () => {
     }
 
     showError(oauthError);
-    navigate(location.pathname, { replace: true, state: {} });
-  }, [location.pathname, navigate, oauthError, showError]);
+    history.replace(location.pathname, {});
+  }, [history, location.pathname, oauthError, showError]);
 
   if (isLoading && !schema) {
     return <Spinner />;
@@ -70,7 +70,7 @@ export const LoginPage = () => {
             console.log('[LoginPage] onSuccess:response', response);
             hydrateAuth(response);
             console.log('[LoginPage] onSuccess:afterHydrate', useAuthStore.getState());
-            navigate('/dashboard', { replace: true });
+            history.replace('/dashboard');
           }}
           onError={(error) => {
             console.error('[LoginPage] onError', error);

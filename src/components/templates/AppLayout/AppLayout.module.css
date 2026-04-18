@@ -1,3 +1,12 @@
+.page,
+.pageContent {
+  --background: transparent;
+}
+
+.pageContent::part(scroll) {
+  overflow: hidden;
+}
+
 .shell {
   --app-shell-padding: clamp(16px, 3vw, 28px);
   --app-shell-gap: var(--space-6);

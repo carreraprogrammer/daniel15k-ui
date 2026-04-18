@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { financeService } from '../services/financeService';
 import type { AgentUiEvent } from '../types/finance.types';
 
@@ -8,13 +8,13 @@ const POLL_INTERVAL_MS = 2000;
 export function useAgentEvents(sessionId?: string) {
   const [events, setEvents] = useState<AgentUiEvent[]>([]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const navigate = useNavigate();
+  const history = useHistory();
 
   const handleNavigate = useCallback(
     async (event: AgentUiEvent) => {
       const payload = event.payload as unknown as { route: string };
       if (payload?.route) {
-        navigate(payload.route);
+        history.push(payload.route);
       }
       await financeService.consumeAgentEvent(event.id);
     },

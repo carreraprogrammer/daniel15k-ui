@@ -7,7 +7,7 @@ import {
   useRef,
   type ReactNode,
 } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { financeService } from '../services/financeService';
 import type { AgentUiEvent } from '../types/finance.types';
 
@@ -73,7 +73,7 @@ interface AgentUIContextValue {
   startChat: (message: string) => Promise<void>;
   reply: (
     eventId: number,
-    type: 'form_submitted' | 'confirmed' | 'dismissed',
+    type: 'form_submitted' | 'confirmed' | 'dismissed' | 'categories_selected' | 'amounts_confirmed',
     data?: Record<string, unknown>,
   ) => Promise<void>;
   consume: (id: number) => Promise<void>;
@@ -88,7 +88,7 @@ const POLL_MS = 2000;
 
 export function AgentUIProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const navigate = useNavigate();
+  const history = useHistory();
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const sessionIdRef = useRef<string | null>(null);
@@ -111,10 +111,10 @@ export function AgentUIProvider({ children }: { children: ReactNode }) {
     async (event: AgentUiEvent) => {
       const payload = event.payload as unknown as { route: string };
       LOG('navigate event → route:', payload?.route);
-      if (payload?.route) navigate(payload.route);
+      if (payload?.route) history.push(payload.route);
       await financeService.consumeAgentEvent(event.id).catch(() => null);
     },
-    [navigate],
+    [history],
   );
 
   const poll = useCallback(async () => {
@@ -180,7 +180,7 @@ export function AgentUIProvider({ children }: { children: ReactNode }) {
   const reply = useCallback(
     async (
       eventId: number,
-      type: 'form_submitted' | 'confirmed' | 'dismissed',
+      type: 'form_submitted' | 'confirmed' | 'dismissed' | 'categories_selected' | 'amounts_confirmed',
       data?: Record<string, unknown>,
     ) => {
       const sid = sessionIdRef.current;

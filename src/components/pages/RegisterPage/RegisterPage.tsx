@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { AuthLayout } from '../../templates/AuthLayout';
 import { DynamicForm } from '../../organisms/DynamicForm';
 import { GoogleButton } from '../../atoms/GoogleButton';
@@ -21,7 +21,7 @@ const schema = {
 
 export const RegisterPage = () => {
   const hydrateAuth = useAuthStore((state) => state.hydrateAuth);
-  const navigate = useNavigate();
+  const history = useHistory();
   const { showError, toast } = useToast();
 
   return (
@@ -46,7 +46,7 @@ export const RegisterPage = () => {
             console.log('[RegisterPage] onSuccess:response', response);
             hydrateAuth(response);
             console.log('[RegisterPage] onSuccess:afterHydrate', useAuthStore.getState());
-            navigate('/dashboard', { replace: true });
+            history.replace('/dashboard');
           }}
           onError={(error) => {
             console.error('[RegisterPage] onError', error);

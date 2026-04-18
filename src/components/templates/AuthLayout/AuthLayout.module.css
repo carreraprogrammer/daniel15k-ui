@@ -1,3 +1,8 @@
+.authPage,
+.authContent {
+  --background: transparent;
+}
+
 .page {
   min-height: 100vh;
   display: grid;
