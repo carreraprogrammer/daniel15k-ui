@@ -85,7 +85,12 @@ export const IncomeSetupWizard = ({ isOpen, onClose, onComplete }: IncomeSetupWi
     setSaving(false);
   };
 
-  const handleClose = () => { reset(); onClose(); };
+  const handleClose = () => {
+    const hadProgress = step !== 'base';
+    reset();
+    if (hadProgress) onComplete?.();
+    onClose();
+  };
   const handleDone  = () => { reset(); onComplete?.(); onClose(); };
 
   // ── Validación ──────────────────────────────────────────────────────────

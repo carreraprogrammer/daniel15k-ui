@@ -17,9 +17,11 @@ import { FilterSheet } from '../../molecules/FilterSheet';
 import { SheetModal } from '../../molecules/SheetModal';
 import { RecurringObligationComposer } from '../../organisms/RecurringObligationComposer';
 import { RecurringObligationSlidingCard } from '../../organisms/RecurringObligationSlidingCard';
+import { IncomeSourceComposer } from '../../organisms/IncomeSourceComposer';
 import { financeService } from '../../../services/financeService';
 import type {
   IncomeSource,
+  IncomeSourcePayload,
   IncomeSourceQueryParams,
   RecurringObligation,
   RecurringObligationPayload,
@@ -69,6 +71,9 @@ export const RecurringObligationsPage = () => {
   const [incomeFiltersOpen, setIncomeFiltersOpen] = useState(false);
   const [draftIncomeFilters, setDraftIncomeFilters] = useState<IncomeSourceQueryParams>(initialIncomeFilters);
   const [activeView, setActiveView] = useState<'income' | 'obligations'>('obligations');
+  const [incomeComposerOpen, setIncomeComposerOpen] = useState(false);
+  const [editingIncome, setEditingIncome] = useState<IncomeSource | null>(null);
+  const [deletingIncome, setDeletingIncome] = useState<IncomeSource | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -151,6 +156,44 @@ export const RecurringObligationsPage = () => {
     }
   };
 
+  const handleCreateIncome = async (payload: IncomeSourcePayload) => {
+    setSubmitting(true);
+    try {
+      await financeService.createIncomeSource(payload);
+      setIncomeComposerOpen(false);
+      await load();
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleUpdateIncome = async (id: string, payload: Partial<IncomeSourcePayload>) => {
+    setSubmitting(true);
+    try {
+      await financeService.updateIncomeSource(id, payload);
+      setEditingIncome(null);
+      setIncomeComposerOpen(false);
+      await load();
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDeleteIncome = async () => {
+    if (!deletingIncome) return;
+    setSubmitting(true);
+    try {
+      await financeService.deleteIncomeSource(deletingIncome.id);
+      setDeletingIncome(null);
+      if (editingIncome?.id === deletingIncome.id) setEditingIncome(null);
+      await load();
+    } catch (deleteError) {
+      setError(deleteError instanceof Error ? deleteError.message : 'No fue posible borrar el ingreso.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const obligationActiveFilterCount = useMemo(
     () =>
       [obligationFilters.active !== 'all' ? obligationFilters.active : '', obligationFilters.category_id].filter(Boolean).length,
@@ -197,15 +240,21 @@ export const RecurringObligationsPage = () => {
               </p>
             </div>
             <div className={styles.listSecondary}>
-              <IconButton
-                label="Nuevo recurrente"
-                variant="primary"
-                icon={<IonIcon icon={addOutline} />}
-                onClick={() => {
-                  setEditingObligation(null);
-                  setComposerOpen(true);
-                }}
-              />
+              {activeView === 'income' ? (
+                <IconButton
+                  label="Agregar ingreso"
+                  variant="primary"
+                  icon={<IonIcon icon={addOutline} />}
+                  onClick={() => { setEditingIncome(null); setIncomeComposerOpen(true); }}
+                />
+              ) : (
+                <IconButton
+                  label="Nuevo recurrente"
+                  variant="primary"
+                  icon={<IonIcon icon={addOutline} />}
+                  onClick={() => { setEditingObligation(null); setComposerOpen(true); }}
+                />
+              )}
             </div>
           </div>
         </div>
@@ -286,6 +335,22 @@ export const RecurringObligationsPage = () => {
                           {classificationLabel(source.attributes.classification, source.attributes.is_variable)}
                         </span>
                         <span className={styles.listLabel}>{formatCop(source.attributes.expected_amount)}</span>
+                        <div className={styles.rowActions}>
+                          <button
+                            type="button"
+                            className={styles.rowAction}
+                            onClick={() => { setEditingIncome(source); setIncomeComposerOpen(true); }}
+                          >
+                            Editar
+                          </button>
+                          <button
+                            type="button"
+                            className={[styles.rowAction, styles.rowActionDanger].join(' ')}
+                            onClick={() => setDeletingIncome(source)}
+                          >
+                            Borrar
+                          </button>
+                        </div>
                       </div>
                     </article>
                   ))}
@@ -508,6 +573,30 @@ export const RecurringObligationsPage = () => {
           }}
         />
       </CrudModal>
+
+      <CrudModal
+        isOpen={incomeComposerOpen}
+        title={editingIncome ? 'Editar ingreso' : 'Nuevo ingreso'}
+        onClose={() => { setIncomeComposerOpen(false); setEditingIncome(null); }}
+      >
+        <IncomeSourceComposer
+          source={editingIncome}
+          loading={submitting}
+          onCreate={handleCreateIncome}
+          onUpdate={handleUpdateIncome}
+          onCancel={() => { setIncomeComposerOpen(false); setEditingIncome(null); }}
+        />
+      </CrudModal>
+
+      <ConfirmModal
+        isOpen={Boolean(deletingIncome)}
+        title="Borrar ingreso"
+        message={deletingIncome ? `Vas a borrar "${deletingIncome.attributes.name}". Esta acción no se puede deshacer.` : ''}
+        confirmLabel="Borrar"
+        danger
+        onCancel={() => setDeletingIncome(null)}
+        onConfirm={() => void handleDeleteIncome()}
+      />
 
       <SheetModal
         isOpen={summaryOpen}
