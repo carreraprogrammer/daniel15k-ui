@@ -21,8 +21,21 @@
 }
 
 .focusCardFull {
-  min-height: calc(100svh - 8rem);
-  align-content: space-between;
+  min-height: calc(
+    100dvh
+    - (var(--app-shell-padding) * 2)
+    - var(--app-shell-gap)
+    - var(--app-header-height)
+    - var(--app-content-pad-top)
+    - var(--app-content-pad-bottom)
+  );
+  grid-template-rows: minmax(0, 1fr) auto auto;
+  align-content: stretch;
+}
+
+.focusCardFull .focusGrid {
+  align-self: center;
+  align-items: center;
 }
 
 .focusGrid {
@@ -413,7 +426,14 @@
   }
 
   .focusCardFull {
-    min-height: calc(100svh - 6.5rem);
+    min-height: calc(
+      100dvh
+      - (var(--app-shell-padding) * 2)
+      - var(--app-shell-gap)
+      - var(--app-header-height)
+      - var(--app-content-pad-top)
+      - var(--app-content-pad-bottom)
+    );
   }
 
   .focusTitle {

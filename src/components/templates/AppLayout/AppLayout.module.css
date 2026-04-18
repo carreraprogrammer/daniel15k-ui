@@ -1,17 +1,27 @@
 .shell {
+  --app-shell-padding: clamp(16px, 3vw, 28px);
+  --app-shell-gap: var(--space-6);
+  --app-content-pad-top: clamp(20px, 3vw, 32px);
+  --app-content-pad-bottom: clamp(20px, 3vw, 32px);
+  --app-content-pad-inline: clamp(20px, 3vw, 32px);
+  --app-header-height: 0px;
   position: relative;
   min-height: 100dvh;
   height: 100dvh;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
-  padding: clamp(16px, 3vw, 28px);
-  gap: var(--space-6);
+  padding: var(--app-shell-padding);
+  gap: var(--app-shell-gap);
   overflow: hidden;
   overflow-x: clip;
   background:
     radial-gradient(circle at top left, rgba(91, 106, 240, 0.16), transparent 22%),
     radial-gradient(circle at right 20%, rgba(0, 229, 204, 0.12), transparent 24%),
     linear-gradient(180deg, #05070c 0%, #0b0f19 52%, #0b0d12 100%);
+}
+
+.headerSlot {
+  min-width: 0;
 }
 
 .backdrop {
@@ -30,7 +40,7 @@
   z-index: 1;
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr);
-  gap: var(--space-6);
+  gap: var(--app-shell-gap);
   min-height: 0;
 }
 
@@ -105,7 +115,7 @@
 
 .content {
   height: 100%;
-  padding: clamp(20px, 3vw, 32px);
+  padding: var(--app-content-pad-top) var(--app-content-pad-inline) var(--app-content-pad-bottom);
   border-radius: 30px;
   min-width: 0;
   min-height: 0;
@@ -121,10 +131,13 @@
 
 @media (max-width: 1024px) {
   .shell {
+    --app-shell-padding: 12px;
+    --app-shell-gap: 12px;
+    --app-content-pad-top: 18px;
+    --app-content-pad-bottom: 24px;
+    --app-content-pad-inline: 16px;
     min-height: 100dvh;
     height: 100dvh;
-    padding: 12px;
-    gap: 12px;
     overflow: hidden;
   }
 
@@ -145,7 +158,6 @@
   .content {
     height: 100%;
     min-height: 0;
-    padding: 18px 16px 24px;
     border-radius: 24px;
     overflow-y: auto;
   }

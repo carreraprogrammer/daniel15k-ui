@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { IonIcon } from '@ionic/react';
 import { closeOutline, logOutOutline, personCircleOutline } from 'ionicons/icons';
 import { NavLink } from 'react-router-dom';
@@ -24,11 +24,35 @@ const NAV_ITEMS = [
 export const AppLayout = ({ title, children }: { title: string; children: ReactNode }) => {
   const logout = useAuthStore((state) => state.logout);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const shellRef = useRef<HTMLDivElement | null>(null);
+  const headerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     document.body.classList.toggle('menu-open', mobileMenuOpen);
     return () => document.body.classList.remove('menu-open');
   }, [mobileMenuOpen]);
+
+  useEffect(() => {
+    const shell = shellRef.current;
+    const header = headerRef.current;
+    if (!shell || !header || typeof ResizeObserver === 'undefined') {
+      return undefined;
+    }
+
+    const syncHeaderHeight = () => {
+      shell.style.setProperty('--app-header-height', `${header.getBoundingClientRect().height}px`);
+    };
+
+    syncHeaderHeight();
+
+    const observer = new ResizeObserver(() => {
+      syncHeaderHeight();
+    });
+
+    observer.observe(header);
+
+    return () => observer.disconnect();
+  }, []);
 
   const closeMenu = () => setMobileMenuOpen(false);
 
@@ -43,9 +67,11 @@ export const AppLayout = ({ title, children }: { title: string; children: ReactN
   );
 
   return (
-    <div className={styles.shell}>
+    <div ref={shellRef} className={styles.shell}>
       <div className={styles.backdrop} aria-hidden="true" />
-      <Header currentSection={title} onMenuToggle={() => setMobileMenuOpen((open) => !open)} menuOpen={mobileMenuOpen} />
+      <div ref={headerRef} className={styles.headerSlot}>
+        <Header currentSection={title} onMenuToggle={() => setMobileMenuOpen((open) => !open)} menuOpen={mobileMenuOpen} />
+      </div>
       <div className={styles.grid}>
         <aside className={styles.sidebar}>
           <div className={styles.sidebarPanel}>
