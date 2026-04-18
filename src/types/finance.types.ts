@@ -1,15 +1,14 @@
 export interface SummaryBalance {
   income_confirmed: number;
-  income_projected: number;
+  income_pending: number;
   expense_confirmed: number;
   expense_pending: number;
-  expense_projected: number;
   balance_confirmed: number;
   balance_total: number;
 }
 
 export type TransactionType = 'expense' | 'income';
-export type TransactionStatus = 'confirmed' | 'pending' | 'projected';
+export type TransactionStatus = 'confirmed' | 'pending';
 
 export interface BurnRateCategory {
   category: string;

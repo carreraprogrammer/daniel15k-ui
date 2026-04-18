@@ -299,7 +299,6 @@ export const TransactionsPage = () => {
             options={[
               { label: 'Confirmada', value: 'confirmed' },
               { label: 'Pendiente', value: 'pending' },
-              { label: 'Proyectada', value: 'projected' },
             ]}
             placeholder="Todos"
           />

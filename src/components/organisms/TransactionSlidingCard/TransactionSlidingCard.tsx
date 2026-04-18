@@ -10,7 +10,6 @@ const formatCop = (value: number) =>
 const statusLabels: Record<string, string> = {
   confirmed: 'Confirmada',
   pending: 'Pendiente',
-  projected: 'Proyectada',
 };
 
 const typeLabels: Record<string, string> = {

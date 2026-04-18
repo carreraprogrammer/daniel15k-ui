@@ -21,7 +21,6 @@ const transactionTypeOptions = [
 const transactionStatusOptions = [
   { label: 'Confirmada', value: 'confirmed' },
   { label: 'Pendiente', value: 'pending' },
-  { label: 'Proyectada', value: 'projected' },
 ];
 
 interface TransactionComposerValues {
