@@ -20,6 +20,11 @@
   box-shadow: 0 24px 80px rgba(2, 6, 23, 0.28);
 }
 
+.focusCardFull {
+  min-height: calc(100svh - 8rem);
+  align-content: space-between;
+}
+
 .focusGrid {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) auto;
@@ -405,6 +410,10 @@
     gap: 0.9rem;
     padding: 1rem;
     border-radius: 22px;
+  }
+
+  .focusCardFull {
+    min-height: calc(100svh - 6.5rem);
   }
 
   .focusTitle {

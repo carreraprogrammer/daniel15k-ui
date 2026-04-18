@@ -45,7 +45,7 @@ export const DashboardPage = () => {
   return (
     <AppLayout title="Dashboard">
       <section className={styles.stack}>
-        <div className={styles.focusCard}>
+        <div className={`${styles.focusCard} ${styles.focusCardFull}`}>
           <div className={styles.focusGrid}>
             <div className={styles.focusCopy}>
               <span className={styles.eyebrow}>Resumen ejecutivo</span>
