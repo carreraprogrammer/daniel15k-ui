@@ -145,6 +145,8 @@ export const AgentEventRenderer = () => {
   const { state } = useAgentUI();
   const { events, status } = state;
 
+  console.log('[AgentEventRenderer] status:', status, 'events:', events.length);
+
   if (status === 'idle') return null;
 
   return (

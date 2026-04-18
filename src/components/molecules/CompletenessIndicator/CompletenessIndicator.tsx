@@ -105,8 +105,10 @@ export const CompletenessIndicator = () => {
                       className={styles.itemCta}
                       disabled={agentState.status === 'loading'}
                       onClick={async () => {
+                        console.log('[CompletenessIndicator] Armar plan clicked, agentState:', agentState.status);
                         setOpen(false);
                         await startChat('Quiero crear mi plan mensual de presupuesto');
+                        console.log('[CompletenessIndicator] startChat done, agentState:', agentState.status);
                       }}
                     >
                       {agentState.status === 'loading' ? 'Consultando al agente...' : ctaLabel}

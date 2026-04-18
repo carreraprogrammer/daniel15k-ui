@@ -11,6 +11,9 @@ import { useNavigate } from 'react-router-dom';
 import { financeService } from '../services/financeService';
 import type { AgentUiEvent } from '../types/finance.types';
 
+const LOG = (...args: unknown[]) => console.log('[AgentUI]', ...args);
+const ERR = (...args: unknown[]) => console.error('[AgentUI]', ...args);
+
 // ─── State ────────────────────────────────────────────────────────────────────
 
 type ChatStatus = 'idle' | 'loading' | 'active' | 'error';
@@ -38,30 +41,26 @@ type AgentUIAction =
   | { type: 'RESET' };
 
 function reducer(state: AgentUIState, action: AgentUIAction): AgentUIState {
+  LOG('dispatch', action.type, 'payload' in action ? action.payload : '');
   switch (action.type) {
     case 'CHAT_LOADING':
       return { ...state, status: 'loading' };
-
     case 'CHAT_STARTED':
       return { ...state, sessionId: action.payload.sessionId, status: 'active', events: [] };
-
     case 'CHAT_ERROR':
       return { ...state, status: 'error' };
-
     case 'EVENTS_RECEIVED': {
       const existingIds = new Set(state.events.map((e) => e.id));
       const newEvents = action.payload.filter((e) => !existingIds.has(e.id));
+      LOG('EVENTS_RECEIVED — new:', newEvents.length, 'existing:', existingIds.size);
       return newEvents.length > 0
         ? { ...state, events: [...state.events, ...newEvents] }
         : state;
     }
-
     case 'EVENT_CONSUMED':
       return { ...state, events: state.events.filter((e) => e.id !== action.payload.id) };
-
     case 'RESET':
       return initialState;
-
     default:
       return state;
   }
@@ -93,11 +92,11 @@ export function AgentUIProvider({ children }: { children: ReactNode }) {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const sessionIdRef = useRef<string | null>(null);
 
-  // keep ref in sync so the interval closure always has the latest sessionId
   sessionIdRef.current = state.sessionId;
 
   const stopPolling = useCallback(() => {
     if (timerRef.current) {
+      LOG('polling stopped');
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
@@ -106,6 +105,7 @@ export function AgentUIProvider({ children }: { children: ReactNode }) {
   const handleNavigateEvent = useCallback(
     async (event: AgentUiEvent) => {
       const payload = event.payload as unknown as { route: string };
+      LOG('navigate event → route:', payload?.route);
       if (payload?.route) navigate(payload.route);
       await financeService.consumeAgentEvent(event.id).catch(() => null);
     },
@@ -118,10 +118,14 @@ export function AgentUIProvider({ children }: { children: ReactNode }) {
 
     try {
       const pending = await financeService.getPendingAgentEvents(sid);
+      LOG('poll — session:', sid, 'pending events:', pending.length);
+
       if (!pending.length) return;
 
       const navigateEvents = pending.filter((e) => e.event_type === 'navigate');
       const uiEvents = pending.filter((e) => e.event_type !== 'navigate');
+
+      LOG('poll — ui events:', uiEvents.map((e) => e.event_type), 'navigate:', navigateEvents.length);
 
       for (const ev of navigateEvents) {
         void handleNavigateEvent(ev);
@@ -130,29 +134,32 @@ export function AgentUIProvider({ children }: { children: ReactNode }) {
       if (uiEvents.length > 0) {
         dispatch({ type: 'EVENTS_RECEIVED', payload: uiEvents });
       }
-    } catch {
-      // silencioso — no interrumpir la UI por un error de red
+    } catch (err) {
+      ERR('poll error:', err);
     }
   }, [handleNavigateEvent]);
 
   const startPolling = useCallback(() => {
     stopPolling();
+    LOG('polling started every', POLL_MS, 'ms');
     timerRef.current = setInterval(() => void poll(), POLL_MS);
   }, [poll, stopPolling]);
 
-  // cleanup on unmount
   useEffect(() => () => stopPolling(), [stopPolling]);
 
   // ─── Public API ─────────────────────────────────────────────────────────────
 
   const startChat = useCallback(
     async (message: string) => {
+      LOG('startChat called — message:', message);
       dispatch({ type: 'CHAT_LOADING' });
       try {
-        const { session_id } = await financeService.startWebChat(message);
-        dispatch({ type: 'CHAT_STARTED', payload: { sessionId: session_id } });
+        const result = await financeService.startWebChat(message);
+        LOG('startWebChat response:', result);
+        dispatch({ type: 'CHAT_STARTED', payload: { sessionId: result.session_id } });
         startPolling();
-      } catch {
+      } catch (err) {
+        ERR('startChat error:', err);
         dispatch({ type: 'CHAT_ERROR' });
       }
     },
@@ -166,13 +173,15 @@ export function AgentUIProvider({ children }: { children: ReactNode }) {
       data?: Record<string, unknown>,
     ) => {
       const sid = sessionIdRef.current;
-      if (!sid) return;
+      LOG('reply — eventId:', eventId, 'type:', type, 'sessionId:', sid);
+      if (!sid) { ERR('reply called without sessionId'); return; }
       dispatch({ type: 'CHAT_LOADING' });
       try {
         await financeService.replyWebChat(sid, eventId, type, data);
         dispatch({ type: 'EVENT_CONSUMED', payload: { id: eventId } });
-        dispatch({ type: 'CHAT_STARTED', payload: { sessionId: sid } }); // keep active
-      } catch {
+        dispatch({ type: 'CHAT_STARTED', payload: { sessionId: sid } });
+      } catch (err) {
+        ERR('reply error:', err);
         dispatch({ type: 'CHAT_ERROR' });
       }
     },
@@ -180,14 +189,18 @@ export function AgentUIProvider({ children }: { children: ReactNode }) {
   );
 
   const consume = useCallback(async (id: number) => {
+    LOG('consume event id:', id);
     await financeService.consumeAgentEvent(id).catch(() => null);
     dispatch({ type: 'EVENT_CONSUMED', payload: { id } });
   }, []);
 
   const reset = useCallback(() => {
+    LOG('reset');
     stopPolling();
     dispatch({ type: 'RESET' });
   }, [stopPolling]);
+
+  LOG('render — status:', state.status, 'sessionId:', state.sessionId, 'events:', state.events.length);
 
   return (
     <AgentUIContext.Provider value={{ state, startChat, reply, consume, reset }}>
