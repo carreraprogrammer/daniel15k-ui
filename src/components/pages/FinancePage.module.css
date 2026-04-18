@@ -211,38 +211,6 @@
   gap: 0.2rem;
 }
 
-.rowActions {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.25rem;
-}
-
-.rowAction {
-  padding: 0.2rem 0.6rem;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 6px;
-  background: transparent;
-  color: rgba(231, 236, 244, 0.7);
-  font-size: 0.78rem;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-}
-
-.rowAction:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
-}
-
-.rowActionDanger {
-  border-color: rgba(255, 80, 80, 0.3);
-  color: rgba(255, 120, 120, 0.8);
-}
-
-.rowActionDanger:hover {
-  background: rgba(255, 80, 80, 0.1);
-  color: #ff8080;
-}
-
 .listLabel {
   color: #fff;
   font-weight: 600;

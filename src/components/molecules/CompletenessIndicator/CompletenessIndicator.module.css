@@ -71,6 +71,8 @@
 
 .panel {
   width: min(340px, calc(100vw - 2.5rem));
+  max-height: min(480px, calc(100dvh - 8rem));
+  overflow-y: auto;
   padding: var(--space-5);
   border: 1px solid rgba(251, 146, 60, 0.2);
   border-radius: 20px;
@@ -201,11 +203,12 @@
 
 @media (max-width: 1024px) {
   .root {
-    bottom: 1.25rem;
-    right: 1.25rem;
+    bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
+    right: calc(1.25rem + env(safe-area-inset-right, 0px));
   }
 
   .panel {
     width: min(320px, calc(100vw - 2.5rem));
+    max-height: min(400px, calc(100dvh - 7rem));
   }
 }

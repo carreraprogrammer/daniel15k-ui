@@ -18,6 +18,7 @@ import { SheetModal } from '../../molecules/SheetModal';
 import { RecurringObligationComposer } from '../../organisms/RecurringObligationComposer';
 import { RecurringObligationSlidingCard } from '../../organisms/RecurringObligationSlidingCard';
 import { IncomeSourceComposer } from '../../organisms/IncomeSourceComposer';
+import { IncomeSourceSlidingCard } from '../../organisms/IncomeSourceSlidingCard';
 import { financeService } from '../../../services/financeService';
 import type {
   IncomeSource,
@@ -27,7 +28,6 @@ import type {
   RecurringObligationPayload,
   RecurringObligationQueryParams,
 } from '../../../types/finance.types';
-import { cadenceLabel, classificationLabel, incomeWindowLabel, reliabilityLabel } from '../../../utils/incomeProfile';
 import styles from '../FinancePage.module.css';
 
 const formatCop = (value: number) =>
@@ -45,7 +45,7 @@ const initialObligationFilters: RecurringObligationQueryParams = {
 
 const initialIncomeFilters: IncomeSourceQueryParams = {
   q: '',
-  active: 'all',
+  active: true,
   is_variable: 'all',
   sort_by: 'expected_day_from',
   sort_dir: 'asc',
@@ -320,39 +320,12 @@ export const RecurringObligationsPage = () => {
               ) : (
                 <div className={styles.list}>
                   {incomeSources.map((source) => (
-                    <article key={source.id} className={styles.listItem}>
-                      <div className={styles.listPrimary}>
-                        <span className={styles.listLabel}>{source.attributes.name}</span>
-                        <span className={styles.listMeta}>
-                          {incomeWindowLabel(source.attributes)}
-                        </span>
-                        <span className={styles.listMeta}>
-                          {cadenceLabel(source.attributes.cadence)} · {reliabilityLabel(source.attributes.reliability_score)}
-                        </span>
-                      </div>
-                      <div className={styles.listSecondary}>
-                        <span className={styles.pill}>
-                          {classificationLabel(source.attributes.classification, source.attributes.is_variable)}
-                        </span>
-                        <span className={styles.listLabel}>{formatCop(source.attributes.expected_amount)}</span>
-                        <div className={styles.rowActions}>
-                          <button
-                            type="button"
-                            className={styles.rowAction}
-                            onClick={() => { setEditingIncome(source); setIncomeComposerOpen(true); }}
-                          >
-                            Editar
-                          </button>
-                          <button
-                            type="button"
-                            className={[styles.rowAction, styles.rowActionDanger].join(' ')}
-                            onClick={() => setDeletingIncome(source)}
-                          >
-                            Borrar
-                          </button>
-                        </div>
-                      </div>
-                    </article>
+                    <IncomeSourceSlidingCard
+                      key={source.id}
+                      source={source}
+                      onEdit={(s) => { setEditingIncome(s); setIncomeComposerOpen(true); }}
+                      onDelete={setDeletingIncome}
+                    />
                   ))}
                 </div>
               )}
