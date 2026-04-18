@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { IonIcon, useIonAlert, useIonToast } from '@ionic/react';
 import { addOutline } from 'ionicons/icons';
 import { AppLayout } from '../../templates/AppLayout';
@@ -29,6 +29,7 @@ export const TransactionsPage = () => {
   const [sortOpen, setSortOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [insightsOpen, setInsightsOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [presentAlert] = useIonAlert();
   const [presentToast] = useIonToast();
@@ -58,6 +59,12 @@ export const TransactionsPage = () => {
     updateTransaction,
     deleteTransaction,
   } = useTransactionsPage();
+
+  const latestTransaction = transactions[0] ?? null;
+  const latestCategory = useMemo(
+    () => (latestTransaction ? resolveTransactionCategory(latestTransaction, categoryLookup) : null),
+    [categoryLookup, latestTransaction],
+  );
 
   const handleCreate = async (payload: TransactionCreatePayload) => {
     await createTransaction(payload);
@@ -148,84 +155,131 @@ export const TransactionsPage = () => {
   return (
     <AppLayout title="Transacciones">
       <section className={styles.stack}>
-        <div className={styles.hero}>
-          <div className={styles.listItem}>
-            <div className={styles.listPrimary}>
-              <span className={styles.eyebrow}>Finanzas</span>
-              <h2 className={styles.headline}>Operación manual del mes</h2>
-              <p className={styles.description}>
-                Vista inicial de transacciones confirmadas y pendientes para reemplazar el trabajo manual disperso.
+        <div className={styles.focusCard}>
+          <div className={styles.focusGrid}>
+            <div className={styles.focusCopy}>
+              <span className={styles.eyebrow}>Transacciones</span>
+              <p className={styles.focusQuestion}>¿Qué fue lo último que pasó y necesito revisar?</p>
+              <h2 className={styles.focusTitle}>
+                {latestTransaction ? latestTransaction.attributes.concept : 'Todavía no hay movimientos en esta vista'}
+              </h2>
+              <p className={styles.focusText}>
+                {latestTransaction
+                  ? `Esto es lo último que verás al entrar. Si solo quieres confirmar que quedó bien registrado, aquí debería bastar.`
+                  : 'Cuando registres movimientos, esta vista mostrará primero el último caso para que no tengas que escanear toda la lista.'}
               </p>
             </div>
-            <div className={styles.listSecondary}>
-              <IconButton
-                label="Nueva transacción"
-                variant="primary"
-                icon={<IonIcon icon={addOutline} />}
+            <div>
+              <div className={styles.focusValue}>
+                {latestTransaction ? formatCop(latestTransaction.attributes.amount) : '—'}
+              </div>
+              <p className={styles.focusCaption}>
+                {latestTransaction
+                  ? `${latestTransaction.attributes.date} · ${latestTransaction.attributes.status === 'pending' ? 'Pendiente' : 'Confirmada'}`
+                  : 'Sin transacciones visibles todavía'}
+              </p>
+            </div>
+          </div>
+
+          <div className={styles.focusMeta}>
+            {latestCategory ? (
+              <span className={styles.focusBadge}>
+                {latestCategory.categoryName}
+                {latestCategory.subcategoryName ? ` · ${latestCategory.subcategoryName}` : ''}
+              </span>
+            ) : null}
+            <span className={styles.focusBadge}>{metrics.count} resultados</span>
+            <span className={styles.focusBadge}>{metrics.pendingCount} pendientes</span>
+          </div>
+
+          <div className={styles.focusActions}>
+            <IconButton
+              label="Nueva transacción"
+              variant="primary"
+              icon={<IonIcon icon={addOutline} />}
+              onClick={() => {
+                setEditingTransaction(null);
+                setComposerOpen(true);
+              }}
+            />
+            <Button
+              label={detailsOpen ? 'Ocultar detalle' : 'Explorar detalle'}
+              variant="ghost"
+              onClick={() => setDetailsOpen((current) => !current)}
+            />
+            {latestTransaction ? (
+              <Button
+                label="Editar última"
+                size="sm"
+                variant="ghost"
                 onClick={() => {
-                  setEditingTransaction(null);
+                  setEditingTransaction(latestTransaction);
                   setComposerOpen(true);
                 }}
               />
-            </div>
+            ) : null}
           </div>
         </div>
 
-        <ListToolbar
-          searchLabel="Buscar transacciones"
-          searchPlaceholder="Concepto o producto"
-          searchValue={filters.q ?? ''}
-          resultLabel={`${metrics.count} resultados`}
-          activeFilterCount={activeFilterCount}
-          onSearchChange={(q) => {
-            const next = { ...filters, q };
-            setFilters(next);
-            setDraftFilters(next);
-          }}
-          onOpenSort={() => setSortOpen(true)}
-          onOpenFilters={() => setFiltersOpen(true)}
-        />
+        {detailsOpen ? (
+          <div className={styles.detailPanel}>
+            <ListToolbar
+              searchLabel="Buscar transacciones"
+              searchPlaceholder="Concepto o producto"
+              searchValue={filters.q ?? ''}
+              resultLabel={`${metrics.count} resultados`}
+              activeFilterCount={activeFilterCount}
+              onSearchChange={(q) => {
+                const next = { ...filters, q };
+                setFilters(next);
+                setDraftFilters(next);
+              }}
+              onOpenSort={() => setSortOpen(true)}
+              onOpenFilters={() => setFiltersOpen(true)}
+            />
 
-        {!loading ? (
-          <div className={styles.secondaryActions}>
-            <Button
-              label="Ver resumen del período"
-              size="sm"
-              variant="ghost"
-              onClick={() => setInsightsOpen(true)}
+            {!loading ? (
+              <div className={styles.secondaryActions}>
+                <Button
+                  label="Ver resumen del período"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setInsightsOpen(true)}
+                />
+              </div>
+            ) : null}
+
+            <div className={styles.quickFilters}>
+              <Button
+                label="Pendientes"
+                size="sm"
+                variant={filters.status === 'pending' ? 'primary' : 'ghost'}
+                onClick={() => quickToggle({ status: 'pending' })}
+              />
+              <Button
+                label="Gastos"
+                size="sm"
+                variant={filters.transaction_type === 'expense' ? 'primary' : 'ghost'}
+                onClick={() => quickToggle({ transaction_type: 'expense' })}
+              />
+              <Button
+                label="Ingresos"
+                size="sm"
+                variant={filters.transaction_type === 'income' ? 'primary' : 'ghost'}
+                onClick={() => quickToggle({ transaction_type: 'income' })}
+              />
+            </div>
+
+            <AppliedFiltersBar
+              chips={appliedChips}
+              onRemove={removeChip}
+              onClearAll={() => {
+                setFilters(initialTransactionFilters);
+                setDraftFilters(initialTransactionFilters);
+              }}
             />
           </div>
         ) : null}
-
-        <div className={styles.quickFilters}>
-          <Button
-            label="Pendientes"
-            size="sm"
-            variant={filters.status === 'pending' ? 'primary' : 'ghost'}
-            onClick={() => quickToggle({ status: 'pending' })}
-          />
-          <Button
-            label="Gastos"
-            size="sm"
-            variant={filters.transaction_type === 'expense' ? 'primary' : 'ghost'}
-            onClick={() => quickToggle({ transaction_type: 'expense' })}
-          />
-          <Button
-            label="Ingresos"
-            size="sm"
-            variant={filters.transaction_type === 'income' ? 'primary' : 'ghost'}
-            onClick={() => quickToggle({ transaction_type: 'income' })}
-          />
-        </div>
-
-        <AppliedFiltersBar
-          chips={appliedChips}
-          onRemove={removeChip}
-          onClearAll={() => {
-            setFilters(initialTransactionFilters);
-            setDraftFilters(initialTransactionFilters);
-          }}
-        />
 
         {loading ? <Spinner size="lg" /> : null}
         {error ? <ErrorState message={error} onRetry={() => void reload()} /> : null}

@@ -41,6 +41,7 @@ export const DebtsPage = () => {
   const [sortOpen, setSortOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const [editingDebt, setEditingDebt] = useState<Debt | null>(null);
   const [deletingDebt, setDeletingDebt] = useState<Debt | null>(null);
   const [filters, setFilters] = useState<DebtQueryParams>(initialFilters);
@@ -147,78 +148,97 @@ export const DebtsPage = () => {
   return (
     <AppLayout title="Deudas">
       <section className={styles.stack}>
-        <div className={styles.hero}>
-          <div className={styles.listItem}>
-            <div className={styles.listPrimary}>
-              <span className={styles.eyebrow}>Finanzas</span>
-              <h2 className={styles.headline}>Deudas activas y seguimiento manual</h2>
-              <p className={styles.description}>
-                Corrige saldos, pagos y estados cuando el agente no interprete bien una deuda.
+        <div className={styles.focusCard}>
+          <div className={styles.focusGrid}>
+            <div className={styles.focusCopy}>
+              <span className={styles.eyebrow}>Deudas</span>
+              <p className={styles.focusQuestion}>¿Cuánta presión de deuda tengo hoy?</p>
+              <h2 className={styles.focusTitle}>
+                {metrics.activeCount ? `${metrics.activeCount} deudas activas` : 'No hay deudas activas'}
+              </h2>
+              <p className={styles.focusText}>
+                Esta vista debería dejar claro cuánto debes y cuánto te exige al mes antes de abrir filtros, tablas o edición.
               </p>
             </div>
-            <div className={styles.listSecondary}>
-              <IconButton
-                label="Nueva deuda"
-                variant="primary"
-                icon={<IonIcon icon={addOutline} />}
-                onClick={() => {
-                  setEditingDebt(null);
-                  setComposerOpen(true);
-                }}
-              />
+            <div>
+              <div className={styles.focusValue}>{formatCop(metrics.totalBalance)}</div>
+              <p className={styles.focusCaption}>Saldo activo acumulado</p>
             </div>
+          </div>
+
+          <div className={styles.focusMeta}>
+            <span className={styles.focusBadge}>{formatCop(metrics.totalMonthly)} al mes</span>
+            <span className={styles.focusBadge}>{metrics.totalCount} registradas</span>
+          </div>
+
+          <div className={styles.focusActions}>
+            <IconButton
+              label="Nueva deuda"
+              variant="primary"
+              icon={<IonIcon icon={addOutline} />}
+              onClick={() => {
+                setEditingDebt(null);
+                setComposerOpen(true);
+              }}
+            />
+            <Button
+              label={detailsOpen ? 'Ocultar detalle' : 'Explorar detalle'}
+              variant="ghost"
+              onClick={() => setDetailsOpen((current) => !current)}
+            />
+            {!loading ? (
+              <Button
+                label="Ver resumen de deudas"
+                size="sm"
+                variant="ghost"
+                onClick={() => setSummaryOpen(true)}
+              />
+            ) : null}
           </div>
         </div>
 
-        <ListToolbar
-          searchLabel="Buscar deudas"
-          searchPlaceholder="Nombre de deuda"
-          searchValue={filters.q ?? ''}
-          resultLabel={`${metrics.totalCount} resultados`}
-          activeFilterCount={activeFilterCount}
-          onSearchChange={(q) => {
-            const next = { ...filters, q };
-            setFilters(next);
-            setDraftFilters(next);
-          }}
-          onOpenSort={() => setSortOpen(true)}
-          onOpenFilters={() => setFiltersOpen(true)}
-        />
+        {detailsOpen ? (
+          <div className={styles.detailPanel}>
+            <ListToolbar
+              searchLabel="Buscar deudas"
+              searchPlaceholder="Nombre de deuda"
+              searchValue={filters.q ?? ''}
+              resultLabel={`${metrics.totalCount} resultados`}
+              activeFilterCount={activeFilterCount}
+              onSearchChange={(q) => {
+                const next = { ...filters, q };
+                setFilters(next);
+                setDraftFilters(next);
+              }}
+              onOpenSort={() => setSortOpen(true)}
+              onOpenFilters={() => setFiltersOpen(true)}
+            />
 
-        {!loading ? (
-          <div className={styles.secondaryActions}>
-            <Button
-              label="Ver resumen de deudas"
-              size="sm"
-              variant="ghost"
-              onClick={() => setSummaryOpen(true)}
+            <div className={styles.quickFilters}>
+              <Button
+                label="Activas"
+                size="sm"
+                variant={filters.status === 'active' ? 'primary' : 'ghost'}
+                onClick={() => quickToggle({ status: 'active' })}
+              />
+              <Button
+                label="Pagadas"
+                size="sm"
+                variant={filters.status === 'paid_off' ? 'primary' : 'ghost'}
+                onClick={() => quickToggle({ status: 'paid_off' })}
+              />
+            </div>
+
+            <AppliedFiltersBar
+              chips={appliedChips}
+              onRemove={removeChip}
+              onClearAll={() => {
+                setFilters(initialFilters);
+                setDraftFilters(initialFilters);
+              }}
             />
           </div>
         ) : null}
-
-        <div className={styles.quickFilters}>
-          <Button
-            label="Activas"
-            size="sm"
-            variant={filters.status === 'active' ? 'primary' : 'ghost'}
-            onClick={() => quickToggle({ status: 'active' })}
-          />
-          <Button
-            label="Pagadas"
-            size="sm"
-            variant={filters.status === 'paid_off' ? 'primary' : 'ghost'}
-            onClick={() => quickToggle({ status: 'paid_off' })}
-          />
-        </div>
-
-        <AppliedFiltersBar
-          chips={appliedChips}
-          onRemove={removeChip}
-          onClearAll={() => {
-            setFilters(initialFilters);
-            setDraftFilters(initialFilters);
-          }}
-        />
 
         {loading ? <Spinner size="lg" /> : null}
         {error ? <ErrorState message={error} onRetry={() => void load()} /> : null}

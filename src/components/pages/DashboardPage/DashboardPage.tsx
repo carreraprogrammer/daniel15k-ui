@@ -1,5 +1,7 @@
+import { useMemo, useState } from 'react';
 import { AppLayout } from '../../templates/AppLayout';
 import { useAuthStore } from '../../../store/authStore';
+import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
 import { ErrorState } from '../../molecules/ErrorState';
 import { useDashboardData } from '../../../hooks/useDashboardData';
@@ -9,26 +11,75 @@ const formatCop = (value: number) => new Intl.NumberFormat('es-CO', { style: 'cu
 
 export const DashboardPage = () => {
   const user = useAuthStore((state) => state.user);
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const { summary, debts, pending, obligations, loading, error, behaviorSummary, behaviorSignals, reload } =
     useDashboardData();
+
+  const focusState = useMemo(() => {
+    if (!summary) {
+      return {
+        title: 'Todavía no hay lectura del mes',
+        value: '—',
+        caption: 'Carga el resumen para ver balance, presión y siguiente acción.',
+        text: 'Esta pantalla debería responder cómo vas y qué importa hoy, no obligarte a leer seis widgets iguales.',
+      };
+    }
+
+    const baseIncome = summary.monthly_plan?.base_budget_income ?? 0;
+    const expenses = summary.balance.expense_confirmed;
+    const remainingBase = baseIncome > 0 ? baseIncome - expenses : summary.balance.balance_confirmed;
+    const recommendedAction = summary.financial_context?.recommended_action ?? 'Todavía no hay una acción recomendada.';
+    const overflow = summary.overflow_status?.realized_overflow ?? 0;
+
+    return {
+      title: remainingBase >= 0 ? 'Así va tu mes' : 'Tu mes ya va pasado',
+      value: formatCop(remainingBase),
+      caption: baseIncome > 0 ? 'Disponible frente a tu ingreso base presupuestable' : 'Balance confirmado del período',
+      text:
+        overflow > 0
+          ? `Ya hay overflow disponible. ${recommendedAction}`
+          : recommendedAction,
+    };
+  }, [summary]);
 
   return (
     <AppLayout title="Dashboard">
       <section className={styles.stack}>
-        <div className={styles.hero}>
-          <span className={styles.eyebrow}>Resumen ejecutivo</span>
-          <h2 className={styles.headline}>{`Hola, ${user?.name ?? 'Daniel'}`}</h2>
-          <p className={styles.description}>
-            Primer panel operativo para revisar balance, presión de gasto, pendientes y compromisos fijos sin depender solo del flujo por Telegram.
-          </p>
+        <div className={styles.focusCard}>
+          <div className={styles.focusGrid}>
+            <div className={styles.focusCopy}>
+              <span className={styles.eyebrow}>Resumen ejecutivo</span>
+              <p className={styles.focusQuestion}>{`¿Cómo voy este mes y qué debería mirar primero, ${user?.name ?? 'Daniel'}?`}</p>
+              <h2 className={styles.focusTitle}>{focusState.title}</h2>
+              <p className={styles.focusText}>{focusState.text}</p>
+            </div>
+            <div>
+              <div className={styles.focusValue}>{focusState.value}</div>
+              <p className={styles.focusCaption}>{focusState.caption}</p>
+            </div>
+          </div>
+
+          {!loading && !error && summary ? (
+            <div className={styles.focusMeta}>
+              <span className={styles.focusBadge}>{pending.length} pendientes</span>
+              <span className={styles.focusBadge}>{formatCop(summary.debts?.total_balance ?? 0)} en deuda activa</span>
+              <span className={styles.focusBadge}>{formatCop(behaviorSummary.totals.discretionary)} discrecional</span>
+            </div>
+          ) : null}
+
+          <div className={styles.focusActions}>
+            <Button
+              label={detailsOpen ? 'Ocultar detalle' : 'Ver detalle del mes'}
+              variant="ghost"
+              onClick={() => setDetailsOpen((current) => !current)}
+            />
+          </div>
         </div>
-
-
 
         {loading ? <Spinner size="lg" /> : null}
         {error ? <ErrorState message={error} onRetry={() => void reload()} /> : null}
 
-        {!loading && !error && summary ? (
+        {!loading && !error && summary && detailsOpen ? (
           <>
             <div className={styles.metrics}>
               <article className={styles.metricCard}>

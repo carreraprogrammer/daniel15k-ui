@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AppLayout } from '../../templates/AppLayout';
+import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
 import { SelectInput } from '../../atoms/SelectInput';
 import { ErrorState } from '../../molecules/ErrorState';
@@ -31,6 +32,7 @@ export const BudgetsPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [sortOpen, setSortOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const [filters, setFilters] = useState<BudgetQueryParams>(initialFilters);
   const [draftFilters, setDraftFilters] = useState<BudgetQueryParams>(initialFilters);
 
@@ -74,44 +76,80 @@ export const BudgetsPage = () => {
     return next;
   }, [categoryOptions, filters.category_id, filters.q]);
 
+  const burnCategories = summary?.burn_rate?.categories ?? [];
+  const outOfRange = burnCategories.filter((item) => item.on_track === false);
+  const topRisk = outOfRange[0] ?? burnCategories[0] ?? null;
+
   return (
     <AppLayout title="Presupuestos">
       <section className={styles.stack}>
-        <div className={styles.hero}>
-          <span className={styles.eyebrow}>Finanzas</span>
-          <h2 className={styles.headline}>Presupuesto y burn rate</h2>
-          <p className={styles.description}>
-            Lectura inicial del período activo para ver límites cargados y la proyección contra el gasto real.
-          </p>
+        <div className={styles.focusCard}>
+          <div className={styles.focusGrid}>
+            <div className={styles.focusCopy}>
+              <span className={styles.eyebrow}>Presupuestos</span>
+              <p className={styles.focusQuestion}>¿El mes va dentro del plan o ya se salió de rango?</p>
+              <h2 className={styles.focusTitle}>
+                {outOfRange.length ? `${outOfRange.length} categorías fuera de rango` : 'El burn rate sigue estable'}
+              </h2>
+              <p className={styles.focusText}>
+                {topRisk
+                  ? `${topRisk.category} es la señal más útil para empezar. No necesitas leer toda la tabla antes de saber dónde mirar.`
+                  : 'Cuando existan presupuestos, esta tarjeta te dirá primero si el plan sigue sano o no.'}
+              </p>
+            </div>
+            <div>
+              <div className={styles.focusValue}>{topRisk ? formatCop(topRisk.projected) : '—'}</div>
+              <p className={styles.focusCaption}>
+                {topRisk ? `Proyección actual de ${topRisk.category}` : 'Sin burn rate visible todavía'}
+              </p>
+            </div>
+          </div>
+
+          <div className={styles.focusMeta}>
+            <span className={styles.focusBadge}>{budgets.length} categorías con presupuesto</span>
+            <span className={styles.focusBadge}>{outOfRange.length} alertas</span>
+          </div>
+
+          <div className={styles.focusActions}>
+            <Button
+              label={detailsOpen ? 'Ocultar detalle' : 'Explorar detalle'}
+              variant="ghost"
+              onClick={() => setDetailsOpen((current) => !current)}
+            />
+          </div>
         </div>
 
-        <ListToolbar
-          searchLabel="Buscar presupuestos"
-          searchPlaceholder="Categoría"
-          searchValue={filters.q ?? ''}
-          resultLabel={`${budgets.length} resultados`}
-          activeFilterCount={activeFilterCount}
-          onSearchChange={(q) => {
-            const next = { ...filters, q };
-            setFilters(next);
-            setDraftFilters(next);
-          }}
-          onOpenSort={() => setSortOpen(true)}
-          onOpenFilters={() => setFiltersOpen(true)}
-        />
+        {detailsOpen ? (
+          <div className={styles.detailPanel}>
+            <ListToolbar
+              searchLabel="Buscar presupuestos"
+              searchPlaceholder="Categoría"
+              searchValue={filters.q ?? ''}
+              resultLabel={`${budgets.length} resultados`}
+              activeFilterCount={activeFilterCount}
+              onSearchChange={(q) => {
+                const next = { ...filters, q };
+                setFilters(next);
+                setDraftFilters(next);
+              }}
+              onOpenSort={() => setSortOpen(true)}
+              onOpenFilters={() => setFiltersOpen(true)}
+            />
 
-        <AppliedFiltersBar
-          chips={chips}
-          onRemove={(key) => {
-            const next = { ...filters, [key]: '' };
-            setFilters(next);
-            setDraftFilters(next);
-          }}
-          onClearAll={() => {
-            setFilters(initialFilters);
-            setDraftFilters(initialFilters);
-          }}
-        />
+            <AppliedFiltersBar
+              chips={chips}
+              onRemove={(key) => {
+                const next = { ...filters, [key]: '' };
+                setFilters(next);
+                setDraftFilters(next);
+              }}
+              onClearAll={() => {
+                setFilters(initialFilters);
+                setDraftFilters(initialFilters);
+              }}
+            />
+          </div>
+        ) : null}
 
         {loading ? <Spinner size="lg" /> : null}
         {error ? <ErrorState message={error} onRetry={() => void load()} /> : null}

@@ -8,6 +8,96 @@
   gap: 1.25rem;
 }
 
+.focusCard {
+  display: grid;
+  gap: 1rem;
+  padding: 1.3rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top left, rgba(245, 158, 11, 0.12), transparent 42%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.02));
+  box-shadow: 0 24px 80px rgba(2, 6, 23, 0.28);
+}
+
+.focusGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) auto;
+  gap: 1rem;
+  align-items: end;
+}
+
+.focusCopy {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.focusQuestion {
+  margin: 0;
+  color: rgba(231, 236, 244, 0.72);
+  font-size: 0.84rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.focusTitle {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(1.45rem, 2.2vw, 1.95rem);
+  letter-spacing: -0.04em;
+}
+
+.focusText {
+  margin: 0;
+  max-width: 58ch;
+  color: rgba(231, 236, 244, 0.72);
+  line-height: 1.55;
+}
+
+.focusValue {
+  color: #fff;
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  line-height: 0.95;
+}
+
+.focusCaption {
+  margin: 0.35rem 0 0;
+  color: rgba(231, 236, 244, 0.62);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.focusMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.focusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.42rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.focusActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.detailPanel {
+  display: grid;
+  gap: 1rem;
+}
+
 .hero > .listItem {
   padding: 0;
   background: transparent;
@@ -278,6 +368,10 @@
   .columns {
     grid-template-columns: 1fr;
   }
+
+  .focusGrid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 640px) {
@@ -305,6 +399,25 @@
 
   .description {
     display: none;
+  }
+
+  .focusCard {
+    gap: 0.9rem;
+    padding: 1rem;
+    border-radius: 22px;
+  }
+
+  .focusTitle {
+    font-size: clamp(1.25rem, 6vw, 1.6rem);
+  }
+
+  .focusValue {
+    font-size: clamp(1.8rem, 9vw, 2.4rem);
+  }
+
+  .focusActions {
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .eyebrow {
