@@ -30,6 +30,12 @@ El flujo principal usa:
 - confiabilidad explícita para ingresos no base
 - una sola fuente de ingreso aunque tenga varias ventanas de cobro
 
+Además:
+
+- si la cadencia es `biweekly`, la UI pide el valor por quincena
+- si la cadencia es `weekly`, la UI pide el valor por semana
+- el total mensual esperado se calcula internamente y se muestra como referencia en la pantalla
+
 ## Modelo vigente
 
 Ahora el frontend crea un `income_source` con `schedules` anidados:

@@ -7,9 +7,11 @@ import { TextInput } from '../../atoms/TextInput';
 import { financeService } from '../../../services/financeService';
 import type { IncomeSourcePayload } from '../../../types/finance.types';
 import {
+  amountLabelForCadence,
   BIWEEKLY_DAY_OPTIONS,
   INCOME_CADENCE_OPTIONS,
   MONTHLY_WINDOW_OPTIONS,
+  monthlyTotalFromAmount,
   RELIABILITY_OPTIONS,
   buildIncomeSchedules,
   windowRange,
@@ -107,12 +109,13 @@ export const IncomeSetupWizard = ({ isOpen, onClose, onComplete }: IncomeSetupWi
     classification: IncomeSourcePayload['classification'],
     reliabilityScore: number,
   ): IncomeSourcePayload[] => {
-    const amount = Number(income.amount);
-    const schedules = buildIncomeSchedules(income.cadence, amount, {
+    const eventAmount = Number(income.amount);
+    const schedules = buildIncomeSchedules(income.cadence, eventAmount, {
       windowKey: income.windowKey,
       biweeklyDay1: income.biweeklyDay1 === '' ? undefined : Number(income.biweeklyDay1),
       biweeklyDay2: income.biweeklyDay2 === '' ? undefined : Number(income.biweeklyDay2),
     });
+    const monthlyTotal = monthlyTotalFromAmount(income.cadence, eventAmount);
 
     const summaryRange = income.cadence === 'irregular'
       ? { dayFrom: 1, dayTo: 31 }
@@ -126,7 +129,7 @@ export const IncomeSetupWizard = ({ isOpen, onClose, onComplete }: IncomeSetupWi
     return [
       {
         name: income.name.trim(),
-        expected_amount: amount,
+        expected_amount: monthlyTotal,
         expected_day_from: summaryRange.dayFrom,
         expected_day_to: summaryRange.dayTo,
         classification,
@@ -187,7 +190,9 @@ export const IncomeSetupWizard = ({ isOpen, onClose, onComplete }: IncomeSetupWi
     done:         '¡Listo!',
   };
 
-  const amountLabel = base.cadence === 'irregular' ? 'Monto cuando llega' : 'Monto total mensual';
+  const amountLabel = amountLabelForCadence(base.cadence);
+  const baseMonthlyExpected = base.amount === '' ? null : monthlyTotalFromAmount(base.cadence, Number(base.amount));
+  const variableMonthlyExpected = varIncome.amount === '' ? null : monthlyTotalFromAmount(varIncome.cadence, Number(varIncome.amount));
 
   // ── Render ───────────────────────────────────────────────────────────────
 
@@ -241,6 +246,11 @@ export const IncomeSetupWizard = ({ isOpen, onClose, onComplete }: IncomeSetupWi
                 min={0}
                 required
               />
+              {(base.cadence === 'biweekly' || base.cadence === 'weekly') && baseMonthlyExpected ? (
+                <p className={[styles.hint, styles.spanTwo].join(' ')}>
+                  Total mensual esperado calculado: <strong>${baseMonthlyExpected.toLocaleString('es-CO')}</strong>
+                </p>
+              ) : null}
               <div />
 
               {base.cadence === 'biweekly' && (
@@ -264,7 +274,7 @@ export const IncomeSetupWizard = ({ isOpen, onClose, onComplete }: IncomeSetupWi
                     required
                   />
                   <p className={[styles.hint, styles.spanTwo].join(' ')}>
-                    Se guardará una sola fuente de ingreso con dos ventanas de cobro y total mensual consolidado.
+                    Escribe el valor de cada quincena. El sistema calculará el total mensual internamente.
                   </p>
                 </>
               )}
@@ -290,7 +300,7 @@ export const IncomeSetupWizard = ({ isOpen, onClose, onComplete }: IncomeSetupWi
 
               {base.cadence === 'weekly' && (
                 <p className={[styles.hint, styles.spanTwo].join(' ')}>
-                  Se crearán cuatro ventanas semanales dentro de la misma fuente para reflejar el ingreso total del mes.
+                  Escribe el valor que suele llegar cada semana. El sistema proyectará el total mensual internamente.
                 </p>
               )}
             </div>
@@ -337,7 +347,7 @@ export const IncomeSetupWizard = ({ isOpen, onClose, onComplete }: IncomeSetupWi
               </div>
               <NumberInput
                 name="wz-var-amount"
-                label="Monto cuando llega"
+                label={amountLabelForCadence(varIncome.cadence)}
                 value={varIncome.amount}
                 onChange={(amount) => setVarIncome((v) => ({ ...v, amount }))}
                 format="currency"
@@ -345,6 +355,11 @@ export const IncomeSetupWizard = ({ isOpen, onClose, onComplete }: IncomeSetupWi
                 min={0}
                 required
               />
+              {(varIncome.cadence === 'biweekly' || varIncome.cadence === 'weekly') && variableMonthlyExpected ? (
+                <p className={[styles.hint, styles.spanTwo].join(' ')}>
+                  Total mensual esperado calculado: <strong>${variableMonthlyExpected.toLocaleString('es-CO')}</strong>
+                </p>
+              ) : null}
               <SelectInput
                 name="wz-var-cadence"
                 label="¿Cada cuánto llega?"
@@ -393,7 +408,7 @@ export const IncomeSetupWizard = ({ isOpen, onClose, onComplete }: IncomeSetupWi
               ) : null}
               {varIncome.cadence === 'weekly' && (
                 <p className={[styles.hint, styles.spanTwo].join(' ')}>
-                  Se guardará una sola fuente con cuatro ventanas semanales y confiabilidad variable.
+                  Escribe el valor semanal. El sistema convertirá eso a total mensual esperado.
                 </p>
               )}
               <div className={styles.spanTwo}>

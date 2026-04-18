@@ -135,32 +135,28 @@ export const buildIncomeSchedules = (
     const secondDay = options.biweeklyDay2 ?? 20;
     const firstWindow = dayWindow(firstDay);
     const secondWindow = dayWindow(secondDay);
-    const firstAmount = Math.round(amount / 2);
     return [
       {
         ordinal: 1,
         label: 'Quincena 1',
         expected_day_from: firstWindow.dayFrom,
         expected_day_to: firstWindow.dayTo,
-        expected_amount: firstAmount,
+        expected_amount: amount,
       },
       {
         ordinal: 2,
         label: 'Quincena 2',
         expected_day_from: secondWindow.dayFrom,
         expected_day_to: secondWindow.dayTo,
-        expected_amount: amount - firstAmount,
+        expected_amount: amount,
       },
     ];
   }
 
   if (cadence === 'weekly') {
-    const baseAmount = Math.floor(amount / WEEKLY_WINDOWS.length);
-    const remainder = amount - (baseAmount * WEEKLY_WINDOWS.length);
-
-    return WEEKLY_WINDOWS.map((window, index) => ({
+    return WEEKLY_WINDOWS.map((window) => ({
       ...window,
-      expected_amount: baseAmount + (index === WEEKLY_WINDOWS.length - 1 ? remainder : 0),
+      expected_amount: amount,
     }));
   }
 
@@ -177,4 +173,23 @@ export const buildIncomeSchedules = (
       expected_amount: amount,
     },
   ];
+};
+
+export const monthlyTotalFromAmount = (cadence: IncomeCadence, amount: number) => {
+  if (cadence === 'biweekly') return amount * 2;
+  if (cadence === 'weekly') return amount * 4;
+  return amount;
+};
+
+export const amountLabelForCadence = (cadence: IncomeCadence) => {
+  switch (cadence) {
+    case 'biweekly':
+      return 'Monto por quincena';
+    case 'weekly':
+      return 'Monto por semana';
+    case 'irregular':
+      return 'Monto cuando llega';
+    default:
+      return 'Monto total mensual';
+  }
 };

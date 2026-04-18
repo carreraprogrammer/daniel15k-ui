@@ -5,11 +5,13 @@ import { SelectInput } from '../../atoms/SelectInput';
 import { TextInput } from '../../atoms/TextInput';
 import type { IncomeSource, IncomeSourcePayload } from '../../../types/finance.types';
 import {
+  amountLabelForCadence,
   BIWEEKLY_DAY_OPTIONS,
   buildIncomeSchedules,
   INCOME_CADENCE_OPTIONS,
   INCOME_CLASSIFICATION_OPTIONS,
   MONTHLY_WINDOW_OPTIONS,
+  monthlyTotalFromAmount,
   RELIABILITY_OPTIONS,
   inferWindowKey,
 } from '../../../utils/incomeProfile';
@@ -50,7 +52,11 @@ const fromSource = (source: IncomeSource | null): Values => {
   ) ?? 'mid';
   return {
     name: source.attributes.name,
-    expectedAmount: source.attributes.expected_amount,
+    expectedAmount: cadence === 'biweekly'
+      ? Math.round(source.attributes.expected_amount / 2)
+      : cadence === 'weekly'
+        ? Math.round(source.attributes.expected_amount / 4)
+        : source.attributes.expected_amount,
     cadence,
     windowKey: inferredWindow,
     biweeklyDay1: scheduleAnchor(primarySchedule?.expected_day_from, primarySchedule?.expected_day_to) ?? source.attributes.expected_day_from,
@@ -74,9 +80,11 @@ export const IncomeSourceComposer = ({ source = null, loading, onCreate, onUpdat
 
   const isEditing = Boolean(source);
   const submitLabel = useMemo(() => (isEditing ? 'Guardar cambios' : 'Agregar ingreso'), [isEditing]);
-  const amountLabel = useMemo(() => (
-    values.cadence === 'irregular' ? 'Monto cuando llega' : 'Monto total mensual'
-  ), [values.cadence]);
+  const amountLabel = useMemo(() => amountLabelForCadence(values.cadence), [values.cadence]);
+  const monthlyExpected = useMemo(
+    () => (values.expectedAmount === '' ? null : monthlyTotalFromAmount(values.cadence, Number(values.expectedAmount))),
+    [values.cadence, values.expectedAmount],
+  );
 
   useEffect(() => {
     setValues(fromSource(source));
@@ -98,17 +106,19 @@ export const IncomeSourceComposer = ({ source = null, loading, onCreate, onUpdat
       return;
     }
 
-    const schedules = buildIncomeSchedules(values.cadence, Number(values.expectedAmount), {
+    const eventAmount = Number(values.expectedAmount);
+    const schedules = buildIncomeSchedules(values.cadence, eventAmount, {
       windowKey: values.windowKey,
       biweeklyDay1: values.biweeklyDay1 === '' ? undefined : Number(values.biweeklyDay1),
       biweeklyDay2: values.biweeklyDay2 === '' ? undefined : Number(values.biweeklyDay2),
     });
     const dayFrom = Math.min(...schedules.map((schedule) => schedule.expected_day_from));
     const dayTo = Math.max(...schedules.map((schedule) => schedule.expected_day_to));
+    const monthlyTotal = monthlyTotalFromAmount(values.cadence, eventAmount);
 
     const payload: IncomeSourcePayload = {
       name: values.name.trim(),
-      expected_amount: Number(values.expectedAmount),
+      expected_amount: monthlyTotal,
       expected_day_from: dayFrom,
       expected_day_to: dayTo,
       classification: values.classification,
@@ -155,6 +165,11 @@ export const IncomeSourceComposer = ({ source = null, loading, onCreate, onUpdat
           min={0}
           required
         />
+        {(values.cadence === 'biweekly' || values.cadence === 'weekly') && monthlyExpected ? (
+          <p className={[styles.hint, styles.spanTwo].join(' ')}>
+            Total mensual esperado calculado: <strong>${monthlyExpected.toLocaleString('es-CO')}</strong>
+          </p>
+        ) : null}
         <SelectInput
           name="income-classification"
           label="Clasificación"
@@ -210,9 +225,14 @@ export const IncomeSourceComposer = ({ source = null, loading, onCreate, onUpdat
             Los ingresos irregulares se guardan con ventana de mes completo.
           </p>
         ) : null}
+        {values.cadence === 'biweekly' ? (
+          <p className={[styles.hint, styles.spanTwo].join(' ')}>
+            Escribe el valor de cada quincena. El sistema sumará ambas para proyectar el total mensual.
+          </p>
+        ) : null}
         {values.cadence === 'weekly' ? (
           <p className={[styles.hint, styles.spanTwo].join(' ')}>
-            El ingreso se guardará como una sola fuente con cuatro ventanas semanales dentro del mes.
+            Escribe el valor que suele llegar cada semana. El total mensual se calcula internamente.
           </p>
         ) : null}
         {values.classification !== 'base' && (
