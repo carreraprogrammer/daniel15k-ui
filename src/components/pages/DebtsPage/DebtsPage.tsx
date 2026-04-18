@@ -148,7 +148,7 @@ export const DebtsPage = () => {
   return (
     <AppLayout title="Deudas">
       <section className={styles.stack}>
-        <div className={styles.focusCard}>
+        <div className={`${styles.focusCard} ${styles.focusCardFull}`}>
           <div className={styles.focusGrid}>
             <div className={styles.focusCopy}>
               <span className={styles.eyebrow}>Deudas</span>

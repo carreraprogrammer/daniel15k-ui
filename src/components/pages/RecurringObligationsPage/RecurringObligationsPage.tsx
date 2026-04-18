@@ -231,7 +231,7 @@ export const RecurringObligationsPage = () => {
   return (
     <AppLayout title="Recurrentes">
       <section className={styles.stack}>
-        <div className={styles.focusCard}>
+        <div className={`${styles.focusCard} ${styles.focusCardFull}`}>
           <div className={styles.focusGrid}>
             <div className={styles.focusCopy}>
               <span className={styles.eyebrow}>Recurrentes</span>
