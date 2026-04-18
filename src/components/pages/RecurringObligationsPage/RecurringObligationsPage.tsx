@@ -14,7 +14,6 @@ import { ListToolbar } from '../../molecules/ListToolbar';
 import { AppliedFiltersBar } from '../../molecules/AppliedFiltersBar';
 import { SortSheet } from '../../molecules/SortSheet';
 import { FilterSheet } from '../../molecules/FilterSheet';
-import { SheetModal } from '../../molecules/SheetModal';
 import { RecurringObligationComposer } from '../../organisms/RecurringObligationComposer';
 import { RecurringObligationSlidingCard } from '../../organisms/RecurringObligationSlidingCard';
 import { IncomeSourceComposer } from '../../organisms/IncomeSourceComposer';
@@ -62,7 +61,6 @@ export const RecurringObligationsPage = () => {
   const [composerOpen, setComposerOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [summaryOpen, setSummaryOpen] = useState(false);
   const [editingObligation, setEditingObligation] = useState<RecurringObligation | null>(null);
   const [deletingObligation, setDeletingObligation] = useState<RecurringObligation | null>(null);
   const [obligationFilters, setObligationFilters] = useState<RecurringObligationQueryParams>(initialObligationFilters);
@@ -315,14 +313,6 @@ export const RecurringObligationsPage = () => {
                 variant="ghost"
                 onClick={() => setDetailsOpen(true)}
               />
-              {!loading ? (
-                <Button
-                  label="Ver resumen recurrente"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => setSummaryOpen(true)}
-                />
-              ) : null}
             </div>
           </div>
         ) : null}
@@ -636,34 +626,6 @@ export const RecurringObligationsPage = () => {
         onCancel={() => setDeletingIncome(null)}
         onConfirm={() => void handleDeleteIncome()}
       />
-
-      <SheetModal
-        isOpen={summaryOpen}
-        title="Resumen recurrente"
-        onClose={() => setSummaryOpen(false)}
-        height="compact"
-      >
-        <div className={styles.summarySheetBody}>
-          <div className={styles.metrics}>
-            <article className={styles.metricCard}>
-              <span className={styles.metricLabel}>Total ingresos esperados</span>
-              <strong className={styles.metricValue}>{formatCop(metrics.incomeTotal)}</strong>
-            </article>
-            <article className={styles.metricCard}>
-              <span className={styles.metricLabel}>Total obligaciones</span>
-              <strong className={styles.metricValue}>{formatCop(metrics.obligationsTotal)}</strong>
-            </article>
-            <article className={styles.metricCard}>
-              <span className={styles.metricLabel}>Fuentes de ingreso</span>
-              <strong className={styles.metricValue}>{metrics.incomeCount}</strong>
-            </article>
-            <article className={styles.metricCard}>
-              <span className={styles.metricLabel}>Recurrentes activos</span>
-              <strong className={styles.metricValue}>{metrics.obligationsCount}</strong>
-            </article>
-          </div>
-        </div>
-      </SheetModal>
     </AppLayout>
   );
 };

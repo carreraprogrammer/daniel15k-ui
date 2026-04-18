@@ -13,7 +13,6 @@ import { ListToolbar } from '../../molecules/ListToolbar';
 import { AppliedFiltersBar } from '../../molecules/AppliedFiltersBar';
 import { SortSheet } from '../../molecules/SortSheet';
 import { FilterSheet } from '../../molecules/FilterSheet';
-import { SheetModal } from '../../molecules/SheetModal';
 import { TransactionComposer } from '../../organisms/TransactionComposer';
 import { TransactionSlidingCard } from '../../organisms/TransactionSlidingCard';
 import type { Transaction, TransactionCreatePayload, TransactionUpdatePayload } from '../../../types/finance.types';
@@ -28,7 +27,6 @@ export const TransactionsPage = () => {
   const [composerOpen, setComposerOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [insightsOpen, setInsightsOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [presentAlert] = useIonAlert();
@@ -269,17 +267,6 @@ export const TransactionsPage = () => {
               onOpenFilters={() => setFiltersOpen(true)}
             />
 
-            {!loading ? (
-              <div className={styles.secondaryActions}>
-                <Button
-                  label="Ver resumen del período"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => setInsightsOpen(true)}
-                />
-              </div>
-            ) : null}
-
             <div className={styles.quickFilters}>
               <Button
                 label="Pendientes"
@@ -435,65 +422,6 @@ export const TransactionsPage = () => {
           }}
         />
       </CrudModal>
-
-      <SheetModal
-        isOpen={insightsOpen}
-        title="Resumen de transacciones"
-        onClose={() => setInsightsOpen(false)}
-        height="tall"
-      >
-        <div className={styles.summarySheetBody}>
-          <div className={styles.metrics}>
-            <article className={styles.metricCard}>
-              <span className={styles.metricLabel}>Balance confirmado</span>
-              <strong className={styles.metricValue}>{formatCop(summary?.balance.balance_confirmed ?? 0)}</strong>
-            </article>
-            <article className={styles.metricCard}>
-              <span className={styles.metricLabel}>Gastos del período</span>
-              <strong className={styles.metricValue}>{formatCop(metrics.expenseTotal)}</strong>
-            </article>
-            <article className={styles.metricCard}>
-              <span className={styles.metricLabel}>Ingresos del período</span>
-              <strong className={styles.metricValue}>{formatCop(metrics.incomeTotal)}</strong>
-            </article>
-            <article className={styles.metricCard}>
-              <span className={styles.metricLabel}>Pendientes / total</span>
-              <strong className={styles.metricValue}>
-                {metrics.pendingCount} / {metrics.count}
-              </strong>
-            </article>
-            <article className={styles.metricCard}>
-              <span className={styles.metricLabel}>Discrecional</span>
-              <strong className={styles.metricValue}>{formatCop(behaviorSummary.totals.discretionary)}</strong>
-              <p className={styles.metricHint}>Gasto elegido. Este es el bloque donde sí existe fricción útil.</p>
-            </article>
-            <article className={styles.metricCard}>
-              <span className={styles.metricLabel}>Inversión</span>
-              <strong className={styles.metricValue}>{formatCop(behaviorSummary.totals.investment)}</strong>
-              <p className={styles.metricHint}>Plata que construye futuro en vez de solo sostener el presente.</p>
-            </article>
-          </div>
-
-          {behaviorSignals.length ? (
-            <section className={styles.panel}>
-              <h3 className={styles.panelTitle}>Lectura conductual</h3>
-              <div className={styles.list}>
-                {behaviorSignals.map((signal) => (
-                  <article key={`${signal.tone}-${signal.title}`} className={styles.listItem}>
-                    <div className={styles.listPrimary}>
-                      <span className={styles.listLabel}>{signal.title}</span>
-                      <span className={styles.listMeta}>{signal.message}</span>
-                    </div>
-                    <div className={styles.listSecondary}>
-                      <span className={styles.pill}>{signal.tone}</span>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </section>
-          ) : null}
-        </div>
-      </SheetModal>
     </AppLayout>
   );
 };
