@@ -11,6 +11,7 @@ Cerrar la implementación del perfil de ingresos para que frontend y backend hab
 - `cadence` usa:
   - `monthly`
   - `biweekly`
+  - `weekly`
   - `irregular`
 - `classification` usa:
   - `base`
@@ -27,22 +28,37 @@ El flujo principal usa:
 - ventanas predefinidas
 - cadencia explícita
 - confiabilidad explícita para ingresos no base
+- una sola fuente de ingreso aunque tenga varias ventanas de cobro
 
-## Workaround aceptado en este milestone
+## Modelo vigente
 
-Cuando el usuario declara un ingreso quincenal en el wizard:
+Ahora el frontend crea un `income_source` con `schedules` anidados:
 
-- la UI crea dos `income_sources`
-- cada uno se guarda como entrada mensual esperada
-- se marca con `evidence_source` de split
+- `monthly` -> 1 schedule
+- `biweekly` -> 2 schedules
+- `weekly` -> 4 schedules
+- `irregular` -> 1 schedule de mes completo
 
-Esto no es el modelo final ideal.
+Los campos top-level:
+
+- `expected_day_from`
+- `expected_day_to`
+- `expected_amount`
+
+se mantienen como denormalización de lectura y compatibilidad, pero la fuente de verdad ya es `schedules`.
+
+## Impacto en UI
+
+- el wizard de ingresos ya no parte quincenal en dos filas
+- el composer manual ya usa el mismo contrato
+- el listado de ingresos resume las ventanas desde `schedules`
 
 ## Deuda conocida
 
-El modelo de largo plazo debería separar:
+El backend todavía conserva los campos agregados en `income_sources` por compatibilidad con:
 
-- `income_source`
-- `income_source_schedule`
+- sorting legacy
+- Brain legacy
+- cálculos agregados existentes
 
-Pero ese cambio no entra en este cierre. Por ahora se prioriza coherencia operativa del contrato actual.
+El siguiente paso de largo plazo sería mover más lógica a `income_source_schedules`, pero ya no hace falta duplicar fuentes para modelar quincenal o semanal.

@@ -11,14 +11,14 @@ import {
   INCOME_CADENCE_OPTIONS,
   MONTHLY_WINDOW_OPTIONS,
   RELIABILITY_OPTIONS,
-  dayWindow,
+  buildIncomeSchedules,
   windowRange,
 } from '../../../utils/incomeProfile';
 import styles from './IncomeSetupWizard.module.css';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
-type Cadence = 'monthly' | 'biweekly' | 'irregular';
+type Cadence = 'monthly' | 'biweekly' | 'weekly' | 'irregular';
 type WindowKey = 'early' | 'week1' | 'q1' | 'mid' | 'q2' | 'late';
 type Step = 'base' | 'ask_variable' | 'variable' | 'done';
 
@@ -108,52 +108,33 @@ export const IncomeSetupWizard = ({ isOpen, onClose, onComplete }: IncomeSetupWi
     reliabilityScore: number,
   ): IncomeSourcePayload[] => {
     const amount = Number(income.amount);
+    const schedules = buildIncomeSchedules(income.cadence, amount, {
+      windowKey: income.windowKey,
+      biweeklyDay1: income.biweeklyDay1 === '' ? undefined : Number(income.biweeklyDay1),
+      biweeklyDay2: income.biweeklyDay2 === '' ? undefined : Number(income.biweeklyDay2),
+    });
 
-    if (income.cadence === 'biweekly') {
-      const firstAmount = Math.round(amount / 2);
-      const w1 = dayWindow(Number(income.biweeklyDay1));
-      const w2 = dayWindow(Number(income.biweeklyDay2));
-      return [
-        {
-          name: `${income.name.trim()} (1ª quincena)`,
-          expected_amount: firstAmount,
-          expected_day_from: w1.dayFrom,
-          expected_day_to: w1.dayTo,
-          classification,
-          cadence: 'monthly',
-          reliability_score: reliabilityScore,
-          is_variable: classification !== 'base',
-          evidence_source: 'biweekly_split_1',
-        },
-        {
-          name: `${income.name.trim()} (2ª quincena)`,
-          expected_amount: amount - firstAmount,
-          expected_day_from: w2.dayFrom,
-          expected_day_to: w2.dayTo,
-          classification,
-          cadence: 'monthly',
-          reliability_score: reliabilityScore,
-          is_variable: classification !== 'base',
-          evidence_source: 'biweekly_split_2',
-        },
-      ];
-    }
-
-    const range = income.cadence === 'irregular'
+    const summaryRange = income.cadence === 'irregular'
       ? { dayFrom: 1, dayTo: 31 }
-      : windowRange(income.windowKey);
+      : income.cadence === 'monthly'
+        ? windowRange(income.windowKey)
+        : {
+            dayFrom: Math.min(...schedules.map((schedule) => schedule.expected_day_from)),
+            dayTo: Math.max(...schedules.map((schedule) => schedule.expected_day_to)),
+          };
 
     return [
       {
         name: income.name.trim(),
         expected_amount: amount,
-        expected_day_from: range.dayFrom,
-        expected_day_to: range.dayTo,
+        expected_day_from: summaryRange.dayFrom,
+        expected_day_to: summaryRange.dayTo,
         classification,
         cadence: income.cadence,
         reliability_score: reliabilityScore,
         is_variable: classification !== 'base',
         evidence_source: 'income_setup_wizard',
+        schedules,
       },
     ];
   };
@@ -206,7 +187,7 @@ export const IncomeSetupWizard = ({ isOpen, onClose, onComplete }: IncomeSetupWi
     done:         '¡Listo!',
   };
 
-  const amountLabel = base.cadence === 'biweekly' ? 'Monto total mensual' : 'Monto mensual';
+  const amountLabel = base.cadence === 'irregular' ? 'Monto cuando llega' : 'Monto total mensual';
 
   // ── Render ───────────────────────────────────────────────────────────────
 
@@ -283,7 +264,7 @@ export const IncomeSetupWizard = ({ isOpen, onClose, onComplete }: IncomeSetupWi
                     required
                   />
                   <p className={[styles.hint, styles.spanTwo].join(' ')}>
-                    Cada cuota se guardará como {base.amount !== '' ? `$${Math.round(Number(base.amount) / 2).toLocaleString('es-CO')}` : '—'} y contará como una entrada mensual esperada.
+                    Se guardará una sola fuente de ingreso con dos ventanas de cobro y total mensual consolidado.
                   </p>
                 </>
               )}
@@ -304,6 +285,12 @@ export const IncomeSetupWizard = ({ isOpen, onClose, onComplete }: IncomeSetupWi
               {base.cadence === 'irregular' && (
                 <p className={[styles.hint, styles.spanTwo].join(' ')}>
                   Los ingresos irregulares se guardan con ventana de mes completo.
+                </p>
+              )}
+
+              {base.cadence === 'weekly' && (
+                <p className={[styles.hint, styles.spanTwo].join(' ')}>
+                  Se crearán cuatro ventanas semanales dentro de la misma fuente para reflejar el ingreso total del mes.
                 </p>
               )}
             </div>
@@ -387,7 +374,8 @@ export const IncomeSetupWizard = ({ isOpen, onClose, onComplete }: IncomeSetupWi
                     required
                   />
                 </>
-              ) : varIncome.cadence === 'monthly' ? (
+              ) : null}
+              {varIncome.cadence === 'monthly' ? (
                 <div className={styles.spanTwo}>
                   <SelectInput
                     name="wz-var-window"
@@ -397,9 +385,15 @@ export const IncomeSetupWizard = ({ isOpen, onClose, onComplete }: IncomeSetupWi
                     options={MONTHLY_WINDOW_OPTIONS}
                   />
                 </div>
-              ) : (
+              ) : null}
+              {varIncome.cadence === 'irregular' ? (
                 <p className={[styles.hint, styles.spanTwo].join(' ')}>
                   Los ingresos irregulares se guardan con ventana de mes completo.
+                </p>
+              ) : null}
+              {varIncome.cadence === 'weekly' && (
+                <p className={[styles.hint, styles.spanTwo].join(' ')}>
+                  Se guardará una sola fuente con cuatro ventanas semanales y confiabilidad variable.
                 </p>
               )}
               <div className={styles.spanTwo}>

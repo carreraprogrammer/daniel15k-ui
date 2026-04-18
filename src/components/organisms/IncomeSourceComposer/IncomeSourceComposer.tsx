@@ -6,20 +6,19 @@ import { TextInput } from '../../atoms/TextInput';
 import type { IncomeSource, IncomeSourcePayload } from '../../../types/finance.types';
 import {
   BIWEEKLY_DAY_OPTIONS,
+  buildIncomeSchedules,
   INCOME_CADENCE_OPTIONS,
   INCOME_CLASSIFICATION_OPTIONS,
   MONTHLY_WINDOW_OPTIONS,
   RELIABILITY_OPTIONS,
-  dayWindow,
   inferWindowKey,
-  windowRange,
 } from '../../../utils/incomeProfile';
 import styles from './IncomeSourceComposer.module.css';
 
 interface Values {
   name: string;
   expectedAmount: number | '';
-  cadence: 'monthly' | 'biweekly' | 'irregular';
+  cadence: 'monthly' | 'biweekly' | 'weekly' | 'irregular';
   windowKey: 'early' | 'week1' | 'q1' | 'mid' | 'q2' | 'late';
   biweeklyDay1: number | '';
   biweeklyDay2: number | '';
@@ -41,14 +40,21 @@ const emptyValues: Values = {
 const fromSource = (source: IncomeSource | null): Values => {
   if (!source) return emptyValues;
   const cadence = source.attributes.cadence ?? 'monthly';
-  const inferredWindow = inferWindowKey(source.attributes.expected_day_from, source.attributes.expected_day_to) ?? 'mid';
+  const schedules = source.attributes.schedules ?? [];
+  const primarySchedule = schedules[0];
+  const scheduleAnchor = (dayFrom?: number, dayTo?: number) =>
+    dayFrom && dayTo ? Math.round((dayFrom + dayTo) / 2) : undefined;
+  const inferredWindow = inferWindowKey(
+    primarySchedule?.expected_day_from ?? source.attributes.expected_day_from,
+    primarySchedule?.expected_day_to ?? source.attributes.expected_day_to,
+  ) ?? 'mid';
   return {
     name: source.attributes.name,
     expectedAmount: source.attributes.expected_amount,
     cadence,
     windowKey: inferredWindow,
-    biweeklyDay1: source.attributes.expected_day_from,
-    biweeklyDay2: source.attributes.expected_day_to,
+    biweeklyDay1: scheduleAnchor(primarySchedule?.expected_day_from, primarySchedule?.expected_day_to) ?? source.attributes.expected_day_from,
+    biweeklyDay2: scheduleAnchor(schedules[1]?.expected_day_from, schedules[1]?.expected_day_to) ?? source.attributes.expected_day_to,
     classification: source.attributes.classification ?? (source.attributes.is_variable ? 'variable' : 'base'),
     reliabilityScore: source.attributes.reliability_score ?? 100,
   };
@@ -89,21 +95,24 @@ export const IncomeSourceComposer = ({ source = null, loading, onCreate, onUpdat
       return;
     }
 
-    const range = values.cadence === 'biweekly'
-      ? dayWindow(Number(values.biweeklyDay1))
-      : values.cadence === 'irregular'
-        ? { dayFrom: 1, dayTo: 31 }
-        : windowRange(values.windowKey);
+    const schedules = buildIncomeSchedules(values.cadence, Number(values.expectedAmount), {
+      windowKey: values.windowKey,
+      biweeklyDay1: values.biweeklyDay1 === '' ? undefined : Number(values.biweeklyDay1),
+      biweeklyDay2: values.biweeklyDay2 === '' ? undefined : Number(values.biweeklyDay2),
+    });
+    const dayFrom = Math.min(...schedules.map((schedule) => schedule.expected_day_from));
+    const dayTo = Math.max(...schedules.map((schedule) => schedule.expected_day_to));
 
     const payload: IncomeSourcePayload = {
       name: values.name.trim(),
       expected_amount: Number(values.expectedAmount),
-      expected_day_from: range.dayFrom,
-      expected_day_to: range.dayTo,
+      expected_day_from: dayFrom,
+      expected_day_to: dayTo,
       classification: values.classification,
       cadence: values.cadence,
       reliability_score: values.classification === 'base' ? 100 : Number(values.reliabilityScore || 50),
       is_variable: values.classification !== 'base',
+      schedules,
     };
 
     setError(null);
@@ -180,7 +189,8 @@ export const IncomeSourceComposer = ({ source = null, loading, onCreate, onUpdat
               required
             />
           </>
-        ) : values.cadence === 'monthly' ? (
+        ) : null}
+        {values.cadence === 'monthly' ? (
           <div className={styles.spanTwo}>
             <SelectInput
               name="income-window"
@@ -191,11 +201,17 @@ export const IncomeSourceComposer = ({ source = null, loading, onCreate, onUpdat
               required
             />
           </div>
-        ) : (
+        ) : null}
+        {values.cadence === 'irregular' ? (
           <p className={[styles.hint, styles.spanTwo].join(' ')}>
             Los ingresos irregulares se guardan con ventana de mes completo.
           </p>
-        )}
+        ) : null}
+        {values.cadence === 'weekly' ? (
+          <p className={[styles.hint, styles.spanTwo].join(' ')}>
+            El ingreso se guardará como una sola fuente con cuatro ventanas semanales dentro del mes.
+          </p>
+        ) : null}
         {values.classification !== 'base' && (
           <div className={styles.spanTwo}>
             <SelectInput

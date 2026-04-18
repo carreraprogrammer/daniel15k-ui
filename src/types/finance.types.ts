@@ -248,12 +248,23 @@ export interface IncomeSource {
     expected_amount: number;
     is_variable: boolean;
     classification?: 'base' | 'variable' | 'seasonal' | 'one_time';
-    cadence?: 'monthly' | 'biweekly' | 'irregular';
+    cadence?: 'monthly' | 'biweekly' | 'weekly' | 'irregular';
     reliability_score?: number;
     last_confirmed_at?: string | null;
     evidence_source?: string | null;
+    notes?: string | null;
+    schedules?: IncomeSourceSchedule[];
     active?: boolean;
   };
+}
+
+export interface IncomeSourceSchedule {
+  id?: string;
+  ordinal: number;
+  label?: string | null;
+  expected_day_from: number;
+  expected_day_to: number;
+  expected_amount: number;
 }
 
 export interface IncomeSourcePayload {
@@ -262,10 +273,12 @@ export interface IncomeSourcePayload {
   expected_day_to: number | '';
   expected_amount: number | '';
   classification: 'base' | 'variable' | 'seasonal' | 'one_time';
-  cadence?: 'monthly' | 'biweekly' | 'irregular';
+  cadence?: 'monthly' | 'biweekly' | 'weekly' | 'irregular';
   reliability_score?: number;
   last_confirmed_at?: string | null;
   evidence_source?: string;
+  notes?: string;
+  schedules?: IncomeSourceSchedule[];
   is_variable?: boolean;
   active?: boolean;
 }
