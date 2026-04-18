@@ -90,6 +90,7 @@ export function AgentUIProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
   const navigate = useNavigate();
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const sessionIdRef = useRef<string | null>(null);
 
   sessionIdRef.current = state.sessionId;
@@ -99,6 +100,10 @@ export function AgentUIProvider({ children }: { children: ReactNode }) {
       LOG('polling stopped');
       clearInterval(timerRef.current);
       timerRef.current = null;
+    }
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
     }
   }, []);
 
@@ -132,6 +137,7 @@ export function AgentUIProvider({ children }: { children: ReactNode }) {
       }
 
       if (uiEvents.length > 0) {
+        if (timeoutRef.current) { clearTimeout(timeoutRef.current); timeoutRef.current = null; }
         dispatch({ type: 'EVENTS_RECEIVED', payload: uiEvents });
       }
     } catch (err) {
@@ -143,6 +149,11 @@ export function AgentUIProvider({ children }: { children: ReactNode }) {
     stopPolling();
     LOG('polling started every', POLL_MS, 'ms');
     timerRef.current = setInterval(() => void poll(), POLL_MS);
+    timeoutRef.current = setTimeout(() => {
+      LOG('session timeout — no events received in 90s, resetting');
+      stopPolling();
+      dispatch({ type: 'RESET' });
+    }, 90_000);
   }, [poll, stopPolling]);
 
   useEffect(() => () => stopPolling(), [stopPolling]);

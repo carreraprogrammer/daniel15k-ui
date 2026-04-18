@@ -20,8 +20,29 @@ interface PlanProposalCardProps {
 
 const PlanProposalCard = ({ event }: PlanProposalCardProps) => {
   const { reply, consume } = useAgentUI();
-  const p = event.payload as unknown as { draft: MonthlyPlanDraft; warnings?: string[] };
-  const { draft, warnings } = p;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const p = event.payload as any;
+  const { draft, warnings } = p as { draft: any; warnings?: string[] };
+
+  // Normalize: agent may send nested or flat structure
+  const baseIncome: number = draft.base_budget_income ?? draft.income?.base ?? 0;
+  const obligationsTotal: number = draft.recurring_obligations_total ?? draft.obligations?.total_obligaciones ?? 0;
+  const debtMinimums: number = draft.debt_minimums_total ?? draft.obligations?.deudas?.total ?? 0;
+  const buffer: number = draft.protected_buffer_amount ?? 0;
+  const freeMargin: number = draft.free_margin ?? draft.margen_libre ?? 0;
+  const discretionary: number = draft.discretionary_limit ?? 0;
+
+  const distribution: Record<string, number> = {};
+  if (draft.distribution && !Array.isArray(draft.distribution)) {
+    Object.assign(distribution, draft.distribution);
+  } else {
+    const arr: { categoria?: string; category?: string; monto?: number; amount?: number }[] =
+      draft.distribucion ?? draft.distribution ?? [];
+    for (const item of arr) {
+      const key = item.categoria ?? item.category ?? '';
+      distribution[key] = item.monto ?? item.amount ?? 0;
+    }
+  }
 
   return (
     <div className={styles.card}>
@@ -33,36 +54,40 @@ const PlanProposalCard = ({ event }: PlanProposalCardProps) => {
       <div className={styles.planGrid}>
         <div className={styles.planRow}>
           <span className={styles.planLabel}>Ingreso base</span>
-          <strong className={styles.planValue}>{formatCop(draft.base_budget_income)}</strong>
+          <strong className={styles.planValue}>{formatCop(baseIncome)}</strong>
         </div>
         <div className={`${styles.planRow} ${styles.planRowSubtract}`}>
           <span className={styles.planLabel}>Obligaciones fijas</span>
-          <span className={styles.planValueMuted}>− {formatCop(draft.recurring_obligations_total)}</span>
+          <span className={styles.planValueMuted}>− {formatCop(obligationsTotal)}</span>
         </div>
-        <div className={`${styles.planRow} ${styles.planRowSubtract}`}>
-          <span className={styles.planLabel}>Mínimos de deuda</span>
-          <span className={styles.planValueMuted}>− {formatCop(draft.debt_minimums_total)}</span>
-        </div>
-        <div className={`${styles.planRow} ${styles.planRowSubtract}`}>
-          <span className={styles.planLabel}>Buffer de protección</span>
-          <span className={styles.planValueMuted}>− {formatCop(draft.protected_buffer_amount)}</span>
-        </div>
+        {debtMinimums > 0 && (
+          <div className={`${styles.planRow} ${styles.planRowSubtract}`}>
+            <span className={styles.planLabel}>Mínimos de deuda</span>
+            <span className={styles.planValueMuted}>− {formatCop(debtMinimums)}</span>
+          </div>
+        )}
+        {buffer > 0 && (
+          <div className={`${styles.planRow} ${styles.planRowSubtract}`}>
+            <span className={styles.planLabel}>Buffer de protección</span>
+            <span className={styles.planValueMuted}>− {formatCop(buffer)}</span>
+          </div>
+        )}
         <div className={`${styles.planRow} ${styles.planRowResult}`}>
           <span className={styles.planLabel}>Margen libre</span>
-          <strong className={styles.planValueAccent}>{formatCop(draft.free_margin)}</strong>
+          <strong className={styles.planValueAccent}>{formatCop(freeMargin)}</strong>
         </div>
-        {draft.discretionary_limit > 0 && (
+        {discretionary > 0 && (
           <div className={styles.planRow}>
             <span className={styles.planLabel}>Límite discrecional</span>
-            <strong className={styles.planValue}>{formatCop(draft.discretionary_limit)}</strong>
+            <strong className={styles.planValue}>{formatCop(discretionary)}</strong>
           </div>
         )}
       </div>
 
-      {draft.distribution && Object.keys(draft.distribution).length > 0 && (
+      {Object.keys(distribution).length > 0 && (
         <div className={styles.distribution}>
           <span className={styles.distributionTitle}>Distribución sugerida</span>
-          {Object.entries(draft.distribution).map(([category, amount]) => (
+          {Object.entries(distribution).map(([category, amount]) => (
             <div key={category} className={styles.distributionRow}>
               <span className={styles.distributionLabel}>{category}</span>
               <span className={styles.distributionAmount}>{formatCop(amount)}</span>
@@ -74,7 +99,7 @@ const PlanProposalCard = ({ event }: PlanProposalCardProps) => {
       {warnings && warnings.length > 0 && (
         <div className={styles.warnings}>
           {warnings.map((w, i) => (
-            <p key={i} className={styles.warningItem}>⚠ {w}</p>
+            <p key={i} className={styles.warningItem}>{w}</p>
           ))}
         </div>
       )}
@@ -151,7 +176,7 @@ export const AgentEventRenderer = () => {
 
   return (
     <div className={styles.container}>
-      {status === 'loading' && events.length === 0 && (
+      {(status === 'loading' || status === 'active') && events.length === 0 && (
         <div className={styles.loadingCard}>
           <Spinner size="sm" />
           <span className={styles.loadingText}>El agente está analizando tu situación...</span>
