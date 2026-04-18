@@ -2,7 +2,6 @@ import { AppLayout } from '../../templates/AppLayout';
 import { useAuthStore } from '../../../store/authStore';
 import { Spinner } from '../../atoms/Spinner';
 import { ErrorState } from '../../molecules/ErrorState';
-import { AgentEventRenderer } from '../../molecules/AgentEventRenderer';
 import { useDashboardData } from '../../../hooks/useDashboardData';
 import styles from '../FinancePage.module.css';
 
@@ -24,7 +23,6 @@ export const DashboardPage = () => {
           </p>
         </div>
 
-        <AgentEventRenderer />
 
 
         {loading ? <Spinner size="lg" /> : null}

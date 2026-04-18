@@ -6,6 +6,7 @@ import { Header } from '../../organisms/Header';
 import { BrandMark } from '../../atoms/BrandMark';
 import { Button } from '../../atoms/Button';
 import { CompletenessIndicator } from '../../molecules/CompletenessIndicator';
+import { AgentEventRenderer } from '../../molecules/AgentEventRenderer';
 import { useAuthStore } from '../../../store/authStore';
 import styles from './AppLayout.module.css';
 
@@ -101,6 +102,7 @@ export const AppLayout = ({ title, children }: { title: string; children: ReactN
         </section>
       </aside>
 
+      <AgentEventRenderer />
       <CompletenessIndicator />
     </div>
   );
