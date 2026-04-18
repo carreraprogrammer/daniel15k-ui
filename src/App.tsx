@@ -6,4 +6,16 @@ import './theme/utilities.css';
 import { IonApp } from '@ionic/react';
 import { BrowserRouter } from 'react-router-dom';
 import { AppRouter } from './router/AppRouter';
-export default function App(){ return <IonApp><BrowserRouter><AppRouter /></BrowserRouter></IonApp>; }
+import { AgentUIProvider } from './contexts/AgentUIContext';
+
+export default function App() {
+  return (
+    <IonApp>
+      <BrowserRouter>
+        <AgentUIProvider>
+          <AppRouter />
+        </AgentUIProvider>
+      </BrowserRouter>
+    </IonApp>
+  );
+}

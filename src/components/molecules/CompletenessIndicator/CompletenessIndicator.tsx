@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { IncomeSetupWizard } from '../../organisms/IncomeSetupWizard';
 import { financeService } from '../../../services/financeService';
-import { useWebChat } from '../../../hooks/useWebChat';
+import { useAgentUI } from '../../../contexts/AgentUIContext';
 import type { CompletenessResponse } from '../../../types/finance.types';
 import styles from './CompletenessIndicator.module.css';
 
@@ -26,7 +26,7 @@ export const CompletenessIndicator = () => {
   const [open, setOpen] = useState(false);
   const [incomeWizardOpen, setIncomeWizardOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
-  const { start: startWebChat, status: webChatStatus } = useWebChat();
+  const { startChat, state: agentState } = useAgentUI();
 
   const loadCompleteness = () => {
     financeService.fetchCompleteness().then(setData).catch(() => null);
@@ -103,13 +103,13 @@ export const CompletenessIndicator = () => {
                     <button
                       type="button"
                       className={styles.itemCta}
-                      disabled={webChatStatus === 'loading'}
+                      disabled={agentState.status === 'loading'}
                       onClick={async () => {
                         setOpen(false);
-                        await startWebChat('Quiero crear mi plan mensual de presupuesto');
+                        await startChat('Quiero crear mi plan mensual de presupuesto');
                       }}
                     >
-                      {webChatStatus === 'loading' ? 'Consultando al agente...' : ctaLabel}
+                      {agentState.status === 'loading' ? 'Consultando al agente...' : ctaLabel}
                     </button>
                   )}
                   {!blockedByDep && to && !wizard && (

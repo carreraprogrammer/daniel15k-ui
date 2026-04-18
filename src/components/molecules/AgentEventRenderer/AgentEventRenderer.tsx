@@ -1,4 +1,4 @@
-import { useAgentEvents } from '../../../hooks/useAgentEvents';
+import { useAgentUI } from '../../../contexts/AgentUIContext';
 import type {
   AgentUiEvent,
   MonthlyPlanDraft,
@@ -6,164 +6,156 @@ import type {
   ShowCardPayload,
 } from '../../../types/finance.types';
 import { Button } from '../../atoms/Button';
+import { Spinner } from '../../atoms/Spinner';
 import styles from './AgentEventRenderer.module.css';
 
 const formatCop = (value: number) =>
   new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(value);
 
+// ─── PlanProposalCard ─────────────────────────────────────────────────────────
+
 interface PlanProposalCardProps {
-  draft: MonthlyPlanDraft;
-  warnings?: string[];
-  onConsume: () => void;
+  event: AgentUiEvent;
 }
 
-const PlanProposalCard = ({ draft, warnings, onConsume }: PlanProposalCardProps) => (
-  <div className={styles.card}>
-    <div className={styles.cardHeader}>
-      <span className={styles.cardEyebrow}>Propuesta del agente</span>
-      <h3 className={styles.cardTitle}>Plan {draft.month}/{draft.year}</h3>
-    </div>
+const PlanProposalCard = ({ event }: PlanProposalCardProps) => {
+  const { reply, consume } = useAgentUI();
+  const p = event.payload as unknown as { draft: MonthlyPlanDraft; warnings?: string[] };
+  const { draft, warnings } = p;
 
-    <div className={styles.planGrid}>
-      <div className={styles.planRow}>
-        <span className={styles.planLabel}>Ingreso base</span>
-        <strong className={styles.planValue}>{formatCop(draft.base_budget_income)}</strong>
+  return (
+    <div className={styles.card}>
+      <div className={styles.cardHeader}>
+        <span className={styles.cardEyebrow}>Propuesta del agente</span>
+        <h3 className={styles.cardTitle}>Plan {draft.month}/{draft.year}</h3>
       </div>
-      <div className={`${styles.planRow} ${styles.planRowSubtract}`}>
-        <span className={styles.planLabel}>Obligaciones fijas</span>
-        <span className={styles.planValueMuted}>− {formatCop(draft.recurring_obligations_total)}</span>
-      </div>
-      <div className={`${styles.planRow} ${styles.planRowSubtract}`}>
-        <span className={styles.planLabel}>Mínimos de deuda</span>
-        <span className={styles.planValueMuted}>− {formatCop(draft.debt_minimums_total)}</span>
-      </div>
-      <div className={`${styles.planRow} ${styles.planRowSubtract}`}>
-        <span className={styles.planLabel}>Buffer de protección</span>
-        <span className={styles.planValueMuted}>− {formatCop(draft.protected_buffer_amount)}</span>
-      </div>
-      <div className={`${styles.planRow} ${styles.planRowResult}`}>
-        <span className={styles.planLabel}>Margen libre</span>
-        <strong className={styles.planValueAccent}>{formatCop(draft.free_margin)}</strong>
-      </div>
-      {draft.discretionary_limit > 0 && (
+
+      <div className={styles.planGrid}>
         <div className={styles.planRow}>
-          <span className={styles.planLabel}>Límite discrecional</span>
-          <strong className={styles.planValue}>{formatCop(draft.discretionary_limit)}</strong>
+          <span className={styles.planLabel}>Ingreso base</span>
+          <strong className={styles.planValue}>{formatCop(draft.base_budget_income)}</strong>
+        </div>
+        <div className={`${styles.planRow} ${styles.planRowSubtract}`}>
+          <span className={styles.planLabel}>Obligaciones fijas</span>
+          <span className={styles.planValueMuted}>− {formatCop(draft.recurring_obligations_total)}</span>
+        </div>
+        <div className={`${styles.planRow} ${styles.planRowSubtract}`}>
+          <span className={styles.planLabel}>Mínimos de deuda</span>
+          <span className={styles.planValueMuted}>− {formatCop(draft.debt_minimums_total)}</span>
+        </div>
+        <div className={`${styles.planRow} ${styles.planRowSubtract}`}>
+          <span className={styles.planLabel}>Buffer de protección</span>
+          <span className={styles.planValueMuted}>− {formatCop(draft.protected_buffer_amount)}</span>
+        </div>
+        <div className={`${styles.planRow} ${styles.planRowResult}`}>
+          <span className={styles.planLabel}>Margen libre</span>
+          <strong className={styles.planValueAccent}>{formatCop(draft.free_margin)}</strong>
+        </div>
+        {draft.discretionary_limit > 0 && (
+          <div className={styles.planRow}>
+            <span className={styles.planLabel}>Límite discrecional</span>
+            <strong className={styles.planValue}>{formatCop(draft.discretionary_limit)}</strong>
+          </div>
+        )}
+      </div>
+
+      {draft.distribution && Object.keys(draft.distribution).length > 0 && (
+        <div className={styles.distribution}>
+          <span className={styles.distributionTitle}>Distribución sugerida</span>
+          {Object.entries(draft.distribution).map(([category, amount]) => (
+            <div key={category} className={styles.distributionRow}>
+              <span className={styles.distributionLabel}>{category}</span>
+              <span className={styles.distributionAmount}>{formatCop(amount)}</span>
+            </div>
+          ))}
         </div>
       )}
-    </div>
 
-    {draft.distribution && Object.keys(draft.distribution).length > 0 && (
-      <div className={styles.distribution}>
-        <span className={styles.distributionTitle}>Distribución sugerida</span>
-        {Object.entries(draft.distribution).map(([category, amount]) => (
-          <div key={category} className={styles.distributionRow}>
-            <span className={styles.distributionLabel}>{category}</span>
-            <span className={styles.distributionAmount}>{formatCop(amount)}</span>
-          </div>
-        ))}
+      {warnings && warnings.length > 0 && (
+        <div className={styles.warnings}>
+          {warnings.map((w, i) => (
+            <p key={i} className={styles.warningItem}>⚠ {w}</p>
+          ))}
+        </div>
+      )}
+
+      <div className={styles.cardActions}>
+        <Button label="Descartar" variant="ghost" onClick={() => void consume(event.id)} />
+        <Button label="Confirmar plan" onClick={() => void reply(event.id, 'confirmed')} />
       </div>
-    )}
+    </div>
+  );
+};
 
-    {warnings && warnings.length > 0 && (
-      <div className={styles.warnings}>
-        {warnings.map((w, i) => (
-          <p key={i} className={styles.warningItem}>⚠ {w}</p>
-        ))}
+// ─── AgentCard ────────────────────────────────────────────────────────────────
+
+const AgentCard = ({ event }: { event: AgentUiEvent }) => {
+  const { consume } = useAgentUI();
+  const p = event.payload as unknown as ShowCardPayload;
+
+  return (
+    <div className={`${styles.card} ${styles[`tone_${p.tone}`]}`}>
+      <div className={styles.cardHeader}>
+        <span className={styles.cardEyebrow}>Agente</span>
+        <h3 className={styles.cardTitle}>{p.title}</h3>
       </div>
-    )}
-
-    <div className={styles.cardActions}>
-      <Button label="Revisar plan" onClick={onConsume} />
+      <p className={styles.cardBody}>{p.body}</p>
+      <div className={styles.cardActions}>
+        <Button label="Entendido" variant="ghost" onClick={() => void consume(event.id)} />
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
-interface AgentCardProps {
-  title: string;
-  body: string;
-  tone: ShowCardPayload['tone'];
-  onConsume: () => void;
-}
+// ─── ConfirmCard ──────────────────────────────────────────────────────────────
 
-const AgentCard = ({ title, body, tone, onConsume }: AgentCardProps) => (
-  <div className={`${styles.card} ${styles[`tone_${tone}`]}`}>
-    <div className={styles.cardHeader}>
-      <span className={styles.cardEyebrow}>Agente</span>
-      <h3 className={styles.cardTitle}>{title}</h3>
+const ConfirmCard = ({ event }: { event: AgentUiEvent }) => {
+  const { reply } = useAgentUI();
+  const p = event.payload as unknown as RequestConfirmationPayload;
+
+  return (
+    <div className={`${styles.card} ${styles.tone_info}`}>
+      <div className={styles.cardHeader}>
+        <span className={styles.cardEyebrow}>El agente necesita confirmación</span>
+        <h3 className={styles.cardTitle}>{p.question}</h3>
+      </div>
+      {p.context && <p className={styles.cardBody}>{p.context}</p>}
+      <div className={styles.cardActions}>
+        <Button label="Cancelar" variant="ghost" onClick={() => void reply(event.id, 'dismissed')} />
+        <Button label="Confirmar" onClick={() => void reply(event.id, 'confirmed')} />
+      </div>
     </div>
-    <p className={styles.cardBody}>{body}</p>
-    <div className={styles.cardActions}>
-      <Button label="Entendido" variant="ghost" onClick={onConsume} />
-    </div>
-  </div>
-);
+  );
+};
 
-interface ConfirmCardProps {
-  question: string;
-  context?: string;
-  onConsume: () => void;
-}
+// ─── Registry ─────────────────────────────────────────────────────────────────
 
-const ConfirmCard = ({ question, context, onConsume }: ConfirmCardProps) => (
-  <div className={`${styles.card} ${styles.tone_info}`}>
-    <div className={styles.cardHeader}>
-      <span className={styles.cardEyebrow}>El agente necesita confirmación</span>
-      <h3 className={styles.cardTitle}>{question}</h3>
-    </div>
-    {context && <p className={styles.cardBody}>{context}</p>}
-    <div className={styles.cardActions}>
-      <Button label="Confirmar" onClick={onConsume} />
-    </div>
-  </div>
-);
-
-const renderEvent = (event: AgentUiEvent, onConsume: () => void) => {
+const renderEvent = (event: AgentUiEvent) => {
   switch (event.event_type) {
-    case 'show_plan_proposal': {
-      const p = event.payload as { draft: MonthlyPlanDraft; warnings?: string[] };
-      return <PlanProposalCard key={event.id} draft={p.draft} warnings={p.warnings} onConsume={onConsume} />;
-    }
-    case 'show_card': {
-      const p = event.payload as ShowCardPayload;
-      return <AgentCard key={event.id} title={p.title} body={p.body} tone={p.tone} onConsume={onConsume} />;
-    }
-    case 'request_confirmation': {
-      const p = event.payload as RequestConfirmationPayload;
-      return <ConfirmCard key={event.id} question={p.question} context={p.context} onConsume={onConsume} />;
-    }
-    default:
-      return null;
+    case 'show_plan_proposal': return <PlanProposalCard key={event.id} event={event} />;
+    case 'show_card':          return <AgentCard key={event.id} event={event} />;
+    case 'request_confirmation': return <ConfirmCard key={event.id} event={event} />;
+    default: return null;
   }
 };
 
-type ReplyFn = (
-  eventId: number,
-  type: 'form_submitted' | 'confirmed' | 'dismissed',
-  data?: Record<string, unknown>,
-) => Promise<void>;
+// ─── AgentEventRenderer ───────────────────────────────────────────────────────
 
-interface AgentEventRendererProps {
-  sessionId?: string;
-  onReply?: ReplyFn;
-}
+export const AgentEventRenderer = () => {
+  const { state } = useAgentUI();
+  const { events, status } = state;
 
-export const AgentEventRenderer = ({ sessionId, onReply }: AgentEventRendererProps) => {
-  const { events, consume } = useAgentEvents(sessionId);
-
-  if (!events.length) return null;
-
-  const handleConsume = (event: AgentUiEvent, type: 'confirmed' | 'dismissed' = 'dismissed') => {
-    if (onReply) {
-      void onReply(event.id, type).then(() => consume(event.id));
-    } else {
-      void consume(event.id);
-    }
-  };
+  if (status === 'idle') return null;
 
   return (
     <div className={styles.container}>
-      {events.map((event) => renderEvent(event, () => handleConsume(event, 'confirmed')))}
+      {status === 'loading' && events.length === 0 && (
+        <div className={styles.loadingCard}>
+          <Spinner size="sm" />
+          <span className={styles.loadingText}>El agente está analizando tu situación...</span>
+        </div>
+      )}
+      {events.map(renderEvent)}
     </div>
   );
 };

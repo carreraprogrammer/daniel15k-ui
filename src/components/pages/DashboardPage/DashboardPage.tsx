@@ -26,6 +26,7 @@ export const DashboardPage = () => {
 
         <AgentEventRenderer />
 
+
         {loading ? <Spinner size="lg" /> : null}
         {error ? <ErrorState message={error} onRetry={() => void reload()} /> : null}
 
