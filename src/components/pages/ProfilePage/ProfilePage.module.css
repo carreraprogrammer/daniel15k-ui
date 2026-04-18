@@ -18,6 +18,12 @@
   gap: var(--space-4);
 }
 
+.formCard {
+  display: grid;
+  align-content: start;
+  gap: var(--space-5);
+}
+
 .eyebrow,
 .metaLabel {
   color: var(--color-accent);
@@ -38,6 +44,24 @@
   margin: 0;
   color: rgba(240, 240, 248, 0.7);
   line-height: 1.75;
+}
+
+.formHeader {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.formTitle {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(1.3rem, 2vw, 1.8rem);
+  letter-spacing: -0.03em;
+}
+
+.formDescription {
+  margin: 0;
+  color: rgba(240, 240, 248, 0.68);
+  line-height: 1.65;
 }
 
 .userMeta {
