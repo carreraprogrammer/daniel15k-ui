@@ -362,3 +362,64 @@ export interface BudgetQueryParams {
   sort_by?: string;
   sort_dir?: 'asc' | 'desc';
 }
+
+// Agent UI Events — canal agente → front-end
+
+export type AgentUiEventType =
+  | 'show_plan_proposal'
+  | 'show_card'
+  | 'show_form'
+  | 'request_confirmation'
+  | 'navigate';
+
+export interface MonthlyPlanDraft {
+  month: number;
+  year: number;
+  base_budget_income: number;
+  recurring_obligations_total: number;
+  debt_minimums_total: number;
+  protected_buffer_amount: number;
+  free_margin: number;
+  discretionary_limit: number;
+  overflow_rule?: string;
+  distribution?: Record<string, number>;
+  warnings?: string[];
+}
+
+export interface ShowCardPayload {
+  title: string;
+  body: string;
+  tone: 'info' | 'warning' | 'success';
+}
+
+export interface DynamicField {
+  name: string;
+  label: string;
+  type: 'text' | 'number' | 'select' | 'date';
+  options?: { label: string; value: string }[];
+  required?: boolean;
+}
+
+export interface ShowFormPayload {
+  fields: DynamicField[];
+  prefilled: Record<string, unknown>;
+}
+
+export interface RequestConfirmationPayload {
+  question: string;
+  context?: string;
+}
+
+export type AgentUiEventPayload =
+  | ({ draft: MonthlyPlanDraft } & { warnings?: string[] })
+  | ShowCardPayload
+  | ShowFormPayload
+  | RequestConfirmationPayload;
+
+export interface AgentUiEvent {
+  id: number;
+  event_type: AgentUiEventType;
+  payload: AgentUiEventPayload;
+  session_id?: string;
+  created_at: string;
+}

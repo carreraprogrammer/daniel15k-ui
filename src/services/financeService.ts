@@ -1,5 +1,6 @@
 import { api } from './api';
 import type {
+  AgentUiEvent,
   Budget,
   CategoryResource,
   BudgetQueryParams,
@@ -234,5 +235,33 @@ export const financeService = {
 
   async deleteRecurringObligation(id: string): Promise<void> {
     await api.delete(`/api/v1/recurring_obligations/${id}`);
+  },
+
+  async getPendingAgentEvents(sessionId?: string): Promise<AgentUiEvent[]> {
+    const params = sessionId ? { session_id: sessionId } : {};
+    const { data } = await api.get('/api/v1/agent_events/pending', { params });
+    return (data.data as AgentUiEvent[]) ?? [];
+  },
+
+  async consumeAgentEvent(id: number): Promise<void> {
+    await api.patch(`/api/v1/agent_events/${id}/consume`);
+  },
+
+  async startWebChat(message: string): Promise<{ session_id: string }> {
+    const { data } = await api.post('/api/v1/agents/chat', { message, source: 'web' });
+    return data.data as { session_id: string };
+  },
+
+  async replyWebChat(
+    sessionId: string,
+    eventId: number,
+    type: 'form_submitted' | 'confirmed' | 'dismissed',
+    eventData?: Record<string, unknown>,
+  ): Promise<void> {
+    await api.post('/api/v1/agents/chat', {
+      session_id: sessionId,
+      source: 'web',
+      event_response: { event_id: eventId, type, data: eventData ?? {} },
+    });
   },
 };

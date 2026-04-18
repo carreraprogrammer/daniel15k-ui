@@ -2,6 +2,7 @@ import { AppLayout } from '../../templates/AppLayout';
 import { useAuthStore } from '../../../store/authStore';
 import { Spinner } from '../../atoms/Spinner';
 import { ErrorState } from '../../molecules/ErrorState';
+import { AgentEventRenderer } from '../../molecules/AgentEventRenderer';
 import { useDashboardData } from '../../../hooks/useDashboardData';
 import styles from '../FinancePage.module.css';
 
@@ -22,6 +23,8 @@ export const DashboardPage = () => {
             Primer panel operativo para revisar balance, presión de gasto, pendientes y compromisos fijos sin depender solo del flujo por Telegram.
           </p>
         </div>
+
+        <AgentEventRenderer />
 
         {loading ? <Spinner size="lg" /> : null}
         {error ? <ErrorState message={error} onRetry={() => void reload()} /> : null}

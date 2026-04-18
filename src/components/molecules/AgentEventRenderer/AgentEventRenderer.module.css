@@ -1,0 +1,154 @@
+.container {
+  display: grid;
+  gap: 1rem;
+}
+
+.card {
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.tone_info {
+  border-color: rgba(99, 179, 237, 0.25);
+  background: rgba(99, 179, 237, 0.05);
+}
+
+.tone_warning {
+  border-color: rgba(246, 173, 85, 0.3);
+  background: rgba(246, 173, 85, 0.06);
+}
+
+.tone_success {
+  border-color: rgba(72, 187, 120, 0.25);
+  background: rgba(72, 187, 120, 0.05);
+}
+
+.cardHeader {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.cardEyebrow {
+  color: rgba(231, 236, 244, 0.45);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.cardTitle {
+  margin: 0;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.cardBody {
+  margin: 0;
+  color: rgba(231, 236, 244, 0.72);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.cardActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+/* Plan proposal */
+
+.planGrid {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.planRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.4rem 0;
+}
+
+.planRowSubtract {
+  opacity: 0.75;
+}
+
+.planRowResult {
+  margin-top: 0.25rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.planLabel {
+  color: rgba(231, 236, 244, 0.7);
+  font-size: 0.88rem;
+}
+
+.planValue {
+  color: #fff;
+  font-size: 0.95rem;
+}
+
+.planValueMuted {
+  color: rgba(231, 236, 244, 0.5);
+  font-size: 0.88rem;
+}
+
+.planValueAccent {
+  color: #68d391;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+/* Distribution */
+
+.distribution {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.75rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.distributionTitle {
+  color: rgba(231, 236, 244, 0.5);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+}
+
+.distributionRow {
+  display: flex;
+  justify-content: space-between;
+}
+
+.distributionLabel {
+  color: rgba(231, 236, 244, 0.7);
+  font-size: 0.85rem;
+}
+
+.distributionAmount {
+  color: #fff;
+  font-size: 0.85rem;
+}
+
+/* Warnings */
+
+.warnings {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.warningItem {
+  margin: 0;
+  color: #f6ad55;
+  font-size: 0.84rem;
+  line-height: 1.5;
+}

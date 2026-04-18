@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { IncomeSetupWizard } from '../../organisms/IncomeSetupWizard';
 import { financeService } from '../../../services/financeService';
+import { useWebChat } from '../../../hooks/useWebChat';
 import type { CompletenessResponse } from '../../../types/finance.types';
 import styles from './CompletenessIndicator.module.css';
 
@@ -10,7 +11,7 @@ const DIMENSION_META: Record<string, { label: string; to?: string; ctaLabel?: st
   debts:              { label: 'Deudas', to: '/debts', ctaLabel: 'Completar →' },
   recurring_expenses: { label: 'Gastos recurrentes', to: '/recurring', ctaLabel: 'Completar →' },
   strategy:           { label: 'Estrategia financiera' },
-  monthly_plan:       { label: 'Plan mensual', to: '/budgets', ctaLabel: 'Armar plan →', dependsOn: 'income_profile' },
+  monthly_plan:       { label: 'Plan mensual', wizard: 'budget_agent', ctaLabel: 'Armar plan →', dependsOn: 'income_profile' },
 };
 
 const STATUS_LABEL: Record<string, string> = {
@@ -25,6 +26,7 @@ export const CompletenessIndicator = () => {
   const [open, setOpen] = useState(false);
   const [incomeWizardOpen, setIncomeWizardOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
+  const { start: startWebChat, status: webChatStatus } = useWebChat();
 
   const loadCompleteness = () => {
     financeService.fetchCompleteness().then(setData).catch(() => null);
@@ -95,6 +97,19 @@ export const CompletenessIndicator = () => {
                       onClick={() => { setOpen(false); setIncomeWizardOpen(true); }}
                     >
                       {ctaLabel}
+                    </button>
+                  )}
+                  {!blockedByDep && wizard === 'budget_agent' && (
+                    <button
+                      type="button"
+                      className={styles.itemCta}
+                      disabled={webChatStatus === 'loading'}
+                      onClick={async () => {
+                        setOpen(false);
+                        await startWebChat('Quiero crear mi plan mensual de presupuesto');
+                      }}
+                    >
+                      {webChatStatus === 'loading' ? 'Consultando al agente...' : ctaLabel}
                     </button>
                   )}
                   {!blockedByDep && to && !wizard && (
