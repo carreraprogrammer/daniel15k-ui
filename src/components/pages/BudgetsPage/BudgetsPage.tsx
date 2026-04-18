@@ -180,40 +180,44 @@ export const BudgetsPage = () => {
           </div>
         ) : null}
 
-        {loading ? <Spinner size="lg" /> : null}
-        {error ? <ErrorState message={error} onRetry={() => void load()} /> : null}
-        {!loading && !error && !budgets.length ? <EmptyState message="No hay presupuestos definidos para el período actual." /> : null}
+        {detailsOpen ? (
+          <>
+            {loading ? <Spinner size="lg" /> : null}
+            {error ? <ErrorState message={error} onRetry={() => void load()} /> : null}
+            {!loading && !error && !budgets.length ? <EmptyState message="No hay presupuestos definidos para el período actual." /> : null}
 
-        {!loading && !error && budgets.length && detailsOpen ? (
-          <div className={styles.tableWrap}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Categoría</th>
-                  <th className={styles.numeric}>Límite</th>
-                  <th className={styles.numeric}>Gastado</th>
-                  <th className={styles.numeric}>Proyectado</th>
-                  <th>Estado</th>
-                </tr>
-              </thead>
-              <tbody>
-                {budgets.map((budget) => {
-                  const burnRate = summary?.burn_rate?.categories.find((item) => item.category_id === budget.attributes.category_id);
-                  return (
-                    <tr key={budget.id}>
-                      <td>{budget.attributes.category_name ?? `Categoría ${budget.attributes.category_id}`}</td>
-                      <td className={styles.numeric}>{formatCop(budget.attributes.amount_limit)}</td>
-                      <td className={styles.numeric}>{formatCop(burnRate?.spent ?? 0)}</td>
-                      <td className={styles.numeric}>{formatCop(burnRate?.projected ?? 0)}</td>
-                      <td className={burnRate?.on_track === false ? styles.statusWarn : styles.statusGood}>
-                        {burnRate?.on_track === false ? 'Fuera de rango' : 'En rango'}
-                      </td>
+            {!loading && !error && budgets.length ? (
+              <div className={styles.tableWrap}>
+                <table className={styles.table}>
+                  <thead>
+                    <tr>
+                      <th>Categoría</th>
+                      <th className={styles.numeric}>Límite</th>
+                      <th className={styles.numeric}>Gastado</th>
+                      <th className={styles.numeric}>Proyectado</th>
+                      <th>Estado</th>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                  </thead>
+                  <tbody>
+                    {budgets.map((budget) => {
+                      const burnRate = summary?.burn_rate?.categories.find((item) => item.category_id === budget.attributes.category_id);
+                      return (
+                        <tr key={budget.id}>
+                          <td>{budget.attributes.category_name ?? `Categoría ${budget.attributes.category_id}`}</td>
+                          <td className={styles.numeric}>{formatCop(budget.attributes.amount_limit)}</td>
+                          <td className={styles.numeric}>{formatCop(burnRate?.spent ?? 0)}</td>
+                          <td className={styles.numeric}>{formatCop(burnRate?.projected ?? 0)}</td>
+                          <td className={burnRate?.on_track === false ? styles.statusWarn : styles.statusGood}>
+                            {burnRate?.on_track === false ? 'Fuera de rango' : 'En rango'}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            ) : null}
+          </>
         ) : null}
       </section>
 

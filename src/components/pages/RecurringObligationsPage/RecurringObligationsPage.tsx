@@ -327,11 +327,10 @@ export const RecurringObligationsPage = () => {
           </div>
         ) : null}
 
-        {loading ? <Spinner size="lg" /> : null}
-        {error ? <ErrorState message={error} onRetry={() => void load()} /> : null}
-
-        {!loading && !error && detailsOpen ? (
+        {detailsOpen ? (
           <>
+            {loading ? <Spinner size="lg" /> : null}
+            {error ? <ErrorState message={error} onRetry={() => void load()} /> : null}
             <div className={styles.detailStageHeader}>
               <div className={styles.detailStageCopy}>
                 <h3 className={styles.detailStageTitle}>Detalle recurrente</h3>
