@@ -59,7 +59,7 @@ export const DashboardPage = () => {
   return (
     <AppLayout title="Dashboard">
       <section className={styles.stack}>
-        {!detailsOpen ? (
+        {!detailsOpen && !loading && !error ? (
           <div className={`${styles.focusCard} ${styles.focusCardFull}`}>
             <div className={styles.focusGrid}>
               <div className={styles.focusCopy}>
