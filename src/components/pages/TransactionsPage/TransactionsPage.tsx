@@ -65,6 +65,7 @@ export const TransactionsPage = () => {
     () => (latestTransaction ? resolveTransactionCategory(latestTransaction, categoryLookup) : null),
     [categoryLookup, latestTransaction],
   );
+  const reviewPressurePct = metrics.count ? Math.round((metrics.pendingCount / metrics.count) * 100) : 0;
 
   const handleCreate = async (payload: TransactionCreatePayload) => {
     await createTransaction(payload);
@@ -155,74 +156,104 @@ export const TransactionsPage = () => {
   return (
     <AppLayout title="Transacciones">
       <section className={styles.stack}>
-        <div className={`${styles.focusCard} ${styles.focusCardFull}`}>
-          <div className={styles.focusGrid}>
-            <div className={styles.focusCopy}>
-              <span className={styles.eyebrow}>Transacciones</span>
-              <p className={styles.focusQuestion}>¿Qué fue lo último que pasó y necesito revisar?</p>
-              <h2 className={styles.focusTitle}>
-                {latestTransaction ? latestTransaction.attributes.concept : 'Todavía no hay movimientos en esta vista'}
-              </h2>
-              <p className={styles.focusText}>
-                {latestTransaction
-                  ? `Esto es lo último que verás al entrar. Si solo quieres confirmar que quedó bien registrado, aquí debería bastar.`
-                  : 'Cuando registres movimientos, esta vista mostrará primero el último caso para que no tengas que escanear toda la lista.'}
-              </p>
-            </div>
-            <div>
-              <div className={styles.focusValue}>
-                {latestTransaction ? formatCop(latestTransaction.attributes.amount) : '—'}
+        {!detailsOpen ? (
+          <div className={`${styles.focusCard} ${styles.focusCardFull}`}>
+            <div className={styles.focusGrid}>
+              <div className={styles.focusCopy}>
+                <span className={styles.eyebrow}>Transacciones</span>
+                <p className={styles.focusQuestion}>¿Qué fue lo último que pasó y necesito revisar?</p>
+                <h2 className={styles.focusTitle}>
+                  {latestTransaction ? latestTransaction.attributes.concept : 'Todavía no hay movimientos en esta vista'}
+                </h2>
+                <p className={styles.focusText}>
+                  {latestTransaction
+                    ? 'La pantalla inicial debería bastar para confirmar que tu último movimiento quedó bien y decidir si hay que corregirlo.'
+                    : 'Cuando registres movimientos, esta vista mostrará primero el último caso para que no tengas que escanear toda la lista.'}
+                </p>
               </div>
-              <p className={styles.focusCaption}>
-                {latestTransaction
-                  ? `${latestTransaction.attributes.date} · ${latestTransaction.attributes.status === 'pending' ? 'Pendiente' : 'Confirmada'}`
-                  : 'Sin transacciones visibles todavía'}
-              </p>
+              <div>
+                <div className={styles.focusValue}>
+                  {latestTransaction ? formatCop(latestTransaction.attributes.amount) : '—'}
+                </div>
+                <p className={styles.focusCaption}>
+                  {latestTransaction
+                    ? `${latestTransaction.attributes.date} · ${latestTransaction.attributes.status === 'pending' ? 'Pendiente' : 'Confirmada'}`
+                    : 'Sin transacciones visibles todavía'}
+                </p>
+              </div>
             </div>
-          </div>
 
-          <div className={styles.focusMeta}>
-            {latestCategory ? (
-              <span className={styles.focusBadge}>
-                {latestCategory.categoryName}
-                {latestCategory.subcategoryName ? ` · ${latestCategory.subcategoryName}` : ''}
-              </span>
+            {metrics.count ? (
+              <section className={styles.focusSupport}>
+                <div className={styles.focusSupportHeader}>
+                  <h3 className={styles.focusSupportTitle}>Casos que piden revisión</h3>
+                  <span className={styles.focusSupportValue}>{metrics.pendingCount} de {metrics.count}</span>
+                </div>
+                <div className={styles.focusRail}>
+                  <div
+                    className={`${styles.focusRailFill} ${reviewPressurePct >= 40 ? styles.focusRailFillWarn : ''}`}
+                    style={{ width: `${reviewPressurePct}%` }}
+                  />
+                </div>
+                <p className={styles.focusSupportText}>
+                  {reviewPressurePct === 0
+                    ? 'No hay ruido pendiente en esta vista.'
+                    : `${reviewPressurePct}% de la vista sigue pidiendo confirmación o aclaración.`}
+                </p>
+              </section>
             ) : null}
-            <span className={styles.focusBadge}>{metrics.count} resultados</span>
-            <span className={styles.focusBadge}>{metrics.pendingCount} pendientes</span>
-          </div>
 
-          <div className={styles.focusActions}>
-            <IconButton
-              label="Nueva transacción"
-              variant="primary"
-              icon={<IonIcon icon={addOutline} />}
-              onClick={() => {
-                setEditingTransaction(null);
-                setComposerOpen(true);
-              }}
-            />
-            <Button
-              label={detailsOpen ? 'Ocultar detalle' : 'Explorar detalle'}
-              variant="ghost"
-              onClick={() => setDetailsOpen((current) => !current)}
-            />
-            {latestTransaction ? (
-              <Button
-                label="Editar última"
-                size="sm"
-                variant="ghost"
+            <div className={styles.focusMeta}>
+              {latestCategory ? (
+                <span className={styles.focusBadge}>
+                  {latestCategory.categoryName}
+                  {latestCategory.subcategoryName ? ` · ${latestCategory.subcategoryName}` : ''}
+                </span>
+              ) : null}
+              <span className={styles.focusBadge}>{metrics.count} resultados</span>
+              <span className={styles.focusBadge}>{metrics.pendingCount} pendientes</span>
+            </div>
+
+            <div className={styles.focusActions}>
+              <IconButton
+                label="Nueva transacción"
+                variant="primary"
+                icon={<IonIcon icon={addOutline} />}
                 onClick={() => {
-                  setEditingTransaction(latestTransaction);
+                  setEditingTransaction(null);
                   setComposerOpen(true);
                 }}
               />
-            ) : null}
+              <Button
+                label="Explorar detalle"
+                variant="ghost"
+                onClick={() => setDetailsOpen(true)}
+              />
+              {latestTransaction ? (
+                <Button
+                  label="Editar última"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    setEditingTransaction(latestTransaction);
+                    setComposerOpen(true);
+                  }}
+                />
+              ) : null}
+            </div>
           </div>
-        </div>
+        ) : null}
 
         {detailsOpen ? (
-          <div className={styles.detailPanel}>
+          <div className={styles.detailStage}>
+            <div className={styles.detailStageHeader}>
+              <div className={styles.detailStageCopy}>
+                <h3 className={styles.detailStageTitle}>Detalle de transacciones</h3>
+                <p className={styles.detailStageText}>Aquí sí entra búsqueda, filtros y lista completa. Ya no se apila debajo del resumen inicial.</p>
+              </div>
+              <Button label="Volver al resumen" variant="ghost" onClick={() => setDetailsOpen(false)} />
+            </div>
+            <div className={styles.detailPanel}>
             <ListToolbar
               searchLabel="Buscar transacciones"
               searchPlaceholder="Concepto o producto"
@@ -278,6 +309,7 @@ export const TransactionsPage = () => {
                 setDraftFilters(initialTransactionFilters);
               }}
             />
+            </div>
           </div>
         ) : null}
 
@@ -285,7 +317,7 @@ export const TransactionsPage = () => {
         {error ? <ErrorState message={error} onRetry={() => void reload()} /> : null}
         {!loading && !error && !transactions.length ? <EmptyState message="No hay transacciones para el período actual." /> : null}
 
-        {!loading && !error && transactions.length ? (
+        {!loading && !error && transactions.length && detailsOpen ? (
           <div className={styles.list}>
             {transactions.map((transaction) => (
               <TransactionSlidingCard

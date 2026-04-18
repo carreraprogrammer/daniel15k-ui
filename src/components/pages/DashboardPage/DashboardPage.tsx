@@ -42,45 +42,86 @@ export const DashboardPage = () => {
     };
   }, [summary]);
 
+  const monthProgress = useMemo(() => {
+    if (!summary) return null;
+    const baseIncome = summary.monthly_plan?.base_budget_income ?? 0;
+    const expenses = summary.balance.expense_confirmed;
+    if (baseIncome <= 0) return null;
+    const pct = Math.max(0, Math.min(100, Math.round((expenses / baseIncome) * 100)));
+    return {
+      pct,
+      used: expenses,
+      total: baseIncome,
+      warn: pct > 100,
+    };
+  }, [summary]);
+
   return (
     <AppLayout title="Dashboard">
       <section className={styles.stack}>
-        <div className={`${styles.focusCard} ${styles.focusCardFull}`}>
-          <div className={styles.focusGrid}>
-            <div className={styles.focusCopy}>
-              <span className={styles.eyebrow}>Resumen ejecutivo</span>
-              <p className={styles.focusQuestion}>{`¿Cómo voy este mes y qué debería mirar primero, ${user?.name ?? 'Daniel'}?`}</p>
-              <h2 className={styles.focusTitle}>{focusState.title}</h2>
-              <p className={styles.focusText}>{focusState.text}</p>
+        {!detailsOpen ? (
+          <div className={`${styles.focusCard} ${styles.focusCardFull}`}>
+            <div className={styles.focusGrid}>
+              <div className={styles.focusCopy}>
+                <span className={styles.eyebrow}>Resumen ejecutivo</span>
+                <p className={styles.focusQuestion}>{`¿Cómo voy este mes y qué debería mirar primero, ${user?.name ?? 'Daniel'}?`}</p>
+                <h2 className={styles.focusTitle}>{focusState.title}</h2>
+                <p className={styles.focusText}>{focusState.text}</p>
+              </div>
+              <div>
+                <div className={styles.focusValue}>{focusState.value}</div>
+                <p className={styles.focusCaption}>{focusState.caption}</p>
+              </div>
             </div>
-            <div>
-              <div className={styles.focusValue}>{focusState.value}</div>
-              <p className={styles.focusCaption}>{focusState.caption}</p>
+
+            {monthProgress ? (
+              <section className={styles.focusSupport}>
+                <div className={styles.focusSupportHeader}>
+                  <h3 className={styles.focusSupportTitle}>Presión del mes</h3>
+                  <span className={styles.focusSupportValue}>{monthProgress.pct}% consumido</span>
+                </div>
+                <div className={styles.focusRail}>
+                  <div
+                    className={`${styles.focusRailFill} ${monthProgress.pct >= 100 ? styles.focusRailFillWarn : ''}`}
+                    style={{ width: `${Math.min(monthProgress.pct, 100)}%` }}
+                  />
+                </div>
+                <p className={styles.focusSupportText}>
+                  {formatCop(monthProgress.used)} de {formatCop(monthProgress.total)} del ingreso base ya están comprometidos por gasto confirmado.
+                </p>
+              </section>
+            ) : null}
+
+            {!loading && !error && summary ? (
+              <div className={styles.focusMeta}>
+                <span className={styles.focusBadge}>{pending.length} pendientes</span>
+                <span className={styles.focusBadge}>{formatCop(summary.debts?.total_balance ?? 0)} en deuda activa</span>
+                <span className={styles.focusBadge}>{formatCop(behaviorSummary.totals.discretionary)} discrecional</span>
+              </div>
+            ) : null}
+
+            <div className={styles.focusActions}>
+              <Button
+                label="Ver detalle del mes"
+                variant="ghost"
+                onClick={() => setDetailsOpen(true)}
+              />
             </div>
           </div>
-
-          {!loading && !error && summary ? (
-            <div className={styles.focusMeta}>
-              <span className={styles.focusBadge}>{pending.length} pendientes</span>
-              <span className={styles.focusBadge}>{formatCop(summary.debts?.total_balance ?? 0)} en deuda activa</span>
-              <span className={styles.focusBadge}>{formatCop(behaviorSummary.totals.discretionary)} discrecional</span>
-            </div>
-          ) : null}
-
-          <div className={styles.focusActions}>
-            <Button
-              label={detailsOpen ? 'Ocultar detalle' : 'Ver detalle del mes'}
-              variant="ghost"
-              onClick={() => setDetailsOpen((current) => !current)}
-            />
-          </div>
-        </div>
+        ) : null}
 
         {loading ? <Spinner size="lg" /> : null}
         {error ? <ErrorState message={error} onRetry={() => void reload()} /> : null}
 
         {!loading && !error && summary && detailsOpen ? (
-          <>
+          <div className={styles.detailStage}>
+            <div className={styles.detailStageHeader}>
+              <div className={styles.detailStageCopy}>
+                <h3 className={styles.detailStageTitle}>Detalle del mes</h3>
+                <p className={styles.detailStageText}>Aquí sí entran métricas, señales y breakdowns. El resumen principal ya cumplió su trabajo arriba.</p>
+              </div>
+              <Button label="Volver al resumen" variant="ghost" onClick={() => setDetailsOpen(false)} />
+            </div>
             <div className={styles.metrics}>
               <article className={styles.metricCard}>
                 <span className={styles.metricLabel}>Balance confirmado</span>
@@ -238,7 +279,7 @@ export const DashboardPage = () => {
                 </tbody>
               </table>
             </div>
-          </>
+          </div>
         ) : null}
       </section>
     </AppLayout>

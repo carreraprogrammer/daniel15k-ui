@@ -73,6 +73,7 @@ export const DebtsPage = () => {
       activeCount: activeDebts.length,
     };
   }, [debts]);
+  const settledPct = metrics.totalCount ? Math.round(((metrics.totalCount - metrics.activeCount) / metrics.totalCount) * 100) : 0;
 
   const handleCreate = async (payload: DebtPayload) => {
     setSubmitting(true);
@@ -148,57 +149,82 @@ export const DebtsPage = () => {
   return (
     <AppLayout title="Deudas">
       <section className={styles.stack}>
-        <div className={`${styles.focusCard} ${styles.focusCardFull}`}>
-          <div className={styles.focusGrid}>
-            <div className={styles.focusCopy}>
-              <span className={styles.eyebrow}>Deudas</span>
-              <p className={styles.focusQuestion}>¿Cuánta presión de deuda tengo hoy?</p>
-              <h2 className={styles.focusTitle}>
-                {metrics.activeCount ? `${metrics.activeCount} deudas activas` : 'No hay deudas activas'}
-              </h2>
-              <p className={styles.focusText}>
-                Esta vista debería dejar claro cuánto debes y cuánto te exige al mes antes de abrir filtros, tablas o edición.
-              </p>
+        {!detailsOpen ? (
+          <div className={`${styles.focusCard} ${styles.focusCardFull}`}>
+            <div className={styles.focusGrid}>
+              <div className={styles.focusCopy}>
+                <span className={styles.eyebrow}>Deudas</span>
+                <p className={styles.focusQuestion}>¿Cuánta presión de deuda tengo hoy?</p>
+                <h2 className={styles.focusTitle}>
+                  {metrics.activeCount ? `${metrics.activeCount} deudas activas` : 'No hay deudas activas'}
+                </h2>
+                <p className={styles.focusText}>
+                  Esta vista debería dejar claro cuánto debes y cuánto te exige al mes antes de abrir filtros, tablas o edición.
+                </p>
+              </div>
+              <div>
+                <div className={styles.focusValue}>{formatCop(metrics.totalBalance)}</div>
+                <p className={styles.focusCaption}>Saldo activo acumulado</p>
+              </div>
             </div>
-            <div>
-              <div className={styles.focusValue}>{formatCop(metrics.totalBalance)}</div>
-              <p className={styles.focusCaption}>Saldo activo acumulado</p>
-            </div>
-          </div>
 
-          <div className={styles.focusMeta}>
-            <span className={styles.focusBadge}>{formatCop(metrics.totalMonthly)} al mes</span>
-            <span className={styles.focusBadge}>{metrics.totalCount} registradas</span>
-          </div>
-
-          <div className={styles.focusActions}>
-            <IconButton
-              label="Nueva deuda"
-              variant="primary"
-              icon={<IonIcon icon={addOutline} />}
-              onClick={() => {
-                setEditingDebt(null);
-                setComposerOpen(true);
-              }}
-            />
-            <Button
-              label={detailsOpen ? 'Ocultar detalle' : 'Explorar detalle'}
-              variant="ghost"
-              onClick={() => setDetailsOpen((current) => !current)}
-            />
-            {!loading ? (
-              <Button
-                label="Ver resumen de deudas"
-                size="sm"
-                variant="ghost"
-                onClick={() => setSummaryOpen(true)}
-              />
+            {metrics.totalCount ? (
+              <section className={styles.focusSupport}>
+                <div className={styles.focusSupportHeader}>
+                  <h3 className={styles.focusSupportTitle}>Deuda ya resuelta</h3>
+                  <span className={styles.focusSupportValue}>{settledPct}% cerrada</span>
+                </div>
+                <div className={styles.focusRail}>
+                  <div className={styles.focusRailFill} style={{ width: `${settledPct}%` }} />
+                </div>
+                <p className={styles.focusSupportText}>
+                  {metrics.totalCount - metrics.activeCount} de {metrics.totalCount} deudas ya no están activas.
+                </p>
+              </section>
             ) : null}
+
+            <div className={styles.focusMeta}>
+              <span className={styles.focusBadge}>{formatCop(metrics.totalMonthly)} al mes</span>
+              <span className={styles.focusBadge}>{metrics.totalCount} registradas</span>
+            </div>
+
+            <div className={styles.focusActions}>
+              <IconButton
+                label="Nueva deuda"
+                variant="primary"
+                icon={<IonIcon icon={addOutline} />}
+                onClick={() => {
+                  setEditingDebt(null);
+                  setComposerOpen(true);
+                }}
+              />
+              <Button
+                label="Explorar detalle"
+                variant="ghost"
+                onClick={() => setDetailsOpen(true)}
+              />
+              {!loading ? (
+                <Button
+                  label="Ver resumen de deudas"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setSummaryOpen(true)}
+                />
+              ) : null}
+            </div>
           </div>
-        </div>
+        ) : null}
 
         {detailsOpen ? (
-          <div className={styles.detailPanel}>
+          <div className={styles.detailStage}>
+            <div className={styles.detailStageHeader}>
+              <div className={styles.detailStageCopy}>
+                <h3 className={styles.detailStageTitle}>Detalle de deudas</h3>
+                <p className={styles.detailStageText}>La edición, los filtros y el listado completo viven aquí, no debajo del resumen inicial.</p>
+              </div>
+              <Button label="Volver al resumen" variant="ghost" onClick={() => setDetailsOpen(false)} />
+            </div>
+            <div className={styles.detailPanel}>
             <ListToolbar
               searchLabel="Buscar deudas"
               searchPlaceholder="Nombre de deuda"
@@ -237,6 +263,7 @@ export const DebtsPage = () => {
                 setDraftFilters(initialFilters);
               }}
             />
+            </div>
           </div>
         ) : null}
 
@@ -244,7 +271,7 @@ export const DebtsPage = () => {
         {error ? <ErrorState message={error} onRetry={() => void load()} /> : null}
         {!loading && !error && !debts.length ? <EmptyState message="No hay deudas registradas." /> : null}
 
-        {!loading && !error && debts.length ? (
+        {!loading && !error && debts.length && detailsOpen ? (
           <div className={styles.list}>
             {debts.map((debt) => (
               <DebtSlidingCard

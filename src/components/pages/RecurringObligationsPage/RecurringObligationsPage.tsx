@@ -113,6 +113,9 @@ export const RecurringObligationsPage = () => {
       incomeCount: incomeSources.length,
     };
   }, [incomeSources, obligations]);
+  const coveragePct = metrics.obligationsTotal > 0
+    ? Math.round((metrics.incomeTotal / metrics.obligationsTotal) * 100)
+    : 0;
 
   const handleCreate = async (payload: RecurringObligationPayload) => {
     setSubmitting(true);
@@ -231,78 +234,98 @@ export const RecurringObligationsPage = () => {
   return (
     <AppLayout title="Recurrentes">
       <section className={styles.stack}>
-        <div className={`${styles.focusCard} ${styles.focusCardFull}`}>
-          <div className={styles.focusGrid}>
-            <div className={styles.focusCopy}>
-              <span className={styles.eyebrow}>Recurrentes</span>
-              <p className={styles.focusQuestion}>
-                {activeView === 'income'
-                  ? '¿Con qué ingresos espero contar este mes?'
-                  : '¿Cuánto pesa mi operación fija todos los meses?'}
-              </p>
-              <h2 className={styles.focusTitle}>
-                {activeView === 'income'
-                  ? `${incomeSources.length} fuentes de ingreso`
-                  : `${metrics.obligationsCount} obligaciones activas`}
-              </h2>
-              <p className={styles.focusText}>
-                {activeView === 'income'
-                  ? 'Aquí deberías poder ver rápido si tu perfil de ingresos base ya está claro, sin entrar de inmediato a filtros o formularios.'
-                  : 'Antes de editar nada, esta vista debería decirte cuánto cuesta sostener el sistema actual cada mes.'}
-              </p>
-            </div>
-            <div>
-              <div className={styles.focusValue}>
-                {activeView === 'income' ? formatCop(metrics.incomeTotal) : formatCop(metrics.obligationsTotal)}
+        {!detailsOpen ? (
+          <div className={`${styles.focusCard} ${styles.focusCardFull}`}>
+            <div className={styles.focusGrid}>
+              <div className={styles.focusCopy}>
+                <span className={styles.eyebrow}>Recurrentes</span>
+                <p className={styles.focusQuestion}>
+                  {activeView === 'income'
+                    ? '¿Con qué ingresos espero contar este mes?'
+                    : '¿Cuánto pesa mi operación fija todos los meses?'}
+                </p>
+                <h2 className={styles.focusTitle}>
+                  {activeView === 'income'
+                    ? `${incomeSources.length} fuentes de ingreso`
+                    : `${metrics.obligationsCount} obligaciones activas`}
+                </h2>
+                <p className={styles.focusText}>
+                  {activeView === 'income'
+                    ? 'Aquí deberías poder ver rápido si tu perfil de ingresos base ya está claro, sin entrar de inmediato a filtros o formularios.'
+                    : 'Antes de editar nada, esta vista debería decirte cuánto cuesta sostener el sistema actual cada mes.'}
+                </p>
               </div>
-              <p className={styles.focusCaption}>
-                {activeView === 'income' ? 'Ingreso esperado recurrente' : 'Carga recurrente mensual'}
-              </p>
+              <div>
+                <div className={styles.focusValue}>
+                  {activeView === 'income' ? formatCop(metrics.incomeTotal) : formatCop(metrics.obligationsTotal)}
+                </div>
+                <p className={styles.focusCaption}>
+                  {activeView === 'income' ? 'Ingreso esperado recurrente' : 'Carga recurrente mensual'}
+                </p>
+              </div>
+            </div>
+
+            {metrics.obligationsTotal > 0 ? (
+              <section className={styles.focusSupport}>
+                <div className={styles.focusSupportHeader}>
+                  <h3 className={styles.focusSupportTitle}>Cobertura mensual</h3>
+                  <span className={styles.focusSupportValue}>{coveragePct}%</span>
+                </div>
+                <div className={styles.focusRail}>
+                  <div
+                    className={`${styles.focusRailFill} ${coveragePct < 100 ? styles.focusRailFillWarn : ''}`}
+                    style={{ width: `${Math.min(coveragePct, 100)}%` }}
+                  />
+                </div>
+                <p className={styles.focusSupportText}>
+                  {formatCop(metrics.incomeTotal)} de ingresos recurrentes frente a {formatCop(metrics.obligationsTotal)} en obligaciones.
+                </p>
+              </section>
+            ) : null}
+
+            <div className={styles.focusMeta}>
+              {activeView === 'income' ? (
+                <span className={styles.focusBadge}>{incomeSources.filter((source) => source.attributes.classification === 'base').length} base confiable</span>
+              ) : (
+                <span className={styles.focusBadge}>{metrics.obligationsCount} activos</span>
+              )}
+              <span className={styles.focusBadge}>
+                {activeView === 'income' ? `${incomeSources.length} fuentes` : `${obligations.length} registrados`}
+              </span>
+            </div>
+
+            <div className={styles.focusActions}>
+              {activeView === 'income' ? (
+                <IconButton
+                  label="Agregar ingreso"
+                  variant="primary"
+                  icon={<IonIcon icon={addOutline} />}
+                  onClick={() => { setEditingIncome(null); setIncomeComposerOpen(true); }}
+                />
+              ) : (
+                <IconButton
+                  label="Nuevo recurrente"
+                  variant="primary"
+                  icon={<IonIcon icon={addOutline} />}
+                  onClick={() => { setEditingObligation(null); setComposerOpen(true); }}
+                />
+              )}
+              <Button
+                label="Explorar detalle"
+                variant="ghost"
+                onClick={() => setDetailsOpen(true)}
+              />
+              {!loading ? (
+                <Button
+                  label="Ver resumen recurrente"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setSummaryOpen(true)}
+                />
+              ) : null}
             </div>
           </div>
-
-          <div className={styles.focusMeta}>
-            {activeView === 'income' ? (
-              <span className={styles.focusBadge}>{incomeSources.filter((source) => source.attributes.classification === 'base').length} base confiable</span>
-            ) : (
-              <span className={styles.focusBadge}>{metrics.obligationsCount} activos</span>
-            )}
-            <span className={styles.focusBadge}>
-              {activeView === 'income' ? `${incomeSources.length} fuentes` : `${obligations.length} registrados`}
-            </span>
-          </div>
-
-          <div className={styles.focusActions}>
-            {activeView === 'income' ? (
-              <IconButton
-                label="Agregar ingreso"
-                variant="primary"
-                icon={<IonIcon icon={addOutline} />}
-                onClick={() => { setEditingIncome(null); setIncomeComposerOpen(true); }}
-              />
-            ) : (
-              <IconButton
-                label="Nuevo recurrente"
-                variant="primary"
-                icon={<IonIcon icon={addOutline} />}
-                onClick={() => { setEditingObligation(null); setComposerOpen(true); }}
-              />
-            )}
-            <Button
-              label={detailsOpen ? 'Ocultar detalle' : 'Explorar detalle'}
-              variant="ghost"
-              onClick={() => setDetailsOpen((current) => !current)}
-            />
-            {!loading ? (
-              <Button
-                label="Ver resumen recurrente"
-                size="sm"
-                variant="ghost"
-                onClick={() => setSummaryOpen(true)}
-              />
-            ) : null}
-          </div>
-        </div>
+        ) : null}
 
         {loading ? <Spinner size="lg" /> : null}
         {error ? <ErrorState message={error} onRetry={() => void load()} /> : null}
@@ -318,41 +341,46 @@ export const RecurringObligationsPage = () => {
           </IonSegment>
         </section>
 
-        {!loading && !error ? (
+        {!loading && !error && detailsOpen ? (
           <>
+            <div className={styles.detailStageHeader}>
+              <div className={styles.detailStageCopy}>
+                <h3 className={styles.detailStageTitle}>Detalle recurrente</h3>
+                <p className={styles.detailStageText}>Aquí vives entre filtros, segmentación y cards. La vista inicial ya respondió la pregunta principal.</p>
+              </div>
+              <Button label="Volver al resumen" variant="ghost" onClick={() => setDetailsOpen(false)} />
+            </div>
             {activeView === 'income' ? (
               <section className={styles.panel}>
               <h3 className={styles.panelTitle}>Fuentes de ingreso</h3>
-              {detailsOpen ? (
-                <div className={styles.detailPanel}>
-                  <ListToolbar
-                    searchLabel="Buscar ingresos"
-                    searchPlaceholder="Nombre"
-                    searchValue={incomeFilters.q ?? ''}
-                    resultLabel={`${incomeSources.length} resultados`}
-                    activeFilterCount={incomeActiveFilterCount}
-                    onSearchChange={(q) => {
-                      const next = { ...incomeFilters, q };
-                      setIncomeFilters(next);
-                      setDraftIncomeFilters(next);
-                    }}
-                    onOpenSort={() => setIncomeSortOpen(true)}
-                    onOpenFilters={() => setIncomeFiltersOpen(true)}
-                  />
-                  <AppliedFiltersBar
-                    chips={incomeChips}
-                    onRemove={(key) => {
-                      const next = { ...incomeFilters, [key]: key === 'is_variable' ? 'all' : '' };
-                      setIncomeFilters(next);
-                      setDraftIncomeFilters(next);
-                    }}
-                    onClearAll={() => {
-                      setIncomeFilters(initialIncomeFilters);
-                      setDraftIncomeFilters(initialIncomeFilters);
-                    }}
-                  />
-                </div>
-              ) : null}
+              <div className={styles.detailPanel}>
+                <ListToolbar
+                  searchLabel="Buscar ingresos"
+                  searchPlaceholder="Nombre"
+                  searchValue={incomeFilters.q ?? ''}
+                  resultLabel={`${incomeSources.length} resultados`}
+                  activeFilterCount={incomeActiveFilterCount}
+                  onSearchChange={(q) => {
+                    const next = { ...incomeFilters, q };
+                    setIncomeFilters(next);
+                    setDraftIncomeFilters(next);
+                  }}
+                  onOpenSort={() => setIncomeSortOpen(true)}
+                  onOpenFilters={() => setIncomeFiltersOpen(true)}
+                />
+                <AppliedFiltersBar
+                  chips={incomeChips}
+                  onRemove={(key) => {
+                    const next = { ...incomeFilters, [key]: key === 'is_variable' ? 'all' : '' };
+                    setIncomeFilters(next);
+                    setDraftIncomeFilters(next);
+                  }}
+                  onClearAll={() => {
+                    setIncomeFilters(initialIncomeFilters);
+                    setDraftIncomeFilters(initialIncomeFilters);
+                  }}
+                />
+              </div>
               {!incomeSources.length ? (
                 <EmptyState message="No hay fuentes de ingreso cargadas." />
               ) : (
@@ -371,56 +399,54 @@ export const RecurringObligationsPage = () => {
             ) : (
               <section className={styles.panel}>
               <h3 className={styles.panelTitle}>Obligaciones recurrentes</h3>
-              {detailsOpen ? (
-                <div className={styles.detailPanel}>
-                  <ListToolbar
-                    searchLabel="Buscar recurrentes"
-                    searchPlaceholder="Nombre"
-                    searchValue={obligationFilters.q ?? ''}
-                    resultLabel={`${obligations.length} resultados`}
-                    activeFilterCount={obligationActiveFilterCount}
-                    onSearchChange={(q) => {
-                      const next = { ...obligationFilters, q };
+              <div className={styles.detailPanel}>
+                <ListToolbar
+                  searchLabel="Buscar recurrentes"
+                  searchPlaceholder="Nombre"
+                  searchValue={obligationFilters.q ?? ''}
+                  resultLabel={`${obligations.length} resultados`}
+                  activeFilterCount={obligationActiveFilterCount}
+                  onSearchChange={(q) => {
+                    const next = { ...obligationFilters, q };
+                    setObligationFilters(next);
+                    setDraftObligationFilters(next);
+                  }}
+                  onOpenSort={() => setSortOpen(true)}
+                  onOpenFilters={() => setFiltersOpen(true)}
+                />
+                <div className={styles.quickFilters}>
+                  <Button
+                    label="Activos"
+                    size="sm"
+                    variant={obligationFilters.active === true ? 'primary' : 'ghost'}
+                    onClick={() => {
+                      const next: RecurringObligationQueryParams = {
+                        ...obligationFilters,
+                        active: obligationFilters.active === true ? 'all' : true,
+                      };
                       setObligationFilters(next);
                       setDraftObligationFilters(next);
-                    }}
-                    onOpenSort={() => setSortOpen(true)}
-                    onOpenFilters={() => setFiltersOpen(true)}
-                  />
-                  <div className={styles.quickFilters}>
-                    <Button
-                      label="Activos"
-                      size="sm"
-                      variant={obligationFilters.active === true ? 'primary' : 'ghost'}
-                      onClick={() => {
-                        const next: RecurringObligationQueryParams = {
-                          ...obligationFilters,
-                          active: obligationFilters.active === true ? 'all' : true,
-                        };
-                        setObligationFilters(next);
-                        setDraftObligationFilters(next);
-                      }}
-                    />
-                  </div>
-                  <AppliedFiltersBar
-                    chips={obligationChips}
-                    onRemove={(key) => {
-                      const next: RecurringObligationQueryParams =
-                        key === 'active'
-                          ? { ...obligationFilters, active: 'all' }
-                          : key === 'category_id'
-                            ? { ...obligationFilters, category_id: '' }
-                            : { ...obligationFilters, q: '' };
-                      setObligationFilters(next);
-                      setDraftObligationFilters(next);
-                    }}
-                    onClearAll={() => {
-                      setObligationFilters(initialObligationFilters);
-                      setDraftObligationFilters(initialObligationFilters);
                     }}
                   />
                 </div>
-              ) : null}
+                <AppliedFiltersBar
+                  chips={obligationChips}
+                  onRemove={(key) => {
+                    const next: RecurringObligationQueryParams =
+                      key === 'active'
+                        ? { ...obligationFilters, active: 'all' }
+                        : key === 'category_id'
+                          ? { ...obligationFilters, category_id: '' }
+                          : { ...obligationFilters, q: '' };
+                    setObligationFilters(next);
+                    setDraftObligationFilters(next);
+                  }}
+                  onClearAll={() => {
+                    setObligationFilters(initialObligationFilters);
+                    setDraftObligationFilters(initialObligationFilters);
+                  }}
+                />
+              </div>
               {!obligations.length ? (
                 <EmptyState message="No hay obligaciones recurrentes registradas." />
               ) : (

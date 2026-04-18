@@ -83,44 +83,72 @@ export const BudgetsPage = () => {
   return (
     <AppLayout title="Presupuestos">
       <section className={styles.stack}>
-        <div className={`${styles.focusCard} ${styles.focusCardFull}`}>
-          <div className={styles.focusGrid}>
-            <div className={styles.focusCopy}>
-              <span className={styles.eyebrow}>Presupuestos</span>
-              <p className={styles.focusQuestion}>¿El mes va dentro del plan o ya se salió de rango?</p>
-              <h2 className={styles.focusTitle}>
-                {outOfRange.length ? `${outOfRange.length} categorías fuera de rango` : 'El burn rate sigue estable'}
-              </h2>
-              <p className={styles.focusText}>
-                {topRisk
-                  ? `${topRisk.category} es la señal más útil para empezar. No necesitas leer toda la tabla antes de saber dónde mirar.`
-                  : 'Cuando existan presupuestos, esta tarjeta te dirá primero si el plan sigue sano o no.'}
-              </p>
+        {!detailsOpen ? (
+          <div className={`${styles.focusCard} ${styles.focusCardFull}`}>
+            <div className={styles.focusGrid}>
+              <div className={styles.focusCopy}>
+                <span className={styles.eyebrow}>Presupuestos</span>
+                <p className={styles.focusQuestion}>¿El mes va dentro del plan o ya se salió de rango?</p>
+                <h2 className={styles.focusTitle}>
+                  {outOfRange.length ? `${outOfRange.length} categorías fuera de rango` : 'El burn rate sigue estable'}
+                </h2>
+                <p className={styles.focusText}>
+                  {topRisk
+                    ? `${topRisk.category} es la señal más útil para empezar. No necesitas leer toda la tabla antes de saber dónde mirar.`
+                    : 'Cuando existan presupuestos, esta tarjeta te dirá primero si el plan sigue sano o no.'}
+                </p>
+              </div>
+              <div>
+                <div className={styles.focusValue}>{topRisk ? formatCop(topRisk.projected) : '—'}</div>
+                <p className={styles.focusCaption}>
+                  {topRisk ? `Proyección actual de ${topRisk.category}` : 'Sin burn rate visible todavía'}
+                </p>
+              </div>
             </div>
-            <div>
-              <div className={styles.focusValue}>{topRisk ? formatCop(topRisk.projected) : '—'}</div>
-              <p className={styles.focusCaption}>
-                {topRisk ? `Proyección actual de ${topRisk.category}` : 'Sin burn rate visible todavía'}
-              </p>
+
+            {topRisk ? (
+              <section className={styles.focusSupport}>
+                <div className={styles.focusSupportHeader}>
+                  <h3 className={styles.focusSupportTitle}>Riesgo principal</h3>
+                  <span className={styles.focusSupportValue}>{Math.round(topRisk.pct)}%</span>
+                </div>
+                <div className={styles.focusRail}>
+                  <div
+                    className={`${styles.focusRailFill} ${topRisk.on_track ? '' : styles.focusRailFillWarn}`}
+                    style={{ width: `${Math.min(Math.round(topRisk.pct), 100)}%` }}
+                  />
+                </div>
+                <p className={styles.focusSupportText}>
+                  {formatCop(topRisk.spent)} gastados de {formatCop(topRisk.budget)}; proyectado a {formatCop(topRisk.projected)}.
+                </p>
+              </section>
+            ) : null}
+
+            <div className={styles.focusMeta}>
+              <span className={styles.focusBadge}>{budgets.length} categorías con presupuesto</span>
+              <span className={styles.focusBadge}>{outOfRange.length} alertas</span>
+            </div>
+
+            <div className={styles.focusActions}>
+              <Button
+                label="Explorar detalle"
+                variant="ghost"
+                onClick={() => setDetailsOpen(true)}
+              />
             </div>
           </div>
-
-          <div className={styles.focusMeta}>
-            <span className={styles.focusBadge}>{budgets.length} categorías con presupuesto</span>
-            <span className={styles.focusBadge}>{outOfRange.length} alertas</span>
-          </div>
-
-          <div className={styles.focusActions}>
-            <Button
-              label={detailsOpen ? 'Ocultar detalle' : 'Explorar detalle'}
-              variant="ghost"
-              onClick={() => setDetailsOpen((current) => !current)}
-            />
-          </div>
-        </div>
+        ) : null}
 
         {detailsOpen ? (
-          <div className={styles.detailPanel}>
+          <div className={styles.detailStage}>
+            <div className={styles.detailStageHeader}>
+              <div className={styles.detailStageCopy}>
+                <h3 className={styles.detailStageTitle}>Detalle de presupuestos</h3>
+                <p className={styles.detailStageText}>La tabla completa y los filtros aparecen en esta vista secundaria, no apilados debajo del estado inicial.</p>
+              </div>
+              <Button label="Volver al resumen" variant="ghost" onClick={() => setDetailsOpen(false)} />
+            </div>
+            <div className={styles.detailPanel}>
             <ListToolbar
               searchLabel="Buscar presupuestos"
               searchPlaceholder="Categoría"
@@ -148,6 +176,7 @@ export const BudgetsPage = () => {
                 setDraftFilters(initialFilters);
               }}
             />
+            </div>
           </div>
         ) : null}
 
@@ -155,7 +184,7 @@ export const BudgetsPage = () => {
         {error ? <ErrorState message={error} onRetry={() => void load()} /> : null}
         {!loading && !error && !budgets.length ? <EmptyState message="No hay presupuestos definidos para el período actual." /> : null}
 
-        {!loading && !error && budgets.length ? (
+        {!loading && !error && budgets.length && detailsOpen ? (
           <div className={styles.tableWrap}>
             <table className={styles.table}>
               <thead>
