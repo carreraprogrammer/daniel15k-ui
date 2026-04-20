@@ -370,8 +370,16 @@ export interface BudgetProposalCategory {
   name: string;
   category_type: string;
   suggested_amount: number;
-  avg_spent: number;
+  avg_spent: number | null;
   months_with_data: number;
+  range_hint: string | null;
+}
+
+export interface BudgetAvailableCategory {
+  code: string;
+  name: string;
+  category_type: string;
+  range_hint: string | null;
 }
 
 export interface BudgetProposal {
@@ -392,7 +400,10 @@ export interface BudgetProposal {
   };
   sinking_funds: { id: number; name: string; monthly_contribution: number }[];
   categories: BudgetProposalCategory[];
+  available_categories: BudgetAvailableCategory[];
   free_margin: number;
+  has_history: boolean;
+  mode: 'data_driven' | 'provisional';
   warnings: string[];
   existing_plan: Record<string, unknown> | null;
   month: number;
