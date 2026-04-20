@@ -87,7 +87,9 @@ export const AppLayout = ({ title, children }: { title: string; children: ReactN
               </div>
             </aside>
             <main className={styles.main}>
-              <div className={styles.content}>{children}</div>
+              <div className={styles.content} data-scroll-root="app-layout">
+                {children}
+              </div>
             </main>
           </div>
 

@@ -20,6 +20,15 @@ export const initialTransactionFilters: TransactionQueryParams = {
 };
 
 const PAGE_SIZE = 20;
+const SCROLL_ROOT_SELECTOR = '[data-scroll-root="app-layout"]';
+
+const resolveScrollRoot = (node: HTMLDivElement | null): Element | null => {
+  if (!node) {
+    return null;
+  }
+
+  return node.closest(SCROLL_ROOT_SELECTOR);
+};
 
 export const useTransactionsPage = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -35,6 +44,7 @@ export const useTransactionsPage = () => {
   const [hasNextPage, setHasNextPage] = useState(false);
   const [totalResults, setTotalResults] = useState(0);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const pendingPageRef = useRef<number | null>(null);
 
   const load = async (nextPage = 1, options?: { append?: boolean; withSummary?: boolean }) => {
     const append = options?.append ?? false;
@@ -65,6 +75,7 @@ export const useTransactionsPage = () => {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No fue posible cargar las transacciones.');
     } finally {
+      pendingPageRef.current = null;
       setLoading(false);
       setLoadingMore(false);
     }
@@ -93,6 +104,8 @@ export const useTransactionsPage = () => {
       return undefined;
     }
 
+    const root = resolveScrollRoot(sentinel);
+
     const observer = new IntersectionObserver(
       (entries) => {
         const [entry] = entries;
@@ -100,10 +113,16 @@ export const useTransactionsPage = () => {
           return;
         }
 
-        void load(page + 1, { append: true, withSummary: false });
+        const nextPage = page + 1;
+        if (pendingPageRef.current === nextPage) {
+          return;
+        }
+
+        pendingPageRef.current = nextPage;
+        void load(nextPage, { append: true, withSummary: false });
       },
       {
-        root: null,
+        root,
         rootMargin: '0px 0px 320px 0px',
         threshold: 0.1,
       },
