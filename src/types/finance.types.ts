@@ -363,6 +363,42 @@ export interface BudgetQueryParams {
   sort_dir?: 'asc' | 'desc';
 }
 
+// Budget proposal
+
+export interface BudgetProposalCategory {
+  code: string;
+  name: string;
+  category_type: string;
+  suggested_amount: number;
+  avg_spent: number;
+  months_with_data: number;
+}
+
+export interface BudgetProposal {
+  income: {
+    fixed_total: number;
+    variable_projection: number;
+    planning_income: number;
+    include_variable: boolean;
+    fixed_sources: { name: string; amount: number }[];
+    variable_sources: { name: string; expected_amount: number; reliability_score: number; conservative_projection: number }[];
+  };
+  committed: {
+    obligations_total: number;
+    debt_minimums_total: number;
+    sinking_funds_total: number;
+    total: number;
+    by_category?: Record<string, { total: number; items: { name: string }[] }>;
+  };
+  sinking_funds: { id: number; name: string; monthly_contribution: number }[];
+  categories: BudgetProposalCategory[];
+  free_margin: number;
+  warnings: string[];
+  existing_plan: Record<string, unknown> | null;
+  month: number;
+  year: number;
+}
+
 // Agent UI Events — canal agente → front-end
 
 export type AgentUiEventType =

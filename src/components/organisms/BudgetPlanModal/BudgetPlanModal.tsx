@@ -1,0 +1,247 @@
+import { useEffect, useState } from 'react';
+import {
+  IonButton,
+  IonButtons,
+  IonContent,
+  IonHeader,
+  IonModal,
+  IonTitle,
+  IonToolbar,
+} from '@ionic/react';
+import { Button } from '../../atoms/Button';
+import { Spinner } from '../../atoms/Spinner';
+import { financeService } from '../../../services/financeService';
+import type { BudgetProposal, BudgetProposalCategory } from '../../../types/finance.types';
+import styles from './BudgetPlanModal.module.css';
+
+const formatCop = (v: number) =>
+  new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(v);
+
+interface Props {
+  isOpen: boolean;
+  onClose: () => void;
+  onSaved: () => void;
+}
+
+export const BudgetPlanModal = ({ isOpen, onClose, onSaved }: Props) => {
+  const [proposal, setProposal] = useState<BudgetProposal | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [includeVariable, setIncludeVariable] = useState(false);
+  const [amounts, setAmounts] = useState<Record<string, number>>({});
+
+  const loadProposal = async (variable: boolean) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await financeService.proposeBudgetPlan({ includeVariable: variable });
+      setProposal(data);
+      setAmounts(Object.fromEntries(data.categories.map((c) => [c.code, c.suggested_amount])));
+    } catch {
+      setError('No fue posible calcular la propuesta. Intentá de nuevo.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen) void loadProposal(includeVariable);
+  }, [isOpen]);
+
+  const toggleVariable = (val: boolean) => {
+    setIncludeVariable(val);
+    void loadProposal(val);
+  };
+
+  const setAmount = (code: string, raw: string) => {
+    const n = parseInt(raw.replace(/\D/g, ''), 10);
+    setAmounts((prev) => ({ ...prev, [code]: isNaN(n) ? 0 : n }));
+  };
+
+  const totalCategories = Object.values(amounts).reduce((a, b) => a + b, 0);
+  const committed = proposal?.committed.total ?? 0;
+  const planningIncome = proposal?.income.planning_income ?? 0;
+  const margin = planningIncome - committed - totalCategories;
+
+  const handleConfirm = async () => {
+    if (!proposal) return;
+    setSaving(true);
+    try {
+      const plan = await financeService.generateMonthlyPlan(includeVariable ? 'expected' : 'conservative');
+      await financeService.confirmMonthlyPlan(
+        plan.id,
+        {
+          base_budget_income:          proposal.income.fixed_total,
+          expected_variable_income:    proposal.income.variable_projection,
+          recurring_obligations_total: proposal.committed.obligations_total,
+          debt_minimums_total:         proposal.committed.debt_minimums_total,
+          discretionary_limit:         totalCategories,
+        },
+        Object.entries(amounts)
+          .filter(([, amt]) => amt > 0)
+          .map(([code, amount_limit]) => ({ category_code: code, amount_limit })) as never,
+      );
+      onSaved();
+      onClose();
+    } catch {
+      setError('No fue posible guardar el plan. Intentá de nuevo.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <IonModal
+      isOpen={isOpen}
+      onDidDismiss={onClose}
+      style={{ '--border-radius': '24px', '--width': 'min(620px, 96vw)', '--height': 'min(88dvh, 780px)' }}
+    >
+      <IonHeader className="ion-no-border">
+        <IonToolbar className={styles.toolbar}>
+          <IonTitle className={styles.toolbarTitle}>Plan mensual</IonTitle>
+          <IonButtons slot="end">
+            <IonButton fill="clear" onClick={onClose} className={styles.closeBtn}>✕</IonButton>
+          </IonButtons>
+        </IonToolbar>
+      </IonHeader>
+
+      <IonContent className={styles.body}>
+        {loading && (
+          <div className={styles.loadingState}>
+            <Spinner size="lg" />
+            <p className={styles.loadingText}>Calculando propuesta...</p>
+          </div>
+        )}
+
+        {!loading && error && (
+          <div className={styles.errorState}>
+            <p className={styles.errorText}>{error}</p>
+            <Button label="Reintentar" onClick={() => void loadProposal(includeVariable)} />
+          </div>
+        )}
+
+        {!loading && !error && proposal && (
+          <div className={styles.content}>
+
+            {/* Income section */}
+            <section className={styles.section}>
+              <h3 className={styles.sectionTitle}>Ingreso base</h3>
+              <div className={styles.incomeRow}>
+                <div>
+                  <p className={styles.incomeValue}>{formatCop(proposal.income.fixed_total)}</p>
+                  <p className={styles.incomeLabel}>
+                    {proposal.income.fixed_sources.map((s) => s.name).join(', ') || 'Ingreso fijo'}
+                  </p>
+                </div>
+                {proposal.income.variable_sources.length > 0 && (
+                  <label className={styles.toggleLabel}>
+                    <input
+                      type="checkbox"
+                      className={styles.toggleInput}
+                      checked={includeVariable}
+                      onChange={(e) => toggleVariable(e.target.checked)}
+                    />
+                    <span className={styles.toggleText}>
+                      Incluir variable ({formatCop(proposal.income.variable_projection)})
+                    </span>
+                  </label>
+                )}
+              </div>
+            </section>
+
+            {/* Committed deductions */}
+            <section className={styles.section}>
+              <h3 className={styles.sectionTitle}>Comprometido (fijo)</h3>
+              <div className={styles.committedList}>
+                {Object.entries(proposal.committed.by_category as Record<string, { total: number; items: { name: string }[] }>).map(([cat, data]) => (
+                  <div key={cat} className={styles.committedRow}>
+                    <span className={styles.committedName}>{cat}</span>
+                    <span className={styles.committedAmount}>{formatCop(data.total)}</span>
+                  </div>
+                ))}
+                {proposal.committed.debt_minimums_total > 0 && (
+                  <div className={styles.committedRow}>
+                    <span className={styles.committedName}>Mínimos de deuda</span>
+                    <span className={styles.committedAmount}>{formatCop(proposal.committed.debt_minimums_total)}</span>
+                  </div>
+                )}
+                {proposal.committed.sinking_funds_total > 0 && (
+                  <div className={styles.committedRow}>
+                    <span className={styles.committedName}>Bolsillos</span>
+                    <span className={styles.committedAmount}>{formatCop(proposal.committed.sinking_funds_total)}</span>
+                  </div>
+                )}
+                <div className={`${styles.committedRow} ${styles.committedTotal}`}>
+                  <span className={styles.committedName}>Total comprometido</span>
+                  <span className={styles.committedAmount}>{formatCop(committed)}</span>
+                </div>
+              </div>
+            </section>
+
+            {/* Category amounts */}
+            {proposal.categories.length > 0 && (
+              <section className={styles.section}>
+                <h3 className={styles.sectionTitle}>
+                  Presupuesto por categoría
+                  <span className={styles.sectionHint}> · basado en promedio 3 meses</span>
+                </h3>
+                <div className={styles.categoryList}>
+                  {proposal.categories.map((cat: BudgetProposalCategory) => (
+                    <div key={cat.code} className={styles.categoryRow}>
+                      <div className={styles.categoryMeta}>
+                        <span className={styles.categoryName}>{cat.name}</span>
+                        <span className={`${styles.categoryType} ${styles[`type_${cat.category_type}`]}`}>
+                          {cat.category_type}
+                        </span>
+                      </div>
+                      <input
+                        type="text"
+                        className={styles.amountInput}
+                        value={amounts[cat.code] !== undefined ? formatCop(amounts[cat.code]) : ''}
+                        onChange={(e) => setAmount(cat.code, e.target.value)}
+                        placeholder="$0"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Warnings */}
+            {proposal.warnings.length > 0 && (
+              <div className={styles.warnings}>
+                {proposal.warnings.map((w, i) => (
+                  <p key={i} className={styles.warningItem}>⚠️ {w}</p>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </IonContent>
+
+      {/* Sticky footer */}
+      {!loading && !error && proposal && (
+        <div className={styles.footer}>
+          <div className={styles.footerSummary}>
+            <div className={styles.footerRow}>
+              <span className={styles.footerLabel}>Total asignado</span>
+              <span className={styles.footerValue}>{formatCop(committed + totalCategories)}</span>
+            </div>
+            <div className={styles.footerRow}>
+              <span className={styles.footerLabel}>Margen libre</span>
+              <strong className={margin >= 0 ? styles.marginPositive : styles.marginNegative}>
+                {formatCop(margin)}
+              </strong>
+            </div>
+          </div>
+          <Button
+            label={saving ? 'Guardando...' : 'Confirmar plan'}
+            onClick={() => void handleConfirm()}
+            disabled={saving || margin < 0}
+          />
+        </div>
+      )}
+    </IonModal>
+  );
+};

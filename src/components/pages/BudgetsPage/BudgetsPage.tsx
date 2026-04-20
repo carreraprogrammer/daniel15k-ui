@@ -9,6 +9,7 @@ import { ListToolbar } from '../../molecules/ListToolbar';
 import { AppliedFiltersBar } from '../../molecules/AppliedFiltersBar';
 import { SortSheet } from '../../molecules/SortSheet';
 import { FilterSheet } from '../../molecules/FilterSheet';
+import { BudgetPlanModal } from '../../organisms/BudgetPlanModal/BudgetPlanModal';
 import { financeService } from '../../../services/financeService';
 import type { Budget, BudgetQueryParams, SummaryResponse } from '../../../types/finance.types';
 import styles from '../FinancePage.module.css';
@@ -33,6 +34,7 @@ export const BudgetsPage = () => {
   const [sortOpen, setSortOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [planModalOpen, setPlanModalOpen] = useState(false);
   const [filters, setFilters] = useState<BudgetQueryParams>(initialFilters);
   const [draftFilters, setDraftFilters] = useState<BudgetQueryParams>(initialFilters);
 
@@ -131,6 +133,10 @@ export const BudgetsPage = () => {
 
             <div className={styles.focusActions}>
               <Button
+                label="Armar plan mensual"
+                onClick={() => setPlanModalOpen(true)}
+              />
+              <Button
                 label="Explorar detalle"
                 variant="ghost"
                 onClick={() => setDetailsOpen(true)}
@@ -220,6 +226,12 @@ export const BudgetsPage = () => {
           </>
         ) : null}
       </section>
+
+      <BudgetPlanModal
+        isOpen={planModalOpen}
+        onClose={() => setPlanModalOpen(false)}
+        onSaved={() => void load()}
+      />
 
       <SortSheet
         isOpen={sortOpen}

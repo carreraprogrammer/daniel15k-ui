@@ -2,6 +2,7 @@ import { api } from './api';
 import type {
   AgentUiEvent,
   Budget,
+  BudgetProposal,
   CategoryResource,
   BudgetQueryParams,
   CompletenessResponse,
@@ -245,6 +246,34 @@ export const financeService = {
 
   async consumeAgentEvent(id: number): Promise<void> {
     await api.patch(`/api/v1/agent_events/${id}/consume`);
+  },
+
+  async proposeBudgetPlan(params: {
+    includeVariable: boolean;
+    month?: number;
+    year?: number;
+  }): Promise<BudgetProposal> {
+    const { data } = await api.get('/api/v1/monthly_plans/propose', {
+      params: {
+        include_variable: params.includeVariable,
+        month: params.month,
+        year: params.year,
+      },
+    });
+    return data.data as BudgetProposal;
+  },
+
+  async generateMonthlyPlan(mode: string): Promise<{ id: number }> {
+    const { data } = await api.post('/api/v1/monthly_plans/generate', { mode });
+    return data.data as { id: number };
+  },
+
+  async confirmMonthlyPlan(
+    id: number,
+    updates: Record<string, unknown>,
+    budgets: { category_id: number; amount_limit: number }[],
+  ): Promise<void> {
+    await api.post(`/api/v1/monthly_plans/${id}/confirm`, { ...updates, budgets });
   },
 
   async startWebChat(message: string): Promise<{ session_id: string }> {
