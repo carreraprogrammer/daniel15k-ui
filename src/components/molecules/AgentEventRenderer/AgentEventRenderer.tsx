@@ -26,6 +26,16 @@ import styles from './AgentEventRenderer.module.css';
 const formatCop = (value: number) =>
   new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(value);
 
+const renderMarkdown = (text: string) => {
+  const escaped = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const html = escaped
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/\n/g, '<br/>');
+  // eslint-disable-next-line react/no-danger
+  return <span dangerouslySetInnerHTML={{ __html: html }} />;
+};
+
 // ─── Step map ─────────────────────────────────────────────────────────────────
 
 const STEPS: { type: AgentUiEventType | '__loading__'; label: string }[] = [
@@ -202,7 +212,7 @@ const AgentCard = ({ event }: { event: AgentUiEvent }) => {
 
   return (
     <div className={`${styles.infoContent} ${styles[`tone_${p.tone}`]}`}>
-      <p className={styles.infoBody}>{p.body}</p>
+      <p className={styles.infoBody}>{renderMarkdown(p.body)}</p>
       <div className={styles.modalActions}>
         <Button label="Entendido" onClick={() => void consume(event.id)} />
       </div>
