@@ -2,16 +2,15 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { IncomeSetupWizard } from '../../organisms/IncomeSetupWizard';
 import { financeService } from '../../../services/financeService';
-import { useAgentUI } from '../../../contexts/AgentUIContext';
 import type { CompletenessResponse } from '../../../types/finance.types';
 import styles from './CompletenessIndicator.module.css';
 
 const DIMENSION_META: Record<string, { label: string; to?: string; ctaLabel?: string; wizard?: string; dependsOn?: string }> = {
-  income_profile:     { label: 'Perfil de ingresos', wizard: 'income_setup', ctaLabel: 'Completar →' },
-  debts:              { label: 'Deudas', to: '/debts', ctaLabel: 'Completar →' },
-  recurring_expenses: { label: 'Gastos recurrentes', to: '/recurring', ctaLabel: 'Completar →' },
+  income_profile:     { label: 'Perfil de ingresos', wizard: 'income_setup', ctaLabel: 'Configurar' },
+  debts:              { label: 'Deudas', to: '/debts', ctaLabel: 'Completar' },
+  recurring_expenses: { label: 'Gastos recurrentes', to: '/recurring', ctaLabel: 'Completar' },
   strategy:           { label: 'Estrategia financiera' },
-  monthly_plan:       { label: 'Plan mensual', wizard: 'budget_agent', ctaLabel: 'Armar plan →', dependsOn: 'income_profile' },
+  monthly_plan:       { label: 'Plan mensual', to: '/budgets', ctaLabel: 'Armar plan', dependsOn: 'income_profile' },
 };
 
 const STATUS_LABEL: Record<string, string> = {
@@ -26,7 +25,6 @@ export const CompletenessIndicator = () => {
   const [open, setOpen] = useState(false);
   const [incomeWizardOpen, setIncomeWizardOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
-  const { startChat, state: agentState } = useAgentUI();
 
   const loadCompleteness = () => {
     financeService.fetchCompleteness().then(setData).catch(() => null);
@@ -73,10 +71,10 @@ export const CompletenessIndicator = () => {
       <div className={styles.root} ref={panelRef}>
         {open && (
           <div className={styles.panel}>
-            <p className={styles.panelTitle}>Información incompleta</p>
-            <p className={styles.panelSubtitle}>
-              El sistema necesita estos datos para ayudarte mejor.
-            </p>
+            <div className={styles.panelHeader}>
+              <span className={styles.panelIcon}>⚠</span>
+              <p className={styles.panelTitle}>Información incompleta</p>
+            </div>
             <ul className={styles.list}>
               {gapDimensions.map(({ key, label, to, wizard, ctaLabel, blockedByDep, depLabel, status, message }) => (
                 <li key={key} className={styles.item}>
@@ -97,21 +95,6 @@ export const CompletenessIndicator = () => {
                       onClick={() => { setOpen(false); setIncomeWizardOpen(true); }}
                     >
                       {ctaLabel}
-                    </button>
-                  )}
-                  {!blockedByDep && wizard === 'budget_agent' && (
-                    <button
-                      type="button"
-                      className={styles.itemCta}
-                      disabled={agentState.status === 'loading'}
-                      onClick={async () => {
-                        console.log('[CompletenessIndicator] Armar plan clicked, agentState:', agentState.status);
-                        setOpen(false);
-                        await startChat('Quiero crear mi plan mensual de presupuesto');
-                        console.log('[CompletenessIndicator] startChat done, agentState:', agentState.status);
-                      }}
-                    >
-                      {agentState.status === 'loading' ? 'Consultando al agente...' : ctaLabel}
                     </button>
                   )}
                   {!blockedByDep && to && !wizard && (
