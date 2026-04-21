@@ -20,15 +20,6 @@ export const initialTransactionFilters: TransactionQueryParams = {
 };
 
 const PAGE_SIZE = 20;
-const SCROLL_ROOT_SELECTOR = '[data-scroll-root="app-layout"]';
-
-const resolveScrollRoot = (node: HTMLDivElement | null): Element | null => {
-  if (!node) {
-    return null;
-  }
-
-  return node.closest(SCROLL_ROOT_SELECTOR);
-};
 
 export const useTransactionsPage = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -43,7 +34,7 @@ export const useTransactionsPage = () => {
   const [page, setPage] = useState(1);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [totalResults, setTotalResults] = useState(0);
-  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const [pendingCount, setPendingCount] = useState(0);
   const pendingPageRef = useRef<number | null>(null);
 
   const load = async (nextPage = 1, options?: { append?: boolean; withSummary?: boolean }) => {
@@ -57,9 +48,10 @@ export const useTransactionsPage = () => {
     }
     setError(null);
     try {
-      const [transactionsResponse, summaryResponse] = await Promise.all([
+      const [transactionsResponse, summaryResponse, pendingResponse] = await Promise.all([
         financeService.fetchTransactions({ ...filters, page: nextPage, per_page: PAGE_SIZE }),
         withSummary ? financeService.fetchSummary() : Promise.resolve(null),
+        withSummary ? financeService.fetchPendingTransactions() : Promise.resolve(null),
       ]);
 
       setTransactions((current) =>
@@ -71,6 +63,9 @@ export const useTransactionsPage = () => {
 
       if (summaryResponse) {
         setSummary(summaryResponse);
+      }
+      if (pendingResponse) {
+        setPendingCount(pendingResponse.data.length);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No fue posible cargar las transacciones.');
@@ -98,40 +93,13 @@ export const useTransactionsPage = () => {
     void loadCategories();
   }, []);
 
-  useEffect(() => {
-    const sentinel = sentinelRef.current;
-    if (!sentinel || loading || loadingMore || !hasNextPage) {
-      return undefined;
-    }
-
-    const root = resolveScrollRoot(sentinel);
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const [entry] = entries;
-        if (!entry?.isIntersecting) {
-          return;
-        }
-
-        const nextPage = page + 1;
-        if (pendingPageRef.current === nextPage) {
-          return;
-        }
-
-        pendingPageRef.current = nextPage;
-        void load(nextPage, { append: true, withSummary: false });
-      },
-      {
-        root,
-        rootMargin: '0px 0px 320px 0px',
-        threshold: 0.1,
-      },
-    );
-
-    observer.observe(sentinel);
-
-    return () => observer.disconnect();
-  }, [hasNextPage, loading, loadingMore, page]);
+  const loadMore = async () => {
+    if (loadingMore || !hasNextPage) return;
+    const nextPage = page + 1;
+    if (pendingPageRef.current === nextPage) return;
+    pendingPageRef.current = nextPage;
+    await load(nextPage, { append: true, withSummary: false });
+  };
 
   const createTransaction = async (payload: TransactionCreatePayload) => {
     setSubmitting(true);
@@ -164,13 +132,16 @@ export const useTransactionsPage = () => {
   };
 
   const metrics = useMemo(() => {
-    const incomeTotal = transactions
-      .filter((transaction) => transaction.attributes.transaction_type === 'income')
-      .reduce((sum, transaction) => sum + transaction.attributes.amount, 0);
-    const expenseTotal = transactions
-      .filter((transaction) => transaction.attributes.transaction_type !== 'income')
-      .reduce((sum, transaction) => sum + transaction.attributes.amount, 0);
-    const pendingCount = transactions.filter((transaction) => transaction.attributes.status === 'pending').length;
+    const incomeTotal = summary
+      ? summary.balance.income_confirmed + summary.balance.income_pending
+      : transactions
+          .filter((t) => t.attributes.transaction_type === 'income')
+          .reduce((sum, t) => sum + t.attributes.amount, 0);
+    const expenseTotal = summary
+      ? summary.balance.expense_confirmed + summary.balance.expense_pending
+      : transactions
+          .filter((t) => t.attributes.transaction_type !== 'income')
+          .reduce((sum, t) => sum + t.attributes.amount, 0);
 
     return {
       count: totalResults,
@@ -178,7 +149,7 @@ export const useTransactionsPage = () => {
       expenseTotal,
       pendingCount,
     };
-  }, [totalResults, transactions]);
+  }, [totalResults, transactions, summary, pendingCount]);
 
   const categoryLookup = useMemo(() => buildCategoryLookup(categories), [categories]);
   const behaviorSummary = useMemo(() => summarizeBehavior(transactions, categoryLookup), [categoryLookup, transactions]);
@@ -221,7 +192,7 @@ export const useTransactionsPage = () => {
     activeFilterCount,
     appliedChips,
     hasNextPage,
-    sentinelRef,
+    loadMore,
     setError,
     setFilters,
     setDraftFilters,
