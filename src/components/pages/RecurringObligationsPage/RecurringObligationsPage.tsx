@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { IonIcon, IonLabel, IonSegment, IonSegmentButton } from '@ionic/react';
+import { IonContent, IonIcon, IonLabel, IonSegment, IonSegmentButton } from '@ionic/react';
 import { addOutline } from 'ionicons/icons';
 import { AppLayout } from '../../templates/AppLayout';
 import { IconButton } from '../../atoms/IconButton';
@@ -231,6 +231,7 @@ export const RecurringObligationsPage = () => {
 
   return (
     <AppLayout title="Recurrentes">
+      <IonContent className={styles.pageContent}>
       <section className={styles.stack}>
         {!detailsOpen && !loading && !error ? (
           <div className={`${styles.focusCard} ${styles.focusCardFull}`}>
@@ -626,6 +627,7 @@ export const RecurringObligationsPage = () => {
         onCancel={() => setDeletingIncome(null)}
         onConfirm={() => void handleDeleteIncome()}
       />
+      </IonContent>
     </AppLayout>
   );
 };

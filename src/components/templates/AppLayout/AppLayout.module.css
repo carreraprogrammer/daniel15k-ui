@@ -1,10 +1,5 @@
-.page,
-.pageContent {
+.page {
   --background: transparent;
-}
-
-.pageContent::part(scroll) {
-  overflow: hidden;
 }
 
 .shell {
@@ -63,7 +58,7 @@
 }
 
 .sidebarPanel,
-.content {
+.contentShell {
   position: relative;
   isolation: isolate;
   overflow: hidden;
@@ -76,8 +71,7 @@
   backdrop-filter: blur(18px) saturate(122%);
 }
 
-.sidebarPanel::before,
-.content::before {
+.sidebarPanel::before {
   content: '';
   position: absolute;
   inset: 1px;
@@ -88,8 +82,19 @@
     radial-gradient(circle at top center, rgba(255, 255, 255, 0.05), transparent 42%);
 }
 
-.sidebarPanel > *,
-.content > * {
+.contentShell::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 10;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0px, transparent 48px),
+    radial-gradient(circle at top center, rgba(255, 255, 255, 0.04), transparent 40%);
+}
+
+.sidebarPanel > * {
   position: relative;
   z-index: 1;
 }
@@ -158,15 +163,18 @@
   overflow: hidden;
 }
 
-.content {
+.contentShell {
   height: 100%;
-  padding: var(--app-content-pad-top) var(--app-content-pad-inline) var(--app-content-pad-bottom);
   border-radius: 30px;
   min-width: 0;
   min-height: 0;
-  overflow-y: auto;
-  overflow-wrap: anywhere;
-  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  /* Pass padding vars down to IonContent children */
+  --padding-top: var(--app-content-pad-top);
+  --padding-bottom: var(--app-content-pad-bottom);
+  --padding-start: var(--app-content-pad-inline);
+  --padding-end: var(--app-content-pad-inline);
 }
 
 .mobileMenuBackdrop,
@@ -200,11 +208,10 @@
     overflow: hidden;
   }
 
-  .content {
+  .contentShell {
     height: 100%;
     min-height: 0;
     border-radius: 24px;
-    overflow-y: auto;
   }
 
   .mobileMenuBackdrop {

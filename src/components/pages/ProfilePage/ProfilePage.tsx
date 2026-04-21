@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { IonContent } from '@ionic/react';
 import { useToast } from '../../../hooks/useToast';
 import { authService } from '../../../services/authService';
 import { useAuthStore } from '../../../store/authStore';
@@ -18,6 +19,7 @@ export const ProfilePage = () => {
 
   return (
     <AppLayout title="Mi perfil">
+      <IonContent className={styles.pageContent}>
       <section className={styles.grid}>
         <article className={styles.summaryCard}>
           <span className={styles.eyebrow}>Perfil</span>
@@ -79,6 +81,7 @@ export const ProfilePage = () => {
           {toast}
         </article>
       </section>
+      </IonContent>
     </AppLayout>
   );
 };

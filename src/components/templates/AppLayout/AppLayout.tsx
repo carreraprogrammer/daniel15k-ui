@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { IonContent, IonIcon, IonPage } from '@ionic/react';
+import { IonIcon, IonPage } from '@ionic/react';
 import { closeOutline, logOutOutline, personCircleOutline } from 'ionicons/icons';
 import { NavLink } from 'react-router-dom';
 import { Header } from '../../organisms/Header';
@@ -73,25 +73,24 @@ export const AppLayout = ({ title, children }: { title: string; children: ReactN
 
   return (
     <IonPage className={styles.page}>
-      <IonContent className={styles.pageContent} fullscreen scrollY={false}>
-        <div ref={shellRef} className={styles.shell}>
-          <div className={styles.backdrop} aria-hidden="true" />
-          <div ref={headerRef} className={styles.headerSlot}>
-            <Header currentSection={title} onMenuToggle={() => setMobileMenuOpen((open) => !open)} menuOpen={mobileMenuOpen} />
-          </div>
-          <div className={styles.grid}>
-            <aside className={styles.sidebar}>
-              <div className={styles.sidebarPanel}>
-                <p className={styles.sidebarLabel}>Finanzas</p>
-                {renderNav()}
-              </div>
-            </aside>
-            <main className={styles.main}>
-              <div className={styles.content} data-scroll-root="app-layout">
-                {children}
-              </div>
-            </main>
-          </div>
+      <div ref={shellRef} className={styles.shell}>
+        <div className={styles.backdrop} aria-hidden="true" />
+        <div ref={headerRef} className={styles.headerSlot}>
+          <Header currentSection={title} onMenuToggle={() => setMobileMenuOpen((open) => !open)} menuOpen={mobileMenuOpen} />
+        </div>
+        <div className={styles.grid}>
+          <aside className={styles.sidebar}>
+            <div className={styles.sidebarPanel}>
+              <p className={styles.sidebarLabel}>Finanzas</p>
+              {renderNav()}
+            </div>
+          </aside>
+          <main className={styles.main}>
+            <div className={styles.contentShell}>
+              {children}
+            </div>
+          </main>
+        </div>
 
           <div
             className={[styles.mobileMenuBackdrop, mobileMenuOpen ? styles.mobileMenuBackdropVisible : ''].filter(Boolean).join(' ')}
@@ -140,7 +139,6 @@ export const AppLayout = ({ title, children }: { title: string; children: ReactN
           <AgentEventRenderer />
           <CompletenessIndicator />
         </div>
-      </IonContent>
     </IonPage>
   );
 };

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { IonContent } from '@ionic/react';
 import { AppLayout } from '../../templates/AppLayout';
 import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
@@ -84,6 +85,7 @@ export const BudgetsPage = () => {
 
   return (
     <AppLayout title="Presupuestos">
+      <IonContent className={styles.pageContent}>
       <section className={styles.stack}>
         {!detailsOpen && !loading && !error ? (
           <div className={`${styles.focusCard} ${styles.focusCardFull}`}>
@@ -273,6 +275,7 @@ export const BudgetsPage = () => {
           />
         </section>
       </FilterSheet>
+      </IonContent>
     </AppLayout>
   );
 };

@@ -1,3 +1,10 @@
+.pageContent {
+  --background: transparent;
+  flex: 1;
+  min-height: 0;
+  overflow-wrap: anywhere;
+}
+
 .grid {
   display: grid;
   grid-template-columns: minmax(260px, 360px) minmax(0, 1fr);

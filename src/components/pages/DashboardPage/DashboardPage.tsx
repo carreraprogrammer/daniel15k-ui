@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { IonContent } from '@ionic/react';
 import { AppLayout } from '../../templates/AppLayout';
 import { useAuthStore } from '../../../store/authStore';
 import { Button } from '../../atoms/Button';
@@ -58,6 +59,7 @@ export const DashboardPage = () => {
 
   return (
     <AppLayout title="Dashboard">
+      <IonContent className={styles.pageContent}>
       <section className={styles.stack}>
         {!detailsOpen && !loading && !error ? (
           <div className={`${styles.focusCard} ${styles.focusCardFull}`}>
@@ -282,6 +284,7 @@ export const DashboardPage = () => {
           </div>
         ) : null}
       </section>
+      </IonContent>
     </AppLayout>
   );
 };

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { IonIcon, useIonAlert, useIonToast } from '@ionic/react';
+import { IonContent, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, useIonAlert, useIonToast } from '@ionic/react';
 import { addOutline } from 'ionicons/icons';
 import { AppLayout } from '../../templates/AppLayout';
 import { IconButton } from '../../atoms/IconButton';
@@ -48,7 +48,7 @@ export const TransactionsPage = () => {
     activeFilterCount,
     appliedChips,
     hasNextPage,
-    sentinelRef,
+    loadMore,
     setError,
     setFilters,
     setDraftFilters,
@@ -153,6 +153,7 @@ export const TransactionsPage = () => {
 
   return (
     <AppLayout title="Transacciones">
+      <IonContent className={styles.pageContent}>
       <section className={styles.stack}>
         {!detailsOpen ? (
           <div className={`${styles.focusCard} ${styles.focusCardFull}`}>
@@ -320,18 +321,21 @@ export const TransactionsPage = () => {
                 }}
               />
             ))}
-            {hasNextPage ? (
-              <>
-                <div ref={sentinelRef} className={styles.infiniteSentinel} aria-hidden="true" />
-                <div className={styles.infiniteStatus}>
-                  <Spinner size="sm" />
-                  <span>Cargando más transacciones...</span>
-                </div>
-              </>
-            ) : null}
           </div>
         ) : null}
       </section>
+
+      <IonInfiniteScroll
+        onIonInfinite={async (ev) => {
+          await loadMore();
+          void ev.target.complete();
+        }}
+        threshold="200px"
+        disabled={!hasNextPage}
+      >
+        <IonInfiniteScrollContent loadingText="Cargando más transacciones..." />
+      </IonInfiniteScroll>
+      </IonContent>
 
       <SortSheet
         isOpen={sortOpen}

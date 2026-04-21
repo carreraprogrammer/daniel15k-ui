@@ -1,3 +1,10 @@
+.pageContent {
+  --background: transparent;
+  flex: 1;
+  min-height: 0;
+  overflow-wrap: anywhere;
+}
+
 .stack {
   display: grid;
   gap: 1.5rem;

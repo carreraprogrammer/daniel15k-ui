@@ -11,7 +11,6 @@ import {
 import { useAgentUI } from '../../../contexts/AgentUIContext';
 import type {
   AgentUiEvent,
-  AgentUiEventType,
   AmountEditorItem,
   BudgetCategoryOption,
   RequestConfirmationPayload,
@@ -34,46 +33,6 @@ const renderMarkdown = (text: string) => {
     .replace(/\n/g, '<br/>');
   // eslint-disable-next-line react/no-danger
   return <span dangerouslySetInnerHTML={{ __html: html }} />;
-};
-
-// ─── Step map ─────────────────────────────────────────────────────────────────
-
-const STEPS: { type: AgentUiEventType | '__loading__'; label: string }[] = [
-  { type: '__loading__',          label: 'Analizando' },
-  { type: 'show_card',            label: 'Ingreso' },
-  { type: 'show_category_selector', label: 'Categorías' },
-  { type: 'show_amount_editor',   label: 'Montos' },
-  { type: 'show_plan_proposal',   label: 'Propuesta' },
-  { type: 'request_confirmation', label: 'Confirmar' },
-];
-
-const stepIndexFor = (event: AgentUiEvent | null, isLoading: boolean) => {
-  if (!event) return isLoading ? 0 : -1;
-  const idx = STEPS.findIndex((s) => s.type === event.event_type);
-  return idx >= 0 ? idx : 4; // default to plan step
-};
-
-// ─── StepBar ─────────────────────────────────────────────────────────────────
-
-const StepBar = ({ event, isLoading }: { event: AgentUiEvent | null; isLoading: boolean }) => {
-  const current = stepIndexFor(event, isLoading);
-  return (
-    <div className={styles.stepBar}>
-      {STEPS.map((step, i) => (
-        <div
-          key={step.type}
-          className={[
-            styles.stepItem,
-            i < current ? styles.stepDone : '',
-            i === current ? styles.stepActive : '',
-          ].filter(Boolean).join(' ')}
-        >
-          <div className={styles.stepDot} />
-          <span className={styles.stepLabel}>{step.label}</span>
-        </div>
-      ))}
-    </div>
-  );
 };
 
 // ─── Loading state ────────────────────────────────────────────────────────────
@@ -396,9 +355,6 @@ export const AgentEventRenderer = () => {
             <IonButton fill="clear" onClick={reset} className={styles.closeBtn}>✕</IonButton>
           </IonButtons>
         </IonToolbar>
-        <div className={styles.stepBarWrap}>
-          <StepBar event={currentEvent} isLoading={isLoading} />
-        </div>
       </IonHeader>
 
       <IonContent className={styles.modalBody}>

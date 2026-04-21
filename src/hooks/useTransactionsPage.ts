@@ -20,15 +20,6 @@ export const initialTransactionFilters: TransactionQueryParams = {
 };
 
 const PAGE_SIZE = 20;
-const SCROLL_ROOT_SELECTOR = '[data-scroll-root="app-layout"]';
-
-const resolveScrollRoot = (node: HTMLDivElement | null): Element | null => {
-  if (!node) {
-    return null;
-  }
-
-  return node.closest(SCROLL_ROOT_SELECTOR);
-};
 
 export const useTransactionsPage = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -44,7 +35,6 @@ export const useTransactionsPage = () => {
   const [hasNextPage, setHasNextPage] = useState(false);
   const [totalResults, setTotalResults] = useState(0);
   const [pendingCount, setPendingCount] = useState(0);
-  const sentinelRef = useRef<HTMLDivElement | null>(null);
   const pendingPageRef = useRef<number | null>(null);
 
   const load = async (nextPage = 1, options?: { append?: boolean; withSummary?: boolean }) => {
@@ -102,41 +92,6 @@ export const useTransactionsPage = () => {
 
     void loadCategories();
   }, []);
-
-  useEffect(() => {
-    const sentinel = sentinelRef.current;
-    if (!sentinel || loading || loadingMore || !hasNextPage) {
-      return undefined;
-    }
-
-    const root = resolveScrollRoot(sentinel);
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const [entry] = entries;
-        if (!entry?.isIntersecting) {
-          return;
-        }
-
-        const nextPage = page + 1;
-        if (pendingPageRef.current === nextPage) {
-          return;
-        }
-
-        pendingPageRef.current = nextPage;
-        void load(nextPage, { append: true, withSummary: false });
-      },
-      {
-        root,
-        rootMargin: '0px 0px 320px 0px',
-        threshold: 0.1,
-      },
-    );
-
-    observer.observe(sentinel);
-
-    return () => observer.disconnect();
-  }, [hasNextPage, loading, loadingMore, page]);
 
   const loadMore = async () => {
     if (loadingMore || !hasNextPage) return;
@@ -238,7 +193,6 @@ export const useTransactionsPage = () => {
     appliedChips,
     hasNextPage,
     loadMore,
-    sentinelRef,
     setError,
     setFilters,
     setDraftFilters,

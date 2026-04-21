@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { IonIcon } from '@ionic/react';
+import { IonContent, IonIcon } from '@ionic/react';
 import { addOutline } from 'ionicons/icons';
 import { AppLayout } from '../../templates/AppLayout';
 import { IconButton } from '../../atoms/IconButton';
@@ -146,6 +146,7 @@ export const DebtsPage = () => {
 
   return (
     <AppLayout title="Deudas">
+      <IonContent className={styles.pageContent}>
       <section className={styles.stack}>
         {!detailsOpen ? (
           <div className={`${styles.focusCard} ${styles.focusCardFull}`}>
@@ -373,6 +374,7 @@ export const DebtsPage = () => {
           }}
         />
       </CrudModal>
+      </IonContent>
     </AppLayout>
   );
 };
