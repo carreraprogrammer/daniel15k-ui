@@ -101,7 +101,11 @@ export const AddSubcategorySheet = ({
         icon,
       });
 
-      onCreated({ code: created.code, name: created.name, icon: created.icon });
+      onCreated({
+        code: created.code,
+        name: created.name,
+        icon: created.icon ?? icon,
+      });
 
       // Parent controls isOpen; state is wiped in handleDidDismiss.
     } catch (err: unknown) {

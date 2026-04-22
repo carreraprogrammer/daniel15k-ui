@@ -8,8 +8,8 @@ const formatCOP = (amount: number): string =>
   '$' + Math.round(amount).toLocaleString('es-CO').replace(/,/g, '.');
 
 /** Convert camelCase Ionicon name to kebab-case for the web component */
-const toKebab = (name: string): string =>
-  name.replace(/([A-Z])/g, '-$1').toLowerCase();
+const toKebab = (name?: string | null): string =>
+  (name ?? 'ellipseOutline').replace(/([A-Z])/g, '-$1').toLowerCase();
 
 const CONFIDENCE_LABELS: Record<WizardSubcategory['confidence'], string> = {
   high:   '●',
