@@ -8,25 +8,37 @@ export const AuthLayout = ({ title, children }: { title: string; children: React
     <IonContent className={styles.authContent} fullscreen>
       <main className={styles.page}>
         <section className={styles.hero}>
-          <div className={styles.brandLockup}>
-            <BrandMark variant="principal" size="lg" />
-            <div className={styles.brandText}>
-              <span className={styles.eyebrow}>Daniel 15K</span>
-              <strong className={styles.brandTitle}>Ascent Finance</strong>
+          <div className={styles.heroCard}>
+            <div className={styles.brandLockup}>
+              <BrandMark variant="principal" size="lg" />
+              <div className={styles.brandText}>
+                <span className={styles.eyebrow}>Daniel 15K</span>
+                <strong className={styles.brandTitle}>Ascent Finance</strong>
+              </div>
             </div>
-          </div>
-          <h1 className={styles.title}>{title}</h1>
-          <p className={styles.description}>
-            Entra a tu panel financiero y sincroniza Telegram, correo y dashboard sin fricción.
-          </p>
-          <div className={styles.metricRow}>
-            <div className={styles.metricCard}>
-              <strong>Tiempo real</strong>
-              <span>Telegram y dashboard sincronizados</span>
+            <div className={styles.copy}>
+              <h1 className={styles.title}>{title}</h1>
+              <p className={styles.description}>
+                Controla tu mes desde una sola superficie: presupuesto, burn rate y decisiones
+                con contexto real, no solo tracking.
+              </p>
             </div>
-            <div className={styles.metricCard}>
-              <strong>Coaching</strong>
-              <span>Lectura conductual, no solo tracking</span>
+
+            <div className={styles.metricRow}>
+              <div className={styles.metricCard}>
+                <strong>Presupuesto guiado</strong>
+                <span>Ingresos, categorías y margen sin perder foco.</span>
+              </div>
+              <div className={styles.metricCard}>
+                <strong>Señales útiles</strong>
+                <span>Burn rate claro y lectura conductual del mes.</span>
+              </div>
+            </div>
+
+            <div className={styles.signalRow}>
+              <span className={styles.signalChip}>Dark glass</span>
+              <span className={styles.signalChip}>Glow controlado</span>
+              <span className={styles.signalChip}>Foco financiero</span>
             </div>
           </div>
         </section>

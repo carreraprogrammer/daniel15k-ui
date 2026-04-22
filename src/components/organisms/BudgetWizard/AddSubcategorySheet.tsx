@@ -4,12 +4,14 @@ import {
   IonButtons,
   IonContent,
   IonHeader,
+  IonIcon,
   IonModal,
   IonTitle,
   IonToolbar,
 } from '@ionic/react';
 import { financeService } from '../../../services/financeService';
 import type { SubcategoryCreated } from '../../../types/finance.types';
+import { resolveNamedIcon } from './iconRegistry';
 import styles from './AddSubcategorySheet.module.css';
 
 // ── Icon catalogue ─────────────────────────────────────────────────────────────
@@ -40,10 +42,6 @@ const ICON_OPTIONS: string[] = [
   'heartOutline',
   'diamondOutline',
 ];
-
-/** Convert camelCase Ionicon name to kebab-case for the web component */
-const toKebab = (name: string): string =>
-  name.replace(/([A-Z])/g, '-$1').toLowerCase();
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -212,11 +210,7 @@ export const AddSubcategorySheet = ({
                     style={{ '--chip-color': chipColor } as React.CSSProperties}
                     onClick={() => setIcon(iconName)}
                   >
-                    <ion-icon
-                      name={toKebab(iconName)}
-                      class={styles.iconGlyph}
-                      aria-hidden="true"
-                    />
+                    <IonIcon icon={resolveNamedIcon(iconName)} className={styles.iconGlyph} aria-hidden="true" />
                   </button>
                 );
               })}

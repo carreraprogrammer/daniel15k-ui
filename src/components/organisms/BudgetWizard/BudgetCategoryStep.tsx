@@ -1,15 +1,13 @@
+import { IonIcon } from '@ionic/react';
 import { useState } from 'react';
 import type { WizardCategory, WizardSubcategory } from '../../../types/finance.types';
+import { resolveNamedIcon } from './iconRegistry';
 import styles from './BudgetCategoryStep.module.css';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 const formatCOP = (amount: number): string =>
   '$' + Math.round(amount).toLocaleString('es-CO').replace(/,/g, '.');
-
-/** Convert camelCase Ionicon name to kebab-case for the web component */
-const toKebab = (name?: string | null): string =>
-  (name ?? 'ellipseOutline').replace(/([A-Z])/g, '-$1').toLowerCase();
 
 const CONFIDENCE_LABELS: Record<WizardSubcategory['confidence'], string> = {
   high:   '●',
@@ -107,12 +105,7 @@ export const BudgetCategoryStep = ({
             >
               {/* Icon */}
               <div className={styles.subIconWrap}>
-                {/* Use web component directly for dynamic icon names */}
-                <ion-icon
-                  name={toKebab(sub.icon)}
-                  class={styles.subIcon}
-                  aria-hidden="true"
-                />
+                <IonIcon icon={resolveNamedIcon(sub.icon)} className={styles.subIcon} aria-hidden="true" />
               </div>
 
               {/* Name + confidence */}

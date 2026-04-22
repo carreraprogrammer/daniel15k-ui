@@ -42,6 +42,7 @@ export const RegisterPage = () => {
 
         <DynamicForm
           schema={schema}
+          submitLabel="Crear cuenta"
           onSuccess={(response) => {
             console.log('[RegisterPage] onSuccess:response', response);
             hydrateAuth(response);

@@ -265,6 +265,7 @@ export const BudgetWizardModal = ({
   return (
     <>
       <IonModal
+        className={styles.modal}
         isOpen={isOpen}
         onDidDismiss={onClose}
         keepContentsMounted

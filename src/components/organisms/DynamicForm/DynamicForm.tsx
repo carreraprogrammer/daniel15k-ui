@@ -19,12 +19,14 @@ export const DynamicForm = ({
   onSuccess,
   onError,
   readOnly = false,
+  submitLabel = 'Enviar',
 }: {
   schema: FormSchema;
   initialValues?: FormValues;
   onSuccess?: (payload: ApiEnvelope<Record<string, unknown>>) => void;
   onError?: (error: unknown) => void;
   readOnly?: boolean;
+  submitLabel?: string;
 }) => {
   const [values, setValues] = useState<FormValues>(() => buildValues(schema, initialValues));
   const [errors] = useState<Record<string, string>>({});
@@ -74,7 +76,7 @@ export const DynamicForm = ({
           error={errors[field.name]}
         />
       ))}
-      {!readOnly ? <Button type="submit" label="Guardar cambios" loading={isSubmitting} fullWidth /> : null}
+      {!readOnly ? <Button type="submit" label={submitLabel} loading={isSubmitting} fullWidth /> : null}
     </form>
   );
 };

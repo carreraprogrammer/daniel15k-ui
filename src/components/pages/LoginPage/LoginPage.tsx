@@ -66,6 +66,7 @@ export const LoginPage = () => {
 
         <DynamicForm
           schema={schema ?? fallbackSchema}
+          submitLabel="Entrar"
           onSuccess={(response) => {
             console.log('[LoginPage] onSuccess:response', response);
             hydrateAuth(response);

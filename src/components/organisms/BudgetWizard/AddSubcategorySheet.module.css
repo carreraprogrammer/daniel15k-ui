@@ -134,7 +134,8 @@
 }
 
 .iconGlyph {
-  font-size: 1.375rem;
+  width: 1.375rem;
+  height: 1.375rem;
   color: var(--color-text-secondary);
   display: block;
   transition: color var(--transition-fast);

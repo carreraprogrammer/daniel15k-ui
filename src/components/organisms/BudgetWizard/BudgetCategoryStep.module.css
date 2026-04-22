@@ -86,7 +86,8 @@
 }
 
 .subIcon {
-  font-size: 1rem;
+  width: 1rem;
+  height: 1rem;
   color: var(--cat-color);
 }
 
