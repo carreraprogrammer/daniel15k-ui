@@ -325,16 +325,18 @@ export const TransactionsPage = () => {
         ) : null}
       </section>
 
-      <IonInfiniteScroll
-        onIonInfinite={async (ev) => {
-          await loadMore();
-          void ev.target.complete();
-        }}
-        threshold="200px"
-        disabled={!hasNextPage}
-      >
-        <IonInfiniteScrollContent loadingText="Cargando más transacciones..." />
-      </IonInfiniteScroll>
+      {detailsOpen ? (
+        <IonInfiniteScroll
+          onIonInfinite={async (ev) => {
+            await loadMore();
+            void ev.target.complete();
+          }}
+          threshold="200px"
+          disabled={!hasNextPage}
+        >
+          <IonInfiniteScrollContent loadingText="Cargando más transacciones..." />
+        </IonInfiniteScroll>
+      ) : null}
       </IonContent>
 
       <SortSheet
