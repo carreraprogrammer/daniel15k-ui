@@ -1,13 +1,23 @@
 .pageContent {
   --background: transparent;
+  display: flex;
   flex: 1;
   min-height: 0;
   overflow-wrap: anywhere;
 }
 
+.pageContent::part(scroll) {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
 .stack {
-  display: grid;
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
   gap: 1.5rem;
+  min-height: 100%;
 }
 
 .hero {
@@ -18,23 +28,9 @@
 .focusStage {
   --focus-card-inset: 6px;
   display: flex;
+  flex: 1 1 auto;
   align-items: stretch;
-  height: calc(
-    100dvh
-    - (var(--app-shell-padding) * 2)
-    - var(--app-shell-gap)
-    - var(--app-header-height)
-    - var(--app-content-pad-top)
-    - var(--app-content-pad-bottom)
-  );
-  min-height: calc(
-    100dvh
-    - (var(--app-shell-padding) * 2)
-    - var(--app-shell-gap)
-    - var(--app-header-height)
-    - var(--app-content-pad-top)
-    - var(--app-content-pad-bottom)
-  );
+  min-height: 100%;
   padding: var(--focus-card-inset);
   box-sizing: border-box;
 }
@@ -652,22 +648,7 @@
 
   .focusStage {
     --focus-card-inset: 5px;
-    height: calc(
-      100dvh
-      - (var(--app-shell-padding) * 2)
-      - var(--app-shell-gap)
-      - var(--app-header-height)
-      - var(--app-content-pad-top)
-      - var(--app-content-pad-bottom)
-    );
-    min-height: calc(
-      100dvh
-      - (var(--app-shell-padding) * 2)
-      - var(--app-shell-gap)
-      - var(--app-header-height)
-      - var(--app-content-pad-top)
-      - var(--app-content-pad-bottom)
-    );
+    min-height: 100%;
   }
 
   .hero {
