@@ -11,19 +11,27 @@ const formatCOP = (amount: number): string =>
 
 interface BudgetIncomeStepProps {
   wizardData: WizardData;
+  incomeSources: number[];
   totalIncome: number;
+  includeVariable: boolean;
   onIncomeChange: (sourceIndex: number, amount: number) => void;
+  onToggleVariable: () => void;
 }
 
 // ── Component ────────────────────────────────────────────────────────────────
 
 export const BudgetIncomeStep = ({
   wizardData,
+  incomeSources,
   totalIncome,
+  includeVariable,
   onIncomeChange,
+  onToggleVariable,
 }: BudgetIncomeStepProps) => {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editValue, setEditValue] = useState('');
+
+  const hasVariableSources = wizardData.income.sources.some((s) => s.is_variable);
 
   const startEdit = (index: number, currentAmount: number) => {
     setEditingIndex(index);
@@ -62,42 +70,83 @@ export const BudgetIncomeStep = ({
       </div>
 
       <div className={styles.sourceList}>
-        {wizardData.income.sources.map((source, index) => (
-          <div key={index} className={styles.sourceRow}>
-            <span className={styles.sourceName}>{source.name}</span>
-            <div className={styles.sourceAmount}>
-              {editingIndex === index ? (
-                <input
-                  type="number"
-                  className={styles.amountInput}
-                  value={editValue}
-                  min={0}
-                  autoFocus
-                  onChange={(e) => setEditValue(e.target.value)}
-                  onBlur={() => commitEdit(index)}
-                  onKeyDown={(e) => handleKeyDown(e, index)}
-                  aria-label={`Monto de ${source.name}`}
-                />
-              ) : (
-                <>
-                  <span className={styles.amountText}>{formatCOP(source.monthly_amount)}</span>
-                  <button
-                    type="button"
-                    className={styles.editBtn}
-                    onClick={() => startEdit(index, source.monthly_amount)}
-                    aria-label={`Editar monto de ${source.name}`}
-                  >
-                    ✎
-                  </button>
-                </>
-              )}
+        {wizardData.income.sources.map((source, index) => {
+          const isExcluded = source.is_variable && !includeVariable;
+          return (
+            <div
+              key={index}
+              className={[styles.sourceRow, isExcluded ? styles.sourceRowExcluded : '']
+                .filter(Boolean)
+                .join(' ')}
+            >
+              <div className={styles.sourceInfo}>
+                <span className={styles.sourceName}>{source.name}</span>
+                {source.is_variable && (
+                  <span className={styles.variableBadge}>variable</span>
+                )}
+              </div>
+              <div className={styles.sourceAmount}>
+                {editingIndex === index ? (
+                  <input
+                    type="number"
+                    className={styles.amountInput}
+                    value={editValue}
+                    min={0}
+                    autoFocus
+                    onChange={(e) => setEditValue(e.target.value)}
+                    onBlur={() => commitEdit(index)}
+                    onKeyDown={(e) => handleKeyDown(e, index)}
+                    aria-label={`Monto de ${source.name}`}
+                  />
+                ) : (
+                  <>
+                    <span className={styles.amountText}>
+                      {formatCOP(incomeSources[index] ?? source.monthly_amount)}
+                    </span>
+                    <button
+                      type="button"
+                      className={styles.editBtn}
+                      onClick={() => startEdit(index, incomeSources[index] ?? source.monthly_amount)}
+                      aria-label={`Editar monto de ${source.name}`}
+                    >
+                      ✎
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
+      {/* Variable income toggle — only shown when variable sources exist */}
+      {hasVariableSources && (
+        <button
+          type="button"
+          className={styles.variableToggle}
+          onClick={onToggleVariable}
+          aria-pressed={includeVariable}
+        >
+          <span className={[styles.toggleTrack, includeVariable ? styles.toggleTrackOn : ''].filter(Boolean).join(' ')}>
+            <span className={styles.toggleThumb} />
+          </span>
+          <span className={styles.toggleText}>
+            <span className={styles.toggleLabel}>
+              {includeVariable
+                ? 'Incluyendo ingresos variables'
+                : 'Sin ingresos variables'}
+            </span>
+            <span className={styles.toggleHint}>
+              {includeVariable
+                ? 'Presupuestar solo ingresos fijos da más margen de seguridad'
+                : 'Los ingresos variables no se contarán en el presupuesto base'}
+            </span>
+          </span>
+        </button>
+      )}
+
       <div className={styles.totalRow}>
-        <span className={styles.totalLabel}>Total ingreso</span>
+        <span className={styles.totalLabel}>Total ingreso base</span>
         <span className={styles.totalAmount}>{formatCOP(totalIncome)}</span>
       </div>
 

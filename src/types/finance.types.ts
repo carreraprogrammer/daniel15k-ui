@@ -466,9 +466,15 @@ export interface SubcategoryCreated {
   category_id: string;
 }
 
+export interface WizardIncomeSource {
+  name: string;
+  monthly_amount: number;
+  is_variable: boolean;
+}
+
 export interface WizardData {
   income: {
-    sources: Array<{ name: string; monthly_amount: number }>;
+    sources: WizardIncomeSource[];
     suggested_total: number;
   };
   categories: WizardCategory[];

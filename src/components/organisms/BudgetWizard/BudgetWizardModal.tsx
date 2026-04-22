@@ -127,6 +127,7 @@ export const BudgetWizardModal = ({
   const [currentStep, setCurrentStep] = useState(0);
   const [stepData, setStepData] = useState<Record<string, Record<string, number>>>({});
   const [incomeSources, setIncomeSources] = useState<number[]>([]);
+  const [includeVariable, setIncludeVariable] = useState(true);
 
   // ── Subcategory sheet state ────────────────────────────────────────────────
   const [addSubOpen, setAddSubOpen] = useState(false);
@@ -155,7 +156,11 @@ export const BudgetWizardModal = ({
   const categories = wizardData?.categories ?? [];
 
   const totalIncome = wizardData
-    ? incomeSources.reduce((sum, amt) => sum + amt, 0)
+    ? incomeSources.reduce((sum, amt, i) => {
+        const source = wizardData.income.sources[i];
+        if (!includeVariable && source?.is_variable) return sum;
+        return sum + amt;
+      }, 0)
     : 0;
 
   const alreadyCommitted = computeAlreadyCommitted(
@@ -344,8 +349,11 @@ export const BudgetWizardModal = ({
               {currentStep === 0 && (
                 <BudgetIncomeStep
                   wizardData={wizardData}
+                  incomeSources={incomeSources}
                   totalIncome={totalIncome}
+                  includeVariable={includeVariable}
                   onIncomeChange={handleIncomeChange}
+                  onToggleVariable={() => setIncludeVariable((v) => !v)}
                 />
               )}
 

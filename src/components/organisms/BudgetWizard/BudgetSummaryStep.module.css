@@ -39,7 +39,7 @@
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-lg);
   background: var(--color-income-subtle);
-  border: 1px solid rgba(14, 150, 173, 0.15);
+  border: 1px solid color-mix(in srgb, var(--color-income) 15%, transparent);
 }
 
 .incomeBar {
@@ -54,10 +54,8 @@
   flex: 1;
   font-family: var(--font-sans);
   font-size: var(--text-sm);
-  font-weight: var(--font-semibold);
+  font-weight: var(--font-medium);
   color: var(--color-income);
-  letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
 }
 
 .incomeNumbers {
