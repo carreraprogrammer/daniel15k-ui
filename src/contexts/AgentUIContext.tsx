@@ -11,7 +11,6 @@ import { useHistory } from 'react-router-dom';
 import { financeService } from '../services/financeService';
 import type { AgentUiEvent } from '../types/finance.types';
 
-const LOG = (...args: unknown[]) => console.log('[AgentUI]', ...args);
 const ERR = (...args: unknown[]) => console.error('[AgentUI]', ...args);
 
 // ─── State ────────────────────────────────────────────────────────────────────
@@ -41,7 +40,6 @@ type AgentUIAction =
   | { type: 'RESET' };
 
 function reducer(state: AgentUIState, action: AgentUIAction): AgentUIState {
-  LOG('dispatch', action.type, 'payload' in action ? action.payload : '');
   switch (action.type) {
     case 'CHAT_LOADING':
       return { ...state, status: 'loading' };
@@ -52,7 +50,6 @@ function reducer(state: AgentUIState, action: AgentUIAction): AgentUIState {
     case 'EVENTS_RECEIVED': {
       const existingIds = new Set(state.events.map((e) => e.id));
       const newEvents = action.payload.filter((e) => !existingIds.has(e.id));
-      LOG('EVENTS_RECEIVED — new:', newEvents.length, 'existing:', existingIds.size);
       return newEvents.length > 0
         ? { ...state, events: [...state.events, ...newEvents] }
         : state;
@@ -97,7 +94,6 @@ export function AgentUIProvider({ children }: { children: ReactNode }) {
 
   const stopPolling = useCallback(() => {
     if (timerRef.current) {
-      LOG('polling stopped');
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
@@ -110,7 +106,6 @@ export function AgentUIProvider({ children }: { children: ReactNode }) {
   const handleNavigateEvent = useCallback(
     async (event: AgentUiEvent) => {
       const payload = event.payload as unknown as { route: string };
-      LOG('navigate event → route:', payload?.route);
       if (payload?.route) history.push(payload.route);
       await financeService.consumeAgentEvent(event.id).catch(() => null);
     },
@@ -123,14 +118,10 @@ export function AgentUIProvider({ children }: { children: ReactNode }) {
 
     try {
       const pending = await financeService.getPendingAgentEvents(sid);
-      LOG('poll — session:', sid, 'pending events:', pending.length);
-
       if (!pending.length) return;
 
       const navigateEvents = pending.filter((e) => e.event_type === 'navigate');
       const uiEvents = pending.filter((e) => e.event_type !== 'navigate');
-
-      LOG('poll — ui events:', uiEvents.map((e) => e.event_type), 'navigate:', navigateEvents.length);
 
       for (const ev of navigateEvents) {
         void handleNavigateEvent(ev);
@@ -147,10 +138,8 @@ export function AgentUIProvider({ children }: { children: ReactNode }) {
 
   const startPolling = useCallback(() => {
     stopPolling();
-    LOG('polling started every', POLL_MS, 'ms');
     timerRef.current = setInterval(() => void poll(), POLL_MS);
     timeoutRef.current = setTimeout(() => {
-      LOG('session timeout — no events received in 90s, resetting');
       stopPolling();
       dispatch({ type: 'RESET' });
     }, 90_000);
@@ -162,11 +151,9 @@ export function AgentUIProvider({ children }: { children: ReactNode }) {
 
   const startChat = useCallback(
     async (message: string) => {
-      LOG('startChat called — message:', message);
       dispatch({ type: 'CHAT_LOADING' });
       try {
         const result = await financeService.startWebChat(message);
-        LOG('startWebChat response:', result);
         dispatch({ type: 'CHAT_STARTED', payload: { sessionId: result.session_id } });
         startPolling();
       } catch (err) {
@@ -184,7 +171,6 @@ export function AgentUIProvider({ children }: { children: ReactNode }) {
       data?: Record<string, unknown>,
     ) => {
       const sid = sessionIdRef.current;
-      LOG('reply — eventId:', eventId, 'type:', type, 'sessionId:', sid);
       if (!sid) { ERR('reply called without sessionId'); return; }
       dispatch({ type: 'CHAT_LOADING' });
       try {
@@ -200,18 +186,14 @@ export function AgentUIProvider({ children }: { children: ReactNode }) {
   );
 
   const consume = useCallback(async (id: number) => {
-    LOG('consume event id:', id);
     await financeService.consumeAgentEvent(id).catch(() => null);
     dispatch({ type: 'EVENT_CONSUMED', payload: { id } });
   }, []);
 
   const reset = useCallback(() => {
-    LOG('reset');
     stopPolling();
     dispatch({ type: 'RESET' });
   }, [stopPolling]);
-
-  LOG('render — status:', state.status, 'sessionId:', state.sessionId, 'events:', state.events.length);
 
   return (
     <AgentUIContext.Provider value={{ state, startChat, reply, consume, reset }}>

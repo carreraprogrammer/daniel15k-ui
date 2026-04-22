@@ -44,13 +44,10 @@ export const RegisterPage = () => {
           schema={schema}
           submitLabel="Crear cuenta"
           onSuccess={(response) => {
-            console.log('[RegisterPage] onSuccess:response', response);
             hydrateAuth(response);
-            console.log('[RegisterPage] onSuccess:afterHydrate', useAuthStore.getState());
             history.replace('/dashboard');
           }}
           onError={(error) => {
-            console.error('[RegisterPage] onError', error);
             showError('No se pudo completar el registro.');
           }}
         />

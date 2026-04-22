@@ -46,21 +46,12 @@ export const DynamicForm = ({
         event.stopPropagation();
         if (readOnly) return;
 
-        console.log('[DynamicForm] submit:start', {
-          slug: schema.slug,
-          endpoint: schema.submit_endpoint,
-          method: schema.submit_method,
-          values,
-        });
-
         setIsSubmitting(true);
 
         try {
           const response = await formService.submit(schema, values);
-          console.log('[DynamicForm] submit:success', response);
           onSuccess?.(response);
         } catch (error) {
-          console.error('[DynamicForm] submit:error', error);
           onError?.(error);
         } finally {
           setIsSubmitting(false);

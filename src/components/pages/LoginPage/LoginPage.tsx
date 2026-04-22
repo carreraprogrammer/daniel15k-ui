@@ -68,13 +68,10 @@ export const LoginPage = () => {
           schema={schema ?? fallbackSchema}
           submitLabel="Entrar"
           onSuccess={(response) => {
-            console.log('[LoginPage] onSuccess:response', response);
             hydrateAuth(response);
-            console.log('[LoginPage] onSuccess:afterHydrate', useAuthStore.getState());
             history.replace('/dashboard');
           }}
           onError={(error) => {
-            console.error('[LoginPage] onError', error);
             showError('No se pudo iniciar sesión. Verifica tus credenciales.');
           }}
         />
