@@ -2,10 +2,12 @@ import { api } from './api';
 import type {
   AgentUiEvent,
   Budget,
+  BudgetLineItem,
   BudgetProposal,
   CategoryResource,
   BudgetQueryParams,
   CompletenessResponse,
+  CurrentPlan,
   Debt,
   DebtPayload,
   DebtQueryParams,
@@ -16,11 +18,14 @@ import type {
   RecurringObligation,
   RecurringObligationPayload,
   RecurringObligationQueryParams,
+  SubcategoryCreateParams,
+  SubcategoryCreated,
   SummaryResponse,
   Transaction,
   TransactionCreatePayload,
   TransactionQueryParams,
   TransactionUpdatePayload,
+  WizardData,
 } from '../types/finance.types';
 
 const now = new Date();
@@ -274,6 +279,57 @@ export const financeService = {
     budgets: { category_id: number; amount_limit: number }[],
   ): Promise<void> {
     await api.post(`/api/v1/monthly_plans/${id}/confirm`, { ...updates, budgets });
+  },
+
+  // ── Budget Wizard endpoints ────────────────────────────────────────────────
+
+  /** GET /api/v1/monthly_plans/wizard_data */
+  async fetchWizardData(): Promise<WizardData> {
+    const { data } = await api.get('/api/v1/monthly_plans/wizard_data');
+    return (data.data ?? data) as WizardData;
+  },
+
+  /**
+   * POST /api/v1/monthly_plans/generate
+   * Wizard variant — always accepts `{ mode }` and returns `{ id, status }`.
+   */
+  async generateMonthlyPlanForWizard(params: { mode?: string }): Promise<{ id: string; status: string }> {
+    const { data } = await api.post('/api/v1/monthly_plans/generate', {
+      mode: params.mode ?? 'conservative',
+    });
+    return (data.data ?? data) as { id: string; status: string };
+  },
+
+  /**
+   * POST /api/v1/monthly_plans/:id/confirm
+   * Wizard variant — sends budget lines shaped as BudgetLineItem[].
+   */
+  async confirmMonthlyPlanWithLines(planId: string, lines: BudgetLineItem[]): Promise<void> {
+    await api.post(`/api/v1/monthly_plans/${planId}/confirm`, { lines });
+  },
+
+  /** GET /api/v1/monthly_plans/current — returns null when no plan is active */
+  async fetchCurrentPlan(): Promise<CurrentPlan | null> {
+    try {
+      const { data } = await api.get('/api/v1/monthly_plans/current');
+      if (!data || (!data.data && !data.id)) return null;
+      return (data.data ?? data) as CurrentPlan;
+    } catch (err: unknown) {
+      // 404 means no plan for this month — that's a valid empty state
+      const status = (err as { response?: { status?: number } }).response?.status;
+      if (status === 404) return null;
+      throw err;
+    }
+  },
+
+  // ── Subcategory endpoints ──────────────────────────────────────────────────
+
+  /** POST /api/v1/subcategories */
+  async createSubcategory(params: SubcategoryCreateParams): Promise<SubcategoryCreated> {
+    const { data } = await api.post('/api/v1/subcategories', params);
+    // API may return { data: { ... } } or a flat object
+    const raw = (data.data ?? data) as SubcategoryCreated;
+    return raw;
   },
 
   async startWebChat(message: string): Promise<{ session_id: string }> {

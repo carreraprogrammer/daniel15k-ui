@@ -410,6 +410,81 @@ export interface BudgetProposal {
   year: number;
 }
 
+// ── Current monthly plan (active plan view) ──────────────────────────────────
+
+export interface CurrentPlanLine {
+  /** Subcategory code, e.g. "committed_rent" */
+  subcategory_code: string;
+  subcategory_name: string;
+  /** Behavioral category code, e.g. "committed" */
+  category_code: string;
+  category_name: string;
+  budgeted: number;
+  spent: number;
+  projected: number;
+}
+
+export interface CurrentPlan {
+  id: string;
+  month: string;   // "YYYY-MM"
+  status: string;  // "confirmed" | "draft" | etc.
+  total_income: number;
+  lines: CurrentPlanLine[];
+}
+
+// ── Budget Wizard types ──────────────────────────────────────────────────────
+
+export interface WizardSubcategory {
+  code: string;
+  name: string;
+  icon: string;
+  suggested_amount: number;
+  confidence: 'high' | 'medium' | 'low';
+}
+
+export interface WizardCategory {
+  id: string;
+  code: string;
+  name: string;
+  color: string;
+  icon: string;
+  description: string;
+  subcategories: WizardSubcategory[];
+  suggested_total: number;
+}
+
+export interface SubcategoryCreateParams {
+  name: string;
+  category_id: string;
+  icon: string;
+}
+
+export interface SubcategoryCreated {
+  code: string;
+  name: string;
+  icon: string;
+  category_id: string;
+}
+
+export interface WizardData {
+  income: {
+    sources: Array<{ name: string; monthly_amount: number }>;
+    suggested_total: number;
+  };
+  categories: WizardCategory[];
+}
+
+export interface BudgetLineItem {
+  subcategory_code: string;
+  amount: number;
+}
+
+export interface BudgetPlanDraft {
+  month: string;
+  total_income: number;
+  lines: BudgetLineItem[];
+}
+
 // Agent UI Events — canal agente → front-end
 
 export type AgentUiEventType =

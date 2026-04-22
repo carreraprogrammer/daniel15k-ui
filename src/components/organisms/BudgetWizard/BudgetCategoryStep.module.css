@@ -1,0 +1,286 @@
+/* ── Root ─────────────────────────────────────────────────────────────────── */
+
+.root {
+  display: grid;
+  gap: var(--space-6);
+  padding: var(--space-6);
+}
+
+/* ── Header ───────────────────────────────────────────────────────────────── */
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-xl);
+  background: var(--cat-subtle);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.colorBar {
+  flex-shrink: 0;
+  width: 4px;
+  min-height: 2.5rem;
+  border-radius: var(--radius-full);
+  background: var(--cat-color);
+  align-self: stretch;
+}
+
+.headerContent {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--font-semibold);
+  color: var(--cat-color);
+  letter-spacing: var(--tracking-tight);
+}
+
+.description {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-normal);
+}
+
+/* ── Subcategory list ─────────────────────────────────────────────────────── */
+
+.subList {
+  display: grid;
+  gap: var(--space-1);
+}
+
+/* ── Subcategory row ──────────────────────────────────────────────────────── */
+
+.subRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  border: 1px solid transparent;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.subRow:hover {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+/* ── Icon ─────────────────────────────────────────────────────────────────── */
+
+.subIconWrap {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--cat-color) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--cat-color) 20%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.subIcon {
+  font-size: 1rem;
+  color: var(--cat-color);
+}
+
+/* ── Meta ─────────────────────────────────────────────────────────────────── */
+
+.subMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1;
+  min-width: 0;
+}
+
+.subName {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Confidence indicator ─────────────────────────────────────────────────── */
+
+.confidence {
+  flex-shrink: 0;
+  font-size: var(--text-sm);
+  cursor: help;
+}
+
+.confidence[data-level='high'] {
+  color: var(--color-success);
+}
+
+.confidence[data-level='medium'] {
+  color: var(--color-warning);
+}
+
+.confidence[data-level='low'] {
+  color: var(--color-text-disabled);
+}
+
+/* ── Amount cell ──────────────────────────────────────────────────────────── */
+
+.amountCell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.amountText {
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  color: var(--color-text-primary);
+  font-weight: var(--font-medium);
+  min-width: 100px;
+  text-align: right;
+}
+
+.editBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  color: var(--color-text-disabled);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.editBtn:hover {
+  background: color-mix(in srgb, var(--cat-color) 12%, transparent);
+  color: var(--cat-color);
+  border-color: color-mix(in srgb, var(--cat-color) 30%, transparent);
+}
+
+.amountInput {
+  width: 130px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid color-mix(in srgb, var(--cat-color) 40%, transparent);
+  background: var(--color-bg-input);
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  text-align: right;
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--cat-color) 10%, transparent);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.amountInput:focus {
+  border-color: var(--cat-color);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--cat-color) 20%, transparent);
+}
+
+/* ── Add button ───────────────────────────────────────────────────────────── */
+
+.addBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  border: 1px dashed color-mix(in srgb, var(--cat-color) 25%, transparent);
+  background: transparent;
+  color: var(--color-text-disabled);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+  width: 100%;
+  text-align: left;
+}
+
+.addBtn:hover {
+  background: color-mix(in srgb, var(--cat-color) 6%, transparent);
+  color: var(--cat-color);
+  border-color: color-mix(in srgb, var(--cat-color) 40%, transparent);
+}
+
+.addPlus {
+  font-size: var(--text-lg);
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* ── Footer ───────────────────────────────────────────────────────────────── */
+
+.footer {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-xl);
+  background: var(--cat-subtle);
+  border: 1px solid color-mix(in srgb, var(--cat-color) 15%, transparent);
+}
+
+.footerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.footerLabel {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-medium);
+}
+
+.footerCategoryTotal {
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+  color: var(--cat-color);
+  font-weight: var(--font-bold);
+}
+
+.footerRemaining {
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  color: var(--color-success);
+  font-weight: var(--font-semibold);
+}
+
+.footerRemainingNegative {
+  color: var(--color-error);
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────────── */
+
+@media (max-width: 480px) {
+  .subRow {
+    flex-wrap: wrap;
+  }
+
+  .amountCell {
+    width: 100%;
+    justify-content: flex-end;
+    padding-left: calc(2rem + var(--space-3));
+  }
+
+  .amountText {
+    min-width: 0;
+    flex: 1;
+  }
+}

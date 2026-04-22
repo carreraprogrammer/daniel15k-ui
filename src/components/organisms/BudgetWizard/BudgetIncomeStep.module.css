@@ -1,0 +1,188 @@
+/* ── Root ─────────────────────────────────────────────────────────────────── */
+
+.root {
+  display: grid;
+  gap: var(--space-6);
+  padding: var(--space-6);
+}
+
+/* ── Header ───────────────────────────────────────────────────────────────── */
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.iconWrap {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-md);
+  background: var(--color-income-subtle);
+  border: 1px solid rgba(14, 150, 173, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon {
+  font-size: var(--text-lg);
+  color: var(--color-income);
+}
+
+.title {
+  margin: 0 0 var(--space-1);
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--font-semibold);
+  color: var(--color-income);
+  letter-spacing: var(--tracking-tight);
+}
+
+.description {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-normal);
+}
+
+/* ── Source list ──────────────────────────────────────────────────────────── */
+
+.sourceList {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+  background: rgba(14, 150, 173, 0.04);
+  border: 1px solid rgba(14, 150, 173, 0.12);
+}
+
+.sourceRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.sourceRow:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.sourceRow:first-child {
+  padding-top: 0;
+}
+
+.sourceName {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  color: var(--color-text-primary);
+  font-weight: var(--font-medium);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Amount ───────────────────────────────────────────────────────────────── */
+
+.sourceAmount {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.amountText {
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  color: var(--color-text-primary);
+  font-weight: var(--font-medium);
+}
+
+.editBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.editBtn:hover {
+  background: rgba(14, 150, 173, 0.12);
+  color: var(--color-income);
+  border-color: rgba(14, 150, 173, 0.3);
+}
+
+.amountInput {
+  width: 140px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(14, 150, 173, 0.4);
+  background: var(--color-bg-input);
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  text-align: right;
+  outline: none;
+  transition: border-color var(--transition-fast);
+  box-shadow: 0 0 0 2px rgba(14, 150, 173, 0.1);
+}
+
+.amountInput:focus {
+  border-color: var(--color-income);
+  box-shadow: 0 0 0 3px rgba(14, 150, 173, 0.2);
+}
+
+/* ── Total row ────────────────────────────────────────────────────────────── */
+
+.totalRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-xl);
+  background: var(--color-income-subtle);
+  border: 1px solid rgba(14, 150, 173, 0.2);
+}
+
+.totalLabel {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--color-income);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+.totalAmount {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+  color: var(--color-income);
+  letter-spacing: var(--tracking-tight);
+}
+
+/* ── Hint ─────────────────────────────────────────────────────────────────── */
+
+.hint {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--color-text-disabled);
+  line-height: var(--leading-normal);
+  text-align: center;
+}

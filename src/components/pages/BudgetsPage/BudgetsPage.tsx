@@ -11,11 +11,37 @@ import { AppliedFiltersBar } from '../../molecules/AppliedFiltersBar';
 import { SortSheet } from '../../molecules/SortSheet';
 import { FilterSheet } from '../../molecules/FilterSheet';
 import { BudgetPlanModal } from '../../organisms/BudgetPlanModal/BudgetPlanModal';
+import { BudgetWizardModal } from '../../organisms/BudgetWizard';
+import { ActivePlanView } from '../../organisms/ActivePlanView';
+import { useWizardData } from '../../../hooks/useWizardData';
 import { financeService } from '../../../services/financeService';
-import type { Budget, BudgetQueryParams, SummaryResponse } from '../../../types/finance.types';
+import type {
+  Budget,
+  BudgetPlanDraft,
+  BudgetQueryParams,
+  CurrentPlan,
+  SummaryResponse,
+} from '../../../types/finance.types';
 import styles from '../FinancePage.module.css';
 
-const formatCop = (value: number) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(value);
+// ── Helpers ────────────────────────────────────────────────────────────────────
+
+const formatCop = (value: number) =>
+  new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    maximumFractionDigits: 0,
+  }).format(value);
+
+/** Derive the current month string, e.g. "2026-05" */
+const currentMonthString = (): string => {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  return `${y}-${m}`;
+};
+
+// ── Types ──────────────────────────────────────────────────────────────────────
 
 type CategoryOption = { label: string; value: string | number };
 
@@ -26,30 +52,55 @@ const initialFilters: BudgetQueryParams = {
   sort_dir: 'asc',
 };
 
+// ── Component ──────────────────────────────────────────────────────────────────
+
 export const BudgetsPage = () => {
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [summary, setSummary] = useState<SummaryResponse | null>(null);
+  const [currentPlan, setCurrentPlan] = useState<CurrentPlan | null>(null);
   const [categoryOptions, setCategoryOptions] = useState<CategoryOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Sheet / modal state
   const [sortOpen, setSortOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [planModalOpen, setPlanModalOpen] = useState(false);
+  const [wizardOpen, setWizardOpen] = useState(false);
+
+  // Wizard save state
+  const [wizardSaving, setWizardSaving] = useState(false);
+  const [wizardError, setWizardError] = useState<string | null>(null);
+  const [wizardSuccess, setWizardSuccess] = useState(false);
+
   const [filters, setFilters] = useState<BudgetQueryParams>(initialFilters);
   const [draftFilters, setDraftFilters] = useState<BudgetQueryParams>(initialFilters);
+
+  // ── Wizard data hook ────────────────────────────────────────────────────────
+  const {
+    wizardData,
+    loading: wizardDataLoading,
+    error: wizardDataError,
+    reload: reloadWizardData,
+  } = useWizardData({ enabled: wizardOpen });
+
+  // ── Page data load ──────────────────────────────────────────────────────────
 
   const load = async () => {
     setLoading(true);
     setError(null);
     try {
-      const [budgetsResponse, summaryResponse, categoriesResponse] = await Promise.all([
-        financeService.fetchBudgets(filters),
-        financeService.fetchSummary(),
-        financeService.fetchCategories(),
-      ]);
+      const [budgetsResponse, summaryResponse, categoriesResponse, currentPlanResponse] =
+        await Promise.all([
+          financeService.fetchBudgets(filters),
+          financeService.fetchSummary(),
+          financeService.fetchCategories(),
+          financeService.fetchCurrentPlan(),
+        ]);
       setBudgets(budgetsResponse.data);
       setSummary(summaryResponse);
+      setCurrentPlan(currentPlanResponse);
       setCategoryOptions(
         categoriesResponse.data.map((category) => ({
           label: String(category.attributes.name ?? 'Sin nombre'),
@@ -57,7 +108,9 @@ export const BudgetsPage = () => {
         })),
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'No fue posible cargar los presupuestos.');
+      setError(
+        err instanceof Error ? err.message : 'No fue posible cargar los presupuestos.',
+      );
     } finally {
       setLoading(false);
     }
@@ -67,14 +120,60 @@ export const BudgetsPage = () => {
     void load();
   }, [filters]);
 
-  const activeFilterCount = useMemo(() => [filters.category_id].filter(Boolean).length, [filters.category_id]);
+  // ── Wizard completion handler ───────────────────────────────────────────────
+
+  const handleWizardComplete = async (draft: BudgetPlanDraft) => {
+    setWizardSaving(true);
+    setWizardError(null);
+    try {
+      const plan = await financeService.generateMonthlyPlanForWizard({ mode: 'conservative' });
+      await financeService.confirmMonthlyPlanWithLines(plan.id, draft.lines);
+      setWizardOpen(false);
+      setWizardSuccess(true);
+      // Reload page data so ActivePlanView and burn-rate card reflect the new plan
+      void load();
+    } catch (err) {
+      setWizardError(
+        err instanceof Error
+          ? err.message
+          : 'No fue posible guardar el plan. Intentá de nuevo.',
+      );
+      // Keep wizard open so the user can retry
+    } finally {
+      setWizardSaving(false);
+    }
+  };
+
+  const handleOpenWizard = () => {
+    setWizardError(null);
+    setWizardSuccess(false);
+    setWizardOpen(true);
+  };
+
+  const handleCloseWizard = () => {
+    if (wizardSaving) return; // block close while saving
+    setWizardOpen(false);
+    setWizardError(null);
+  };
+
+  // ── Derived state ───────────────────────────────────────────────────────────
+
+  const activeFilterCount = useMemo(
+    () => [filters.category_id].filter(Boolean).length,
+    [filters.category_id],
+  );
 
   const chips = useMemo(() => {
     const next = [];
     if (filters.q) next.push({ key: 'q', label: `Buscar: ${filters.q}` });
     if (filters.category_id) {
-      const category = categoryOptions.find((item) => String(item.value) === String(filters.category_id));
-      next.push({ key: 'category_id', label: `Categoría: ${category?.label ?? filters.category_id}` });
+      const category = categoryOptions.find(
+        (item) => String(item.value) === String(filters.category_id),
+      );
+      next.push({
+        key: 'category_id',
+        label: `Categoría: ${category?.label ?? filters.category_id}`,
+      });
     }
     return next;
   }, [categoryOptions, filters.category_id, filters.q]);
@@ -83,198 +182,390 @@ export const BudgetsPage = () => {
   const outOfRange = burnCategories.filter((item) => item.on_track === false);
   const topRisk = outOfRange[0] ?? burnCategories[0] ?? null;
 
+  const month = currentMonthString();
+
+  // ── Render ──────────────────────────────────────────────────────────────────
+
   return (
     <AppLayout title="Presupuestos">
       <IonContent className={styles.pageContent}>
-      <section className={styles.stack}>
-        {!detailsOpen && !loading && !error ? (
-          <div className={`${styles.focusCard} ${styles.focusCardFull}`}>
-            <div className={styles.focusGrid}>
-              <div className={styles.focusCopy}>
-                <span className={styles.eyebrow}>Presupuestos</span>
-                <p className={styles.focusQuestion}>¿El mes va dentro del plan o ya se salió de rango?</p>
-                <h2 className={styles.focusTitle}>
-                  {outOfRange.length ? `${outOfRange.length} categorías fuera de rango` : 'El burn rate sigue estable'}
-                </h2>
-                <p className={styles.focusText}>
-                  {topRisk
-                    ? `${topRisk.category} es la señal más útil para empezar. No necesitas leer toda la tabla antes de saber dónde mirar.`
-                    : 'Cuando existan presupuestos, esta tarjeta te dirá primero si el plan sigue sano o no.'}
-                </p>
-              </div>
-              <div>
-                <div className={styles.focusValue}>{topRisk ? formatCop(topRisk.projected) : '—'}</div>
-                <p className={styles.focusCaption}>
-                  {topRisk ? `Proyección actual de ${topRisk.category}` : 'Sin burn rate visible todavía'}
-                </p>
-              </div>
-            </div>
+        <section className={styles.stack}>
 
-            {topRisk ? (
-              <section className={styles.focusSupport}>
-                <div className={styles.focusSupportHeader}>
-                  <h3 className={styles.focusSupportTitle}>Riesgo principal</h3>
-                  <span className={styles.focusSupportValue}>{Math.round(topRisk.pct)}%</span>
+          {/* ── Active plan view (shown when there is a confirmed plan) ── */}
+          {!loading && !error && (currentPlan || !detailsOpen) ? (
+            <div className={`${styles.focusCard} ${styles.focusCardFull}`}>
+              {currentPlan ? (
+                <ActivePlanView currentPlan={currentPlan} onEditPlan={handleOpenWizard} />
+              ) : (
+                <>
+                  {/* Burn-rate focus card (pre-plan state) */}
+                  {!detailsOpen ? (
+                    <div className={styles.focusGrid}>
+                      <div className={styles.focusCopy}>
+                        <span className={styles.eyebrow}>Presupuestos</span>
+                        <p className={styles.focusQuestion}>
+                          ¿El mes va dentro del plan o ya se salió de rango?
+                        </p>
+                        <h2 className={styles.focusTitle}>
+                          {outOfRange.length
+                            ? `${outOfRange.length} categorías fuera de rango`
+                            : 'El burn rate sigue estable'}
+                        </h2>
+                        <p className={styles.focusText}>
+                          {topRisk
+                            ? `${topRisk.category} es la señal más útil para empezar. No necesitas leer toda la tabla antes de saber dónde mirar.`
+                            : 'Cuando existan presupuestos, esta tarjeta te dirá primero si el plan sigue sano o no.'}
+                        </p>
+                      </div>
+                      <div>
+                        <div className={styles.focusValue}>
+                          {topRisk ? formatCop(topRisk.projected) : '—'}
+                        </div>
+                        <p className={styles.focusCaption}>
+                          {topRisk
+                            ? `Proyección actual de ${topRisk.category}`
+                            : 'Sin burn rate visible todavía'}
+                        </p>
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {topRisk && !detailsOpen ? (
+                    <section className={styles.focusSupport}>
+                      <div className={styles.focusSupportHeader}>
+                        <h3 className={styles.focusSupportTitle}>Riesgo principal</h3>
+                        <span className={styles.focusSupportValue}>{Math.round(topRisk.pct)}%</span>
+                      </div>
+                      <div className={styles.focusRail}>
+                        <div
+                          className={`${styles.focusRailFill} ${topRisk.on_track ? '' : styles.focusRailFillWarn}`}
+                          style={{ width: `${Math.min(Math.round(topRisk.pct), 100)}%` }}
+                        />
+                      </div>
+                      <p className={styles.focusSupportText}>
+                        {formatCop(topRisk.spent)} gastados de {formatCop(topRisk.budget)};
+                        proyectado a {formatCop(topRisk.projected)}.
+                      </p>
+                    </section>
+                  ) : null}
+
+                  {!detailsOpen ? (
+                    <>
+                      <div className={styles.focusMeta}>
+                        <span className={styles.focusBadge}>
+                          {budgets.length} categorías con presupuesto
+                        </span>
+                        <span className={styles.focusBadge}>{outOfRange.length} alertas</span>
+                      </div>
+
+                      <div className={styles.focusActions}>
+                        <Button label="Armar plan mensual" onClick={handleOpenWizard} />
+                        <Button
+                          label="Plan anterior"
+                          variant="ghost"
+                          onClick={() => setPlanModalOpen(true)}
+                        />
+                        <Button
+                          label="Explorar detalle"
+                          variant="ghost"
+                          onClick={() => setDetailsOpen(true)}
+                        />
+                      </div>
+                    </>
+                  ) : null}
+                </>
+              )}
+
+              {/* Success banner */}
+              {wizardSuccess && (
+                <div style={{
+                  marginTop: 'var(--space-4)',
+                  padding: 'var(--space-3) var(--space-4)',
+                  borderRadius: 'var(--radius-lg)',
+                  background: 'var(--color-success-subtle)',
+                  color: 'var(--color-success)',
+                  fontSize: 'var(--text-sm)',
+                  fontFamily: 'var(--font-sans)',
+                }}>
+                  Plan guardado correctamente para {month}.
                 </div>
-                <div className={styles.focusRail}>
-                  <div
-                    className={`${styles.focusRailFill} ${topRisk.on_track ? '' : styles.focusRailFillWarn}`}
-                    style={{ width: `${Math.min(Math.round(topRisk.pct), 100)}%` }}
-                  />
+              )}
+            </div>
+          ) : null}
+
+          {/* ── Detail view ── */}
+          {detailsOpen ? (
+            <div className={styles.detailStage}>
+              <div className={styles.detailStageHeader}>
+                <div className={styles.detailStageCopy}>
+                  <h3 className={styles.detailStageTitle}>Detalle de presupuestos</h3>
+                  <p className={styles.detailStageText}>
+                    La tabla completa y los filtros aparecen en esta vista secundaria, no apilados
+                    debajo del estado inicial.
+                  </p>
                 </div>
-                <p className={styles.focusSupportText}>
-                  {formatCop(topRisk.spent)} gastados de {formatCop(topRisk.budget)}; proyectado a {formatCop(topRisk.projected)}.
-                </p>
-              </section>
-            ) : null}
-
-            <div className={styles.focusMeta}>
-              <span className={styles.focusBadge}>{budgets.length} categorías con presupuesto</span>
-              <span className={styles.focusBadge}>{outOfRange.length} alertas</span>
-            </div>
-
-            <div className={styles.focusActions}>
-              <Button
-                label="Armar plan mensual"
-                onClick={() => setPlanModalOpen(true)}
-              />
-              <Button
-                label="Explorar detalle"
-                variant="ghost"
-                onClick={() => setDetailsOpen(true)}
-              />
-            </div>
-          </div>
-        ) : null}
-
-        {detailsOpen ? (
-          <div className={styles.detailStage}>
-            <div className={styles.detailStageHeader}>
-              <div className={styles.detailStageCopy}>
-                <h3 className={styles.detailStageTitle}>Detalle de presupuestos</h3>
-                <p className={styles.detailStageText}>La tabla completa y los filtros aparecen en esta vista secundaria, no apilados debajo del estado inicial.</p>
+                <Button label="Volver al resumen" variant="ghost" onClick={() => setDetailsOpen(false)} />
               </div>
-              <Button label="Volver al resumen" variant="ghost" onClick={() => setDetailsOpen(false)} />
-            </div>
-            <div className={styles.detailPanel}>
-            <ListToolbar
-              searchLabel="Buscar presupuestos"
-              searchPlaceholder="Categoría"
-              searchValue={filters.q ?? ''}
-              resultLabel={`${budgets.length} resultados`}
-              activeFilterCount={activeFilterCount}
-              onSearchChange={(q) => {
-                const next = { ...filters, q };
-                setFilters(next);
-                setDraftFilters(next);
-              }}
-              onOpenSort={() => setSortOpen(true)}
-              onOpenFilters={() => setFiltersOpen(true)}
-            />
+              <div className={styles.detailPanel}>
+                <ListToolbar
+                  searchLabel="Buscar presupuestos"
+                  searchPlaceholder="Categoría"
+                  searchValue={filters.q ?? ''}
+                  resultLabel={`${budgets.length} resultados`}
+                  activeFilterCount={activeFilterCount}
+                  onSearchChange={(q) => {
+                    const next = { ...filters, q };
+                    setFilters(next);
+                    setDraftFilters(next);
+                  }}
+                  onOpenSort={() => setSortOpen(true)}
+                  onOpenFilters={() => setFiltersOpen(true)}
+                />
 
-            <AppliedFiltersBar
-              chips={chips}
-              onRemove={(key) => {
-                const next = { ...filters, [key]: '' };
-                setFilters(next);
-                setDraftFilters(next);
-              }}
-              onClearAll={() => {
-                setFilters(initialFilters);
-                setDraftFilters(initialFilters);
-              }}
-            />
-            </div>
-          </div>
-        ) : null}
-
-        {detailsOpen ? (
-          <>
-            {loading ? <Spinner size="lg" /> : null}
-            {error ? <ErrorState message={error} onRetry={() => void load()} /> : null}
-            {!loading && !error && !budgets.length ? <EmptyState message="No hay presupuestos definidos para el período actual." /> : null}
-
-            {!loading && !error && budgets.length ? (
-              <div className={styles.tableWrap}>
-                <table className={styles.table}>
-                  <thead>
-                    <tr>
-                      <th>Categoría</th>
-                      <th className={styles.numeric}>Límite</th>
-                      <th className={styles.numeric}>Gastado</th>
-                      <th className={styles.numeric}>Proyectado</th>
-                      <th>Estado</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {budgets.map((budget) => {
-                      const burnRate = summary?.burn_rate?.categories.find((item) => item.category_id === budget.attributes.category_id);
-                      return (
-                        <tr key={budget.id}>
-                          <td>{budget.attributes.category_name ?? `Categoría ${budget.attributes.category_id}`}</td>
-                          <td className={styles.numeric}>{formatCop(budget.attributes.amount_limit)}</td>
-                          <td className={styles.numeric}>{formatCop(burnRate?.spent ?? 0)}</td>
-                          <td className={styles.numeric}>{formatCop(burnRate?.projected ?? 0)}</td>
-                          <td className={burnRate?.on_track === false ? styles.statusWarn : styles.statusGood}>
-                            {burnRate?.on_track === false ? 'Fuera de rango' : 'En rango'}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                <AppliedFiltersBar
+                  chips={chips}
+                  onRemove={(key) => {
+                    const next = { ...filters, [key]: '' };
+                    setFilters(next);
+                    setDraftFilters(next);
+                  }}
+                  onClearAll={() => {
+                    setFilters(initialFilters);
+                    setDraftFilters(initialFilters);
+                  }}
+                />
               </div>
-            ) : null}
-          </>
-        ) : null}
-      </section>
+            </div>
+          ) : null}
 
-      <BudgetPlanModal
-        isOpen={planModalOpen}
-        onClose={() => setPlanModalOpen(false)}
-        onSaved={() => void load()}
-      />
+          {detailsOpen ? (
+            <>
+              {loading ? <Spinner size="lg" /> : null}
+              {error ? <ErrorState message={error} onRetry={() => void load()} /> : null}
+              {!loading && !error && !budgets.length ? (
+                <EmptyState message="No hay presupuestos definidos para el período actual." />
+              ) : null}
 
-      <SortSheet
-        isOpen={sortOpen}
-        title="Ordenar presupuestos"
-        sortBy={String(filters.sort_by ?? 'category_id')}
-        sortDir={(filters.sort_dir as 'asc' | 'desc') ?? 'asc'}
-        options={[
-          { label: 'Categoría', value: 'category_name' },
-          { label: 'Límite', value: 'amount_limit' },
-          { label: 'ID categoría', value: 'category_id' },
-        ]}
-        onClose={() => setSortOpen(false)}
-        onChangeSortBy={(sort_by) => setFilters((current) => ({ ...current, sort_by }))}
-        onChangeSortDir={(sort_dir) => setFilters((current) => ({ ...current, sort_dir }))}
-      />
-
-      <FilterSheet
-        isOpen={filtersOpen}
-        title="Filtrar presupuestos"
-        resultLabel={`Mostrar ${budgets.length} resultados`}
-        onClose={() => {
-          setDraftFilters(filters);
-          setFiltersOpen(false);
-        }}
-        onReset={() => setDraftFilters({ ...initialFilters, q: filters.q })}
-        onApply={() => {
-          setFilters(draftFilters);
-          setFiltersOpen(false);
-        }}
-      >
-        <section className={styles.sheetSection}>
-          <h3 className={styles.sheetSectionTitle}>Categoría</h3>
-          <SelectInput
-            name="budget-filter-category"
-            value={draftFilters.category_id ?? ''}
-            onChange={(category_id) => setDraftFilters((current) => ({ ...current, category_id }))}
-            options={categoryOptions}
-            placeholder="Todas"
-          />
+              {!loading && !error && budgets.length ? (
+                <div className={styles.tableWrap}>
+                  <table className={styles.table}>
+                    <thead>
+                      <tr>
+                        <th>Categoría</th>
+                        <th className={styles.numeric}>Límite</th>
+                        <th className={styles.numeric}>Gastado</th>
+                        <th className={styles.numeric}>Proyectado</th>
+                        <th>Estado</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {budgets.map((budget) => {
+                        const burnRate = summary?.burn_rate?.categories.find(
+                          (item) => item.category_id === budget.attributes.category_id,
+                        );
+                        return (
+                          <tr key={budget.id}>
+                            <td>
+                              {budget.attributes.category_name ??
+                                `Categoría ${budget.attributes.category_id}`}
+                            </td>
+                            <td className={styles.numeric}>
+                              {formatCop(budget.attributes.amount_limit)}
+                            </td>
+                            <td className={styles.numeric}>{formatCop(burnRate?.spent ?? 0)}</td>
+                            <td className={styles.numeric}>
+                              {formatCop(burnRate?.projected ?? 0)}
+                            </td>
+                            <td
+                              className={
+                                burnRate?.on_track === false ? styles.statusWarn : styles.statusGood
+                              }
+                            >
+                              {burnRate?.on_track === false ? 'Fuera de rango' : 'En rango'}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              ) : null}
+            </>
+          ) : null}
         </section>
-      </FilterSheet>
+
+        {/* ── Budget Wizard Modal ── */}
+        <BudgetWizardModal
+          isOpen={wizardOpen}
+          onClose={handleCloseWizard}
+          onComplete={(draft: BudgetPlanDraft) => void handleWizardComplete(draft)}
+          wizardData={wizardData ?? undefined}
+          month={month}
+        />
+
+        {/* Loading overlay shown inside wizard when fetching wizard data */}
+        {wizardOpen && wizardDataLoading && !wizardData ? (
+          <div
+            style={{
+              position: 'fixed',
+              inset: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 'var(--space-4)',
+              background: 'rgba(5, 7, 12, 0.72)',
+              zIndex: 'calc(var(--z-modal) + 1)',
+            }}
+          >
+            <Spinner size="lg" />
+            <p
+              style={{
+                margin: 0,
+                color: 'var(--color-text-secondary)',
+                fontFamily: 'var(--font-sans)',
+                fontSize: 'var(--text-sm)',
+              }}
+            >
+              Cargando datos del asistente...
+            </p>
+          </div>
+        ) : null}
+
+        {/* Wizard-level error (fetch failure) */}
+        {wizardOpen && wizardDataError && !wizardData ? (
+          <div
+            style={{
+              position: 'fixed',
+              inset: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 'var(--space-4)',
+              background: 'rgba(5, 7, 12, 0.72)',
+              zIndex: 'calc(var(--z-modal) + 1)',
+            }}
+          >
+            <p
+              style={{
+                margin: 0,
+                color: 'var(--color-error)',
+                fontFamily: 'var(--font-sans)',
+                fontSize: 'var(--text-sm)',
+              }}
+            >
+              {wizardDataError}
+            </p>
+            <Button label="Reintentar" onClick={reloadWizardData} />
+            <Button label="Cerrar" variant="ghost" onClick={handleCloseWizard} />
+          </div>
+        ) : null}
+
+        {/* Wizard save error (generate/confirm failure) — shown while wizard stays open */}
+        {wizardOpen && wizardError ? (
+          <div
+            role="alert"
+            style={{
+              position: 'fixed',
+              bottom: 'calc(var(--space-8) + env(safe-area-inset-bottom))',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              padding: 'var(--space-3) var(--space-5)',
+              borderRadius: 'var(--radius-lg)',
+              background: 'var(--color-error-subtle)',
+              border: '1px solid var(--color-error)',
+              color: 'var(--color-error)',
+              fontFamily: 'var(--font-sans)',
+              fontSize: 'var(--text-sm)',
+              zIndex: 'calc(var(--z-modal) + 2)',
+              maxWidth: 'min(480px, 90vw)',
+              textAlign: 'center',
+            }}
+          >
+            {wizardError}
+          </div>
+        ) : null}
+
+        {/* Wizard saving overlay */}
+        {wizardSaving ? (
+          <div
+            aria-busy="true"
+            style={{
+              position: 'fixed',
+              inset: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 'var(--space-4)',
+              background: 'rgba(5, 7, 12, 0.72)',
+              zIndex: 'calc(var(--z-modal) + 3)',
+            }}
+          >
+            <Spinner size="lg" />
+            <p
+              style={{
+                margin: 0,
+                color: 'var(--color-text-secondary)',
+                fontFamily: 'var(--font-sans)',
+                fontSize: 'var(--text-sm)',
+              }}
+            >
+              Guardando plan...
+            </p>
+          </div>
+        ) : null}
+
+        {/* Legacy BudgetPlanModal — kept for backward compatibility */}
+        <BudgetPlanModal
+          isOpen={planModalOpen}
+          onClose={() => setPlanModalOpen(false)}
+          onSaved={() => void load()}
+        />
+
+        <SortSheet
+          isOpen={sortOpen}
+          title="Ordenar presupuestos"
+          sortBy={String(filters.sort_by ?? 'category_id')}
+          sortDir={(filters.sort_dir as 'asc' | 'desc') ?? 'asc'}
+          options={[
+            { label: 'Categoría', value: 'category_name' },
+            { label: 'Límite', value: 'amount_limit' },
+            { label: 'ID categoría', value: 'category_id' },
+          ]}
+          onClose={() => setSortOpen(false)}
+          onChangeSortBy={(sort_by) => setFilters((current) => ({ ...current, sort_by }))}
+          onChangeSortDir={(sort_dir) => setFilters((current) => ({ ...current, sort_dir }))}
+        />
+
+        <FilterSheet
+          isOpen={filtersOpen}
+          title="Filtrar presupuestos"
+          resultLabel={`Mostrar ${budgets.length} resultados`}
+          onClose={() => {
+            setDraftFilters(filters);
+            setFiltersOpen(false);
+          }}
+          onReset={() => setDraftFilters({ ...initialFilters, q: filters.q })}
+          onApply={() => {
+            setFilters(draftFilters);
+            setFiltersOpen(false);
+          }}
+        >
+          <section className={styles.sheetSection}>
+            <h3 className={styles.sheetSectionTitle}>Categoría</h3>
+            <SelectInput
+              name="budget-filter-category"
+              value={draftFilters.category_id ?? ''}
+              onChange={(category_id) =>
+                setDraftFilters((current) => ({ ...current, category_id }))
+              }
+              options={categoryOptions}
+              placeholder="Todas"
+            />
+          </section>
+        </FilterSheet>
       </IonContent>
     </AppLayout>
   );

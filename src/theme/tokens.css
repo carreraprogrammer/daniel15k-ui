@@ -1,7 +1,7 @@
 /* ─────────────────────────────────────────────
-   BOILERPLATE DESIGN TOKENS
-   Personalidad: Geométrico · Minimalista · Dark
-   Para adaptar a una marca: editar solo este archivo
+   DESIGN TOKENS — Daniel 15K
+   Personalidad: Relajante · Dark · Fantasy-calm
+   Referencia visual: BRAND.md en la raíz del proyecto
 ───────────────────────────────────────────────── */
 
 :root {
@@ -44,8 +44,9 @@
   --color-border-subtle:  #162033;
 
   /* ── TIPOGRAFÍA ── */
-  --font-sans:    'Inter', 'SF Pro Display', system-ui, sans-serif;
-  --font-mono:    'JetBrains Mono', 'Fira Code', monospace;
+  --font-sans:    'DM Sans', 'SF Pro Display', system-ui, sans-serif;
+  --font-display: 'Sora', 'DM Sans', system-ui, sans-serif;
+  --font-mono:    'DM Mono', 'JetBrains Mono', monospace;
 
   --text-xs:      0.75rem;    /* 12px */
   --text-sm:      0.875rem;   /* 14px */
@@ -83,11 +84,13 @@
   --space-16:  4rem;      /* 64px */
   --space-20:  5rem;      /* 80px */
 
-  /* ── BORDER RADIUS (geométrico = radios pequeños) ── */
-  --radius-sm:   4px;
-  --radius-md:   6px;
-  --radius-lg:   8px;
-  --radius-xl:   12px;
+  /* ── BORDER RADIUS ── */
+  --radius-sm:   6px;
+  --radius-md:   10px;
+  --radius-lg:   14px;
+  --radius-xl:   20px;
+  --radius-2xl:  24px;
+  --radius-3xl:  32px;
   --radius-full: 9999px;   /* para pills y avatares */
 
   /* ── SOMBRAS ── */
@@ -112,6 +115,23 @@
   --z-dropdown: 100;
   --z-modal:   200;
   --z-toast:   300;
+
+  /* ── COLORES DE CATEGORÍAS CONDUCTUALES ── */
+  /* Cada categoría es un elemento del mundo. Ver BRAND.md para la lógica. */
+  --color-committed:           #C0392B;   /* Granada — piedra, peso */
+  --color-committed-subtle:    #2D0A0A;
+  --color-necessary:           #D4732A;   /* Ámbar — tierra, sustento */
+  --color-necessary-subtle:    #2D1500;
+  --color-discretionary:       #C9980A;   /* Oro — llama, elección */
+  --color-discretionary-subtle: #2D1F00;
+  --color-investment:          #1A9E4A;   /* Esmeralda — bosque, crecimiento */
+  --color-investment-subtle:   #052E16;
+  --color-social:              #8A4FD8;   /* Amatista — magia, vínculo */
+  --color-social-subtle:       #1A0B36;
+  --color-income:              #0E96AD;   /* Zafiro — agua, flujo */
+  --color-income-subtle:       #0A1F28;
+  --color-unknown:             #5B7280;   /* Niebla — pendiente */
+  --color-unknown-subtle:      #141E2D;
 
   /* ── IONIC OVERRIDES ── */
   --ion-background-color:       var(--color-bg-primary);

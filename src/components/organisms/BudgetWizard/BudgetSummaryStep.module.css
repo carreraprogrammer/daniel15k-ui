@@ -1,0 +1,245 @@
+/* ── Root ─────────────────────────────────────────────────────────────────── */
+
+.root {
+  display: grid;
+  gap: var(--space-6);
+  padding: var(--space-6);
+}
+
+/* ── Header ───────────────────────────────────────────────────────────────── */
+
+.header {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+  color: var(--color-text-primary);
+  letter-spacing: var(--tracking-tight);
+}
+
+.subtitle {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-normal);
+}
+
+/* ── Income anchor row ────────────────────────────────────────────────────── */
+
+.incomeRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-income-subtle);
+  border: 1px solid rgba(14, 150, 173, 0.15);
+}
+
+.incomeBar {
+  flex-shrink: 0;
+  width: 4px;
+  height: 1.5rem;
+  border-radius: var(--radius-full);
+  background: var(--bar-color);
+}
+
+.incomeName {
+  flex: 1;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--color-income);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+.incomeNumbers {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+
+.incomeAmount {
+  font-family: var(--font-mono);
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+  color: var(--color-income);
+}
+
+.incomePct {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--color-text-disabled);
+}
+
+/* ── Category list ────────────────────────────────────────────────────────── */
+
+.categoryList {
+  display: grid;
+  gap: var(--space-3);
+}
+
+/* ── Category row ─────────────────────────────────────────────────────────── */
+
+.categoryRow {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-xl);
+  background: var(--cat-subtle);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: border-color var(--transition-fast);
+}
+
+.categoryRowWarning {
+  border-color: rgba(245, 158, 11, 0.25);
+  background: rgba(245, 158, 11, 0.05);
+}
+
+/* ── Progress bar ─────────────────────────────────────────────────────────── */
+
+.barTrack {
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+}
+
+.barFill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--cat-color);
+  transition: width var(--transition-slow);
+}
+
+/* ── Category info ────────────────────────────────────────────────────────── */
+
+.categoryInfo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.categoryLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.colorDot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--cat-color);
+}
+
+.categoryName {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.categoryRight {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+.categoryAmount {
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  color: var(--cat-color);
+}
+
+.categoryPct {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-disabled);
+  min-width: 2.5rem;
+  text-align: right;
+}
+
+/* ── Warning ──────────────────────────────────────────────────────────────── */
+
+.warning {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--color-warning);
+  line-height: var(--leading-normal);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.warning::before {
+  content: '⚠';
+  flex-shrink: 0;
+}
+
+/* ── Unassigned row ───────────────────────────────────────────────────────── */
+
+.unassignedRow {
+  border-style: dashed;
+}
+
+/* ── Totals card ──────────────────────────────────────────────────────────── */
+
+.totalsCard {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border-radius: var(--radius-2xl);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+}
+
+.totalsRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.totalsLabel {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.totalsValue {
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  color: var(--color-text-primary);
+  font-weight: var(--font-medium);
+}
+
+.totalsHighlight {
+  font-family: var(--font-mono);
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+}
+
+.totalsPositive {
+  color: var(--color-success);
+}
+
+.totalsNegative {
+  color: var(--color-error);
+}
