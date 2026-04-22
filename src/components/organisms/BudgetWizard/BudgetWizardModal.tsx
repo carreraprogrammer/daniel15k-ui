@@ -1,13 +1,5 @@
 import { useEffect, useState } from 'react';
-import {
-  IonButton,
-  IonButtons,
-  IonContent,
-  IonHeader,
-  IonModal,
-  IonTitle,
-  IonToolbar,
-} from '@ionic/react';
+import { IonContent, IonHeader, IonModal } from '@ionic/react';
 import type {
   BudgetLineItem,
   BudgetPlanDraft,
@@ -15,6 +7,7 @@ import type {
   WizardData,
   WizardSubcategory,
 } from '../../../types/finance.types';
+import { BrandMark } from '../../atoms/BrandMark';
 import { BudgetIncomeStep } from './BudgetIncomeStep';
 import { BudgetCategoryStep } from './BudgetCategoryStep';
 import { BudgetSummaryStep } from './BudgetSummaryStep';
@@ -37,9 +30,28 @@ const TOTAL_STEPS = 7; // 0..6
 const CATEGORY_STEP_FIRST = 1;
 const CATEGORY_STEP_LAST  = 5;
 const SUMMARY_STEP = 6;
-
-// Progress dots only count category steps (1–5)
-const PROGRESS_STEP_COUNT = 5;
+const CATEGORY_STEP_FALLBACKS = [
+  {
+    label: 'Comprometido',
+    caption: 'Obligaciones que ya consumen parte del mes.',
+  },
+  {
+    label: 'Necesario',
+    caption: 'Lo básico para sostener la operación diaria.',
+  },
+  {
+    label: 'Inversión',
+    caption: 'Montos que fortalecen tu crecimiento futuro.',
+  },
+  {
+    label: 'Social',
+    caption: 'Vínculos, comunidad y planes compartidos.',
+  },
+  {
+    label: 'Discrecional',
+    caption: 'Elecciones flexibles y disfrute consciente.',
+  },
+] as const;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -107,12 +119,23 @@ function computeAlreadyCommitted(
   return total;
 }
 
-/** Step title for the toolbar */
-function stepTitle(step: number, categories: WizardCategory[]): string {
-  if (step === 0) return 'Ingreso';
-  if (step === SUMMARY_STEP) return 'Resumen';
-  const cat = categoryForStep(step, categories);
-  return cat ? cat.name : `Paso ${step}`;
+function formatCOP(amount: number): string {
+  return '$' + Math.round(amount).toLocaleString('es-CO').replace(/,/g, '.');
+}
+
+function formatMonthLabel(month: string): string {
+  const [yearRaw, monthRaw] = month.split('-');
+  const year = Number(yearRaw);
+  const monthIndex = Number(monthRaw) - 1;
+
+  if (!Number.isFinite(year) || !Number.isFinite(monthIndex) || monthIndex < 0 || monthIndex > 11) {
+    return month;
+  }
+
+  return new Intl.DateTimeFormat('es-CO', {
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date(year, monthIndex, 1));
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -172,6 +195,44 @@ export const BudgetWizardModal = ({
 
   const canGoBack = currentStep > 0;
   const isLastStep = currentStep === SUMMARY_STEP;
+  const totalAssigned = categories.reduce((sum, cat) => {
+    const mergedSubs = [...cat.subcategories, ...(localSubcategories[cat.code] ?? [])];
+    const subAmounts = stepData[cat.code] ?? {};
+
+    return sum + mergedSubs.reduce(
+      (categorySum, sub) => categorySum + (subAmounts[sub.code] ?? sub.suggested_amount),
+      0,
+    );
+  }, 0);
+  const remainingToAssign = totalIncome - totalAssigned;
+  const currentStepNumber = currentStep + 1;
+  const currentCategory = categoryForStep(currentStep, categories);
+  const currentStepColor = currentCategory
+    ? `var(--color-${currentCategory.code})`
+    : currentStep === 0
+      ? 'var(--color-income)'
+      : 'var(--color-brand)';
+  const stepItems = [
+    {
+      label: 'Ingreso base',
+      caption: 'Definí el piso real con el que se construye el mes.',
+      color: 'var(--color-income)',
+    },
+    ...CATEGORY_STEP_FALLBACKS.map((fallback, index) => {
+      const cat = categories[index];
+
+      return {
+        label: cat?.name ?? fallback.label,
+        caption: cat?.description ?? fallback.caption,
+        color: cat ? `var(--color-${cat.code})` : 'var(--color-border)',
+      };
+    }),
+    {
+      label: 'Resumen',
+      caption: 'Validá balance, benchmarks y margen final.',
+      color: 'var(--color-brand)',
+    },
+  ];
 
   // ── Navigation ─────────────────────────────────────────────────────────────
 
@@ -265,43 +326,6 @@ export const BudgetWizardModal = ({
     onComplete(draft);
   };
 
-  // ── Progress dots ──────────────────────────────────────────────────────────
-
-  // Dots represent steps 1–5 (category steps)
-  const progressDots = Array.from({ length: PROGRESS_STEP_COUNT }, (_, i) => {
-    const dotStep = i + 1; // 1..5
-    const isCompleted = currentStep > dotStep;
-    const isCurrent = currentStep === dotStep;
-    const cat = categories[i];
-    const colorVar = cat ? `var(--color-${cat.code})` : 'var(--color-text-disabled)';
-
-    return (
-      <div
-        key={dotStep}
-        className={[
-          styles.dot,
-          isCompleted ? styles.dotCompleted : '',
-          isCurrent ? styles.dotCurrent : '',
-        ]
-          .filter(Boolean)
-          .join(' ')}
-        style={(isCompleted || isCurrent) ? ({ '--dot-color': colorVar } as React.CSSProperties) : undefined}
-        aria-label={cat?.name ?? `Paso ${dotStep}`}
-      />
-    );
-  });
-
-  // ── Step color for header accent ───────────────────────────────────────────
-
-  const currentCat = categoryForStep(currentStep, categories);
-  const headerAccentColor = currentCat
-    ? `var(--color-${currentCat.code})`
-    : currentStep === 0
-    ? 'var(--color-income)'
-    : 'var(--color-brand)';
-
-  // ── Render ─────────────────────────────────────────────────────────────────
-
   return (
     <>
       <IonModal
@@ -309,106 +333,176 @@ export const BudgetWizardModal = ({
         onDidDismiss={onClose}
         keepContentsMounted
         style={{
-          '--border-radius': '24px',
-          '--width': 'min(640px, 96vw)',
-          '--height': 'min(90dvh, 820px)',
+          '--border-radius': '0px',
+          '--width': '100vw',
+          '--height': '100dvh',
         }}
       >
         <IonHeader className="ion-no-border">
-          <IonToolbar className={styles.toolbar}>
-            <div
-              className={styles.toolbarAccent}
-              style={{ '--accent-color': headerAccentColor } as React.CSSProperties}
-            />
-            <IonTitle className={styles.toolbarTitle}>
-              {wizardData ? stepTitle(currentStep, categories) : 'Plan mensual'}
-            </IonTitle>
-            <IonButtons slot="end">
-              <IonButton fill="clear" onClick={onClose} className={styles.closeBtn}>
-                ✕
-              </IonButton>
-            </IonButtons>
-          </IonToolbar>
-
-          {/* Progress bar — only show during category steps */}
-          {currentStep >= CATEGORY_STEP_FIRST && currentStep <= SUMMARY_STEP && (
-            <div className={styles.progressBar}>
-              {progressDots}
+          <div className={styles.chrome}>
+            <div className={styles.chromeBrand}>
+              <BrandMark variant="principal" size="md" />
+              <div className={styles.chromeCopy}>
+                <span className={styles.chromeEyebrow}>Daniel 15K</span>
+                <div className={styles.chromeTitleRow}>
+                  <h2 className={styles.chromeTitle}>Plan mensual</h2>
+                  <span className={styles.chromeMonth}>{formatMonthLabel(month)}</span>
+                </div>
+              </div>
             </div>
-          )}
+
+            <button type="button" onClick={onClose} className={styles.closeBtn}>
+              Cerrar
+            </button>
+          </div>
         </IonHeader>
 
         <IonContent className={styles.content}>
-          {!wizardData ? (
-            <div className={styles.emptyState}>
-              <p className={styles.emptyText}>Cargando datos del plan...</p>
-            </div>
-          ) : (
-            <>
-              {/* Step 0: Income */}
-              {currentStep === 0 && (
-                <BudgetIncomeStep
-                  wizardData={wizardData}
-                  incomeSources={incomeSources}
-                  totalIncome={totalIncome}
-                  includeVariable={includeVariable}
-                  onIncomeChange={handleIncomeChange}
-                  onToggleVariable={() => setIncludeVariable((v) => !v)}
-                />
+          <div className={styles.workspace}>
+            <aside className={styles.sidebar}>
+              <section className={styles.sidebarIntro}>
+                <span
+                  className={styles.sidebarKicker}
+                  style={{ '--accent-color': currentStepColor } as React.CSSProperties}
+                >
+                  Paso {currentStepNumber} de {TOTAL_STEPS}
+                </span>
+                <h3 className={styles.sidebarTitle}>Todo el plan en un solo lugar</h3>
+                <p className={styles.sidebarText}>
+                  Este flujo merece atención completa: fijá primero el ingreso real del mes y
+                  después distribuí cada bloque con margen suficiente.
+                </p>
+              </section>
+
+              <ol className={styles.stepList}>
+                {stepItems.map((item, index) => {
+                  const isCurrent = currentStep === index;
+                  const isCompleted = currentStep > index;
+
+                  return (
+                    <li
+                      key={item.label}
+                      className={[
+                        styles.stepItem,
+                        isCurrent ? styles.stepItemCurrent : '',
+                        isCompleted ? styles.stepItemCompleted : '',
+                      ].filter(Boolean).join(' ')}
+                      style={{ '--step-color': item.color } as React.CSSProperties}
+                    >
+                      <span className={styles.stepIndex}>{String(index + 1).padStart(2, '0')}</span>
+                      <div className={styles.stepCopy}>
+                        <span className={styles.stepLabel}>{item.label}</span>
+                        <span className={styles.stepCaption}>{item.caption}</span>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ol>
+
+              {wizardData && (
+                <section className={styles.metricsCard}>
+                  <div className={styles.metricRow}>
+                    <span className={styles.metricLabel}>Ingreso base</span>
+                    <strong className={styles.metricValue}>{formatCOP(totalIncome)}</strong>
+                  </div>
+                  <div className={styles.metricRow}>
+                    <span className={styles.metricLabel}>Asignado</span>
+                    <strong className={styles.metricValueMuted}>{formatCOP(totalAssigned)}</strong>
+                  </div>
+                  <div className={styles.metricRow}>
+                    <span className={styles.metricLabel}>Disponible</span>
+                    <strong
+                      className={[
+                        styles.metricBalance,
+                        remainingToAssign < 0 ? styles.metricBalanceNegative : '',
+                      ].filter(Boolean).join(' ')}
+                    >
+                      {formatCOP(remainingToAssign)}
+                    </strong>
+                  </div>
+                </section>
               )}
+            </aside>
 
-              {/* Steps 1–5: Category */}
-              {currentStep >= CATEGORY_STEP_FIRST && currentStep <= CATEGORY_STEP_LAST && (() => {
-                const cat = categoryForStep(currentStep, categories);
-                if (!cat) return null;
+            <section className={styles.panel}>
+              {!wizardData ? (
+                <div className={styles.emptyState}>
+                  <p className={styles.emptyText}>Cargando datos del plan...</p>
+                </div>
+              ) : (
+                <div className={styles.panelInner}>
+                  {/* Step 0: Income */}
+                  {currentStep === 0 && (
+                    <BudgetIncomeStep
+                      wizardData={wizardData}
+                      incomeSources={incomeSources}
+                      totalIncome={totalIncome}
+                      includeVariable={includeVariable}
+                      onIncomeChange={handleIncomeChange}
+                      onToggleVariable={() => setIncludeVariable((v) => !v)}
+                    />
+                  )}
 
-                // Merge locally created subcategories so they appear immediately
-                const mergedCategory: WizardCategory = {
-                  ...cat,
-                  subcategories: [
-                    ...cat.subcategories,
-                    ...(localSubcategories[cat.code] ?? []),
-                  ],
-                };
+                  {/* Steps 1–5: Category */}
+                  {currentStep >= CATEGORY_STEP_FIRST && currentStep <= CATEGORY_STEP_LAST && (() => {
+                    const cat = categoryForStep(currentStep, categories);
+                    if (!cat) return null;
 
-                return (
-                  <BudgetCategoryStep
-                    category={mergedCategory}
-                    amounts={stepData[cat.code] ?? {}}
-                    totalIncome={totalIncome}
-                    alreadyCommitted={alreadyCommitted}
-                    onAmountChange={(subCode, amount) =>
-                      handleAmountChange(cat.code, subCode, amount)
-                    }
-                    onAddSubcategory={() => {
-                      setAddSubCategory(cat);
-                      setAddSubOpen(true);
-                    }}
-                  />
-                );
-              })()}
+                    const mergedCategory: WizardCategory = {
+                      ...cat,
+                      subcategories: [
+                        ...cat.subcategories,
+                        ...(localSubcategories[cat.code] ?? []),
+                      ],
+                    };
 
-              {/* Step 6: Summary — pass merged categories so locally added subs show up */}
-              {currentStep === SUMMARY_STEP && (
-                <BudgetSummaryStep
-                  categories={categories.map((cat) => ({
-                    ...cat,
-                    subcategories: [
-                      ...cat.subcategories,
-                      ...(localSubcategories[cat.code] ?? []),
-                    ],
-                  }))}
-                  stepData={stepData}
-                  totalIncome={totalIncome}
-                />
+                    return (
+                      <BudgetCategoryStep
+                        category={mergedCategory}
+                        amounts={stepData[cat.code] ?? {}}
+                        totalIncome={totalIncome}
+                        alreadyCommitted={alreadyCommitted}
+                        onAmountChange={(subCode, amount) =>
+                          handleAmountChange(cat.code, subCode, amount)
+                        }
+                        onAddSubcategory={() => {
+                          setAddSubCategory(cat);
+                          setAddSubOpen(true);
+                        }}
+                      />
+                    );
+                  })()}
+
+                  {/* Step 6: Summary — pass merged categories so locally added subs show up */}
+                  {currentStep === SUMMARY_STEP && (
+                    <BudgetSummaryStep
+                      categories={categories.map((cat) => ({
+                        ...cat,
+                        subcategories: [
+                          ...cat.subcategories,
+                          ...(localSubcategories[cat.code] ?? []),
+                        ],
+                      }))}
+                      stepData={stepData}
+                      totalIncome={totalIncome}
+                    />
+                  )}
+                </div>
               )}
-            </>
-          )}
+            </section>
+          </div>
         </IonContent>
 
-        {/* Footer navigation */}
         <div className={styles.footer}>
           <div className={styles.footerLeft}>
+            <div className={styles.footerMeta}>
+              <span className={styles.footerStep}>Paso {currentStepNumber} de {TOTAL_STEPS}</span>
+              <span className={styles.footerHint}>
+                {isLastStep
+                  ? 'Revisá el balance antes de guardar.'
+                  : 'Avanzá cuando este paso refleje tu mes real.'}
+              </span>
+            </div>
             {canGoBack && (
               <button type="button" className={styles.backBtn} onClick={goBack}>
                 ← Atrás

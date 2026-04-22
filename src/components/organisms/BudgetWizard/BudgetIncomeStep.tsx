@@ -58,14 +58,21 @@ export const BudgetIncomeStep = ({
   return (
     <div className={styles.root}>
       <div className={styles.header}>
-        <div className={styles.iconWrap}>
-          <span className={styles.icon}>↑</span>
+        <div className={styles.headerMain}>
+          <div className={styles.iconWrap}>
+            <span className={styles.icon}>↑</span>
+          </div>
+          <div className={styles.headerCopy}>
+            <span className={styles.kicker}>Punto de partida</span>
+            <h2 className={styles.title}>Definí el ingreso base</h2>
+            <p className={styles.description}>
+              Este monto ancla todo el plan del mes. Si querés más seguridad,
+              podés dejar por fuera los ingresos variables.
+            </p>
+          </div>
         </div>
-        <div>
-          <h2 className={styles.title}>Ingreso</h2>
-          <p className={styles.description}>
-            Base de tu presupuesto. El resto de las categorías se distribuyen desde acá.
-          </p>
+        <div className={styles.headerBadge}>
+          {wizardData.income.sources.length} fuente{wizardData.income.sources.length === 1 ? '' : 's'}
         </div>
       </div>
 
@@ -146,12 +153,12 @@ export const BudgetIncomeStep = ({
       )}
 
       <div className={styles.totalRow}>
-        <span className={styles.totalLabel}>Total ingreso base</span>
+        <span className={styles.totalLabel}>Base con la que se reparte el mes</span>
         <span className={styles.totalAmount}>{formatCOP(totalIncome)}</span>
       </div>
 
       <p className={styles.hint}>
-        Editá cada fuente si el monto no refleja lo que realmente entra este mes.
+        Ajustá cada fuente si el monto no refleja lo que realmente entra este mes.
       </p>
     </div>
   );
