@@ -189,7 +189,7 @@ export const BudgetsPage = () => {
   return (
     <AppLayout title="Presupuestos">
       <IonContent className={styles.pageContent}>
-        <section className={styles.stack}>
+        <section className={`${styles.stack} ${currentPlan || !detailsOpen ? styles.stackFill : ''}`}>
 
           {/* ── Active plan view (shown when there is a confirmed plan) ── */}
           {!loading && !error && (currentPlan || !detailsOpen) ? (

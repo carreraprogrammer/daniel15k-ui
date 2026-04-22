@@ -147,7 +147,7 @@ export const DebtsPage = () => {
   return (
     <AppLayout title="Deudas">
       <IonContent className={styles.pageContent}>
-      <section className={styles.stack}>
+      <section className={`${styles.stack} ${!detailsOpen ? styles.stackFill : ''}`}>
         {!detailsOpen ? (
           <div className={styles.focusStage}>
             <div className={`${styles.focusCard} ${styles.focusCardFull} ${styles.focusCardCentered}`}>

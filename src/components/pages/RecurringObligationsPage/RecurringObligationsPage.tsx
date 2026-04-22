@@ -232,7 +232,7 @@ export const RecurringObligationsPage = () => {
   return (
     <AppLayout title="Recurrentes">
       <IonContent className={styles.pageContent}>
-      <section className={styles.stack}>
+      <section className={`${styles.stack} ${!detailsOpen && !loading && !error ? styles.stackFill : ''}`}>
         {!detailsOpen && !loading && !error ? (
           <div className={styles.focusStage}>
             <div className={`${styles.focusCard} ${styles.focusCardFull} ${styles.focusCardCentered}`}>
