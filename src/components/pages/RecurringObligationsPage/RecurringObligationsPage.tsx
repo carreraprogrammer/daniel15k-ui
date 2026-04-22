@@ -234,86 +234,88 @@ export const RecurringObligationsPage = () => {
       <IonContent className={styles.pageContent}>
       <section className={styles.stack}>
         {!detailsOpen && !loading && !error ? (
-          <div className={`${styles.focusCard} ${styles.focusCardFull}`}>
-            <div className={styles.focusGrid}>
-              <div className={styles.focusCopy}>
-                <span className={styles.eyebrow}>Recurrentes</span>
-                <p className={styles.focusQuestion}>
-                  {activeView === 'income'
-                    ? '¿Con qué ingresos espero contar este mes?'
-                    : '¿Cuánto pesa mi operación fija todos los meses?'}
-                </p>
-                <h2 className={styles.focusTitle}>
-                  {activeView === 'income'
-                    ? `${incomeSources.length} fuentes de ingreso`
-                    : `${metrics.obligationsCount} obligaciones activas`}
-                </h2>
-                <p className={styles.focusText}>
-                  {activeView === 'income'
-                    ? 'Aquí deberías poder ver rápido si tu perfil de ingresos base ya está claro, sin entrar de inmediato a filtros o formularios.'
-                    : 'Antes de editar nada, esta vista debería decirte cuánto cuesta sostener el sistema actual cada mes.'}
-                </p>
-              </div>
-              <div>
-                <div className={styles.focusValue}>
-                  {activeView === 'income' ? formatCop(metrics.incomeTotal) : formatCop(metrics.obligationsTotal)}
+          <div className={styles.focusStage}>
+            <div className={`${styles.focusCard} ${styles.focusCardFull} ${styles.focusCardCentered}`}>
+              <div className={styles.focusGrid}>
+                <div className={styles.focusCopy}>
+                  <span className={styles.eyebrow}>Recurrentes</span>
+                  <p className={styles.focusQuestion}>
+                    {activeView === 'income'
+                      ? '¿Con qué ingresos espero contar este mes?'
+                      : '¿Cuánto pesa mi operación fija todos los meses?'}
+                  </p>
+                  <h2 className={styles.focusTitle}>
+                    {activeView === 'income'
+                      ? `${incomeSources.length} fuentes de ingreso`
+                      : `${metrics.obligationsCount} obligaciones activas`}
+                  </h2>
+                  <p className={styles.focusText}>
+                    {activeView === 'income'
+                      ? 'Aquí deberías poder ver rápido si tu perfil de ingresos base ya está claro, sin entrar de inmediato a filtros o formularios.'
+                      : 'Antes de editar nada, esta vista debería decirte cuánto cuesta sostener el sistema actual cada mes.'}
+                  </p>
                 </div>
-                <p className={styles.focusCaption}>
-                  {activeView === 'income' ? 'Ingreso esperado recurrente' : 'Carga recurrente mensual'}
-                </p>
+                <div>
+                  <div className={styles.focusValue}>
+                    {activeView === 'income' ? formatCop(metrics.incomeTotal) : formatCop(metrics.obligationsTotal)}
+                  </div>
+                  <p className={styles.focusCaption}>
+                    {activeView === 'income' ? 'Ingreso esperado recurrente' : 'Carga recurrente mensual'}
+                  </p>
+                </div>
               </div>
-            </div>
 
-            {metrics.obligationsTotal > 0 ? (
-              <section className={styles.focusSupport}>
-                <div className={styles.focusSupportHeader}>
-                  <h3 className={styles.focusSupportTitle}>Cobertura mensual</h3>
-                  <span className={styles.focusSupportValue}>{coveragePct}%</span>
-                </div>
-                <div className={styles.focusRail}>
-                  <div
-                    className={`${styles.focusRailFill} ${coveragePct < 100 ? styles.focusRailFillWarn : ''}`}
-                    style={{ width: `${Math.min(coveragePct, 100)}%` }}
+              {metrics.obligationsTotal > 0 ? (
+                <section className={styles.focusSupport}>
+                  <div className={styles.focusSupportHeader}>
+                    <h3 className={styles.focusSupportTitle}>Cobertura mensual</h3>
+                    <span className={styles.focusSupportValue}>{coveragePct}%</span>
+                  </div>
+                  <div className={styles.focusRail}>
+                    <div
+                      className={`${styles.focusRailFill} ${coveragePct < 100 ? styles.focusRailFillWarn : ''}`}
+                      style={{ width: `${Math.min(coveragePct, 100)}%` }}
+                    />
+                  </div>
+                  <p className={styles.focusSupportText}>
+                    {formatCop(metrics.incomeTotal)} de ingresos recurrentes frente a {formatCop(metrics.obligationsTotal)} en obligaciones.
+                  </p>
+                </section>
+              ) : null}
+
+              <div className={styles.focusMeta}>
+                {activeView === 'income' ? (
+                  <span className={styles.focusBadge}>{incomeSources.filter((source) => source.attributes.classification === 'base').length} base confiable</span>
+                ) : (
+                  <span className={styles.focusBadge}>{metrics.obligationsCount} activos</span>
+                )}
+                <span className={styles.focusBadge}>
+                  {activeView === 'income' ? `${incomeSources.length} fuentes` : `${obligations.length} registrados`}
+                </span>
+              </div>
+
+              <div className={styles.focusActions}>
+                {activeView === 'income' ? (
+                  <IconButton
+                    label="Agregar ingreso"
+                    variant="primary"
+                    icon={<IonIcon icon={addOutline} />}
+                    onClick={() => { setEditingIncome(null); setIncomeComposerOpen(true); }}
                   />
-                </div>
-                <p className={styles.focusSupportText}>
-                  {formatCop(metrics.incomeTotal)} de ingresos recurrentes frente a {formatCop(metrics.obligationsTotal)} en obligaciones.
-                </p>
-              </section>
-            ) : null}
-
-            <div className={styles.focusMeta}>
-              {activeView === 'income' ? (
-                <span className={styles.focusBadge}>{incomeSources.filter((source) => source.attributes.classification === 'base').length} base confiable</span>
-              ) : (
-                <span className={styles.focusBadge}>{metrics.obligationsCount} activos</span>
-              )}
-              <span className={styles.focusBadge}>
-                {activeView === 'income' ? `${incomeSources.length} fuentes` : `${obligations.length} registrados`}
-              </span>
-            </div>
-
-            <div className={styles.focusActions}>
-              {activeView === 'income' ? (
-                <IconButton
-                  label="Agregar ingreso"
-                  variant="primary"
-                  icon={<IonIcon icon={addOutline} />}
-                  onClick={() => { setEditingIncome(null); setIncomeComposerOpen(true); }}
+                ) : (
+                  <IconButton
+                    label="Nuevo recurrente"
+                    variant="primary"
+                    icon={<IonIcon icon={addOutline} />}
+                    onClick={() => { setEditingObligation(null); setComposerOpen(true); }}
+                  />
+                )}
+                <Button
+                  label="Explorar detalle"
+                  variant="ghost"
+                  onClick={() => setDetailsOpen(true)}
                 />
-              ) : (
-                <IconButton
-                  label="Nuevo recurrente"
-                  variant="primary"
-                  icon={<IonIcon icon={addOutline} />}
-                  onClick={() => { setEditingObligation(null); setComposerOpen(true); }}
-                />
-              )}
-              <Button
-                label="Explorar detalle"
-                variant="ghost"
-                onClick={() => setDetailsOpen(true)}
-              />
+              </div>
             </div>
           </div>
         ) : null}

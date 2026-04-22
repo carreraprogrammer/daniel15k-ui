@@ -16,7 +16,7 @@
 }
 
 .focusStage {
-  display: grid;
+  display: flex;
   align-items: center;
   min-height: calc(
     100dvh
@@ -26,6 +26,10 @@
     - var(--app-content-pad-top)
     - var(--app-content-pad-bottom)
   );
+}
+
+.focusStage > * {
+  width: 100%;
 }
 
 .focusCard {

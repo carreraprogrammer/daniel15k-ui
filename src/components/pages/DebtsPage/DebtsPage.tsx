@@ -149,59 +149,61 @@ export const DebtsPage = () => {
       <IonContent className={styles.pageContent}>
       <section className={styles.stack}>
         {!detailsOpen ? (
-          <div className={`${styles.focusCard} ${styles.focusCardFull}`}>
-            <div className={styles.focusGrid}>
-              <div className={styles.focusCopy}>
-                <span className={styles.eyebrow}>Deudas</span>
-                <p className={styles.focusQuestion}>¿Cuánta presión de deuda tengo hoy?</p>
-                <h2 className={styles.focusTitle}>
-                  {metrics.activeCount ? `${metrics.activeCount} deudas activas` : 'No hay deudas activas'}
-                </h2>
-                <p className={styles.focusText}>
-                  Esta vista debería dejar claro cuánto debes y cuánto te exige al mes antes de abrir filtros, tablas o edición.
-                </p>
-              </div>
-              <div>
-                <div className={styles.focusValue}>{formatCop(metrics.totalBalance)}</div>
-                <p className={styles.focusCaption}>Saldo activo acumulado</p>
-              </div>
-            </div>
-
-            {metrics.totalCount ? (
-              <section className={styles.focusSupport}>
-                <div className={styles.focusSupportHeader}>
-                  <h3 className={styles.focusSupportTitle}>Deuda ya resuelta</h3>
-                  <span className={styles.focusSupportValue}>{settledPct}% cerrada</span>
+          <div className={styles.focusStage}>
+            <div className={`${styles.focusCard} ${styles.focusCardFull} ${styles.focusCardCentered}`}>
+              <div className={styles.focusGrid}>
+                <div className={styles.focusCopy}>
+                  <span className={styles.eyebrow}>Deudas</span>
+                  <p className={styles.focusQuestion}>¿Cuánta presión de deuda tengo hoy?</p>
+                  <h2 className={styles.focusTitle}>
+                    {metrics.activeCount ? `${metrics.activeCount} deudas activas` : 'No hay deudas activas'}
+                  </h2>
+                  <p className={styles.focusText}>
+                    Esta vista debería dejar claro cuánto debes y cuánto te exige al mes antes de abrir filtros, tablas o edición.
+                  </p>
                 </div>
-                <div className={styles.focusRail}>
-                  <div className={styles.focusRailFill} style={{ width: `${settledPct}%` }} />
+                <div>
+                  <div className={styles.focusValue}>{formatCop(metrics.totalBalance)}</div>
+                  <p className={styles.focusCaption}>Saldo activo acumulado</p>
                 </div>
-                <p className={styles.focusSupportText}>
-                  {metrics.totalCount - metrics.activeCount} de {metrics.totalCount} deudas ya no están activas.
-                </p>
-              </section>
-            ) : null}
+              </div>
 
-            <div className={styles.focusMeta}>
-              <span className={styles.focusBadge}>{formatCop(metrics.totalMonthly)} al mes</span>
-              <span className={styles.focusBadge}>{metrics.totalCount} registradas</span>
-            </div>
+              {metrics.totalCount ? (
+                <section className={styles.focusSupport}>
+                  <div className={styles.focusSupportHeader}>
+                    <h3 className={styles.focusSupportTitle}>Deuda ya resuelta</h3>
+                    <span className={styles.focusSupportValue}>{settledPct}% cerrada</span>
+                  </div>
+                  <div className={styles.focusRail}>
+                    <div className={styles.focusRailFill} style={{ width: `${settledPct}%` }} />
+                  </div>
+                  <p className={styles.focusSupportText}>
+                    {metrics.totalCount - metrics.activeCount} de {metrics.totalCount} deudas ya no están activas.
+                  </p>
+                </section>
+              ) : null}
 
-            <div className={styles.focusActions}>
-              <IconButton
-                label="Nueva deuda"
-                variant="primary"
-                icon={<IonIcon icon={addOutline} />}
-                onClick={() => {
-                  setEditingDebt(null);
-                  setComposerOpen(true);
-                }}
-              />
-              <Button
-                label="Explorar detalle"
-                variant="ghost"
-                onClick={() => setDetailsOpen(true)}
-              />
+              <div className={styles.focusMeta}>
+                <span className={styles.focusBadge}>{formatCop(metrics.totalMonthly)} al mes</span>
+                <span className={styles.focusBadge}>{metrics.totalCount} registradas</span>
+              </div>
+
+              <div className={styles.focusActions}>
+                <IconButton
+                  label="Nueva deuda"
+                  variant="primary"
+                  icon={<IonIcon icon={addOutline} />}
+                  onClick={() => {
+                    setEditingDebt(null);
+                    setComposerOpen(true);
+                  }}
+                />
+                <Button
+                  label="Explorar detalle"
+                  variant="ghost"
+                  onClick={() => setDetailsOpen(true)}
+                />
+              </div>
             </div>
           </div>
         ) : null}

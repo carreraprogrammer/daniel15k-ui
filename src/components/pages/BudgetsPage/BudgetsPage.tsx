@@ -193,11 +193,12 @@ export const BudgetsPage = () => {
 
           {/* ── Active plan view (shown when there is a confirmed plan) ── */}
           {!loading && !error && (currentPlan || !detailsOpen) ? (
-            <div className={`${styles.focusCard} ${styles.focusCardFull}`}>
-              {currentPlan ? (
-                <ActivePlanView currentPlan={currentPlan} onEditPlan={handleOpenWizard} />
-              ) : (
-                <>
+            <div className={styles.focusStage}>
+              <div className={`${styles.focusCard} ${styles.focusCardFull} ${styles.focusCardCentered}`}>
+                {currentPlan ? (
+                  <ActivePlanView currentPlan={currentPlan} onEditPlan={handleOpenWizard} />
+                ) : (
+                  <>
                   {/* Burn-rate focus card (pre-plan state) */}
                   {!detailsOpen ? (
                     <div className={styles.focusGrid}>
@@ -273,23 +274,24 @@ export const BudgetsPage = () => {
                       </div>
                     </>
                   ) : null}
-                </>
-              )}
+                  </>
+                )}
 
-              {/* Success banner */}
-              {wizardSuccess && (
-                <div style={{
-                  marginTop: 'var(--space-4)',
-                  padding: 'var(--space-3) var(--space-4)',
-                  borderRadius: 'var(--radius-lg)',
-                  background: 'var(--color-success-subtle)',
-                  color: 'var(--color-success)',
-                  fontSize: 'var(--text-sm)',
-                  fontFamily: 'var(--font-sans)',
-                }}>
-                  Plan guardado correctamente para {month}.
-                </div>
-              )}
+                {/* Success banner */}
+                {wizardSuccess && (
+                  <div style={{
+                    marginTop: 'var(--space-4)',
+                    padding: 'var(--space-3) var(--space-4)',
+                    borderRadius: 'var(--radius-lg)',
+                    background: 'var(--color-success-subtle)',
+                    color: 'var(--color-success)',
+                    fontSize: 'var(--text-sm)',
+                    fontFamily: 'var(--font-sans)',
+                  }}>
+                    Plan guardado correctamente para {month}.
+                  </div>
+                )}
+              </div>
             </div>
           ) : null}
 

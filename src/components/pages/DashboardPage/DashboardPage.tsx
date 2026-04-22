@@ -62,52 +62,54 @@ export const DashboardPage = () => {
       <IonContent className={styles.pageContent}>
       <section className={styles.stack}>
         {!detailsOpen && !loading && !error ? (
-          <div className={`${styles.focusCard} ${styles.focusCardFull}`}>
-            <div className={styles.focusGrid}>
-              <div className={styles.focusCopy}>
-                <span className={styles.eyebrow}>Resumen ejecutivo</span>
-                <p className={styles.focusQuestion}>{`¿Cómo voy este mes y qué debería mirar primero, ${user?.name ?? 'Daniel'}?`}</p>
-                <h2 className={styles.focusTitle}>{focusState.title}</h2>
-                <p className={styles.focusText}>{focusState.text}</p>
-              </div>
-              <div>
-                <div className={styles.focusValue}>{focusState.value}</div>
-                <p className={styles.focusCaption}>{focusState.caption}</p>
-              </div>
-            </div>
-
-            {monthProgress ? (
-              <section className={styles.focusSupport}>
-                <div className={styles.focusSupportHeader}>
-                  <h3 className={styles.focusSupportTitle}>Presión del mes</h3>
-                  <span className={styles.focusSupportValue}>{monthProgress.pct}% consumido</span>
+          <div className={styles.focusStage}>
+            <div className={`${styles.focusCard} ${styles.focusCardFull} ${styles.focusCardCentered}`}>
+              <div className={styles.focusGrid}>
+                <div className={styles.focusCopy}>
+                  <span className={styles.eyebrow}>Resumen ejecutivo</span>
+                  <p className={styles.focusQuestion}>{`¿Cómo voy este mes y qué debería mirar primero, ${user?.name ?? 'Daniel'}?`}</p>
+                  <h2 className={styles.focusTitle}>{focusState.title}</h2>
+                  <p className={styles.focusText}>{focusState.text}</p>
                 </div>
-                <div className={styles.focusRail}>
-                  <div
-                    className={`${styles.focusRailFill} ${monthProgress.pct >= 100 ? styles.focusRailFillWarn : ''}`}
-                    style={{ width: `${Math.min(monthProgress.pct, 100)}%` }}
-                  />
+                <div>
+                  <div className={styles.focusValue}>{focusState.value}</div>
+                  <p className={styles.focusCaption}>{focusState.caption}</p>
                 </div>
-                <p className={styles.focusSupportText}>
-                  {formatCop(monthProgress.used)} de {formatCop(monthProgress.total)} del ingreso base ya están comprometidos por gasto confirmado.
-                </p>
-              </section>
-            ) : null}
-
-            {!loading && !error && summary ? (
-              <div className={styles.focusMeta}>
-                <span className={styles.focusBadge}>{pending.length} pendientes</span>
-                <span className={styles.focusBadge}>{formatCop(summary.debts?.total_balance ?? 0)} en deuda activa</span>
-                <span className={styles.focusBadge}>{formatCop(behaviorSummary.totals.discretionary)} discrecional</span>
               </div>
-            ) : null}
 
-            <div className={styles.focusActions}>
-              <Button
-                label="Ver detalle del mes"
-                variant="ghost"
-                onClick={() => setDetailsOpen(true)}
-              />
+              {monthProgress ? (
+                <section className={styles.focusSupport}>
+                  <div className={styles.focusSupportHeader}>
+                    <h3 className={styles.focusSupportTitle}>Presión del mes</h3>
+                    <span className={styles.focusSupportValue}>{monthProgress.pct}% consumido</span>
+                  </div>
+                  <div className={styles.focusRail}>
+                    <div
+                      className={`${styles.focusRailFill} ${monthProgress.pct >= 100 ? styles.focusRailFillWarn : ''}`}
+                      style={{ width: `${Math.min(monthProgress.pct, 100)}%` }}
+                    />
+                  </div>
+                  <p className={styles.focusSupportText}>
+                    {formatCop(monthProgress.used)} de {formatCop(monthProgress.total)} del ingreso base ya están comprometidos por gasto confirmado.
+                  </p>
+                </section>
+              ) : null}
+
+              {!loading && !error && summary ? (
+                <div className={styles.focusMeta}>
+                  <span className={styles.focusBadge}>{pending.length} pendientes</span>
+                  <span className={styles.focusBadge}>{formatCop(summary.debts?.total_balance ?? 0)} en deuda activa</span>
+                  <span className={styles.focusBadge}>{formatCop(behaviorSummary.totals.discretionary)} discrecional</span>
+                </div>
+              ) : null}
+
+              <div className={styles.focusActions}>
+                <Button
+                  label="Ver detalle del mes"
+                  variant="ghost"
+                  onClick={() => setDetailsOpen(true)}
+                />
+              </div>
             </div>
           </div>
         ) : null}
