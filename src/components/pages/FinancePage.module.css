@@ -16,8 +16,17 @@
 }
 
 .focusStage {
+  --focus-card-inset: 6px;
   display: flex;
-  align-items: center;
+  align-items: stretch;
+  height: calc(
+    100dvh
+    - (var(--app-shell-padding) * 2)
+    - var(--app-shell-gap)
+    - var(--app-header-height)
+    - var(--app-content-pad-top)
+    - var(--app-content-pad-bottom)
+  );
   min-height: calc(
     100dvh
     - (var(--app-shell-padding) * 2)
@@ -26,10 +35,14 @@
     - var(--app-content-pad-top)
     - var(--app-content-pad-bottom)
   );
+  padding: var(--focus-card-inset);
+  box-sizing: border-box;
 }
 
 .focusStage > * {
   width: 100%;
+  min-height: 100%;
+  height: 100%;
 }
 
 .focusCard {
@@ -76,20 +89,14 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  min-height: calc(
-    100dvh
-    - (var(--app-shell-padding) * 2)
-    - var(--app-shell-gap)
-    - var(--app-header-height)
-    - var(--app-content-pad-top)
-    - var(--app-content-pad-bottom)
-  );
+  height: 100%;
+  min-height: 100%;
   gap: 1.2rem;
 }
 
 .focusCardCentered {
-  min-height: auto;
-  align-self: center;
+  min-height: 100%;
+  align-self: stretch;
   justify-content: center;
 }
 
@@ -644,6 +651,15 @@
   }
 
   .focusStage {
+    --focus-card-inset: 5px;
+    height: calc(
+      100dvh
+      - (var(--app-shell-padding) * 2)
+      - var(--app-shell-gap)
+      - var(--app-header-height)
+      - var(--app-content-pad-top)
+      - var(--app-content-pad-bottom)
+    );
     min-height: calc(
       100dvh
       - (var(--app-shell-padding) * 2)
@@ -683,14 +699,7 @@
   }
 
   .focusCardFull {
-    min-height: calc(
-      100dvh
-      - (var(--app-shell-padding) * 2)
-      - var(--app-shell-gap)
-      - var(--app-header-height)
-      - var(--app-content-pad-top)
-      - var(--app-content-pad-bottom)
-    );
+    min-height: 100%;
   }
 
   .focusTitle {
