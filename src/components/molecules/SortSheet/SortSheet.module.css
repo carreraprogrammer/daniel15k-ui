@@ -1,12 +1,49 @@
 .content {
   display: grid;
-  gap: 1.2rem;
-  padding: 1rem 1rem 1.25rem;
+  gap: 1rem;
+  padding: 0 0 0.25rem;
+}
+
+.snapshot {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.snapshotCard {
+  display: grid;
+  gap: 0.22rem;
+  padding: 0.95rem 1rem;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.02)),
+    rgba(255, 255, 255, 0.025);
+}
+
+.snapshotLabel {
+  color: rgba(231, 236, 244, 0.58);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.snapshotValue {
+  color: var(--color-text-primary);
+  font-size: 0.98rem;
+  letter-spacing: -0.02em;
 }
 
 .section {
   display: grid;
   gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.018)),
+    rgba(255, 255, 255, 0.022);
 }
 
 .heading {
@@ -39,9 +76,8 @@
   color: var(--color-accent);
 }
 
-.footer {
-  position: sticky;
-  bottom: 0;
-  padding-top: 0.25rem;
-  background: linear-gradient(180deg, rgba(10, 15, 25, 0), rgba(10, 15, 25, 0.96) 18%);
+@media (max-width: 520px) {
+  .snapshot {
+    grid-template-columns: 1fr;
+  }
 }

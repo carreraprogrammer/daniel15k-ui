@@ -15,7 +15,7 @@ import {
   RELIABILITY_OPTIONS,
   inferWindowKey,
 } from '../../../utils/incomeProfile';
-import styles from './IncomeSourceComposer.module.css';
+import styles from '../ComposerForm.module.css';
 
 interface Values {
   name: string;
@@ -144,108 +144,120 @@ export const IncomeSourceComposer = ({ source = null, loading, onCreate, onUpdat
 
   return (
     <section className={styles.panel}>
-      <div className={styles.grid}>
-        <div className={styles.spanTwo}>
-          <TextInput
-            name="income-name"
-            label="Nombre"
-            value={values.name}
-            onChange={(name) => setValues((v) => ({ ...v, name }))}
-            placeholder="Ej. Salario EMAPTA, Freelance 525"
+      <div className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <div>
+            <p className={styles.sectionEyebrow}>Escenario</p>
+            <h3 className={styles.sectionTitle}>Perfil del ingreso</h3>
+          </div>
+          <p className={styles.sectionText}>
+            El editor prioriza nombre, cadencia y confiabilidad para proyectar el flujo mensual sin cargar la pantalla con ruido innecesario.
+          </p>
+        </div>
+
+        <div className={styles.grid}>
+          <div className={styles.spanTwo}>
+            <TextInput
+              name="income-name"
+              label="Nombre"
+              value={values.name}
+              onChange={(name) => setValues((v) => ({ ...v, name }))}
+              placeholder="Ej. Salario EMAPTA, Freelance 525"
+              required
+            />
+          </div>
+          <NumberInput
+            name="income-amount"
+            label={amountLabel}
+            value={values.expectedAmount}
+            onChange={(expectedAmount) => setValues((v) => ({ ...v, expectedAmount }))}
+            format="currency"
+            prefix="$"
+            min={0}
             required
           />
+          {(values.cadence === 'biweekly' || values.cadence === 'weekly') && monthlyExpected ? (
+            <p className={[styles.hint, styles.spanTwo].join(' ')}>
+              Total mensual esperado calculado: <strong>${monthlyExpected.toLocaleString('es-CO')}</strong>
+            </p>
+          ) : null}
+          <SelectInput
+            name="income-classification"
+            label="Clasificación"
+            value={values.classification}
+            onChange={(classification) =>
+              setValues((v) => ({ ...v, classification: String(classification) as Values['classification'] }))
+            }
+            options={INCOME_CLASSIFICATION_OPTIONS}
+            required
+          />
+          <SelectInput
+            name="income-cadence"
+            label="Cadencia"
+            value={values.cadence}
+            onChange={(cadence) => setValues((v) => ({ ...v, cadence: String(cadence) as Values['cadence'] }))}
+            options={INCOME_CADENCE_OPTIONS}
+            required
+          />
+          {values.cadence === 'biweekly' ? (
+            <>
+              <SelectInput
+                name="income-day-first"
+                label="Primer pago"
+                value={values.biweeklyDay1}
+                onChange={(day) => setValues((v) => ({ ...v, biweeklyDay1: Number(day) }))}
+                options={BIWEEKLY_DAY_OPTIONS}
+                required
+              />
+              <SelectInput
+                name="income-day-second"
+                label="Segundo pago"
+                value={values.biweeklyDay2}
+                onChange={(day) => setValues((v) => ({ ...v, biweeklyDay2: Number(day) }))}
+                options={BIWEEKLY_DAY_OPTIONS}
+                required
+              />
+            </>
+          ) : null}
+          {values.cadence === 'monthly' ? (
+            <div className={styles.spanTwo}>
+              <SelectInput
+                name="income-window"
+                label="Ventana esperada"
+                value={values.windowKey}
+                onChange={(windowKey) => setValues((v) => ({ ...v, windowKey: String(windowKey) as Values['windowKey'] }))}
+                options={MONTHLY_WINDOW_OPTIONS}
+                required
+              />
+            </div>
+          ) : null}
+          {values.cadence === 'irregular' ? (
+            <p className={[styles.hint, styles.spanTwo].join(' ')}>
+              Los ingresos irregulares se guardan con ventana de mes completo.
+            </p>
+          ) : null}
+          {values.cadence === 'biweekly' ? (
+            <p className={[styles.hint, styles.spanTwo].join(' ')}>
+              Escribe el valor de cada quincena. El sistema sumará ambas para proyectar el total mensual.
+            </p>
+          ) : null}
+          {values.cadence === 'weekly' ? (
+            <p className={[styles.hint, styles.spanTwo].join(' ')}>
+              Escribe el valor que suele llegar cada semana. El total mensual se calcula internamente.
+            </p>
+          ) : null}
+          {values.classification !== 'base' && (
+            <div className={styles.spanTwo}>
+              <SelectInput
+                name="income-reliability"
+                label="¿Qué tan seguido llega?"
+                value={values.reliabilityScore}
+                onChange={(r) => setValues((v) => ({ ...v, reliabilityScore: Number(r) }))}
+                options={RELIABILITY_OPTIONS}
+              />
+            </div>
+          )}
         </div>
-        <NumberInput
-          name="income-amount"
-          label={amountLabel}
-          value={values.expectedAmount}
-          onChange={(expectedAmount) => setValues((v) => ({ ...v, expectedAmount }))}
-          format="currency"
-          prefix="$"
-          min={0}
-          required
-        />
-        {(values.cadence === 'biweekly' || values.cadence === 'weekly') && monthlyExpected ? (
-          <p className={[styles.hint, styles.spanTwo].join(' ')}>
-            Total mensual esperado calculado: <strong>${monthlyExpected.toLocaleString('es-CO')}</strong>
-          </p>
-        ) : null}
-        <SelectInput
-          name="income-classification"
-          label="Clasificación"
-          value={values.classification}
-          onChange={(classification) =>
-            setValues((v) => ({ ...v, classification: String(classification) as Values['classification'] }))
-          }
-          options={INCOME_CLASSIFICATION_OPTIONS}
-          required
-        />
-        <SelectInput
-          name="income-cadence"
-          label="Cadencia"
-          value={values.cadence}
-          onChange={(cadence) => setValues((v) => ({ ...v, cadence: String(cadence) as Values['cadence'] }))}
-          options={INCOME_CADENCE_OPTIONS}
-          required
-        />
-        {values.cadence === 'biweekly' ? (
-          <>
-            <SelectInput
-              name="income-day-first"
-              label="Primer pago"
-              value={values.biweeklyDay1}
-              onChange={(day) => setValues((v) => ({ ...v, biweeklyDay1: Number(day) }))}
-              options={BIWEEKLY_DAY_OPTIONS}
-              required
-            />
-            <SelectInput
-              name="income-day-second"
-              label="Segundo pago"
-              value={values.biweeklyDay2}
-              onChange={(day) => setValues((v) => ({ ...v, biweeklyDay2: Number(day) }))}
-              options={BIWEEKLY_DAY_OPTIONS}
-              required
-            />
-          </>
-        ) : null}
-        {values.cadence === 'monthly' ? (
-          <div className={styles.spanTwo}>
-            <SelectInput
-              name="income-window"
-              label="Ventana esperada"
-              value={values.windowKey}
-              onChange={(windowKey) => setValues((v) => ({ ...v, windowKey: String(windowKey) as Values['windowKey'] }))}
-              options={MONTHLY_WINDOW_OPTIONS}
-              required
-            />
-          </div>
-        ) : null}
-        {values.cadence === 'irregular' ? (
-          <p className={[styles.hint, styles.spanTwo].join(' ')}>
-            Los ingresos irregulares se guardan con ventana de mes completo.
-          </p>
-        ) : null}
-        {values.cadence === 'biweekly' ? (
-          <p className={[styles.hint, styles.spanTwo].join(' ')}>
-            Escribe el valor de cada quincena. El sistema sumará ambas para proyectar el total mensual.
-          </p>
-        ) : null}
-        {values.cadence === 'weekly' ? (
-          <p className={[styles.hint, styles.spanTwo].join(' ')}>
-            Escribe el valor que suele llegar cada semana. El total mensual se calcula internamente.
-          </p>
-        ) : null}
-        {values.classification !== 'base' && (
-          <div className={styles.spanTwo}>
-            <SelectInput
-              name="income-reliability"
-              label="¿Qué tan seguido llega?"
-              value={values.reliabilityScore}
-              onChange={(r) => setValues((v) => ({ ...v, reliabilityScore: Number(r) }))}
-              options={RELIABILITY_OPTIONS}
-            />
-          </div>
-        )}
       </div>
 
       {error ? <p className={styles.error}>{error}</p> : null}

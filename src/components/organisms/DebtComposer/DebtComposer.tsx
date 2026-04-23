@@ -6,7 +6,7 @@ import { SelectInput } from '../../atoms/SelectInput';
 import { TextInput } from '../../atoms/TextInput';
 import { TextareaInput } from '../../atoms/TextareaInput';
 import type { Debt, DebtPayload } from '../../../types/finance.types';
-import styles from './DebtComposer.module.css';
+import styles from '../ComposerForm.module.css';
 
 const debtTypeOptions = [
   { label: 'Tarjeta de crédito', value: 'credit_card' },
@@ -130,81 +130,93 @@ export const DebtComposer = ({ debt = null, loading, onCreate, onUpdate, onCance
 
   return (
     <section className={styles.panel}>
-      <div className={styles.grid}>
-        <div className={styles.spanTwo}>
-          <TextInput
-            name="debt-name"
-            label="Nombre"
-            value={values.name}
-            onChange={(name) => setValues((current) => ({ ...current, name }))}
-            placeholder="Ej. Crediexpress, TC LifeMiles"
+      <div className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <div>
+            <p className={styles.sectionEyebrow}>Estructura</p>
+            <h3 className={styles.sectionTitle}>Perfil de la deuda</h3>
+          </div>
+          <p className={styles.sectionText}>
+            Mantén primero los datos que definen el instrumento y luego el estado operativo para revisar la carga mensual con claridad.
+          </p>
+        </div>
+
+        <div className={styles.grid}>
+          <div className={styles.spanTwo}>
+            <TextInput
+              name="debt-name"
+              label="Nombre"
+              value={values.name}
+              onChange={(name) => setValues((current) => ({ ...current, name }))}
+              placeholder="Ej. Crediexpress, TC LifeMiles"
+              required
+            />
+          </div>
+          <SelectInput
+            name="debt-type"
+            label="Tipo"
+            value={values.debtType}
+            onChange={(debtType) => setValues((current) => ({ ...current, debtType: String(debtType) }))}
+            options={debtTypeOptions}
             required
           />
-        </div>
-        <SelectInput
-          name="debt-type"
-          label="Tipo"
-          value={values.debtType}
-          onChange={(debtType) => setValues((current) => ({ ...current, debtType: String(debtType) }))}
-          options={debtTypeOptions}
-          required
-        />
-        <SelectInput
-          name="debt-status"
-          label="Estado"
-          value={values.status}
-          onChange={(status) => setValues((current) => ({ ...current, status: String(status) }))}
-          options={debtStatusOptions}
-          required
-        />
-        <NumberInput
-          name="debt-original-amount"
-          label="Monto original"
-          value={values.originalAmount}
-          onChange={(originalAmount) => setValues((current) => ({ ...current, originalAmount }))}
-          format="currency"
-          min={0}
-        />
-        <NumberInput
-          name="debt-current-balance"
-          label="Saldo actual"
-          value={values.currentBalance}
-          onChange={(currentBalance) => setValues((current) => ({ ...current, currentBalance }))}
-          format="currency"
-          min={0}
-          required
-        />
-        <NumberInput
-          name="debt-monthly-payment"
-          label="Pago mensual"
-          value={values.monthlyPayment}
-          onChange={(monthlyPayment) => setValues((current) => ({ ...current, monthlyPayment }))}
-          format="currency"
-          min={0}
-          required
-        />
-        <NumberInput
-          name="debt-interest-rate"
-          label="Interés %"
-          value={values.interestRate}
-          onChange={(interestRate) => setValues((current) => ({ ...current, interestRate }))}
-          min={0}
-          step={0.01}
-        />
-        <DateInput
-          name="debt-payoff-date"
-          label="Fecha objetivo"
-          value={values.payoffDate}
-          onChange={(payoffDate) => setValues((current) => ({ ...current, payoffDate }))}
-        />
-        <div className={styles.spanTwo}>
-          <TextareaInput
-            name="debt-notes"
-            label="Notas"
-            value={values.notes}
-            onChange={(notes) => setValues((current) => ({ ...current, notes }))}
-            rows={4}
+          <SelectInput
+            name="debt-status"
+            label="Estado"
+            value={values.status}
+            onChange={(status) => setValues((current) => ({ ...current, status: String(status) }))}
+            options={debtStatusOptions}
+            required
           />
+          <NumberInput
+            name="debt-original-amount"
+            label="Monto original"
+            value={values.originalAmount}
+            onChange={(originalAmount) => setValues((current) => ({ ...current, originalAmount }))}
+            format="currency"
+            min={0}
+          />
+          <NumberInput
+            name="debt-current-balance"
+            label="Saldo actual"
+            value={values.currentBalance}
+            onChange={(currentBalance) => setValues((current) => ({ ...current, currentBalance }))}
+            format="currency"
+            min={0}
+            required
+          />
+          <NumberInput
+            name="debt-monthly-payment"
+            label="Pago mensual"
+            value={values.monthlyPayment}
+            onChange={(monthlyPayment) => setValues((current) => ({ ...current, monthlyPayment }))}
+            format="currency"
+            min={0}
+            required
+          />
+          <NumberInput
+            name="debt-interest-rate"
+            label="Interés %"
+            value={values.interestRate}
+            onChange={(interestRate) => setValues((current) => ({ ...current, interestRate }))}
+            min={0}
+            step={0.01}
+          />
+          <DateInput
+            name="debt-payoff-date"
+            label="Fecha objetivo"
+            value={values.payoffDate}
+            onChange={(payoffDate) => setValues((current) => ({ ...current, payoffDate }))}
+          />
+          <div className={styles.spanTwo}>
+            <TextareaInput
+              name="debt-notes"
+              label="Notas"
+              value={values.notes}
+              onChange={(notes) => setValues((current) => ({ ...current, notes }))}
+              rows={4}
+            />
+          </div>
         </div>
       </div>
 

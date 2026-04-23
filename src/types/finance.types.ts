@@ -188,6 +188,8 @@ export interface TransactionCreatePayload {
   amount: number;
   transaction_type: TransactionType;
   status: TransactionStatus;
+  category_id?: number | null;
+  subcategory_id?: number | null;
   source?: 'manual';
 }
 
@@ -197,6 +199,8 @@ export interface TransactionUpdatePayload {
   product: string;
   amount: number;
   status: TransactionStatus;
+  category_id?: number | null;
+  subcategory_id?: number | null;
   source?: 'manual';
 }
 
@@ -310,6 +314,7 @@ export interface RecurringObligationPayload {
   due_day: number | '';
   active?: boolean;
   category_id?: number | null;
+  subcategory_id?: number | null;
   notes?: string;
 }
 
@@ -469,6 +474,7 @@ export interface SubcategoryCreateParams {
 }
 
 export interface SubcategoryCreated {
+  id: string;
   code: string;
   name: string;
   icon: string;

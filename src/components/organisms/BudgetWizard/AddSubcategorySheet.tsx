@@ -1,20 +1,10 @@
-import { useState } from 'react';
-import {
-  IonButton,
-  IonButtons,
-  IonContent,
-  IonHeader,
-  IonIcon,
-  IonModal,
-  IonTitle,
-  IonToolbar,
-} from '@ionic/react';
+import { useState, type CSSProperties } from 'react';
+import { IonIcon } from '@ionic/react';
+import { SheetModal } from '../../molecules/SheetModal';
 import { financeService } from '../../../services/financeService';
 import type { SubcategoryCreated } from '../../../types/finance.types';
 import { resolveNamedIcon } from './iconRegistry';
 import styles from './AddSubcategorySheet.module.css';
-
-// ── Icon catalogue ─────────────────────────────────────────────────────────────
 
 const ICON_OPTIONS: string[] = [
   'fitnessOutline',
@@ -43,18 +33,14 @@ const ICON_OPTIONS: string[] = [
   'diamondOutline',
 ];
 
-// ── Types ─────────────────────────────────────────────────────────────────────
-
 export interface AddSubcategorySheetProps {
   isOpen: boolean;
   onClose: () => void;
   categoryCode: string;
   categoryName: string;
   categoryId: string;
-  onCreated: (sub: Pick<SubcategoryCreated, 'code' | 'name' | 'icon'>) => void;
+  onCreated: (sub: Pick<SubcategoryCreated, 'id' | 'code' | 'name' | 'icon'>) => void;
 }
-
-// ── Component ─────────────────────────────────────────────────────────────────
 
 export const AddSubcategorySheet = ({
   isOpen,
@@ -64,27 +50,21 @@ export const AddSubcategorySheet = ({
   categoryId,
   onCreated,
 }: AddSubcategorySheetProps) => {
-  const [name, setName]       = useState('');
-  const [icon, setIcon]       = useState<string | null>(null);
+  const [name, setName] = useState('');
+  const [icon, setIcon] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  // Derived CSS variable for the category accent color
   const chipColor = `var(--color-${categoryCode})`;
+  const canSubmit = name.trim().length > 0 && icon !== null && !loading;
 
-  // ── Reset local state when sheet closes ───────────────────────────────────
-
-  const handleDidDismiss = () => {
+  const handleDismiss = () => {
     setName('');
     setIcon(null);
     setLoading(false);
     setError(null);
     onClose();
   };
-
-  // ── Submit ────────────────────────────────────────────────────────────────
-
-  const canSubmit = name.trim().length > 0 && icon !== null && !loading;
 
   const handleSubmit = async () => {
     if (!canSubmit || icon === null) return;
@@ -100,159 +80,97 @@ export const AddSubcategorySheet = ({
       });
 
       onCreated({
+        id: created.id,
         code: created.code,
         name: created.name,
         icon: created.icon ?? icon,
       });
-
-      // Parent controls isOpen; state is wiped in handleDidDismiss.
     } catch (err: unknown) {
       const message =
-        (err as { response?: { data?: { error?: string } } })
-          ?.response?.data?.error ??
-        (err as { response?: { data?: { message?: string } } })
-          ?.response?.data?.message ??
+        (err as { response?: { data?: { error?: string } } })?.response?.data?.error ??
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
         'Error al crear la subcategoría. Intenta de nuevo.';
       setError(message);
       setLoading(false);
     }
   };
 
-  // ── Render ────────────────────────────────────────────────────────────────
-
   return (
-    <IonModal
-      isOpen={isOpen}
-      onDidDismiss={handleDidDismiss}
-      initialBreakpoint={0.65}
-      breakpoints={[0, 0.65, 0.95]}
-      backdropBreakpoint={0.2}
-      handle
-      style={{ '--border-radius': '24px 24px 0 0' }}
-    >
-      <IonHeader className="ion-no-border">
-        <IonToolbar
-          className={styles.toolbar}
-          style={{ '--chip-color': chipColor } as React.CSSProperties}
-        >
-          <IonTitle className={styles.toolbarTitle}>
-            Nueva subcategoría en{' '}
-            <span
-              className={styles.categoryChip}
-              style={{ '--chip-color': chipColor } as React.CSSProperties}
-            >
-              {categoryName}
-            </span>
-          </IonTitle>
-          <IonButtons slot="end">
-            <IonButton
-              fill="clear"
-              onClick={onClose}
-              disabled={loading}
-              className={styles.closeBtn}
-              aria-label="Cerrar"
-            >
-              ✕
-            </IonButton>
-          </IonButtons>
-        </IonToolbar>
-      </IonHeader>
-
-      <IonContent className={styles.content}>
-        <div
-          className={styles.body}
-          style={{ '--chip-color': chipColor } as React.CSSProperties}
-        >
-          {/* ── Name field ────────────────────────────────────────────────── */}
-          <section className={styles.section}>
-            <label htmlFor="sub-name" className={styles.label}>
-              Nombre
-            </label>
-            <input
-              id="sub-name"
-              type="text"
-              className={styles.nameInput}
-              placeholder="ej. Gym, Netflix, Mascotas…"
-              value={name}
-              maxLength={40}
-              disabled={loading}
-              onChange={(e) => setName(e.target.value)}
-              autoComplete="off"
-              style={{ '--chip-color': chipColor } as React.CSSProperties}
-            />
-            <span className={styles.charCount}>{name.length}/40</span>
-          </section>
-
-          {/* ── Icon grid ─────────────────────────────────────────────────── */}
-          <section className={styles.section}>
-            <span className={styles.label}>Ícono</span>
-            <div
-              className={styles.iconGrid}
-              role="radiogroup"
-              aria-label="Selecciona un ícono"
-            >
-              {ICON_OPTIONS.map((iconName) => {
-                const isSelected = icon === iconName;
-                return (
-                  <button
-                    key={iconName}
-                    type="button"
-                    role="radio"
-                    aria-checked={isSelected}
-                    aria-label={iconName.replace('Outline', '')}
-                    disabled={loading}
-                    className={[
-                      styles.iconBtn,
-                      isSelected ? styles.iconBtnSelected : '',
-                    ]
-                      .filter(Boolean)
-                      .join(' ')}
-                    style={{ '--chip-color': chipColor } as React.CSSProperties}
-                    onClick={() => setIcon(iconName)}
-                  >
-                    <IonIcon icon={resolveNamedIcon(iconName)} className={styles.iconGlyph} aria-hidden="true" />
-                  </button>
-                );
-              })}
-            </div>
-          </section>
-
-          {/* ── Inline error ──────────────────────────────────────────────── */}
-          {error !== null && (
-            <p className={styles.errorMsg} role="alert">
-              {error}
+    <SheetModal isOpen={isOpen} onClose={handleDismiss} title="Nueva subcategoría" height="tall">
+      <div className={styles.body} style={{ '--chip-color': chipColor } as CSSProperties}>
+        <div className={styles.intro}>
+          <div className={styles.introCopy}>
+            <span className={styles.introLabel}>Categoría fija</span>
+            <strong className={styles.introTitle}>{categoryName}</strong>
+            <p className={styles.introText}>
+              Crea una subcategoría sin salir del editor. El icono heredará el color de esta categoría para mantener lectura rápida.
             </p>
-          )}
+          </div>
+          <span className={styles.categoryChip}>{categoryName}</span>
         </div>
 
-        {/* ── Footer actions ────────────────────────────────────────────────── */}
-        <div className={styles.footer}>
-          <button
-            type="button"
-            className={styles.cancelBtn}
-            onClick={onClose}
+        <section className={styles.section}>
+          <label htmlFor="sub-name" className={styles.label}>
+            Nombre
+          </label>
+          <input
+            id="sub-name"
+            type="text"
+            className={styles.nameInput}
+            placeholder="ej. Gym, Netflix, Mascotas…"
+            value={name}
+            maxLength={40}
             disabled={loading}
-          >
+            onChange={(e) => setName(e.target.value)}
+            autoComplete="off"
+          />
+          <span className={styles.charCount}>{name.length}/40</span>
+        </section>
+
+        <section className={styles.section}>
+          <span className={styles.label}>Ícono</span>
+          <div className={styles.iconGrid} role="radiogroup" aria-label="Selecciona un ícono">
+            {ICON_OPTIONS.map((iconName) => {
+              const isSelected = icon === iconName;
+              return (
+                <button
+                  key={iconName}
+                  type="button"
+                  role="radio"
+                  aria-checked={isSelected}
+                  aria-label={iconName.replace('Outline', '')}
+                  disabled={loading}
+                  className={[styles.iconBtn, isSelected ? styles.iconBtnSelected : ''].filter(Boolean).join(' ')}
+                  onClick={() => setIcon(iconName)}
+                >
+                  <IonIcon icon={resolveNamedIcon(iconName)} className={styles.iconGlyph} aria-hidden="true" />
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        {error !== null ? (
+          <p className={styles.errorMsg} role="alert">
+            {error}
+          </p>
+        ) : null}
+
+        <div className={styles.footer}>
+          <button type="button" className={styles.cancelBtn} onClick={handleDismiss} disabled={loading}>
             Cancelar
           </button>
           <button
             type="button"
             className={styles.submitBtn}
-            style={
-              canSubmit
-                ? ({ '--chip-color': chipColor } as React.CSSProperties)
-                : undefined
-            }
             disabled={!canSubmit}
             onClick={() => void handleSubmit()}
           >
-            {loading ? (
-              <span className={styles.spinner} aria-hidden="true" />
-            ) : null}
-            {loading ? 'Creando…' : 'Crear subcategoría →'}
+            {loading ? <span className={styles.spinner} aria-hidden="true" /> : null}
+            {loading ? 'Creando…' : 'Crear subcategoría'}
           </button>
         </div>
-      </IonContent>
-    </IonModal>
+      </div>
+    </SheetModal>
   );
 };

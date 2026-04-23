@@ -1,43 +1,61 @@
-/* ── Toolbar ──────────────────────────────────────────────────────────────── */
-
-.toolbar {
-  --background: var(--color-bg-elevated);
-  padding: 0 var(--space-4);
-}
-
-.toolbarTitle {
-  font-family: var(--font-sans);
-  font-size: var(--text-base);
-  font-weight: var(--font-semibold);
-  color: var(--color-text-primary);
-  text-align: left;
-  padding-inline-start: 0;
-}
-
 .categoryChip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0.72rem 1rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--chip-color, var(--color-brand)) 36%, rgba(255, 255, 255, 0.08));
+  background: color-mix(in srgb, var(--chip-color, var(--color-brand)) 12%, rgba(255, 255, 255, 0.03));
   color: var(--chip-color, var(--color-brand));
-  font-weight: var(--font-bold);
-}
-
-.closeBtn {
-  --color: var(--color-text-secondary);
-  font-size: var(--text-lg);
-}
-
-/* ── Content ──────────────────────────────────────────────────────────────── */
-
-.content {
-  --background: var(--color-bg-elevated);
-  --padding-start: 0;
-  --padding-end: 0;
-  --padding-top: 0;
-  --padding-bottom: 0;
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
 }
 
 .body {
   display: grid;
-  gap: var(--space-6);
-  padding: var(--space-4) var(--space-6) 0;
+  gap: var(--space-5);
+  padding: 0 var(--space-1) var(--space-2);
+}
+
+.intro {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border-radius: 22px;
+  border: 1px solid color-mix(in srgb, var(--chip-color, var(--color-brand)) 18%, rgba(255, 255, 255, 0.06));
+  background:
+    linear-gradient(180deg, rgba(21, 18, 15, 0.92), rgba(14, 12, 11, 0.95)),
+    radial-gradient(circle at top left, color-mix(in srgb, var(--chip-color, var(--color-brand)) 12%, transparent), transparent 32%);
+}
+
+.introCopy {
+  display: grid;
+  gap: 0.42rem;
+}
+
+.introLabel {
+  color: var(--color-accent);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.introTitle {
+  color: var(--color-text-primary);
+  font-family: var(--font-display);
+  font-size: clamp(1.05rem, 0.95rem + 0.4vw, 1.32rem);
+  letter-spacing: -0.04em;
+}
+
+.introText {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-relaxed);
 }
 
 /* ── Sections ─────────────────────────────────────────────────────────────── */
@@ -45,6 +63,10 @@
 .section {
   display: grid;
   gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .label {
@@ -162,13 +184,9 @@
 /* ── Footer actions ───────────────────────────────────────────────────────── */
 
 .footer {
-  position: sticky;
-  bottom: 0;
   display: flex;
   gap: var(--space-3);
-  padding: var(--space-4) var(--space-6) var(--space-6);
-  background: var(--color-bg-elevated);
-  border-top: 1px solid var(--color-border-subtle);
+  padding-top: var(--space-1);
 }
 
 .cancelBtn {
@@ -205,7 +223,7 @@
   padding: var(--space-3) var(--space-5);
   border-radius: var(--radius-lg);
   border: 1px solid transparent;
-  background: var(--chip-color, var(--color-brand));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--chip-color, var(--color-brand)) 90%, #f4ddb3), var(--chip-color, var(--color-brand)));
   color: var(--color-text-inverse);
   font-family: var(--font-sans);
   font-size: var(--text-base);
@@ -239,4 +257,20 @@
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+@media (max-width: 720px) {
+  .intro,
+  .footer {
+    flex-direction: column;
+  }
+
+  .categoryChip {
+    width: 100%;
+  }
+
+  .cancelBtn,
+  .submitBtn {
+    width: 100%;
+  }
 }

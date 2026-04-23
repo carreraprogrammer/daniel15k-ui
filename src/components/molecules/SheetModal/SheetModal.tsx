@@ -1,12 +1,7 @@
 import type { ReactNode } from 'react';
 import {
-  IonButton,
-  IonButtons,
   IonContent,
-  IonHeader,
   IonModal,
-  IonTitle,
-  IonToolbar,
 } from '@ionic/react';
 import './SheetModal.css';
 
@@ -28,14 +23,19 @@ export const SheetModal = ({ isOpen, title, children, onClose, height = 'tall' }
     handle
     className={`sheet-modal sheet-modal--${height}`}
   >
-    <IonHeader>
-      <IonToolbar>
-        <IonTitle>{title}</IonTitle>
-        <IonButtons slot="end">
-          <IonButton onClick={onClose}>Cerrar</IonButton>
-        </IonButtons>
-      </IonToolbar>
-    </IonHeader>
-    <IonContent>{children}</IonContent>
+    <IonContent>
+      <div className="sheet-modal__shell">
+        <div className="sheet-modal__topbar">
+          <div className="sheet-modal__copy">
+            <span className="sheet-modal__eyebrow">Daniel 15K</span>
+            <h2 className="sheet-modal__title">{title}</h2>
+          </div>
+          <button type="button" className="sheet-modal__close" onClick={onClose}>
+            Cerrar
+          </button>
+        </div>
+        {children}
+      </div>
+    </IonContent>
   </IonModal>
 );

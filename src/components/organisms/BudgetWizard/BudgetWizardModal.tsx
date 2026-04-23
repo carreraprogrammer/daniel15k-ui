@@ -209,7 +209,7 @@ export const BudgetWizardModal = ({
    * Merges the new subcategory into localSubcategories and seeds
    * its stepData entry to $0 so it appears immediately with a low-confidence dot.
    */
-  const handleSubcategoryCreated = (sub: { code: string; name: string; icon: string }) => {
+  const handleSubcategoryCreated = (sub: { id: string; code: string; name: string; icon: string }) => {
     if (!addSubCategory) return;
 
     const newSub: WizardSubcategory = {

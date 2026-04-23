@@ -1,0 +1,233 @@
+.panel {
+  display: grid;
+  gap: 1.4rem;
+  padding: 0;
+}
+
+.section {
+  display: grid;
+  gap: 1.15rem;
+  padding: 1.3rem;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 26px;
+  background:
+    linear-gradient(180deg, rgba(22, 19, 16, 0.88), rgba(13, 11, 10, 0.94)),
+    radial-gradient(circle at top left, rgba(243, 210, 122, 0.07), transparent 32%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.sectionHeader {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.sectionEyebrow {
+  margin: 0;
+  color: var(--color-accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.sectionTitle {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-display);
+  font-size: clamp(1.1rem, 1rem + 0.55vw, 1.55rem);
+  letter-spacing: -0.04em;
+}
+
+.sectionText {
+  margin: 0;
+  max-width: 64ch;
+  color: var(--color-text-secondary);
+  font-size: 0.98rem;
+  line-height: 1.6;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.spanTwo {
+  grid-column: span 2;
+}
+
+.categoryRail,
+.subcategoryRail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.categoryToken,
+.subcategoryToken {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.72rem;
+  min-height: 3rem;
+  padding: 0.78rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition:
+    border-color 140ms ease,
+    background-color 140ms ease,
+    transform 140ms ease,
+    color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.categoryToken:hover,
+.subcategoryToken:hover,
+.addSubcategoryBtn:hover {
+  transform: translateY(-1px);
+}
+
+.categoryTokenActive,
+.subcategoryTokenActive {
+  border-color: color-mix(in srgb, var(--category-accent, var(--color-accent)) 56%, rgba(255, 255, 255, 0.12));
+  background: color-mix(in srgb, var(--category-accent, var(--color-accent)) 16%, rgba(255, 255, 255, 0.02));
+  color: var(--color-text-primary);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.24);
+}
+
+.categorySwatch {
+  width: 0.82rem;
+  height: 0.82rem;
+  border-radius: 999px;
+  background: var(--category-accent, var(--color-accent));
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--category-accent, var(--color-accent)) 14%, transparent);
+  flex-shrink: 0;
+}
+
+.categoryTokenText,
+.subcategoryTokenText {
+  font-size: 0.98rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.subcategorySection {
+  display: grid;
+  gap: 0.95rem;
+  padding: 1rem;
+  border-radius: 22px;
+  border: 1px solid color-mix(in srgb, var(--category-accent, var(--color-accent)) 18%, rgba(255, 255, 255, 0.06));
+  background:
+    linear-gradient(180deg, rgba(17, 14, 12, 0.88), rgba(11, 10, 9, 0.92)),
+    radial-gradient(circle at top left, color-mix(in srgb, var(--category-accent, var(--color-accent)) 12%, transparent), transparent 34%);
+}
+
+.subcategoryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9rem;
+}
+
+.subcategoryLabel {
+  color: var(--color-text-primary);
+  font-size: 0.94rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.addSubcategoryBtn {
+  min-height: 2.75rem;
+  padding: 0.72rem 1rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--category-accent, var(--color-accent)) 30%, rgba(255, 255, 255, 0.08));
+  background: color-mix(in srgb, var(--category-accent, var(--color-accent)) 10%, rgba(255, 255, 255, 0.02));
+  color: var(--color-text-primary);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform 140ms ease,
+    background-color 140ms ease,
+    border-color 140ms ease;
+}
+
+.subcategoryIconWrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.15rem;
+  height: 2.15rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--category-accent, var(--color-accent)) 14%, rgba(255, 255, 255, 0.03));
+  color: var(--category-accent, var(--color-accent));
+  flex-shrink: 0;
+}
+
+.subcategoryIcon {
+  font-size: 1.1rem;
+}
+
+.hint {
+  margin: 0;
+  padding: 0.92rem 1rem;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.025);
+  color: var(--color-text-secondary);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.8rem;
+}
+
+.error {
+  margin: 0;
+  padding: 0.95rem 1rem;
+  border-radius: 18px;
+  border: 1px solid color-mix(in srgb, var(--color-error) 28%, rgba(255, 255, 255, 0.04));
+  background: color-mix(in srgb, var(--color-error) 10%, rgba(255, 255, 255, 0.02));
+  color: #ffb28a;
+  font-size: 0.94rem;
+  line-height: 1.55;
+}
+
+@media (max-width: 720px) {
+  .section {
+    padding: 1rem;
+    border-radius: 22px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .spanTwo {
+    grid-column: span 1;
+  }
+
+  .subcategoryHeader,
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .categoryRail,
+  .subcategoryRail {
+    gap: 0.6rem;
+  }
+
+  .categoryToken,
+  .subcategoryToken,
+  .addSubcategoryBtn {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}

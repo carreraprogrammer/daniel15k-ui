@@ -187,15 +187,6 @@ export const RecurringObligationsPage = () => {
     }
   };
 
-  const categoryOptions = useMemo(
-    () =>
-      categories.map((category) => ({
-        label: String(category.attributes.name ?? 'Sin nombre'),
-        value: Number(category.id),
-      })),
-    [categories],
-  );
-
   const selectedObligationCategoryId = obligationFilters.category_id ? String(obligationFilters.category_id) : '';
   const categoryFilters = useMemo(
     () =>
@@ -568,6 +559,7 @@ export const RecurringObligationsPage = () => {
       <CrudModal
         isOpen={composerOpen}
         title={editingObligation ? 'Editar recurrente' : 'Nuevo recurrente'}
+        subtitle="Programa el cobro y clasifícalo con el mismo sistema visual de transacciones."
         onClose={() => {
           setComposerOpen(false);
           setEditingObligation(null);
@@ -576,7 +568,7 @@ export const RecurringObligationsPage = () => {
         <RecurringObligationComposer
           obligation={editingObligation}
           loading={submitting}
-          categoryOptions={categoryOptions}
+          categories={categories}
           onCreate={handleCreate}
           onUpdate={handleUpdate}
           onCancel={() => {
@@ -589,6 +581,7 @@ export const RecurringObligationsPage = () => {
       <CrudModal
         isOpen={incomeComposerOpen}
         title={editingIncome ? 'Editar ingreso' : 'Nuevo ingreso'}
+        subtitle="Define cuánto entra, con qué frecuencia y qué tan confiable es para el plan."
         onClose={() => { setIncomeComposerOpen(false); setEditingIncome(null); }}
       >
         <IncomeSourceComposer

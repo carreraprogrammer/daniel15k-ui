@@ -315,6 +315,7 @@ export const DebtsPage = () => {
       <CrudModal
         isOpen={composerOpen}
         title={editingDebt ? 'Editar deuda' : 'Nueva deuda'}
+        subtitle="Concentra estructura, carga mensual y estado de la deuda sin ruido adicional."
         onClose={() => {
           setComposerOpen(false);
           setEditingDebt(null);

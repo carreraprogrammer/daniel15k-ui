@@ -1,4 +1,3 @@
-import { Button } from '../../atoms/Button';
 import { SheetModal } from '../SheetModal';
 import styles from './SortSheet.module.css';
 
@@ -30,6 +29,19 @@ export const SortSheet = ({
 }: SortSheetProps) => (
   <SheetModal isOpen={isOpen} title={title} onClose={onClose} height="compact">
     <div className={styles.content}>
+      <div className={styles.snapshot}>
+        <div className={styles.snapshotCard}>
+          <span className={styles.snapshotLabel}>Orden actual</span>
+          <strong className={styles.snapshotValue}>
+            {options.find((option) => option.value === sortBy)?.label ?? 'Sin definir'}
+          </strong>
+        </div>
+        <div className={styles.snapshotCard}>
+          <span className={styles.snapshotLabel}>Dirección</span>
+          <strong className={styles.snapshotValue}>{sortDir === 'desc' ? 'Descendente' : 'Ascendente'}</strong>
+        </div>
+      </div>
+
       <section className={styles.section}>
         <h3 className={styles.heading}>Ordenar por</h3>
         <div className={styles.options}>
@@ -65,10 +77,6 @@ export const SortSheet = ({
           </button>
         </div>
       </section>
-
-      <div className={styles.footer}>
-        <Button label="Listo" onClick={onClose} fullWidth />
-      </div>
     </div>
   </SheetModal>
 );

@@ -1,5 +1,7 @@
 .crud-modal {
   --backdrop-opacity: 0.72;
+  --width: min(1120px, 97vw);
+  --height: min(92dvh, 920px);
 }
 
 .crud-modal::part(backdrop) {
@@ -13,35 +15,109 @@
 .crud-modal::part(content) {
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 28px;
-  background:
-    var(--surface-highlight),
-    var(--surface-glow),
-    rgba(10, 15, 25, 0.96);
+  background: linear-gradient(180deg, rgba(14, 12, 11, 0.98), rgba(11, 10, 10, 0.96));
   box-shadow: 0 28px 72px rgba(0, 0, 0, 0.38), 0 8px 24px rgba(2, 6, 23, 0.2);
   backdrop-filter: blur(20px) saturate(126%);
   overflow: hidden;
 }
 
-.crud-modal ion-toolbar {
-  --background: rgba(10, 15, 25, 0.98);
-  --border-color: rgba(255, 255, 255, 0.06);
-  --color: var(--color-text-primary);
-}
-
-.crud-modal ion-title {
-  color: var(--color-text-primary);
-  letter-spacing: -0.03em;
-}
-
-.crud-modal ion-button {
-  --color: var(--color-accent);
-}
-
 .crud-modal ion-content {
-  --background: rgba(10, 15, 25, 0.96);
+  --background: transparent;
   --color: var(--color-text-primary);
 }
 
 .crud-modal__content::part(background) {
-  background: rgba(10, 15, 25, 0.96);
+  background: transparent;
+}
+
+.crud-modal__shell {
+  max-width: 1060px;
+  min-height: 100%;
+  margin: 0 auto;
+  padding: clamp(0.9rem, 1.5vw, 1.25rem);
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 1rem;
+}
+
+.crud-modal__topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: clamp(0.95rem, 1.5vw, 1.2rem);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background:
+    linear-gradient(180deg, rgba(21, 18, 15, 0.92), rgba(14, 12, 11, 0.94)),
+    radial-gradient(circle at top left, rgba(243, 210, 122, 0.08), transparent 30%);
+}
+
+.crud-modal__copy {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.crud-modal__eyebrow {
+  color: var(--color-accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.crud-modal__title {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 2vw, 1.65rem);
+  letter-spacing: -0.03em;
+}
+
+.crud-modal__subtitle {
+  margin: 0;
+  color: rgba(231, 236, 244, 0.66);
+  font-size: 0.94rem;
+  line-height: 1.55;
+}
+
+.crud-modal__close {
+  padding: 0.72rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--color-text-secondary);
+  font: inherit;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
+}
+
+.crud-modal__close:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.crud-modal__body {
+  min-height: 0;
+  border-radius: 26px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: linear-gradient(180deg, rgba(17, 15, 14, 0.92), rgba(11, 10, 10, 0.96));
+  overflow: auto;
+}
+
+@media (max-width: 720px) {
+  .crud-modal {
+    --width: 100vw;
+    --height: 100dvh;
+  }
+
+  .crud-modal__topbar {
+    flex-direction: column;
+  }
+
+  .crud-modal__close {
+    width: 100%;
+  }
 }

@@ -456,6 +456,7 @@ export const TransactionsPage = () => {
       <CrudModal
         isOpen={composerOpen}
         title={editingTransaction ? 'Editar transacción' : 'Nueva transacción'}
+        subtitle="Ajusta contexto, clasificación y subcategoría desde un solo lugar."
         onClose={() => {
           setComposerOpen(false);
           setEditingTransaction(null);
@@ -463,6 +464,7 @@ export const TransactionsPage = () => {
       >
         <TransactionComposer
           transaction={editingTransaction}
+          categories={categories}
           loading={submitting}
           onCreate={handleCreate}
           onUpdate={handleUpdate}

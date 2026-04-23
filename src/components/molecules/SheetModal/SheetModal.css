@@ -41,3 +41,53 @@
   --background: rgba(10, 15, 25, 0.96);
   --color: var(--color-text-primary);
 }
+
+.sheet-modal__shell {
+  display: grid;
+  gap: 1rem;
+  padding: 0.9rem 1rem 1.1rem;
+}
+
+.sheet-modal__topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1rem;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background:
+    linear-gradient(180deg, rgba(21, 18, 15, 0.9), rgba(14, 12, 11, 0.92)),
+    radial-gradient(circle at top left, rgba(243, 210, 122, 0.08), transparent 30%);
+}
+
+.sheet-modal__copy {
+  display: grid;
+  gap: 0.18rem;
+}
+
+.sheet-modal__eyebrow {
+  color: var(--color-accent);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.sheet-modal__title {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-display);
+  font-size: 1.08rem;
+  letter-spacing: -0.03em;
+}
+
+.sheet-modal__close {
+  padding: 0.64rem 0.95rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--color-text-secondary);
+  font: inherit;
+  cursor: pointer;
+}
