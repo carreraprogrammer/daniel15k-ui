@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { IonContent, IonIcon, IonLabel, IonSegment, IonSegmentButton } from '@ionic/react';
 import { addOutline } from 'ionicons/icons';
 import { AppLayout } from '../../templates/AppLayout';
@@ -19,6 +19,7 @@ import { IncomeSourceComposer } from '../../organisms/IncomeSourceComposer';
 import { IncomeSourceSlidingCard } from '../../organisms/IncomeSourceSlidingCard';
 import { financeService } from '../../../services/financeService';
 import type {
+  CategoryResource,
   IncomeSource,
   IncomeSourcePayload,
   IncomeSourceQueryParams,
@@ -30,8 +31,6 @@ import styles from '../FinancePage.module.css';
 
 const formatCop = (value: number) =>
   new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(value);
-
-type CategoryOption = { label: string; value: string | number };
 
 const initialObligationFilters: RecurringObligationQueryParams = {
   q: '',
@@ -52,7 +51,7 @@ const initialIncomeFilters: IncomeSourceQueryParams = {
 export const RecurringObligationsPage = () => {
   const [obligations, setObligations] = useState<RecurringObligation[]>([]);
   const [incomeSources, setIncomeSources] = useState<IncomeSource[]>([]);
-  const [categoryOptions, setCategoryOptions] = useState<CategoryOption[]>([]);
+  const [categories, setCategories] = useState<CategoryResource[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -82,12 +81,7 @@ export const RecurringObligationsPage = () => {
       ]);
       setObligations(obligationsResponse.data);
       setIncomeSources(incomeResponse.data);
-      setCategoryOptions(
-        categoriesResponse.data.map((category) => ({
-          label: String(category.attributes.name ?? 'Sin nombre'),
-          value: Number(category.id),
-        })),
-      );
+      setCategories(categoriesResponse.data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No fue posible cargar la operación recurrente.');
     } finally {
@@ -193,6 +187,26 @@ export const RecurringObligationsPage = () => {
     }
   };
 
+  const categoryOptions = useMemo(
+    () =>
+      categories.map((category) => ({
+        label: String(category.attributes.name ?? 'Sin nombre'),
+        value: Number(category.id),
+      })),
+    [categories],
+  );
+
+  const selectedObligationCategoryId = obligationFilters.category_id ? String(obligationFilters.category_id) : '';
+  const categoryFilters = useMemo(
+    () =>
+      categories.map((category) => ({
+        id: String(category.id),
+        name: category.attributes.name ?? 'Sin categoría',
+        color: category.attributes.color ?? 'var(--color-accent)',
+      })),
+    [categories],
+  );
+
   const obligationChips = useMemo(() => {
     const chips = [];
     if (obligationFilters.q) chips.push({ key: 'q', label: `Buscar: ${obligationFilters.q}` });
@@ -200,11 +214,11 @@ export const RecurringObligationsPage = () => {
       chips.push({ key: 'active', label: obligationFilters.active ? 'Solo activas' : 'Solo inactivas' });
     }
     if (obligationFilters.category_id) {
-      const category = categoryOptions.find((item) => String(item.value) === String(obligationFilters.category_id));
-      chips.push({ key: 'category_id', label: `Categoría: ${category?.label ?? obligationFilters.category_id}` });
+      const category = categoryFilters.find((item) => item.id === String(obligationFilters.category_id));
+      chips.push({ key: 'category_id', label: `Categoría: ${category?.name ?? obligationFilters.category_id}` });
     }
     return chips;
-  }, [categoryOptions, obligationFilters.active, obligationFilters.category_id, obligationFilters.q]);
+  }, [categoryFilters, obligationFilters.active, obligationFilters.category_id, obligationFilters.q]);
 
   const incomeChips = useMemo(() => {
     const chips = [];
@@ -436,16 +450,36 @@ export const RecurringObligationsPage = () => {
                         ]}
                         placeholder="Todos"
                       />
-                      <SelectInput
-                        name="rec-inline-category"
-                        value={obligationFilters.category_id ?? ''}
-                        onChange={(category_id) =>
-                          setObligationFilters((current) => ({ ...current, category_id }))
-                        }
-                        options={categoryOptions}
-                        placeholder="Todas las categorías"
-                      />
                     </div>
+                    <section className={styles.filterComposer}>
+                      <div className={styles.filterComposerHeader}>
+                        <span className={styles.filterComposerLabel}>Categoría</span>
+                        <span className={styles.filterComposerHint}>Aplica la misma lectura por color que ya ves en transacciones.</span>
+                      </div>
+
+                      <div className={styles.categoryRail}>
+                        {categoryFilters.map((category) => {
+                          const active = category.id === selectedObligationCategoryId;
+                          return (
+                            <button
+                              key={category.id}
+                              type="button"
+                              className={[styles.categoryToken, active ? styles.categoryTokenActive : ''].filter(Boolean).join(' ')}
+                              style={{ '--category-accent': category.color } as CSSProperties}
+                              onClick={() =>
+                                setObligationFilters((current) => ({
+                                  ...current,
+                                  category_id: active ? '' : category.id,
+                                }))
+                              }
+                            >
+                              <span className={styles.categorySwatch} />
+                              <span className={styles.categoryTokenText}>{category.name}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </section>
                   </div>
                 ) : null}
                 <AppliedFiltersBar

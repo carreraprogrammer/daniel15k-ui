@@ -1,9 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { IonContent } from '@ionic/react';
 import { AppLayout } from '../../templates/AppLayout';
 import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
-import { SelectInput } from '../../atoms/SelectInput';
 import { ErrorState } from '../../molecules/ErrorState';
 import { EmptyState } from '../../molecules/EmptyState';
 import { ListToolbar } from '../../molecules/ListToolbar';
@@ -18,6 +17,7 @@ import type {
   Budget,
   BudgetPlanDraft,
   BudgetQueryParams,
+  CategoryResource,
   CurrentPlan,
   SummaryResponse,
 } from '../../../types/finance.types';
@@ -42,8 +42,6 @@ const currentMonthString = (): string => {
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
-type CategoryOption = { label: string; value: string | number };
-
 const initialFilters: BudgetQueryParams = {
   q: '',
   category_id: '',
@@ -57,7 +55,7 @@ export const BudgetsPage = () => {
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [summary, setSummary] = useState<SummaryResponse | null>(null);
   const [currentPlan, setCurrentPlan] = useState<CurrentPlan | null>(null);
-  const [categoryOptions, setCategoryOptions] = useState<CategoryOption[]>([]);
+  const [categories, setCategories] = useState<CategoryResource[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -99,12 +97,7 @@ export const BudgetsPage = () => {
       setBudgets(budgetsResponse.data);
       setSummary(summaryResponse);
       setCurrentPlan(currentPlanResponse);
-      setCategoryOptions(
-        categoriesResponse.data.map((category) => ({
-          label: String(category.attributes.name ?? 'Sin nombre'),
-          value: Number(category.id),
-        })),
-      );
+      setCategories(categoriesResponse.data);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : 'No fue posible cargar los presupuestos.',
@@ -156,20 +149,31 @@ export const BudgetsPage = () => {
 
   // ── Derived state ───────────────────────────────────────────────────────────
 
+  const selectedCategoryId = filters.category_id ? String(filters.category_id) : '';
+  const categoryFilters = useMemo(
+    () =>
+      categories.map((category) => ({
+        id: String(category.id),
+        name: category.attributes.name ?? 'Sin categoría',
+        color: category.attributes.color ?? 'var(--color-accent)',
+      })),
+    [categories],
+  );
+
   const chips = useMemo(() => {
     const next = [];
     if (filters.q) next.push({ key: 'q', label: `Buscar: ${filters.q}` });
     if (filters.category_id) {
-      const category = categoryOptions.find(
-        (item) => String(item.value) === String(filters.category_id),
+      const category = categoryFilters.find(
+        (item) => item.id === String(filters.category_id),
       );
       next.push({
         key: 'category_id',
-        label: `Categoría: ${category?.label ?? filters.category_id}`,
+        label: `Categoría: ${category?.name ?? filters.category_id}`,
       });
     }
     return next;
-  }, [categoryOptions, filters.category_id, filters.q]);
+  }, [categoryFilters, filters.category_id, filters.q]);
   const activeFilterCount = useMemo(
     () => chips.filter((chip) => chip.key !== 'q').length,
     [chips],
@@ -322,17 +326,35 @@ export const BudgetsPage = () => {
 
                 {filtersVisible ? (
                   <div className={styles.filterPanel}>
-                    <div className={styles.inlineFilters}>
-                      <SelectInput
-                        name="budget-inline-category"
-                        value={filters.category_id ?? ''}
-                        onChange={(category_id) =>
-                          setFilters((current) => ({ ...current, category_id }))
-                        }
-                        options={categoryOptions}
-                        placeholder="Todas las categorías"
-                      />
-                    </div>
+                    <section className={styles.filterComposer}>
+                      <div className={styles.filterComposerHeader}>
+                        <span className={styles.filterComposerLabel}>Categoría</span>
+                        <span className={styles.filterComposerHint}>Filtra el plan por la categoría que quieres revisar.</span>
+                      </div>
+
+                      <div className={styles.categoryRail}>
+                        {categoryFilters.map((category) => {
+                          const active = category.id === selectedCategoryId;
+                          return (
+                            <button
+                              key={category.id}
+                              type="button"
+                              className={[styles.categoryToken, active ? styles.categoryTokenActive : ''].filter(Boolean).join(' ')}
+                              style={{ '--category-accent': category.color } as CSSProperties}
+                              onClick={() =>
+                                setFilters((current) => ({
+                                  ...current,
+                                  category_id: active ? '' : category.id,
+                                }))
+                              }
+                            >
+                              <span className={styles.categorySwatch} />
+                              <span className={styles.categoryTokenText}>{category.name}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </section>
                   </div>
                 ) : null}
 
