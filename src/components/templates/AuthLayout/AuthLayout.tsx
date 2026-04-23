@@ -10,7 +10,7 @@ export const AuthLayout = ({ title, children }: { title: string; children: React
         <section className={styles.hero}>
           <div className={styles.heroCard}>
             <div className={styles.brandLockup}>
-              <BrandMark variant="principal" size="lg" />
+              <BrandMark variant="monoline" size="lg" />
               <div className={styles.brandText}>
                 <span className={styles.eyebrow}>Daniel 15K</span>
                 <strong className={styles.brandTitle}>Ascent Finance</strong>

@@ -25,8 +25,8 @@
 }
 
 .primary {
-  border-color: rgba(0, 229, 204, 0.28);
-  background: linear-gradient(135deg, rgba(0, 229, 204, 0.12), rgba(91, 106, 240, 0.15));
+  border-color: rgba(214, 168, 74, 0.3);
+  background: linear-gradient(135deg, rgba(243, 210, 122, 0.12), rgba(214, 168, 74, 0.15));
 }
 
 .ghost {

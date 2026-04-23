@@ -101,7 +101,7 @@ export const AppLayout = ({ title, children }: { title: string; children: ReactN
           <aside className={[styles.mobileMenu, mobileMenuOpen ? styles.mobileMenuOpen : ''].filter(Boolean).join(' ')}>
             <div className={styles.mobileMenuHeader}>
               <div className={styles.mobileMenuBrand}>
-                <BrandMark variant="principal" size="md" />
+                <BrandMark variant="monoline" size="md" />
                 <div>
                   <span className={styles.mobileMenuKicker}>Daniel 15K</span>
                   <h2 className={styles.mobileMenuTitle}>Ascent Finance</h2>

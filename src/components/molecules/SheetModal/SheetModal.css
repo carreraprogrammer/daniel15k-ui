@@ -4,8 +4,8 @@
 
 .sheet-modal::part(backdrop) {
   background:
-    radial-gradient(circle at top left, rgba(91, 106, 240, 0.16), transparent 28%),
-    radial-gradient(circle at right 20%, rgba(0, 229, 204, 0.1), transparent 22%),
+    radial-gradient(circle at top left, rgba(243, 210, 122, 0.14), transparent 28%),
+    radial-gradient(circle at right 20%, rgba(214, 168, 74, 0.1), transparent 22%),
     rgba(5, 7, 12, 0.88);
   backdrop-filter: blur(12px);
 }

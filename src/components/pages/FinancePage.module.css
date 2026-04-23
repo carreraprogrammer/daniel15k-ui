@@ -252,7 +252,7 @@
 .focusRailFill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, rgba(245, 158, 11, 0.9), rgba(0, 229, 204, 0.85));
+  background: linear-gradient(90deg, rgba(243, 210, 122, 0.92), rgba(214, 168, 74, 0.88));
 }
 
 .focusRailFillWarn {
@@ -498,7 +498,7 @@
 }
 
 .segmentWrap ion-segment-button.segment-button-checked::part(native) {
-  background: linear-gradient(135deg, rgba(0, 229, 204, 0.12), rgba(91, 106, 240, 0.15));
+  background: linear-gradient(135deg, rgba(243, 210, 122, 0.12), rgba(214, 168, 74, 0.15));
 }
 
 .headline {
@@ -516,7 +516,7 @@
 }
 
 .eyebrow {
-  color: #7ce0d3;
+  color: var(--color-accent);
   font-size: 0.74rem;
   font-weight: 700;
   letter-spacing: 0.18em;
@@ -693,8 +693,8 @@
   width: fit-content;
   padding: 0.3rem 0.65rem;
   border-radius: 999px;
-  background: rgba(124, 224, 211, 0.14);
-  color: #8fe9dd;
+  background: rgba(243, 210, 122, 0.14);
+  color: var(--color-accent);
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -760,7 +760,7 @@
 }
 
 .statusGood {
-  color: #8fe9dd;
+  color: var(--color-accent);
 }
 
 .statusWarn {

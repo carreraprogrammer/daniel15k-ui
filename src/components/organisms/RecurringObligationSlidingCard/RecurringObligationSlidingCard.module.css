@@ -9,7 +9,7 @@
   min-width: 72px;
 }
 
-.optionEdit   { --background: linear-gradient(135deg, rgba(0, 229, 204, 0.16), rgba(91, 106, 240, 0.18)); }
+.optionEdit   { --background: linear-gradient(135deg, rgba(243, 210, 122, 0.16), rgba(214, 168, 74, 0.18)); }
 .optionDelete { --background: rgba(239, 68, 68, 0.16); }
 
 /* ── Card shell ─────────────────────────────────────────────────────────── */

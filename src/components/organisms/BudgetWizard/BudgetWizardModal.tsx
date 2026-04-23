@@ -278,7 +278,7 @@ export const BudgetWizardModal = ({
         <IonHeader className="ion-no-border">
           <div className={styles.chrome}>
             <div className={styles.chromeBrand}>
-              <BrandMark variant="principal" size="md" />
+              <BrandMark variant="monoline" size="md" />
               <div className={styles.chromeCopy}>
                 <span className={styles.chromeEyebrow}>Daniel 15K</span>
                 <div className={styles.chromeTitleRow}>
