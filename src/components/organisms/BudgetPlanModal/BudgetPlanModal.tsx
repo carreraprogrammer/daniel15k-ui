@@ -1,13 +1,9 @@
 import { useEffect, useState } from 'react';
 import {
-  IonButton,
-  IonButtons,
   IonContent,
-  IonHeader,
   IonModal,
-  IonTitle,
-  IonToolbar,
 } from '@ionic/react';
+import { BrandMark } from '../../atoms/BrandMark';
 import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
 import { financeService } from '../../../services/financeService';
@@ -126,25 +122,29 @@ export const BudgetPlanModal = ({ isOpen, onClose, onSaved }: Props) => {
 
   return (
     <IonModal
+      className={styles.modal}
       isOpen={isOpen}
       onDidDismiss={onClose}
-      style={{ '--border-radius': '24px', '--width': 'min(620px, 96vw)', '--height': 'min(88dvh, 780px)' }}
+      style={{ '--border-radius': '28px', '--width': 'min(1100px, 98vw)', '--height': 'min(94dvh, 960px)' }}
     >
-      <IonHeader className="ion-no-border">
-        <IonToolbar className={styles.toolbar}>
-          <IonTitle className={styles.toolbarTitle}>
-            Plan mensual
-            {proposal?.mode === 'provisional' && (
-              <span className={styles.provisionalBadge}>provisional</span>
-            )}
-          </IonTitle>
-          <IonButtons slot="end">
-            <IonButton fill="clear" onClick={onClose} className={styles.closeBtn}>✕</IonButton>
-          </IonButtons>
-        </IonToolbar>
-      </IonHeader>
-
       <IonContent className={styles.body}>
+        <div className={styles.panel}>
+          <div className={styles.topbar}>
+            <div className={styles.topbarBrand}>
+              <BrandMark variant="monoline" size="md" />
+              <div className={styles.topbarCopy}>
+                <span className={styles.topbarEyebrow}>Daniel 15K</span>
+                <div className={styles.topbarTitleRow}>
+                  <h2 className={styles.topbarTitle}>Plan mensual</h2>
+                  {proposal?.mode === 'provisional' && (
+                    <span className={styles.provisionalBadge}>Provisional</span>
+                  )}
+                </div>
+              </div>
+            </div>
+            <button type="button" onClick={onClose} className={styles.closeBtn}>Cerrar</button>
+          </div>
+
         {loading && (
           <div className={styles.loadingState}>
             <Spinner size="lg" />
@@ -301,29 +301,33 @@ export const BudgetPlanModal = ({ isOpen, onClose, onSaved }: Props) => {
             )}
           </div>
         )}
-      </IonContent>
 
-      {!loading && !error && proposal && (
-        <div className={styles.footer}>
-          <div className={styles.footerSummary}>
-            <div className={styles.footerRow}>
-              <span className={styles.footerLabel}>Total asignado</span>
-              <span className={styles.footerValue}>{formatCop(committed + totalCategories)}</span>
+          {!loading && !error && proposal && (
+            <div className={styles.actionsBar}>
+              <div className={styles.footerSummary}>
+                <div className={styles.footerRow}>
+                  <span className={styles.footerLabel}>Total asignado</span>
+                  <span className={styles.footerValue}>{formatCop(committed + totalCategories)}</span>
+                </div>
+                <div className={styles.footerRow}>
+                  <span className={styles.footerLabel}>Sin asignar</span>
+                  <strong className={margin >= 0 ? styles.marginPositive : styles.marginNegative}>
+                    {formatCop(margin)}
+                  </strong>
+                </div>
+              </div>
+              <div className={styles.actions}>
+                <Button label="Cerrar" variant="ghost" onClick={onClose} />
+                <Button
+                  label={saving ? 'Guardando...' : 'Confirmar plan'}
+                  onClick={() => void handleConfirm()}
+                  disabled={saving || margin < 0}
+                />
+              </div>
             </div>
-            <div className={styles.footerRow}>
-              <span className={styles.footerLabel}>Sin asignar</span>
-              <strong className={margin >= 0 ? styles.marginPositive : styles.marginNegative}>
-                {formatCop(margin)}
-              </strong>
-            </div>
-          </div>
-          <Button
-            label={saving ? 'Guardando...' : 'Confirmar plan'}
-            onClick={() => void handleConfirm()}
-            disabled={saving || margin < 0}
-          />
+          )}
         </div>
-      )}
+      </IonContent>
     </IonModal>
   );
 };
