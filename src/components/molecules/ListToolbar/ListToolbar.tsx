@@ -12,7 +12,7 @@ export interface ListToolbarProps {
   activeFilterCount?: number;
   onSearchChange: (value: string) => void;
   onOpenSort: () => void;
-  onOpenFilters: () => void;
+  onOpenFilters?: () => void;
 }
 
 export const ListToolbar = ({
@@ -86,10 +86,12 @@ export const ListToolbar = ({
 
         <div className={styles.actions}>
           <IconButton label="Ordenar" icon={<IonIcon icon={optionsOutline} />} onClick={onOpenSort} />
-          <div className={styles.filterWrap}>
-            <IconButton label="Filtrar" icon={<IonIcon icon={funnelOutline} />} onClick={onOpenFilters} />
-            {activeFilterCount ? <span className={styles.count}>{activeFilterCount}</span> : null}
-          </div>
+          {onOpenFilters ? (
+            <div className={styles.filterWrap}>
+              <IconButton label="Filtrar" icon={<IonIcon icon={funnelOutline} />} onClick={onOpenFilters} />
+              {activeFilterCount ? <span className={styles.count}>{activeFilterCount}</span> : null}
+            </div>
+          ) : null}
         </div>
       </div>
 

@@ -299,6 +299,12 @@
   gap: var(--finance-space-md);
 }
 
+.inlineFilters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--finance-space-md);
+}
+
 .filterComposer {
   display: grid;
   gap: var(--finance-space-sm);
@@ -853,6 +859,11 @@
   .categoryRail,
   .subcategoryRail {
     gap: var(--finance-space-xs);
+  }
+
+  .inlineFilters {
+    grid-template-columns: 1fr;
+    gap: var(--finance-space-sm);
   }
 
   .categoryToken,

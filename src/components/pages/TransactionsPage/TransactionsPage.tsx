@@ -12,7 +12,6 @@ import { CrudModal } from '../../molecules/CrudModal';
 import { ListToolbar } from '../../molecules/ListToolbar';
 import { AppliedFiltersBar } from '../../molecules/AppliedFiltersBar';
 import { SortSheet } from '../../molecules/SortSheet';
-import { FilterSheet } from '../../molecules/FilterSheet';
 import { TransactionComposer } from '../../organisms/TransactionComposer';
 import { TransactionSlidingCard } from '../../organisms/TransactionSlidingCard';
 import type { Transaction, TransactionCreatePayload, TransactionUpdatePayload } from '../../../types/finance.types';
@@ -27,7 +26,6 @@ const formatCop = (value: number) =>
 export const TransactionsPage = () => {
   const [composerOpen, setComposerOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
-  const [filtersOpen, setFiltersOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [presentAlert] = useIonAlert();
@@ -42,18 +40,15 @@ export const TransactionsPage = () => {
     submitting,
     error,
     filters,
-    draftFilters,
     metrics,
     categoryLookup,
     behaviorSummary,
     behaviorSignals,
-    activeFilterCount,
     appliedChips,
     hasNextPage,
     loadMore,
     setError,
     setFilters,
-    setDraftFilters,
     reload,
     createTransaction,
     updateTransaction,
@@ -169,7 +164,6 @@ export const TransactionsPage = () => {
       next.subcategory_id = '';
     }
     setFilters(next);
-    setDraftFilters(next);
   };
 
   const quickToggle = (patch: Partial<typeof filters>) => {
@@ -178,7 +172,6 @@ export const TransactionsPage = () => {
     const nextValue = filters[key] === value ? '' : value;
     const next = { ...filters, [key]: nextValue };
     setFilters(next);
-    setDraftFilters(next);
   };
 
   return (
@@ -289,15 +282,44 @@ export const TransactionsPage = () => {
               searchPlaceholder="Concepto o producto"
               searchValue={filters.q ?? ''}
               resultLabel={`${metrics.count} resultados`}
-              activeFilterCount={activeFilterCount}
               onSearchChange={(q) => {
                 const next = { ...filters, q };
                 setFilters(next);
-                setDraftFilters(next);
               }}
               onOpenSort={() => setSortOpen(true)}
-              onOpenFilters={() => setFiltersOpen(true)}
             />
+
+            <div className={styles.inlineFilters}>
+              <SelectInput
+                name="tx-inline-status"
+                value={filters.status ?? ''}
+                onChange={(status) => setFilters((current) => ({ ...current, status: String(status) }))}
+                options={[
+                  { label: 'Confirmada', value: 'confirmed' },
+                  { label: 'Pendiente', value: 'pending' },
+                ]}
+                placeholder="Todos los estados"
+              />
+              <SelectInput
+                name="tx-inline-type"
+                value={filters.transaction_type ?? ''}
+                onChange={(transaction_type) =>
+                  setFilters((current) => ({ ...current, transaction_type: String(transaction_type) }))
+                }
+                options={[
+                  { label: 'Gasto', value: 'expense' },
+                  { label: 'Ingreso', value: 'income' },
+                ]}
+                placeholder="Todos los tipos"
+              />
+              <SelectInput
+                name="tx-inline-source"
+                value={filters.source ?? ''}
+                onChange={(source) => setFilters((current) => ({ ...current, source: String(source) }))}
+                options={[{ label: 'Manual', value: 'manual' }]}
+                placeholder="Todos los orígenes"
+              />
+            </div>
 
             <section className={styles.filterComposer}>
               <div className={styles.filterComposerHeader}>
@@ -322,7 +344,6 @@ export const TransactionsPage = () => {
                           subcategory_id: '',
                         };
                         setFilters(next);
-                        setDraftFilters(next);
                       }}
                     >
                       <span className={styles.categorySwatch} />
@@ -351,7 +372,6 @@ export const TransactionsPage = () => {
                             subcategory_id: active ? '' : subcategory.id,
                           };
                           setFilters(next);
-                          setDraftFilters(next);
                         }}
                       >
                         <span className={styles.subcategoryIconWrap}>
@@ -391,7 +411,6 @@ export const TransactionsPage = () => {
               onRemove={removeChip}
               onClearAll={() => {
                 setFilters(initialTransactionFilters);
-                setDraftFilters(initialTransactionFilters);
               }}
             />
             </div>
@@ -451,60 +470,6 @@ export const TransactionsPage = () => {
         onChangeSortBy={(sort_by) => setFilters((current) => ({ ...current, sort_by }))}
         onChangeSortDir={(sort_dir) => setFilters((current) => ({ ...current, sort_dir }))}
       />
-
-      <FilterSheet
-        isOpen={filtersOpen}
-        title="Filtrar transacciones"
-        resultLabel={`Mostrar ${metrics.count} resultados`}
-        onClose={() => {
-          setDraftFilters(filters);
-          setFiltersOpen(false);
-        }}
-        onReset={() => setDraftFilters({ ...initialTransactionFilters, q: filters.q })}
-        onApply={() => {
-          setFilters(draftFilters);
-          setFiltersOpen(false);
-        }}
-      >
-        <section className={styles.sheetSection}>
-          <h3 className={styles.sheetSectionTitle}>Estado</h3>
-          <SelectInput
-            name="tx-filter-status"
-            value={draftFilters.status ?? ''}
-            onChange={(status) => setDraftFilters((current) => ({ ...current, status: String(status) }))}
-            options={[
-              { label: 'Confirmada', value: 'confirmed' },
-              { label: 'Pendiente', value: 'pending' },
-            ]}
-            placeholder="Todos"
-          />
-        </section>
-        <section className={styles.sheetSection}>
-          <h3 className={styles.sheetSectionTitle}>Tipo</h3>
-          <SelectInput
-            name="tx-filter-type"
-            value={draftFilters.transaction_type ?? ''}
-            onChange={(transaction_type) =>
-              setDraftFilters((current) => ({ ...current, transaction_type: String(transaction_type) }))
-            }
-            options={[
-              { label: 'Gasto', value: 'expense' },
-              { label: 'Ingreso', value: 'income' },
-            ]}
-            placeholder="Todos"
-          />
-        </section>
-        <section className={styles.sheetSection}>
-          <h3 className={styles.sheetSectionTitle}>Origen</h3>
-          <SelectInput
-            name="tx-filter-source"
-            value={draftFilters.source ?? ''}
-            onChange={(source) => setDraftFilters((current) => ({ ...current, source: String(source) }))}
-            options={[{ label: 'Manual', value: 'manual' }]}
-            placeholder="Todos"
-          />
-        </section>
-      </FilterSheet>
 
       <CrudModal
         isOpen={composerOpen}

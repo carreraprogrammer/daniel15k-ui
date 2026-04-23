@@ -13,7 +13,6 @@ import { CrudModal } from '../../molecules/CrudModal';
 import { ListToolbar } from '../../molecules/ListToolbar';
 import { AppliedFiltersBar } from '../../molecules/AppliedFiltersBar';
 import { SortSheet } from '../../molecules/SortSheet';
-import { FilterSheet } from '../../molecules/FilterSheet';
 import { DebtComposer } from '../../organisms/DebtComposer';
 import { DebtSlidingCard } from '../../organisms/DebtSlidingCard';
 import { financeService } from '../../../services/financeService';
@@ -38,12 +37,10 @@ export const DebtsPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [composerOpen, setComposerOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
-  const [filtersOpen, setFiltersOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [editingDebt, setEditingDebt] = useState<Debt | null>(null);
   const [deletingDebt, setDeletingDebt] = useState<Debt | null>(null);
   const [filters, setFilters] = useState<DebtQueryParams>(initialFilters);
-  const [draftFilters, setDraftFilters] = useState<DebtQueryParams>(initialFilters);
 
   const load = async () => {
     setLoading(true);
@@ -116,11 +113,6 @@ export const DebtsPage = () => {
     }
   };
 
-  const activeFilterCount = useMemo(
-    () => [filters.status, filters.debt_type].filter(Boolean).length,
-    [filters.debt_type, filters.status],
-  );
-
   const appliedChips = useMemo(() => {
     const chips = [];
     if (filters.q) chips.push({ key: 'q', label: `Buscar: ${filters.q}` });
@@ -132,7 +124,6 @@ export const DebtsPage = () => {
   const removeChip = (key: string) => {
     const next = { ...filters, [key]: '' };
     setFilters(next);
-    setDraftFilters(next);
   };
 
   const quickToggle = (patch: Partial<DebtQueryParams>) => {
@@ -141,7 +132,6 @@ export const DebtsPage = () => {
     const nextValue = filters[key] === value ? '' : value;
     const next = { ...filters, [key]: nextValue };
     setFilters(next);
-    setDraftFilters(next);
   };
 
   return (
@@ -223,15 +213,39 @@ export const DebtsPage = () => {
               searchPlaceholder="Nombre de deuda"
               searchValue={filters.q ?? ''}
               resultLabel={`${metrics.totalCount} resultados`}
-              activeFilterCount={activeFilterCount}
               onSearchChange={(q) => {
                 const next = { ...filters, q };
                 setFilters(next);
-                setDraftFilters(next);
               }}
               onOpenSort={() => setSortOpen(true)}
-              onOpenFilters={() => setFiltersOpen(true)}
             />
+
+            <div className={styles.inlineFilters}>
+              <SelectInput
+                name="debt-inline-status"
+                value={filters.status ?? ''}
+                onChange={(status) => setFilters((current) => ({ ...current, status: String(status) }))}
+                options={[
+                  { label: 'Activa', value: 'active' },
+                  { label: 'Pagada', value: 'paid_off' },
+                  { label: 'Pausada', value: 'paused' },
+                  { label: 'En disputa', value: 'disputed' },
+                ]}
+                placeholder="Todos los estados"
+              />
+              <SelectInput
+                name="debt-inline-type"
+                value={filters.debt_type ?? ''}
+                onChange={(debt_type) => setFilters((current) => ({ ...current, debt_type: String(debt_type) }))}
+                options={[
+                  { label: 'Tarjeta de crédito', value: 'credit_card' },
+                  { label: 'Préstamo personal', value: 'personal_loan' },
+                  { label: 'Familiar', value: 'family' },
+                  { label: 'Hipoteca', value: 'mortgage' },
+                ]}
+                placeholder="Todos los tipos"
+              />
+            </div>
 
             <div className={styles.quickFilters}>
               <Button
@@ -253,7 +267,6 @@ export const DebtsPage = () => {
               onRemove={removeChip}
               onClearAll={() => {
                 setFilters(initialFilters);
-                setDraftFilters(initialFilters);
               }}
             />
             </div>
@@ -296,52 +309,6 @@ export const DebtsPage = () => {
         onChangeSortBy={(sort_by) => setFilters((current) => ({ ...current, sort_by }))}
         onChangeSortDir={(sort_dir) => setFilters((current) => ({ ...current, sort_dir }))}
       />
-
-      <FilterSheet
-        isOpen={filtersOpen}
-        title="Filtrar deudas"
-        resultLabel={`Mostrar ${metrics.totalCount} resultados`}
-        onClose={() => {
-          setDraftFilters(filters);
-          setFiltersOpen(false);
-        }}
-        onReset={() => setDraftFilters({ ...initialFilters, q: filters.q })}
-        onApply={() => {
-          setFilters(draftFilters);
-          setFiltersOpen(false);
-        }}
-      >
-        <section className={styles.sheetSection}>
-          <h3 className={styles.sheetSectionTitle}>Estado</h3>
-          <SelectInput
-            name="debt-filter-status"
-            value={draftFilters.status ?? ''}
-            onChange={(status) => setDraftFilters((current) => ({ ...current, status: String(status) }))}
-            options={[
-              { label: 'Activa', value: 'active' },
-              { label: 'Pagada', value: 'paid_off' },
-              { label: 'Pausada', value: 'paused' },
-              { label: 'En disputa', value: 'disputed' },
-            ]}
-            placeholder="Todos"
-          />
-        </section>
-        <section className={styles.sheetSection}>
-          <h3 className={styles.sheetSectionTitle}>Tipo</h3>
-          <SelectInput
-            name="debt-filter-type"
-            value={draftFilters.debt_type ?? ''}
-            onChange={(debt_type) => setDraftFilters((current) => ({ ...current, debt_type: String(debt_type) }))}
-            options={[
-              { label: 'Tarjeta de crédito', value: 'credit_card' },
-              { label: 'Préstamo personal', value: 'personal_loan' },
-              { label: 'Familiar', value: 'family' },
-              { label: 'Hipoteca', value: 'mortgage' },
-            ]}
-            placeholder="Todos"
-          />
-        </section>
-      </FilterSheet>
 
       <ConfirmModal
         isOpen={Boolean(deletingDebt)}

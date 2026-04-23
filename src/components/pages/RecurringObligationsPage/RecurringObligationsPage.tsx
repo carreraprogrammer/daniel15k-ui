@@ -13,7 +13,6 @@ import { CrudModal } from '../../molecules/CrudModal';
 import { ListToolbar } from '../../molecules/ListToolbar';
 import { AppliedFiltersBar } from '../../molecules/AppliedFiltersBar';
 import { SortSheet } from '../../molecules/SortSheet';
-import { FilterSheet } from '../../molecules/FilterSheet';
 import { RecurringObligationComposer } from '../../organisms/RecurringObligationComposer';
 import { RecurringObligationSlidingCard } from '../../organisms/RecurringObligationSlidingCard';
 import { IncomeSourceComposer } from '../../organisms/IncomeSourceComposer';
@@ -60,15 +59,11 @@ export const RecurringObligationsPage = () => {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [composerOpen, setComposerOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
-  const [filtersOpen, setFiltersOpen] = useState(false);
   const [editingObligation, setEditingObligation] = useState<RecurringObligation | null>(null);
   const [deletingObligation, setDeletingObligation] = useState<RecurringObligation | null>(null);
   const [obligationFilters, setObligationFilters] = useState<RecurringObligationQueryParams>(initialObligationFilters);
-  const [draftObligationFilters, setDraftObligationFilters] = useState<RecurringObligationQueryParams>(initialObligationFilters);
   const [incomeFilters, setIncomeFilters] = useState<IncomeSourceQueryParams>(initialIncomeFilters);
   const [incomeSortOpen, setIncomeSortOpen] = useState(false);
-  const [incomeFiltersOpen, setIncomeFiltersOpen] = useState(false);
-  const [draftIncomeFilters, setDraftIncomeFilters] = useState<IncomeSourceQueryParams>(initialIncomeFilters);
   const [activeView, setActiveView] = useState<'income' | 'obligations'>('obligations');
   const [incomeComposerOpen, setIncomeComposerOpen] = useState(false);
   const [editingIncome, setEditingIncome] = useState<IncomeSource | null>(null);
@@ -195,17 +190,6 @@ export const RecurringObligationsPage = () => {
       setSubmitting(false);
     }
   };
-
-  const obligationActiveFilterCount = useMemo(
-    () =>
-      [obligationFilters.active !== 'all' ? obligationFilters.active : '', obligationFilters.category_id].filter(Boolean).length,
-    [obligationFilters.active, obligationFilters.category_id],
-  );
-
-  const incomeActiveFilterCount = useMemo(
-    () => [incomeFilters.active !== 'all' ? incomeFilters.active : '', incomeFilters.is_variable !== 'all' ? incomeFilters.is_variable : ''].filter(Boolean).length,
-    [incomeFilters.active, incomeFilters.is_variable],
-  );
 
   const obligationChips = useMemo(() => {
     const chips = [];
@@ -350,25 +334,38 @@ export const RecurringObligationsPage = () => {
                   searchPlaceholder="Nombre"
                   searchValue={incomeFilters.q ?? ''}
                   resultLabel={`${incomeSources.length} resultados`}
-                  activeFilterCount={incomeActiveFilterCount}
                   onSearchChange={(q) => {
                     const next = { ...incomeFilters, q };
                     setIncomeFilters(next);
-                    setDraftIncomeFilters(next);
                   }}
                   onOpenSort={() => setIncomeSortOpen(true)}
-                  onOpenFilters={() => setIncomeFiltersOpen(true)}
                 />
+                <div className={styles.inlineFilters}>
+                  <SelectInput
+                    name="income-inline-variable"
+                    value={String(incomeFilters.is_variable ?? 'all')}
+                    onChange={(is_variable) =>
+                      setIncomeFilters((current) => ({
+                        ...current,
+                        is_variable: is_variable === 'all' ? 'all' : is_variable === 'true',
+                      }))
+                    }
+                    options={[
+                      { label: 'Todos', value: 'all' },
+                      { label: 'Variables', value: 'true' },
+                      { label: 'Fijos', value: 'false' },
+                    ]}
+                    placeholder="Todos"
+                  />
+                </div>
                 <AppliedFiltersBar
                   chips={incomeChips}
                   onRemove={(key) => {
                     const next = { ...incomeFilters, [key]: key === 'is_variable' ? 'all' : '' };
                     setIncomeFilters(next);
-                    setDraftIncomeFilters(next);
                   }}
                   onClearAll={() => {
                     setIncomeFilters(initialIncomeFilters);
-                    setDraftIncomeFilters(initialIncomeFilters);
                   }}
                 />
               </div>
@@ -396,15 +393,39 @@ export const RecurringObligationsPage = () => {
                   searchPlaceholder="Nombre"
                   searchValue={obligationFilters.q ?? ''}
                   resultLabel={`${obligations.length} resultados`}
-                  activeFilterCount={obligationActiveFilterCount}
                   onSearchChange={(q) => {
                     const next = { ...obligationFilters, q };
                     setObligationFilters(next);
-                    setDraftObligationFilters(next);
                   }}
                   onOpenSort={() => setSortOpen(true)}
-                  onOpenFilters={() => setFiltersOpen(true)}
                 />
+                <div className={styles.inlineFilters}>
+                  <SelectInput
+                    name="rec-inline-active"
+                    value={String(obligationFilters.active ?? 'all')}
+                    onChange={(active) =>
+                      setObligationFilters((current) => ({
+                        ...current,
+                        active: active === 'all' ? 'all' : active === 'true',
+                      }))
+                    }
+                    options={[
+                      { label: 'Todos', value: 'all' },
+                      { label: 'Activos', value: 'true' },
+                      { label: 'Inactivos', value: 'false' },
+                    ]}
+                    placeholder="Todos"
+                  />
+                  <SelectInput
+                    name="rec-inline-category"
+                    value={obligationFilters.category_id ?? ''}
+                    onChange={(category_id) =>
+                      setObligationFilters((current) => ({ ...current, category_id }))
+                    }
+                    options={categoryOptions}
+                    placeholder="Todas las categorías"
+                  />
+                </div>
                 <div className={styles.quickFilters}>
                   <Button
                     label="Activos"
@@ -416,7 +437,6 @@ export const RecurringObligationsPage = () => {
                         active: obligationFilters.active === true ? 'all' : true,
                       };
                       setObligationFilters(next);
-                      setDraftObligationFilters(next);
                     }}
                   />
                 </div>
@@ -430,11 +450,9 @@ export const RecurringObligationsPage = () => {
                           ? { ...obligationFilters, category_id: '' }
                           : { ...obligationFilters, q: '' };
                     setObligationFilters(next);
-                    setDraftObligationFilters(next);
                   }}
                   onClearAll={() => {
                     setObligationFilters(initialObligationFilters);
-                    setDraftObligationFilters(initialObligationFilters);
                   }}
                 />
               </div>
@@ -490,86 +508,6 @@ export const RecurringObligationsPage = () => {
         onChangeSortBy={(sort_by) => setIncomeFilters((current) => ({ ...current, sort_by }))}
         onChangeSortDir={(sort_dir) => setIncomeFilters((current) => ({ ...current, sort_dir }))}
       />
-
-      <FilterSheet
-        isOpen={filtersOpen}
-        title="Filtrar recurrentes"
-        resultLabel={`Mostrar ${obligations.length} resultados`}
-        onClose={() => {
-          setDraftObligationFilters(obligationFilters);
-          setFiltersOpen(false);
-        }}
-        onReset={() => setDraftObligationFilters({ ...initialObligationFilters, q: obligationFilters.q })}
-        onApply={() => {
-          setObligationFilters(draftObligationFilters);
-          setFiltersOpen(false);
-        }}
-      >
-        <section className={styles.sheetSection}>
-          <h3 className={styles.sheetSectionTitle}>Estado</h3>
-          <SelectInput
-            name="rec-filter-active"
-            value={String(draftObligationFilters.active ?? 'all')}
-            onChange={(active) =>
-              setDraftObligationFilters((current) => ({
-                ...current,
-                active: active === 'all' ? 'all' : active === 'true',
-              }))
-            }
-            options={[
-              { label: 'Todos', value: 'all' },
-              { label: 'Activos', value: 'true' },
-              { label: 'Inactivos', value: 'false' },
-            ]}
-            placeholder="Todos"
-          />
-        </section>
-        <section className={styles.sheetSection}>
-          <h3 className={styles.sheetSectionTitle}>Categoría</h3>
-          <SelectInput
-            name="rec-filter-category"
-            value={draftObligationFilters.category_id ?? ''}
-            onChange={(category_id) => setDraftObligationFilters((current) => ({ ...current, category_id }))}
-            options={categoryOptions}
-            placeholder="Todas"
-          />
-        </section>
-      </FilterSheet>
-
-      <FilterSheet
-        isOpen={incomeFiltersOpen}
-        title="Filtrar ingresos"
-        resultLabel={`Mostrar ${incomeSources.length} resultados`}
-        onClose={() => {
-          setDraftIncomeFilters(incomeFilters);
-          setIncomeFiltersOpen(false);
-        }}
-        onReset={() => setDraftIncomeFilters({ ...initialIncomeFilters, q: incomeFilters.q })}
-        onApply={() => {
-          setIncomeFilters(draftIncomeFilters);
-          setIncomeFiltersOpen(false);
-        }}
-      >
-        <section className={styles.sheetSection}>
-          <h3 className={styles.sheetSectionTitle}>Tipo</h3>
-          <SelectInput
-            name="income-filter-variable"
-            value={String(draftIncomeFilters.is_variable ?? 'all')}
-            onChange={(is_variable) =>
-              setDraftIncomeFilters((current) => ({
-                ...current,
-                is_variable: is_variable === 'all' ? 'all' : is_variable === 'true',
-              }))
-            }
-            options={[
-              { label: 'Todos', value: 'all' },
-              { label: 'Variables', value: 'true' },
-              { label: 'Fijos', value: 'false' },
-            ]}
-            placeholder="Todos"
-          />
-        </section>
-      </FilterSheet>
 
       <ConfirmModal
         isOpen={Boolean(deletingObligation)}

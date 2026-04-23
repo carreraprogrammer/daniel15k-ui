@@ -32,7 +32,6 @@ export const useTransactionsPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<TransactionQueryParams>(initialTransactionFilters);
-  const [draftFilters, setDraftFilters] = useState<TransactionQueryParams>(initialTransactionFilters);
   const [page, setPage] = useState(1);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [totalResults, setTotalResults] = useState(0);
@@ -157,11 +156,6 @@ export const useTransactionsPage = () => {
   const behaviorSummary = useMemo(() => summarizeBehavior(transactions, categoryLookup), [categoryLookup, transactions]);
   const behaviorSignals = useMemo(() => buildBehaviorSignals(behaviorSummary), [behaviorSummary]);
 
-  const activeFilterCount = useMemo(
-    () => [filters.status, filters.transaction_type, filters.source, filters.category_id, filters.subcategory_id].filter(Boolean).length,
-    [filters.category_id, filters.source, filters.status, filters.subcategory_id, filters.transaction_type],
-  );
-
   const appliedChips = useMemo(() => {
     const chips = [];
 
@@ -195,18 +189,15 @@ export const useTransactionsPage = () => {
     submitting,
     error,
     filters,
-    draftFilters,
     metrics,
     categoryLookup,
     behaviorSummary,
     behaviorSignals,
-    activeFilterCount,
     appliedChips,
     hasNextPage,
     loadMore,
     setError,
     setFilters,
-    setDraftFilters,
     reload: load,
     createTransaction,
     updateTransaction,

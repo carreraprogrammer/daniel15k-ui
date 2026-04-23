@@ -9,7 +9,6 @@ import { EmptyState } from '../../molecules/EmptyState';
 import { ListToolbar } from '../../molecules/ListToolbar';
 import { AppliedFiltersBar } from '../../molecules/AppliedFiltersBar';
 import { SortSheet } from '../../molecules/SortSheet';
-import { FilterSheet } from '../../molecules/FilterSheet';
 import { BudgetPlanModal } from '../../organisms/BudgetPlanModal/BudgetPlanModal';
 import { BudgetWizardModal } from '../../organisms/BudgetWizard';
 import { ActivePlanView } from '../../organisms/ActivePlanView';
@@ -64,7 +63,6 @@ export const BudgetsPage = () => {
 
   // Sheet / modal state
   const [sortOpen, setSortOpen] = useState(false);
-  const [filtersOpen, setFiltersOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [planModalOpen, setPlanModalOpen] = useState(false);
   const [wizardOpen, setWizardOpen] = useState(false);
@@ -75,7 +73,6 @@ export const BudgetsPage = () => {
   const [wizardSuccess, setWizardSuccess] = useState(false);
 
   const [filters, setFilters] = useState<BudgetQueryParams>(initialFilters);
-  const [draftFilters, setDraftFilters] = useState<BudgetQueryParams>(initialFilters);
 
   // ── Wizard data hook ────────────────────────────────────────────────────────
   const {
@@ -157,11 +154,6 @@ export const BudgetsPage = () => {
   };
 
   // ── Derived state ───────────────────────────────────────────────────────────
-
-  const activeFilterCount = useMemo(
-    () => [filters.category_id].filter(Boolean).length,
-    [filters.category_id],
-  );
 
   const chips = useMemo(() => {
     const next = [];
@@ -314,26 +306,33 @@ export const BudgetsPage = () => {
                   searchPlaceholder="Categoría"
                   searchValue={filters.q ?? ''}
                   resultLabel={`${budgets.length} resultados`}
-                  activeFilterCount={activeFilterCount}
                   onSearchChange={(q) => {
                     const next = { ...filters, q };
                     setFilters(next);
-                    setDraftFilters(next);
                   }}
                   onOpenSort={() => setSortOpen(true)}
-                  onOpenFilters={() => setFiltersOpen(true)}
                 />
+
+                <div className={styles.inlineFilters}>
+                  <SelectInput
+                    name="budget-inline-category"
+                    value={filters.category_id ?? ''}
+                    onChange={(category_id) =>
+                      setFilters((current) => ({ ...current, category_id }))
+                    }
+                    options={categoryOptions}
+                    placeholder="Todas las categorías"
+                  />
+                </div>
 
                 <AppliedFiltersBar
                   chips={chips}
                   onRemove={(key) => {
                     const next = { ...filters, [key]: '' };
                     setFilters(next);
-                    setDraftFilters(next);
                   }}
                   onClearAll={() => {
                     setFilters(initialFilters);
-                    setDraftFilters(initialFilters);
                   }}
                 />
               </div>
@@ -541,33 +540,6 @@ export const BudgetsPage = () => {
           onChangeSortDir={(sort_dir) => setFilters((current) => ({ ...current, sort_dir }))}
         />
 
-        <FilterSheet
-          isOpen={filtersOpen}
-          title="Filtrar presupuestos"
-          resultLabel={`Mostrar ${budgets.length} resultados`}
-          onClose={() => {
-            setDraftFilters(filters);
-            setFiltersOpen(false);
-          }}
-          onReset={() => setDraftFilters({ ...initialFilters, q: filters.q })}
-          onApply={() => {
-            setFilters(draftFilters);
-            setFiltersOpen(false);
-          }}
-        >
-          <section className={styles.sheetSection}>
-            <h3 className={styles.sheetSectionTitle}>Categoría</h3>
-            <SelectInput
-              name="budget-filter-category"
-              value={draftFilters.category_id ?? ''}
-              onChange={(category_id) =>
-                setDraftFilters((current) => ({ ...current, category_id }))
-              }
-              options={categoryOptions}
-              placeholder="Todas"
-            />
-          </section>
-        </FilterSheet>
       </IonContent>
     </AppLayout>
   );
