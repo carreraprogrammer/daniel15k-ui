@@ -97,6 +97,7 @@ export const financeService = {
         transaction_type: params.transaction_type,
         source: params.source,
         category_id: params.category_id,
+        subcategory_id: params.subcategory_id,
         sort_by: params.sort_by,
         sort_dir: params.sort_dir,
       },

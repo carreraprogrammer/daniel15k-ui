@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type CSSProperties } from 'react';
 import { IonContent, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, useIonAlert, useIonToast } from '@ionic/react';
 import { addOutline } from 'ionicons/icons';
 import { AppLayout } from '../../templates/AppLayout';
@@ -18,6 +18,7 @@ import { TransactionSlidingCard } from '../../organisms/TransactionSlidingCard';
 import type { Transaction, TransactionCreatePayload, TransactionUpdatePayload } from '../../../types/finance.types';
 import { resolveTransactionCategory } from '../../../utils/financeBehavior';
 import { initialTransactionFilters, useTransactionsPage } from '../../../hooks/useTransactionsPage';
+import { resolveNamedIcon } from '../../organisms/BudgetWizard/iconRegistry';
 import styles from '../FinancePage.module.css';
 
 const formatCop = (value: number) =>
@@ -35,6 +36,7 @@ export const TransactionsPage = () => {
   const {
     transactions,
     summary,
+    categories,
     loading,
     loadingMore,
     submitting,
@@ -64,6 +66,31 @@ export const TransactionsPage = () => {
     [categoryLookup, latestTransaction],
   );
   const reviewPressurePct = metrics.count ? Math.round((metrics.pendingCount / metrics.count) * 100) : 0;
+  const selectedCategoryId = filters.category_id ? String(filters.category_id) : '';
+  const selectedSubcategoryId = filters.subcategory_id ? String(filters.subcategory_id) : '';
+  const selectedCategory = useMemo(
+    () => categories.find((category) => String(category.id) === selectedCategoryId) ?? null,
+    [categories, selectedCategoryId],
+  );
+  const categoryAccent = selectedCategory?.attributes.color ?? '#7ce0d3';
+  const categoryFilters = useMemo(
+    () => categories.map((category) => ({
+      id: String(category.id),
+      name: category.attributes.name ?? 'Sin categoría',
+      color: category.attributes.color ?? '#7ce0d3',
+      count: category.relationships?.subcategories?.data?.length ?? 0,
+    })),
+    [categories],
+  );
+  const subcategoryFilters = useMemo(
+    () =>
+      selectedCategory?.relationships?.subcategories?.data?.map((subcategory) => ({
+        id: String(subcategory.id),
+        name: subcategory.attributes?.name ?? 'Sin subcategoría',
+        icon: subcategory.attributes?.icon ?? undefined,
+      })) ?? [],
+    [selectedCategory],
+  );
 
   const handleCreate = async (payload: TransactionCreatePayload) => {
     await createTransaction(payload);
@@ -138,6 +165,9 @@ export const TransactionsPage = () => {
 
   const removeChip = (key: string) => {
     const next = { ...filters, [key]: '' };
+    if (key === 'category_id') {
+      next.subcategory_id = '';
+    }
     setFilters(next);
     setDraftFilters(next);
   };
@@ -256,7 +286,6 @@ export const TransactionsPage = () => {
             </div>
             <div className={styles.detailPanel}>
             <ListToolbar
-              searchLabel="Buscar transacciones"
               searchPlaceholder="Concepto o producto"
               searchValue={filters.q ?? ''}
               resultLabel={`${metrics.count} resultados`}
@@ -269,6 +298,72 @@ export const TransactionsPage = () => {
               onOpenSort={() => setSortOpen(true)}
               onOpenFilters={() => setFiltersOpen(true)}
             />
+
+            <section className={styles.filterComposer}>
+              <div className={styles.filterComposerHeader}>
+                <span className={styles.filterComposerLabel}>Categoría</span>
+                <span className={styles.filterComposerHint}>Elige un color para abrir sus subcategorías.</span>
+              </div>
+
+              <div className={styles.categoryRail}>
+                {categoryFilters.map((category) => {
+                  const active = category.id === selectedCategoryId;
+                  return (
+                    <button
+                      key={category.id}
+                      type="button"
+                      className={[styles.categoryToken, active ? styles.categoryTokenActive : ''].filter(Boolean).join(' ')}
+                      style={{ '--category-accent': category.color } as CSSProperties}
+                      onClick={() => {
+                        const nextCategoryId = active ? '' : category.id;
+                        const next = {
+                          ...filters,
+                          category_id: nextCategoryId,
+                          subcategory_id: '',
+                        };
+                        setFilters(next);
+                        setDraftFilters(next);
+                      }}
+                    >
+                      <span className={styles.categorySwatch} />
+                      <span className={styles.categoryTokenText}>{category.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {selectedCategory && subcategoryFilters.length ? (
+                <div
+                  className={styles.subcategoryRail}
+                  style={{ '--category-accent': categoryAccent } as CSSProperties}
+                >
+                  {subcategoryFilters.map((subcategory) => {
+                    const active = subcategory.id === selectedSubcategoryId;
+                    return (
+                      <button
+                        key={subcategory.id}
+                        type="button"
+                        className={[styles.subcategoryToken, active ? styles.subcategoryTokenActive : ''].filter(Boolean).join(' ')}
+                        onClick={() => {
+                          const next = {
+                            ...filters,
+                            category_id: selectedCategory.id,
+                            subcategory_id: active ? '' : subcategory.id,
+                          };
+                          setFilters(next);
+                          setDraftFilters(next);
+                        }}
+                      >
+                        <span className={styles.subcategoryIconWrap}>
+                          <IonIcon icon={resolveNamedIcon(subcategory.icon)} className={styles.subcategoryIcon} />
+                        </span>
+                        <span className={styles.subcategoryTokenText}>{subcategory.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : null}
+            </section>
 
             <div className={styles.quickFilters}>
               <Button

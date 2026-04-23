@@ -334,6 +334,7 @@ export interface TransactionQueryParams {
   transaction_type?: string;
   source?: string;
   category_id?: number | string;
+  subcategory_id?: number | string;
   sort_by?: string;
   sort_dir?: 'asc' | 'desc';
 }

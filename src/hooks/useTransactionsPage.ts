@@ -15,6 +15,8 @@ export const initialTransactionFilters: TransactionQueryParams = {
   status: '',
   transaction_type: '',
   source: '',
+  category_id: '',
+  subcategory_id: '',
   sort_by: 'date',
   sort_dir: 'desc',
 };
@@ -156,8 +158,8 @@ export const useTransactionsPage = () => {
   const behaviorSignals = useMemo(() => buildBehaviorSignals(behaviorSummary), [behaviorSummary]);
 
   const activeFilterCount = useMemo(
-    () => [filters.status, filters.transaction_type, filters.source].filter(Boolean).length,
-    [filters.source, filters.status, filters.transaction_type],
+    () => [filters.status, filters.transaction_type, filters.source, filters.category_id, filters.subcategory_id].filter(Boolean).length,
+    [filters.category_id, filters.source, filters.status, filters.subcategory_id, filters.transaction_type],
   );
 
   const appliedChips = useMemo(() => {
@@ -172,13 +174,22 @@ export const useTransactionsPage = () => {
       });
     }
     if (filters.source) chips.push({ key: 'source', label: `Origen: ${filters.source}` });
+    if (filters.category_id) {
+      const category = categoryLookup[`category:${filters.category_id}`];
+      chips.push({ key: 'category_id', label: `Categoría: ${category?.categoryName ?? filters.category_id}` });
+    }
+    if (filters.subcategory_id) {
+      const subcategory = categoryLookup[`subcategory:${filters.subcategory_id}`];
+      chips.push({ key: 'subcategory_id', label: `Subcategoría: ${subcategory?.subcategoryName ?? filters.subcategory_id}` });
+    }
 
     return chips;
-  }, [filters.q, filters.source, filters.status, filters.transaction_type]);
+  }, [categoryLookup, filters.category_id, filters.q, filters.source, filters.status, filters.subcategory_id, filters.transaction_type]);
 
   return {
     transactions,
     summary,
+    categories,
     loading,
     loadingMore,
     submitting,
