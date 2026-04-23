@@ -63,6 +63,7 @@ export const BudgetsPage = () => {
 
   // Sheet / modal state
   const [sortOpen, setSortOpen] = useState(false);
+  const [filtersVisible, setFiltersVisible] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [planModalOpen, setPlanModalOpen] = useState(false);
   const [wizardOpen, setWizardOpen] = useState(false);
@@ -169,6 +170,10 @@ export const BudgetsPage = () => {
     }
     return next;
   }, [categoryOptions, filters.category_id, filters.q]);
+  const activeFilterCount = useMemo(
+    () => chips.filter((chip) => chip.key !== 'q').length,
+    [chips],
+  );
 
   const burnCategories = summary?.burn_rate?.categories ?? [];
   const outOfRange = burnCategories.filter((item) => item.on_track === false);
@@ -306,24 +311,30 @@ export const BudgetsPage = () => {
                   searchPlaceholder="Categoría"
                   searchValue={filters.q ?? ''}
                   resultLabel={`${budgets.length} resultados`}
+                  activeFilterCount={activeFilterCount}
                   onSearchChange={(q) => {
                     const next = { ...filters, q };
                     setFilters(next);
                   }}
                   onOpenSort={() => setSortOpen(true)}
+                  onOpenFilters={() => setFiltersVisible((visible) => !visible)}
                 />
 
-                <div className={styles.inlineFilters}>
-                  <SelectInput
-                    name="budget-inline-category"
-                    value={filters.category_id ?? ''}
-                    onChange={(category_id) =>
-                      setFilters((current) => ({ ...current, category_id }))
-                    }
-                    options={categoryOptions}
-                    placeholder="Todas las categorías"
-                  />
-                </div>
+                {filtersVisible ? (
+                  <div className={styles.filterPanel}>
+                    <div className={styles.inlineFilters}>
+                      <SelectInput
+                        name="budget-inline-category"
+                        value={filters.category_id ?? ''}
+                        onChange={(category_id) =>
+                          setFilters((current) => ({ ...current, category_id }))
+                        }
+                        options={categoryOptions}
+                        placeholder="Todas las categorías"
+                      />
+                    </div>
+                  </div>
+                ) : null}
 
                 <AppliedFiltersBar
                   chips={chips}

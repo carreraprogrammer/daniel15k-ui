@@ -37,6 +37,7 @@ export const DebtsPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [composerOpen, setComposerOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
+  const [filtersVisible, setFiltersVisible] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [editingDebt, setEditingDebt] = useState<Debt | null>(null);
   const [deletingDebt, setDeletingDebt] = useState<Debt | null>(null);
@@ -120,17 +121,13 @@ export const DebtsPage = () => {
     if (filters.debt_type) chips.push({ key: 'debt_type', label: `Tipo: ${filters.debt_type}` });
     return chips;
   }, [filters.debt_type, filters.q, filters.status]);
+  const activeFilterCount = useMemo(
+    () => appliedChips.filter((chip) => chip.key !== 'q').length,
+    [appliedChips],
+  );
 
   const removeChip = (key: string) => {
     const next = { ...filters, [key]: '' };
-    setFilters(next);
-  };
-
-  const quickToggle = (patch: Partial<DebtQueryParams>) => {
-    const key = Object.keys(patch)[0] as keyof DebtQueryParams;
-    const value = patch[key];
-    const nextValue = filters[key] === value ? '' : value;
-    const next = { ...filters, [key]: nextValue };
     setFilters(next);
   };
 
@@ -213,54 +210,45 @@ export const DebtsPage = () => {
               searchPlaceholder="Nombre de deuda"
               searchValue={filters.q ?? ''}
               resultLabel={`${metrics.totalCount} resultados`}
+              activeFilterCount={activeFilterCount}
               onSearchChange={(q) => {
                 const next = { ...filters, q };
                 setFilters(next);
               }}
               onOpenSort={() => setSortOpen(true)}
+              onOpenFilters={() => setFiltersVisible((visible) => !visible)}
             />
 
-            <div className={styles.inlineFilters}>
-              <SelectInput
-                name="debt-inline-status"
-                value={filters.status ?? ''}
-                onChange={(status) => setFilters((current) => ({ ...current, status: String(status) }))}
-                options={[
-                  { label: 'Activa', value: 'active' },
-                  { label: 'Pagada', value: 'paid_off' },
-                  { label: 'Pausada', value: 'paused' },
-                  { label: 'En disputa', value: 'disputed' },
-                ]}
-                placeholder="Todos los estados"
-              />
-              <SelectInput
-                name="debt-inline-type"
-                value={filters.debt_type ?? ''}
-                onChange={(debt_type) => setFilters((current) => ({ ...current, debt_type: String(debt_type) }))}
-                options={[
-                  { label: 'Tarjeta de crédito', value: 'credit_card' },
-                  { label: 'Préstamo personal', value: 'personal_loan' },
-                  { label: 'Familiar', value: 'family' },
-                  { label: 'Hipoteca', value: 'mortgage' },
-                ]}
-                placeholder="Todos los tipos"
-              />
-            </div>
-
-            <div className={styles.quickFilters}>
-              <Button
-                label="Activas"
-                size="sm"
-                variant={filters.status === 'active' ? 'primary' : 'ghost'}
-                onClick={() => quickToggle({ status: 'active' })}
-              />
-              <Button
-                label="Pagadas"
-                size="sm"
-                variant={filters.status === 'paid_off' ? 'primary' : 'ghost'}
-                onClick={() => quickToggle({ status: 'paid_off' })}
-              />
-            </div>
+            {filtersVisible ? (
+              <div className={styles.filterPanel}>
+                <div className={styles.inlineFilters}>
+                  <SelectInput
+                    name="debt-inline-status"
+                    value={filters.status ?? ''}
+                    onChange={(status) => setFilters((current) => ({ ...current, status: String(status) }))}
+                    options={[
+                      { label: 'Activa', value: 'active' },
+                      { label: 'Pagada', value: 'paid_off' },
+                      { label: 'Pausada', value: 'paused' },
+                      { label: 'En disputa', value: 'disputed' },
+                    ]}
+                    placeholder="Todos los estados"
+                  />
+                  <SelectInput
+                    name="debt-inline-type"
+                    value={filters.debt_type ?? ''}
+                    onChange={(debt_type) => setFilters((current) => ({ ...current, debt_type: String(debt_type) }))}
+                    options={[
+                      { label: 'Tarjeta de crédito', value: 'credit_card' },
+                      { label: 'Préstamo personal', value: 'personal_loan' },
+                      { label: 'Familiar', value: 'family' },
+                      { label: 'Hipoteca', value: 'mortgage' },
+                    ]}
+                    placeholder="Todos los tipos"
+                  />
+                </div>
+              </div>
+            ) : null}
 
             <AppliedFiltersBar
               chips={appliedChips}

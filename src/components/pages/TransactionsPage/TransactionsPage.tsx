@@ -26,6 +26,7 @@ const formatCop = (value: number) =>
 export const TransactionsPage = () => {
   const [composerOpen, setComposerOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
+  const [filtersVisible, setFiltersVisible] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [presentAlert] = useIonAlert();
@@ -85,6 +86,10 @@ export const TransactionsPage = () => {
         icon: subcategory.attributes?.icon ?? undefined,
       })) ?? [],
     [selectedCategory],
+  );
+  const activeFilterCount = useMemo(
+    () => appliedChips.filter((chip) => chip.key !== 'q').length,
+    [appliedChips],
   );
 
   const handleCreate = async (payload: TransactionCreatePayload) => {
@@ -163,14 +168,6 @@ export const TransactionsPage = () => {
     if (key === 'category_id') {
       next.subcategory_id = '';
     }
-    setFilters(next);
-  };
-
-  const quickToggle = (patch: Partial<typeof filters>) => {
-    const key = Object.keys(patch)[0] as keyof typeof filters;
-    const value = patch[key];
-    const nextValue = filters[key] === value ? '' : value;
-    const next = { ...filters, [key]: nextValue };
     setFilters(next);
   };
 
@@ -282,129 +279,114 @@ export const TransactionsPage = () => {
               searchPlaceholder="Concepto o producto"
               searchValue={filters.q ?? ''}
               resultLabel={`${metrics.count} resultados`}
+              activeFilterCount={activeFilterCount}
               onSearchChange={(q) => {
                 const next = { ...filters, q };
                 setFilters(next);
               }}
               onOpenSort={() => setSortOpen(true)}
+              onOpenFilters={() => setFiltersVisible((visible) => !visible)}
             />
 
-            <div className={styles.inlineFilters}>
-              <SelectInput
-                name="tx-inline-status"
-                value={filters.status ?? ''}
-                onChange={(status) => setFilters((current) => ({ ...current, status: String(status) }))}
-                options={[
-                  { label: 'Confirmada', value: 'confirmed' },
-                  { label: 'Pendiente', value: 'pending' },
-                ]}
-                placeholder="Todos los estados"
-              />
-              <SelectInput
-                name="tx-inline-type"
-                value={filters.transaction_type ?? ''}
-                onChange={(transaction_type) =>
-                  setFilters((current) => ({ ...current, transaction_type: String(transaction_type) }))
-                }
-                options={[
-                  { label: 'Gasto', value: 'expense' },
-                  { label: 'Ingreso', value: 'income' },
-                ]}
-                placeholder="Todos los tipos"
-              />
-              <SelectInput
-                name="tx-inline-source"
-                value={filters.source ?? ''}
-                onChange={(source) => setFilters((current) => ({ ...current, source: String(source) }))}
-                options={[{ label: 'Manual', value: 'manual' }]}
-                placeholder="Todos los orígenes"
-              />
-            </div>
-
-            <section className={styles.filterComposer}>
-              <div className={styles.filterComposerHeader}>
-                <span className={styles.filterComposerLabel}>Categoría</span>
-                <span className={styles.filterComposerHint}>Elige un color para abrir sus subcategorías.</span>
-              </div>
-
-              <div className={styles.categoryRail}>
-                {categoryFilters.map((category) => {
-                  const active = category.id === selectedCategoryId;
-                  return (
-                    <button
-                      key={category.id}
-                      type="button"
-                      className={[styles.categoryToken, active ? styles.categoryTokenActive : ''].filter(Boolean).join(' ')}
-                      style={{ '--category-accent': category.color } as CSSProperties}
-                      onClick={() => {
-                        const nextCategoryId = active ? '' : category.id;
-                        const next = {
-                          ...filters,
-                          category_id: nextCategoryId,
-                          subcategory_id: '',
-                        };
-                        setFilters(next);
-                      }}
-                    >
-                      <span className={styles.categorySwatch} />
-                      <span className={styles.categoryTokenText}>{category.name}</span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {selectedCategory && subcategoryFilters.length ? (
-                <div
-                  className={styles.subcategoryRail}
-                  style={{ '--category-accent': categoryAccent } as CSSProperties}
-                >
-                  {subcategoryFilters.map((subcategory) => {
-                    const active = subcategory.id === selectedSubcategoryId;
-                    return (
-                      <button
-                        key={subcategory.id}
-                        type="button"
-                        className={[styles.subcategoryToken, active ? styles.subcategoryTokenActive : ''].filter(Boolean).join(' ')}
-                        onClick={() => {
-                          const next = {
-                            ...filters,
-                            category_id: selectedCategory.id,
-                            subcategory_id: active ? '' : subcategory.id,
-                          };
-                          setFilters(next);
-                        }}
-                      >
-                        <span className={styles.subcategoryIconWrap}>
-                          <IonIcon icon={resolveNamedIcon(subcategory.icon)} className={styles.subcategoryIcon} />
-                        </span>
-                        <span className={styles.subcategoryTokenText}>{subcategory.name}</span>
-                      </button>
-                    );
-                  })}
+            {filtersVisible ? (
+              <div className={styles.filterPanel}>
+                <div className={styles.inlineFilters}>
+                  <SelectInput
+                    name="tx-inline-status"
+                    value={filters.status ?? ''}
+                    onChange={(status) => setFilters((current) => ({ ...current, status: String(status) }))}
+                    options={[
+                      { label: 'Confirmada', value: 'confirmed' },
+                      { label: 'Pendiente', value: 'pending' },
+                    ]}
+                    placeholder="Todos los estados"
+                  />
+                  <SelectInput
+                    name="tx-inline-type"
+                    value={filters.transaction_type ?? ''}
+                    onChange={(transaction_type) =>
+                      setFilters((current) => ({ ...current, transaction_type: String(transaction_type) }))
+                    }
+                    options={[
+                      { label: 'Gasto', value: 'expense' },
+                      { label: 'Ingreso', value: 'income' },
+                    ]}
+                    placeholder="Todos los tipos"
+                  />
+                  <SelectInput
+                    name="tx-inline-source"
+                    value={filters.source ?? ''}
+                    onChange={(source) => setFilters((current) => ({ ...current, source: String(source) }))}
+                    options={[{ label: 'Manual', value: 'manual' }]}
+                    placeholder="Todos los orígenes"
+                  />
                 </div>
-              ) : null}
-            </section>
 
-            <div className={styles.quickFilters}>
-              <Button
-                label="Pendientes"
-                size="sm"
-                variant={filters.status === 'pending' ? 'primary' : 'ghost'}
-                onClick={() => quickToggle({ status: 'pending' })}
-              />
-              <Button
-                label="Gastos"
-                size="sm"
-                variant={filters.transaction_type === 'expense' ? 'primary' : 'ghost'}
-                onClick={() => quickToggle({ transaction_type: 'expense' })}
-              />
-              <Button
-                label="Ingresos"
-                size="sm"
-                variant={filters.transaction_type === 'income' ? 'primary' : 'ghost'}
-                onClick={() => quickToggle({ transaction_type: 'income' })}
-              />
-            </div>
+                <section className={styles.filterComposer}>
+                  <div className={styles.filterComposerHeader}>
+                    <span className={styles.filterComposerLabel}>Categoría</span>
+                    <span className={styles.filterComposerHint}>Elige un color para abrir sus subcategorías.</span>
+                  </div>
+
+                  <div className={styles.categoryRail}>
+                    {categoryFilters.map((category) => {
+                      const active = category.id === selectedCategoryId;
+                      return (
+                        <button
+                          key={category.id}
+                          type="button"
+                          className={[styles.categoryToken, active ? styles.categoryTokenActive : ''].filter(Boolean).join(' ')}
+                          style={{ '--category-accent': category.color } as CSSProperties}
+                          onClick={() => {
+                            const nextCategoryId = active ? '' : category.id;
+                            const next = {
+                              ...filters,
+                              category_id: nextCategoryId,
+                              subcategory_id: '',
+                            };
+                            setFilters(next);
+                          }}
+                        >
+                          <span className={styles.categorySwatch} />
+                          <span className={styles.categoryTokenText}>{category.name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {selectedCategory && subcategoryFilters.length ? (
+                    <div
+                      className={styles.subcategoryRail}
+                      style={{ '--category-accent': categoryAccent } as CSSProperties}
+                    >
+                      {subcategoryFilters.map((subcategory) => {
+                        const active = subcategory.id === selectedSubcategoryId;
+                        return (
+                          <button
+                            key={subcategory.id}
+                            type="button"
+                            className={[styles.subcategoryToken, active ? styles.subcategoryTokenActive : ''].filter(Boolean).join(' ')}
+                            onClick={() => {
+                              const next = {
+                                ...filters,
+                                category_id: selectedCategory.id,
+                                subcategory_id: active ? '' : subcategory.id,
+                              };
+                              setFilters(next);
+                            }}
+                          >
+                            <span className={styles.subcategoryIconWrap}>
+                              <IonIcon icon={resolveNamedIcon(subcategory.icon)} className={styles.subcategoryIcon} />
+                            </span>
+                            <span className={styles.subcategoryTokenText}>{subcategory.name}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : null}
+                </section>
+              </div>
+            ) : null}
 
             <AppliedFiltersBar
               chips={appliedChips}
