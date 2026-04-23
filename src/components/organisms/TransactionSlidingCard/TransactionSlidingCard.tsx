@@ -3,12 +3,11 @@ import { IonButton, IonIcon, IonItem, IonItemOptions, IonItemSliding } from '@io
 import { createOutline, trashOutline } from 'ionicons/icons';
 import type { CategoryLookupItem } from '../../../utils/financeBehavior';
 import type { Transaction } from '../../../types/finance.types';
+import { resolveNamedIcon } from '../BudgetWizard/iconRegistry';
 import styles from './TransactionSlidingCard.module.css';
 
 const formatCop = (value: number) =>
   new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(value);
-
-const toKebab = (name: string) => name.replace(/([A-Z])/g, '-$1').toLowerCase();
 
 const statusLabels: Record<string, string> = {
   confirmed: 'Confirmada',
@@ -29,7 +28,7 @@ export const TransactionSlidingCard = ({ transaction, category, onEdit, onDelete
   const type     = transaction.attributes.transaction_type ?? 'expense';
   const catCode  = category.categoryCode ?? 'unknown';
   const catColor = `var(--color-${catCode})`;
-  const iconName = toKebab(category.subcategoryIcon ?? category.categoryIcon ?? 'help-circle-outline');
+  const iconData = resolveNamedIcon(category.subcategoryIcon ?? category.categoryIcon);
   const isIncome = type === 'income';
 
   const handleEdit = () => {
@@ -51,7 +50,7 @@ export const TransactionSlidingCard = ({ transaction, category, onEdit, onDelete
         >
           {/* ── Icon ── */}
           <div className={styles.iconWrap} aria-hidden="true">
-            <ion-icon name={iconName} class={styles.iconGlyph} />
+            <IonIcon icon={iconData} className={styles.iconGlyph} />
           </div>
 
           {/* ── Primary info ── */}

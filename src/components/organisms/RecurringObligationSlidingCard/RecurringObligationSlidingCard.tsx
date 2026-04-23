@@ -1,12 +1,11 @@
 import { IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding } from '@ionic/react';
 import { createOutline, trashOutline } from 'ionicons/icons';
 import type { RecurringObligation } from '../../../types/finance.types';
+import { resolveNamedIcon } from '../BudgetWizard/iconRegistry';
 import styles from './RecurringObligationSlidingCard.module.css';
 
 const formatCop = (value: number) =>
   new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(value);
-
-const toKebab = (name: string) => name.replace(/([A-Z])/g, '-$1').toLowerCase();
 
 export interface RecurringObligationSlidingCardProps {
   obligation: RecurringObligation;
@@ -22,7 +21,7 @@ export const RecurringObligationSlidingCard = ({
   const attrs    = obligation.attributes;
   const catCode  = attrs.category_code ?? 'unknown';
   const catColor = `var(--color-${catCode})`;
-  const iconName = toKebab(attrs.subcategory_icon ?? 'repeat-outline');
+  const iconData = resolveNamedIcon(attrs.subcategory_icon ?? 'repeatOutline');
   const isActive = attrs.active !== false;
 
   return (
@@ -34,7 +33,7 @@ export const RecurringObligationSlidingCard = ({
         >
           {/* ── Icon ── */}
           <div className={styles.iconWrap} aria-hidden="true">
-            <ion-icon name={iconName} class={styles.iconGlyph} />
+            <IonIcon icon={iconData} className={styles.iconGlyph} />
           </div>
 
           {/* ── Primary info ── */}
