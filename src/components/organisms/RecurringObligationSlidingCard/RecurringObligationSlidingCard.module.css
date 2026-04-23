@@ -9,13 +9,10 @@
   min-width: 72px;
 }
 
-.optionEdit {
-  --background: linear-gradient(135deg, rgba(0, 229, 204, 0.16), rgba(91, 106, 240, 0.18));
-}
+.optionEdit   { --background: linear-gradient(135deg, rgba(0, 229, 204, 0.16), rgba(91, 106, 240, 0.18)); }
+.optionDelete { --background: rgba(239, 68, 68, 0.16); }
 
-.optionDelete {
-  --background: rgba(239, 68, 68, 0.16);
-}
+/* ── Card shell ─────────────────────────────────────────────────────────── */
 
 .item {
   --inner-padding-end: 0;
@@ -26,73 +23,143 @@
 
 .item::part(native) {
   border-radius: 22px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.035);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 }
 
 .card {
   display: flex;
-  justify-content: space-between;
-  gap: 1rem;
+  align-items: center;
+  gap: var(--space-4);
   width: 100%;
-  padding: 1rem 1.1rem;
+  padding: 0.9rem 1rem;
 }
 
-.primary,
-.secondary {
+/* ── Icon ───────────────────────────────────────────────────────────────── */
+
+.iconWrap {
+  flex-shrink: 0;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--radius-xl);
+  background: color-mix(in srgb, var(--cat-color) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--cat-color) 22%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconGlyph {
+  font-size: 1.25rem;
+  color: var(--cat-color);
+}
+
+/* ── Primary ────────────────────────────────────────────────────────────── */
+
+.primary {
+  flex: 1;
+  min-width: 0;
   display: grid;
-  gap: 0.35rem;
+  gap: 0.3rem;
 }
 
-.secondary {
-  justify-items: end;
-  align-content: start;
+.name {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.header {
+/* ── Chips ──────────────────────────────────────────────────────────────── */
+
+.chipRow {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.35rem;
   align-items: center;
 }
 
-.meta,
-.label {
-  color: rgba(231, 236, 244, 0.64);
-  font-size: 0.85rem;
+.catChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.22rem 0.55rem;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--cat-color) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--cat-color) 22%, transparent);
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: var(--font-semibold);
+  color: var(--cat-color);
+  white-space: nowrap;
 }
 
-.name,
+.catDot {
+  width: 5px;
+  height: 5px;
+  border-radius: var(--radius-full);
+  background: var(--cat-color);
+  flex-shrink: 0;
+}
+
+.subChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.22rem 0.55rem;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: var(--font-medium);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.meta {
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  color: var(--color-text-disabled);
+}
+
+/* ── Secondary ──────────────────────────────────────────────────────────── */
+
+.secondary {
+  flex-shrink: 0;
+  display: grid;
+  gap: 0.3rem;
+  align-content: start;
+  justify-items: end;
+}
+
 .amount {
-  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  font-weight: var(--font-bold);
+  color: var(--color-text-primary);
+  letter-spacing: var(--tracking-tight);
+  white-space: nowrap;
 }
 
-.status {
+.badge {
   display: inline-flex;
   width: fit-content;
-  padding: 0.28rem 0.62rem;
-  border-radius: 999px;
-  font-size: 0.78rem;
-  font-weight: 700;
+  padding: 0.22rem 0.55rem;
+  border-radius: var(--radius-full);
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: var(--font-medium);
 }
 
-.statusActive {
-  background: rgba(143, 233, 221, 0.14);
-  color: #8fe9dd;
-}
+.badgeActive   { background: rgba(143, 233, 221, 0.1); color: #8fe9dd; }
+.badgeInactive { background: rgba(255, 178, 138, 0.1); color: #ffb28a; }
 
-.statusInactive {
-  background: rgba(255, 178, 138, 0.14);
-  color: #ffb28a;
-}
+/* ── Responsive ─────────────────────────────────────────────────────────── */
 
-@media (max-width: 640px) {
-  .card {
-    flex-direction: column;
-  }
-
-  .secondary {
-    justify-items: start;
-  }
+@media (max-width: 480px) {
+  .name   { font-size: var(--text-sm); }
+  .amount { font-size: var(--text-base); }
 }

@@ -7,9 +7,12 @@ export interface CategoryLookupItem {
   categoryName: string;
   categoryCode: string;
   categoryType: string;
+  categoryColor?: string;
+  categoryIcon?: string;
   subcategoryId?: string;
   subcategoryName?: string;
   subcategoryCode?: string;
+  subcategoryIcon?: string;
 }
 
 export interface BehaviorSummary {
@@ -44,6 +47,8 @@ export const buildCategoryLookup = (categories: CategoryResource[]): Record<stri
       categoryName: category.attributes.name ?? 'Sin categoría',
       categoryCode: category.attributes.code ?? 'unknown',
       categoryType: category.attributes.category_type ?? category.attributes.code ?? 'unknown',
+      categoryColor: category.attributes.color,
+      categoryIcon: category.attributes.icon,
     };
 
     lookup[`category:${categoryItem.categoryId}`] = categoryItem;
@@ -54,6 +59,7 @@ export const buildCategoryLookup = (categories: CategoryResource[]): Record<stri
         subcategoryId: String(subcategory.id),
         subcategoryName: subcategory.attributes?.name ?? 'Sin subcategoría',
         subcategoryCode: subcategory.attributes?.code ?? undefined,
+        subcategoryIcon: subcategory.attributes?.icon ?? undefined,
       };
     });
   });

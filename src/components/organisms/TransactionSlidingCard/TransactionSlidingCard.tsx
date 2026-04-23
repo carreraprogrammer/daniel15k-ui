@@ -1,43 +1,43 @@
 import { useRef } from 'react';
 import { IonButton, IonIcon, IonItem, IonItemOptions, IonItemSliding } from '@ionic/react';
 import { createOutline, trashOutline } from 'ionicons/icons';
-import type { ResolvedTransactionCategory, Transaction } from '../../../types/finance.types';
+import type { CategoryLookupItem } from '../../../utils/financeBehavior';
+import type { Transaction } from '../../../types/finance.types';
 import styles from './TransactionSlidingCard.module.css';
 
 const formatCop = (value: number) =>
   new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(value);
+
+const toKebab = (name: string) => name.replace(/([A-Z])/g, '-$1').toLowerCase();
 
 const statusLabels: Record<string, string> = {
   confirmed: 'Confirmada',
   pending: 'Pendiente',
 };
 
-const typeLabels: Record<string, string> = {
-  expense: 'Gasto',
-  income: 'Ingreso',
-};
-
 export interface TransactionSlidingCardProps {
   transaction: Transaction;
-  category: ResolvedTransactionCategory;
+  category: CategoryLookupItem;
   onEdit: (transaction: Transaction) => void;
   onDelete: (transaction: Transaction) => void;
 }
 
 export const TransactionSlidingCard = ({ transaction, category, onEdit, onDelete }: TransactionSlidingCardProps) => {
-  const status = transaction.attributes.status ?? 'confirmed';
-  const type = transaction.attributes.transaction_type ?? 'expense';
   const slidingRef = useRef<HTMLIonItemSlidingElement | null>(null);
-  const behaviorTone = category.categoryType || 'unknown';
+
+  const status   = transaction.attributes.status ?? 'confirmed';
+  const type     = transaction.attributes.transaction_type ?? 'expense';
+  const catCode  = category.categoryCode ?? 'unknown';
+  const catColor = `var(--color-${catCode})`;
+  const iconName = toKebab(category.subcategoryIcon ?? category.categoryIcon ?? 'help-circle-outline');
+  const isIncome = type === 'income';
 
   const handleEdit = () => {
-    console.debug('[TransactionSlidingCard] handleEdit', { id: transaction.id });
     void slidingRef.current?.close();
     onEdit(transaction);
   };
 
   const handleDelete = () => {
-    console.debug('[TransactionSlidingCard] handleDelete', { id: transaction.id });
     void slidingRef.current?.close();
     onDelete(transaction);
   };
@@ -45,29 +45,44 @@ export const TransactionSlidingCard = ({ transaction, category, onEdit, onDelete
   return (
     <IonItemSliding ref={slidingRef} className={styles.sliding}>
       <IonItem className={styles.item} lines="none">
-        <div className={styles.card}>
-          <div className={styles.primary}>
-            <div className={styles.header}>
-              <span className={styles.date}>{transaction.attributes.date}</span>
-              <span className={`${styles.pill} ${type === 'income' ? styles.pillIncome : styles.pillExpense}`}>
-                {typeLabels[type] ?? type}
-              </span>
-            </div>
-            <strong className={styles.concept}>{transaction.attributes.concept}</strong>
-            <span className={styles.product}>{transaction.attributes.product}</span>
-            <div className={styles.behaviorRow}>
-              <span className={`${styles.behaviorPill} ${styles[`behavior_${behaviorTone}`] ?? styles.behavior_unknown}`}>
-                {category.categoryName}
-              </span>
-              {category.subcategoryName ? <span className={styles.behaviorMeta}>{category.subcategoryName}</span> : null}
-            </div>
+        <div
+          className={styles.card}
+          style={{ '--cat-color': catColor } as React.CSSProperties}
+        >
+          {/* ── Icon ── */}
+          <div className={styles.iconWrap} aria-hidden="true">
+            <ion-icon name={iconName} class={styles.iconGlyph} />
           </div>
 
+          {/* ── Primary info ── */}
+          <div className={styles.primary}>
+            <strong className={styles.concept}>{transaction.attributes.concept}</strong>
+
+            <div className={styles.chipRow}>
+              <span className={styles.catChip}>
+                <span className={styles.catDot} />
+                {category.categoryName}
+              </span>
+              {category.subcategoryName && (
+                <span className={styles.subChip}>{category.subcategoryName}</span>
+              )}
+            </div>
+
+            <span className={styles.meta}>
+              {transaction.attributes.product}
+              {transaction.attributes.product && transaction.attributes.date ? ' · ' : ''}
+              {transaction.attributes.date}
+            </span>
+          </div>
+
+          {/* ── Secondary info ── */}
           <div className={styles.secondary}>
+            <strong className={[styles.amount, isIncome ? styles.amountIncome : ''].filter(Boolean).join(' ')}>
+              {isIncome ? '+' : ''}{formatCop(transaction.attributes.amount)}
+            </strong>
             <span className={`${styles.status} ${styles[`status_${status}`] ?? ''}`}>
               {statusLabels[status] ?? status}
             </span>
-            <strong className={styles.amount}>{formatCop(transaction.attributes.amount)}</strong>
           </div>
         </div>
       </IonItem>

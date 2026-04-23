@@ -153,6 +153,8 @@ export interface CategoryResource {
     name?: string;
     code?: string;
     category_type?: string;
+    color?: string;
+    icon?: string;
   };
   relationships?: {
     subcategories?: {
@@ -162,6 +164,7 @@ export interface CategoryResource {
         attributes?: {
           name?: string;
           code?: string;
+          icon?: string;
         };
       }>;
     };
@@ -292,6 +295,11 @@ export interface RecurringObligation {
     active?: boolean;
     category_id?: number | null;
     category_name?: string | null;
+    category_code?: string | null;
+    category_color?: string | null;
+    subcategory_id?: number | null;
+    subcategory_name?: string | null;
+    subcategory_icon?: string | null;
     notes?: string | null;
   };
 }
