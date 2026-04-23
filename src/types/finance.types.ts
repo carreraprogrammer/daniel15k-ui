@@ -319,6 +319,8 @@ export interface RecurringObligationPayload {
   active?: boolean;
   category_id?: number | null;
   subcategory_id?: number | null;
+  source_type?: 'Debt' | 'Investment' | null;
+  source_id?: number | null;
   notes?: string;
 }
 

@@ -117,6 +117,10 @@ export const PlannedExpensesPage = () => {
     }
   };
 
+  const handleChangeStatus = async (plannedExpense: PlannedExpense, status: PlannedExpense['attributes']['status']) => {
+    await handleUpdate(plannedExpense.id, { status });
+  };
+
   const appliedChips = useMemo(() => {
     const chips = [];
     if (filters.q) chips.push({ key: 'q', label: `Buscar: ${filters.q}` });
@@ -254,7 +258,15 @@ export const PlannedExpensesPage = () => {
 
           {loading ? <Spinner size="lg" /> : null}
           {error ? <ErrorState message={error} onRetry={() => void load()} /> : null}
-          {!loading && !error && !plannedExpenses.length ? <EmptyState message="No hay gastos planeados registrados." /> : null}
+          {!loading && !error && !plannedExpenses.length ? (
+            <EmptyState
+              message={
+                activeFilterCount || filters.q
+                  ? 'No hay gastos planeados que coincidan con esos filtros.'
+                  : 'No hay gastos planeados registrados.'
+              }
+            />
+          ) : null}
 
           {!loading && !error && plannedExpenses.length && detailsOpen ? (
             <div className={styles.list}>
@@ -262,6 +274,9 @@ export const PlannedExpensesPage = () => {
                 <PlannedExpenseSlidingCard
                   key={plannedExpense.id}
                   plannedExpense={plannedExpense}
+                  onChangeStatus={(nextExpense, status) => {
+                    void handleChangeStatus(nextExpense, status);
+                  }}
                   onEdit={(nextExpense) => {
                     setEditingExpense(nextExpense);
                     setComposerOpen(true);
@@ -282,6 +297,7 @@ export const PlannedExpensesPage = () => {
             { label: 'Monto estimado', value: 'amount_estimated' },
             { label: 'Nombre', value: 'name' },
             { label: 'Estado', value: 'status' },
+            { label: 'Tipo', value: 'planning_type' },
           ]}
           onClose={() => setSortOpen(false)}
           onChangeSortBy={(sort_by) => setFilters((current) => ({ ...current, sort_by }))}

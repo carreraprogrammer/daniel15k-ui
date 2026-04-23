@@ -4,9 +4,14 @@
 }
 
 .optionEdit,
+.optionLink,
 .optionDelete {
   --color: var(--color-text-primary);
   min-width: 72px;
+}
+
+.optionLink {
+  --background: linear-gradient(135deg, rgba(143, 233, 221, 0.16), rgba(71, 180, 162, 0.2));
 }
 
 .optionEdit {

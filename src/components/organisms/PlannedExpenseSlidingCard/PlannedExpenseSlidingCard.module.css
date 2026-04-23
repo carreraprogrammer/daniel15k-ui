@@ -3,10 +3,23 @@
   overflow: hidden;
 }
 
+.optionDone,
+.optionCancel,
 .optionEdit {
   --color: var(--color-text-primary);
-  --background: linear-gradient(135deg, rgba(243, 210, 122, 0.16), rgba(214, 168, 74, 0.18));
   min-width: 72px;
+}
+
+.optionDone {
+  --background: linear-gradient(135deg, rgba(143, 233, 221, 0.16), rgba(71, 180, 162, 0.2));
+}
+
+.optionCancel {
+  --background: rgba(255, 178, 138, 0.16);
+}
+
+.optionEdit {
+  --background: linear-gradient(135deg, rgba(243, 210, 122, 0.16), rgba(214, 168, 74, 0.18));
 }
 
 .item {

@@ -18,6 +18,7 @@ import { DebtSlidingCard } from '../../organisms/DebtSlidingCard';
 import { financeService } from '../../../services/financeService';
 import type { Debt, DebtPayload, DebtQueryParams, RecurringObligation } from '../../../types/finance.types';
 import styles from '../FinancePage.module.css';
+import formStyles from '../../organisms/ComposerForm.module.css';
 
 const formatCop = (value: number) =>
   new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(value);
@@ -42,6 +43,9 @@ export const DebtsPage = () => {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [editingDebt, setEditingDebt] = useState<Debt | null>(null);
   const [deletingDebt, setDeletingDebt] = useState<Debt | null>(null);
+  const [linkingDebt, setLinkingDebt] = useState<Debt | null>(null);
+  const [selectedObligationId, setSelectedObligationId] = useState('');
+  const [linkError, setLinkError] = useState<string | null>(null);
   const [filters, setFilters] = useState<DebtQueryParams>(initialFilters);
 
   const load = async () => {
@@ -131,21 +135,94 @@ export const DebtsPage = () => {
     [appliedChips],
   );
 
+  const linkedDebtIdForObligation = (obligation: RecurringObligation) => {
+    if (obligation.attributes.source_type === 'Debt' && obligation.attributes.source_id) {
+      return String(obligation.attributes.source_id);
+    }
+    if (obligation.attributes.allocatable_type === 'Debt' && obligation.attributes.allocatable_id) {
+      return String(obligation.attributes.allocatable_id);
+    }
+    return null;
+  };
+
   const linkedObligationByDebtId = useMemo(() => {
     const map = new Map<string, RecurringObligation>();
     obligations.forEach((obligation) => {
-      const linkedDebtId =
-        obligation.attributes.source_type === 'Debt'
-          ? obligation.attributes.source_id
-          : obligation.attributes.allocatable_type === 'Debt'
-            ? obligation.attributes.allocatable_id
-            : null;
+      const linkedDebtId = linkedDebtIdForObligation(obligation);
       if (linkedDebtId) {
-        map.set(String(linkedDebtId), obligation);
+        map.set(linkedDebtId, obligation);
       }
     });
     return map;
   }, [obligations]);
+
+  const currentLinkedObligation = useMemo(
+    () => (linkingDebt ? linkedObligationByDebtId.get(linkingDebt.id) ?? null : null),
+    [linkedObligationByDebtId, linkingDebt],
+  );
+
+  const linkableObligationOptions = useMemo(() => {
+    if (!linkingDebt) {
+      return [];
+    }
+
+    return obligations
+      .filter((obligation) => {
+        const linkedDebtId = linkedDebtIdForObligation(obligation);
+        return obligation.attributes.active !== false && (!linkedDebtId || linkedDebtId === linkingDebt.id);
+      })
+      .map((obligation) => ({
+        label: `${obligation.attributes.name} · ${formatCop(obligation.attributes.amount)}${obligation.attributes.due_day ? ` · Día ${obligation.attributes.due_day}` : ''}`,
+        value: obligation.id,
+      }));
+  }, [linkingDebt, obligations]);
+
+  const handleOpenLinkModal = (debt: Debt) => {
+    setLinkingDebt(debt);
+    setSelectedObligationId(linkedObligationByDebtId.get(debt.id)?.id ?? '');
+    setLinkError(null);
+  };
+
+  const handleCloseLinkModal = () => {
+    setLinkingDebt(null);
+    setSelectedObligationId('');
+    setLinkError(null);
+  };
+
+  const handleSaveLink = async () => {
+    if (!linkingDebt) {
+      return;
+    }
+
+    const currentlyLinked = linkedObligationByDebtId.get(linkingDebt.id) ?? null;
+    const selectedObligation = obligations.find((obligation) => obligation.id === selectedObligationId) ?? null;
+
+    setSubmitting(true);
+    setLinkError(null);
+
+    try {
+      if (currentlyLinked && currentlyLinked.id !== selectedObligation?.id) {
+        await financeService.updateRecurringObligation(currentlyLinked.id, {
+          source_type: null,
+          source_id: null,
+        });
+      }
+
+      if (selectedObligation && selectedObligation.id !== currentlyLinked?.id) {
+        await financeService.updateRecurringObligation(selectedObligation.id, {
+          source_type: 'Debt',
+          source_id: Number(linkingDebt.id),
+        });
+      }
+
+      handleCloseLinkModal();
+      await load();
+    } catch (nextError) {
+      setLinkError(nextError instanceof Error ? nextError.message : 'No fue posible actualizar el vínculo con la obligación.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const removeChip = (key: string) => {
     const next = { ...filters, [key]: '' };
@@ -297,6 +374,7 @@ export const DebtsPage = () => {
                     ? `Obligación vinculada: ${linkedObligationByDebtId.get(debt.id)?.attributes.name}`
                     : null
                 }
+                onManageLink={handleOpenLinkModal}
                 onEdit={(nextDebt) => {
                   setEditingDebt(nextDebt);
                   setComposerOpen(true);
@@ -357,6 +435,53 @@ export const DebtsPage = () => {
             setEditingDebt(null);
           }}
         />
+      </CrudModal>
+
+      <CrudModal
+        isOpen={Boolean(linkingDebt)}
+        title={linkingDebt ? `Vincular cuota de ${linkingDebt.attributes.name}` : 'Vincular obligación'}
+        subtitle="Usa esta relación para dejar explícito qué cuota mensual representa el impacto en caja de una deuda."
+        onClose={handleCloseLinkModal}
+      >
+        <section className={formStyles.panel}>
+          <div className={formStyles.section}>
+            <div className={formStyles.sectionHeader}>
+              <div>
+                <p className={formStyles.sectionEyebrow}>Relación estructural</p>
+                <h3 className={formStyles.sectionTitle}>Obligación recurrente asociada</h3>
+              </div>
+              <p className={formStyles.sectionText}>
+                `debts` sigue siendo la verdad del pasivo; `recurring_obligations` sigue siendo la verdad del flujo mensual. Este vínculo solo conecta ambas vistas.
+              </p>
+            </div>
+
+            <SelectInput
+              name="debt-linked-obligation"
+              label="Obligación recurrente"
+              value={selectedObligationId}
+              onChange={(value) => setSelectedObligationId(String(value))}
+              options={linkableObligationOptions}
+              placeholder="Sin obligación vinculada"
+              hint={
+                currentLinkedObligation
+                  ? `Hoy está vinculada a "${currentLinkedObligation.attributes.name}".`
+                  : 'Solo aparecen obligaciones activas que estén libres o ya vinculadas a esta deuda.'
+              }
+            />
+
+            {linkError ? <p className={formStyles.error}>{linkError}</p> : null}
+
+            <div className={formStyles.actions}>
+              <Button label="Cancelar" variant="ghost" onClick={handleCloseLinkModal} />
+              <Button
+                label={selectedObligationId ? 'Guardar vínculo' : 'Guardar sin vínculo'}
+                onClick={() => void handleSaveLink()}
+                loading={submitting}
+                disabled={!currentLinkedObligation && !linkableObligationOptions.length && !selectedObligationId}
+              />
+            </div>
+          </div>
+        </section>
       </CrudModal>
       </IonContent>
     </AppLayout>

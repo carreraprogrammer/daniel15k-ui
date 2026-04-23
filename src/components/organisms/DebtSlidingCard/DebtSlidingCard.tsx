@@ -1,5 +1,5 @@
 import { IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding } from '@ionic/react';
-import { createOutline, trashOutline } from 'ionicons/icons';
+import { createOutline, linkOutline, trashOutline } from 'ionicons/icons';
 import type { Debt } from '../../../types/finance.types';
 import styles from './DebtSlidingCard.module.css';
 
@@ -16,11 +16,12 @@ const statusLabels: Record<string, string> = {
 export interface DebtSlidingCardProps {
   debt: Debt;
   linkedObligationLabel?: string | null;
+  onManageLink: (debt: Debt) => void;
   onEdit: (debt: Debt) => void;
   onDelete: (debt: Debt) => void;
 }
 
-export const DebtSlidingCard = ({ debt, linkedObligationLabel, onEdit, onDelete }: DebtSlidingCardProps) => (
+export const DebtSlidingCard = ({ debt, linkedObligationLabel, onManageLink, onEdit, onDelete }: DebtSlidingCardProps) => (
   <IonItemSliding className={styles.sliding}>
     <IonItem className={styles.item} lines="none">
       <div className={styles.card}>
@@ -46,6 +47,9 @@ export const DebtSlidingCard = ({ debt, linkedObligationLabel, onEdit, onDelete 
     </IonItem>
 
     <IonItemOptions side="end">
+      <IonItemOption className={styles.optionLink} onClick={() => onManageLink(debt)}>
+        <IonIcon icon={linkOutline} />
+      </IonItemOption>
       <IonItemOption className={styles.optionEdit} onClick={() => onEdit(debt)}>
         <IonIcon icon={createOutline} />
       </IonItemOption>

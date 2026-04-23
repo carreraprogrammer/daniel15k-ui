@@ -1,5 +1,5 @@
 import { IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding } from '@ionic/react';
-import { createOutline } from 'ionicons/icons';
+import { checkmarkDoneOutline, closeOutline, createOutline } from 'ionicons/icons';
 import type { PlannedExpense } from '../../../types/finance.types';
 import styles from './PlannedExpenseSlidingCard.module.css';
 
@@ -24,11 +24,13 @@ const statusLabels: Record<PlannedExpense['attributes']['status'], string> = {
 
 export interface PlannedExpenseSlidingCardProps {
   plannedExpense: PlannedExpense;
+  onChangeStatus: (plannedExpense: PlannedExpense, status: PlannedExpense['attributes']['status']) => void;
   onEdit: (plannedExpense: PlannedExpense) => void;
 }
 
 export const PlannedExpenseSlidingCard = ({
   plannedExpense,
+  onChangeStatus,
   onEdit,
 }: PlannedExpenseSlidingCardProps) => {
   const attrs = plannedExpense.attributes;
@@ -61,6 +63,16 @@ export const PlannedExpenseSlidingCard = ({
       </IonItem>
 
       <IonItemOptions side="end">
+        {attrs.status === 'planned' ? (
+          <IonItemOption className={styles.optionDone} onClick={() => onChangeStatus(plannedExpense, 'executed')}>
+            <IonIcon icon={checkmarkDoneOutline} />
+          </IonItemOption>
+        ) : null}
+        {attrs.status === 'planned' ? (
+          <IonItemOption className={styles.optionCancel} onClick={() => onChangeStatus(plannedExpense, 'cancelled')}>
+            <IonIcon icon={closeOutline} />
+          </IonItemOption>
+        ) : null}
         <IonItemOption className={styles.optionEdit} onClick={() => onEdit(plannedExpense)}>
           <IonIcon icon={createOutline} />
         </IonItemOption>
