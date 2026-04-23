@@ -15,11 +15,12 @@ const statusLabels: Record<string, string> = {
 
 export interface DebtSlidingCardProps {
   debt: Debt;
+  linkedObligationLabel?: string | null;
   onEdit: (debt: Debt) => void;
   onDelete: (debt: Debt) => void;
 }
 
-export const DebtSlidingCard = ({ debt, onEdit, onDelete }: DebtSlidingCardProps) => (
+export const DebtSlidingCard = ({ debt, linkedObligationLabel, onEdit, onDelete }: DebtSlidingCardProps) => (
   <IonItemSliding className={styles.sliding}>
     <IonItem className={styles.item} lines="none">
       <div className={styles.card}>
@@ -32,6 +33,9 @@ export const DebtSlidingCard = ({ debt, onEdit, onDelete }: DebtSlidingCardProps
           </div>
           <strong className={styles.name}>{debt.attributes.name}</strong>
           <span className={styles.meta}>Pago mensual {formatCop(debt.attributes.monthly_payment)}</span>
+          <span className={styles.linked}>
+            {linkedObligationLabel ?? 'Sin obligación recurrente vinculada'}
+          </span>
         </div>
 
         <div className={styles.secondary}>

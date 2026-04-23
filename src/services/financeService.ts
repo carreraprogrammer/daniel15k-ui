@@ -14,6 +14,9 @@ import type {
   IncomeSource,
   IncomeSourcePayload,
   IncomeSourceQueryParams,
+  PlannedExpense,
+  PlannedExpensePayload,
+  PlannedExpenseQueryParams,
   JsonApiCollection,
   RecurringObligation,
   RecurringObligationPayload,
@@ -187,6 +190,22 @@ export const financeService = {
     return normalizeCollection<RecurringObligation['attributes']>(data) as JsonApiCollection<RecurringObligation>;
   },
 
+  async fetchPlannedExpenses(
+    params: PlannedExpenseQueryParams = {},
+  ): Promise<JsonApiCollection<PlannedExpense>> {
+    const { data } = await api.get('/api/v1/planned_expenses', {
+      params: {
+        q: params.q,
+        status: params.status,
+        planning_type: params.planning_type,
+        category_id: params.category_id,
+        sort_by: params.sort_by,
+        sort_dir: params.sort_dir,
+      },
+    });
+    return normalizeCollection<PlannedExpense['attributes']>(data) as JsonApiCollection<PlannedExpense>;
+  },
+
   async fetchCompleteness(month = defaultMonth, year = defaultYear): Promise<CompletenessResponse> {
     const { data } = await api.get('/api/v1/completeness', { params: { month, year } });
     return (data as { data: CompletenessResponse }).data;
@@ -240,6 +259,19 @@ export const financeService = {
 
   async deleteRecurringObligation(id: string): Promise<void> {
     await api.delete(`/api/v1/recurring_obligations/${id}`);
+  },
+
+  async createPlannedExpense(payload: PlannedExpensePayload): Promise<PlannedExpense> {
+    const { data } = await api.post('/api/v1/planned_expenses', payload);
+    return normalizeSingle<PlannedExpense['attributes']>(data) as PlannedExpense;
+  },
+
+  async updatePlannedExpense(
+    id: string,
+    payload: Partial<PlannedExpensePayload>,
+  ): Promise<PlannedExpense> {
+    const { data } = await api.patch(`/api/v1/planned_expenses/${id}`, payload);
+    return normalizeSingle<PlannedExpense['attributes']>(data) as PlannedExpense;
   },
 
   async getPendingAgentEvents(sessionId?: string): Promise<AgentUiEvent[]> {

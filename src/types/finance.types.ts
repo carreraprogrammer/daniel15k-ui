@@ -295,7 +295,7 @@ export interface RecurringObligation {
   attributes: {
     name: string;
     amount: number;
-    due_day: number;
+    due_day: number | null;
     active?: boolean;
     category_id?: number | null;
     category_name?: string | null;
@@ -304,6 +304,10 @@ export interface RecurringObligation {
     subcategory_id?: number | null;
     subcategory_name?: string | null;
     subcategory_icon?: string | null;
+    source_type?: 'Debt' | 'Investment' | null;
+    source_id?: number | null;
+    allocatable_type?: string | null;
+    allocatable_id?: number | null;
     notes?: string | null;
   };
 }
@@ -313,6 +317,35 @@ export interface RecurringObligationPayload {
   amount: number;
   due_day: number | '';
   active?: boolean;
+  category_id?: number | null;
+  subcategory_id?: number | null;
+  notes?: string;
+}
+
+export interface PlannedExpense {
+  id: string;
+  type?: string;
+  attributes: {
+    name: string;
+    amount_estimated: number;
+    target_date: string;
+    planning_type: 'mandatory_one_off' | 'irregular_maintenance' | 'wish' | 'planned_purchase';
+    status: 'planned' | 'executed' | 'cancelled';
+    category_id?: number | null;
+    category_name?: string | null;
+    category_code?: string | null;
+    subcategory_id?: number | null;
+    subcategory_name?: string | null;
+    notes?: string | null;
+  };
+}
+
+export interface PlannedExpensePayload {
+  name: string;
+  amount_estimated: number | '';
+  target_date: string;
+  planning_type: 'mandatory_one_off' | 'irregular_maintenance' | 'wish' | 'planned_purchase';
+  status: 'planned' | 'executed' | 'cancelled';
   category_id?: number | null;
   subcategory_id?: number | null;
   notes?: string;
@@ -364,6 +397,15 @@ export interface IncomeSourceQueryParams {
   q?: string;
   active?: boolean | 'all';
   is_variable?: boolean | 'all';
+  sort_by?: string;
+  sort_dir?: 'asc' | 'desc';
+}
+
+export interface PlannedExpenseQueryParams {
+  q?: string;
+  status?: string;
+  planning_type?: string;
+  category_id?: number | string;
   sort_by?: string;
   sort_dir?: 'asc' | 'desc';
 }

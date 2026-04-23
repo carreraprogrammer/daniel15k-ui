@@ -9,12 +9,14 @@ const formatCop = (value: number) =>
 
 export interface RecurringObligationSlidingCardProps {
   obligation: RecurringObligation;
+  linkedDebtLabel?: string | null;
   onEdit: (obligation: RecurringObligation) => void;
   onDelete: (obligation: RecurringObligation) => void;
 }
 
 export const RecurringObligationSlidingCard = ({
   obligation,
+  linkedDebtLabel,
   onEdit,
   onDelete,
 }: RecurringObligationSlidingCardProps) => {
@@ -50,6 +52,9 @@ export const RecurringObligationSlidingCard = ({
               {attrs.subcategory_name && (
                 <span className={styles.subChip}>{attrs.subcategory_name}</span>
               )}
+              {linkedDebtLabel ? (
+                <span className={styles.linkChip}>{linkedDebtLabel}</span>
+              ) : null}
               {!attrs.category_name && !attrs.subcategory_name && (
                 <span className={styles.subChip}>Sin categoría</span>
               )}

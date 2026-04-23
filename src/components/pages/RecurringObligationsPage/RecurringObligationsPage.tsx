@@ -23,6 +23,7 @@ import type {
   IncomeSource,
   IncomeSourcePayload,
   IncomeSourceQueryParams,
+  Debt,
   RecurringObligation,
   RecurringObligationPayload,
   RecurringObligationQueryParams,
@@ -50,6 +51,7 @@ const initialIncomeFilters: IncomeSourceQueryParams = {
 
 export const RecurringObligationsPage = () => {
   const [obligations, setObligations] = useState<RecurringObligation[]>([]);
+  const [debts, setDebts] = useState<Debt[]>([]);
   const [incomeSources, setIncomeSources] = useState<IncomeSource[]>([]);
   const [categories, setCategories] = useState<CategoryResource[]>([]);
   const [loading, setLoading] = useState(true);
@@ -74,14 +76,16 @@ export const RecurringObligationsPage = () => {
     setLoading(true);
     setError(null);
     try {
-      const [obligationsResponse, incomeResponse, categoriesResponse] = await Promise.all([
+      const [obligationsResponse, incomeResponse, categoriesResponse, debtsResponse] = await Promise.all([
         financeService.fetchRecurringObligations(obligationFilters),
         financeService.fetchIncomeSources(incomeFilters),
         financeService.fetchCategories(),
+        financeService.fetchDebts({ status: 'active', sort_by: 'created_at', sort_dir: 'desc' }),
       ]);
       setObligations(obligationsResponse.data);
       setIncomeSources(incomeResponse.data);
       setCategories(categoriesResponse.data);
+      setDebts(debtsResponse.data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No fue posible cargar la operación recurrente.');
     } finally {
@@ -226,6 +230,11 @@ export const RecurringObligationsPage = () => {
   const incomeActiveFilterCount = useMemo(
     () => incomeChips.filter((chip) => chip.key !== 'q').length,
     [incomeChips],
+  );
+
+  const debtById = useMemo(
+    () => new Map(debts.map((debt) => [debt.id, debt])),
+    [debts],
   );
 
   return (
@@ -497,6 +506,13 @@ export const RecurringObligationsPage = () => {
                     <RecurringObligationSlidingCard
                       key={obligation.id}
                       obligation={obligation}
+                      linkedDebtLabel={
+                        obligation.attributes.source_type === 'Debt' && obligation.attributes.source_id
+                          ? `Deuda: ${debtById.get(String(obligation.attributes.source_id))?.attributes.name ?? `#${obligation.attributes.source_id}`}`
+                          : obligation.attributes.allocatable_type === 'Debt' && obligation.attributes.allocatable_id
+                            ? `Deuda: ${debtById.get(String(obligation.attributes.allocatable_id))?.attributes.name ?? `#${obligation.attributes.allocatable_id}`}`
+                            : null
+                      }
                       onEdit={(nextObligation) => {
                         setEditingObligation(nextObligation);
                         setComposerOpen(true);

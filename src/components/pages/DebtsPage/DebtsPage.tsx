@@ -16,7 +16,7 @@ import { SortSheet } from '../../molecules/SortSheet';
 import { DebtComposer } from '../../organisms/DebtComposer';
 import { DebtSlidingCard } from '../../organisms/DebtSlidingCard';
 import { financeService } from '../../../services/financeService';
-import type { Debt, DebtPayload, DebtQueryParams } from '../../../types/finance.types';
+import type { Debt, DebtPayload, DebtQueryParams, RecurringObligation } from '../../../types/finance.types';
 import styles from '../FinancePage.module.css';
 
 const formatCop = (value: number) =>
@@ -32,6 +32,7 @@ const initialFilters: DebtQueryParams = {
 
 export const DebtsPage = () => {
   const [debts, setDebts] = useState<Debt[]>([]);
+  const [obligations, setObligations] = useState<RecurringObligation[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -47,8 +48,12 @@ export const DebtsPage = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await financeService.fetchDebts(filters);
-      setDebts(response.data);
+      const [debtsResponse, obligationsResponse] = await Promise.all([
+        financeService.fetchDebts(filters),
+        financeService.fetchRecurringObligations({ active: 'all', sort_by: 'due_day', sort_dir: 'asc' }),
+      ]);
+      setDebts(debtsResponse.data);
+      setObligations(obligationsResponse.data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No fue posible cargar las deudas.');
     } finally {
@@ -125,6 +130,22 @@ export const DebtsPage = () => {
     () => appliedChips.filter((chip) => chip.key !== 'q').length,
     [appliedChips],
   );
+
+  const linkedObligationByDebtId = useMemo(() => {
+    const map = new Map<string, RecurringObligation>();
+    obligations.forEach((obligation) => {
+      const linkedDebtId =
+        obligation.attributes.source_type === 'Debt'
+          ? obligation.attributes.source_id
+          : obligation.attributes.allocatable_type === 'Debt'
+            ? obligation.attributes.allocatable_id
+            : null;
+      if (linkedDebtId) {
+        map.set(String(linkedDebtId), obligation);
+      }
+    });
+    return map;
+  }, [obligations]);
 
   const removeChip = (key: string) => {
     const next = { ...filters, [key]: '' };
@@ -271,6 +292,11 @@ export const DebtsPage = () => {
               <DebtSlidingCard
                 key={debt.id}
                 debt={debt}
+                linkedObligationLabel={
+                  linkedObligationByDebtId.get(debt.id)
+                    ? `Obligación vinculada: ${linkedObligationByDebtId.get(debt.id)?.attributes.name}`
+                    : null
+                }
                 onEdit={(nextDebt) => {
                   setEditingDebt(nextDebt);
                   setComposerOpen(true);

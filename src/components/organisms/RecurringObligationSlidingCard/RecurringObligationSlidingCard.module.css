@@ -119,6 +119,20 @@
   white-space: nowrap;
 }
 
+.linkChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.22rem 0.55rem;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(143, 233, 221, 0.22);
+  background: rgba(143, 233, 221, 0.08);
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: var(--font-medium);
+  color: #8fe9dd;
+  white-space: nowrap;
+}
+
 .meta {
   font-family: var(--font-sans);
   font-size: 0.78rem;

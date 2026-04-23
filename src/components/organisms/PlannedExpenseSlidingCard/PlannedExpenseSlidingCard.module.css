@@ -3,18 +3,10 @@
   overflow: hidden;
 }
 
-.optionEdit,
-.optionDelete {
-  --color: var(--color-text-primary);
-  min-width: 72px;
-}
-
 .optionEdit {
+  --color: var(--color-text-primary);
   --background: linear-gradient(135deg, rgba(243, 210, 122, 0.16), rgba(214, 168, 74, 0.18));
-}
-
-.optionDelete {
-  --background: rgba(239, 68, 68, 0.16);
+  min-width: 72px;
 }
 
 .item {
@@ -50,7 +42,8 @@
   align-content: start;
 }
 
-.header {
+.header,
+.chipRow {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
@@ -59,19 +52,34 @@
 
 .type,
 .meta,
-.label,
-.linked {
+.label {
   color: rgba(231, 236, 244, 0.64);
   font-size: 0.85rem;
-}
-
-.linked {
-  color: #8fe9dd;
 }
 
 .name,
 .amount {
   color: #fff;
+}
+
+.catChip,
+.subChip {
+  display: inline-flex;
+  width: fit-content;
+  padding: 0.22rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.74rem;
+}
+
+.catChip {
+  background: color-mix(in srgb, var(--cat-color) 12%, transparent);
+  color: var(--cat-color);
+  border: 1px solid color-mix(in srgb, var(--cat-color) 22%, transparent);
+}
+
+.subChip {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(231, 236, 244, 0.78);
 }
 
 .status {
@@ -83,18 +91,17 @@
   font-weight: 700;
 }
 
-.status_active {
+.status_planned {
   background: rgba(143, 233, 221, 0.14);
   color: #8fe9dd;
 }
 
-.status_paid_off {
+.status_executed {
   background: rgba(124, 224, 211, 0.14);
   color: #7ce0d3;
 }
 
-.status_paused,
-.status_disputed {
+.status_cancelled {
   background: rgba(255, 178, 138, 0.14);
   color: #ffb28a;
 }

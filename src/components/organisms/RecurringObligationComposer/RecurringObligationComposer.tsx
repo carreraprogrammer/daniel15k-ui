@@ -38,7 +38,7 @@ const valuesFromObligation = (obligation: RecurringObligation | null): Values =>
   return {
     name: obligation.attributes.name,
     amount: obligation.attributes.amount,
-    dueDay: obligation.attributes.due_day,
+    dueDay: obligation.attributes.due_day ?? '',
     categoryId: obligation.attributes.category_id ? String(obligation.attributes.category_id) : '',
     subcategoryId: obligation.attributes.subcategory_id ? String(obligation.attributes.subcategory_id) : '',
     active: String(obligation.attributes.active ?? true),

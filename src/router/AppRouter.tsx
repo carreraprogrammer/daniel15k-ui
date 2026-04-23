@@ -9,6 +9,7 @@ import { NotFoundPage } from '../components/pages/NotFoundPage/NotFoundPage';
 import { OAuthCallbackPage } from '../components/pages/OAuthCallbackPage';
 import { TransactionsPage } from '../components/pages/TransactionsPage';
 import { DebtsPage } from '../components/pages/DebtsPage';
+import { PlannedExpensesPage } from '../components/pages/PlannedExpensesPage';
 import { RecurringObligationsPage } from '../components/pages/RecurringObligationsPage';
 import { BudgetsPage } from '../components/pages/BudgetsPage';
 
@@ -64,6 +65,7 @@ export const AppRouter = () => {
       <ProtectedRoute exact path="/dashboard" component={DashboardPage} />
       <ProtectedRoute exact path="/transactions" component={TransactionsPage} />
       <ProtectedRoute exact path="/debts" component={DebtsPage} />
+      <ProtectedRoute exact path="/planned-expenses" component={PlannedExpensesPage} />
       <ProtectedRoute exact path="/recurring" component={RecurringObligationsPage} />
       <ProtectedRoute exact path="/budgets" component={BudgetsPage} />
       <ProtectedRoute exact path="/profile" component={ProfilePage} />
