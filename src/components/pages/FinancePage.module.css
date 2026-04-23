@@ -1,5 +1,11 @@
 .pageContent {
   --background: transparent;
+  --finance-space-2xs: 0.25rem;
+  --finance-space-xs: 0.5rem;
+  --finance-space-sm: 0.75rem;
+  --finance-space-md: 1rem;
+  --finance-space-lg: 1.25rem;
+  --finance-space-xl: 1.5rem;
   display: flex;
   flex: 1;
   min-height: 0;
@@ -10,13 +16,18 @@
   display: flex;
   flex-direction: column;
   min-height: 100%;
+  padding:
+    var(--app-content-pad-top)
+    var(--app-content-pad-inline)
+    var(--app-content-pad-bottom);
+  box-sizing: border-box;
 }
 
 .stack {
   display: flex;
   flex: 1 0 auto;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: var(--finance-space-xl);
   min-height: 100%;
 }
 
@@ -47,7 +58,7 @@
 
 .focusCard {
   display: grid;
-  gap: 1rem;
+  gap: var(--finance-space-md);
   position: relative;
   isolation: isolate;
   overflow: hidden;
@@ -91,7 +102,7 @@
   justify-content: flex-start;
   height: 100%;
   min-height: 100%;
-  gap: 1.2rem;
+  gap: var(--finance-space-lg);
 }
 
 .focusCardCentered {
@@ -108,13 +119,13 @@
 .focusGrid {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) auto;
-  gap: 1rem;
+  gap: var(--finance-space-md);
   align-items: end;
 }
 
 .focusCopy {
   display: grid;
-  gap: 0.55rem;
+  gap: var(--finance-space-xs);
 }
 
 .focusQuestion {
@@ -160,7 +171,7 @@
 .focusMeta {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.65rem;
+  gap: var(--finance-space-sm);
 }
 
 .focusBadge {
@@ -179,9 +190,9 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--finance-space-sm);
   margin-top: auto;
-  padding-top: 0.2rem;
+  padding-top: var(--finance-space-2xs);
 }
 
 .focusActions > button {
@@ -190,8 +201,8 @@
 
 .focusSupport {
   display: grid;
-  gap: 0.65rem;
-  padding: 0.95rem 1rem;
+  gap: var(--finance-space-sm);
+  padding: var(--finance-space-md);
   border-radius: 20px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
@@ -205,7 +216,7 @@
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  gap: 1rem;
+  gap: var(--finance-space-md);
 }
 
 .focusSupportTitle {
@@ -250,21 +261,23 @@
 
 .detailStage {
   display: grid;
-  gap: 1.25rem;
+  gap: var(--finance-space-xl);
   align-content: start;
 }
 
 .detailStageHeader {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 0.85rem;
+  gap: var(--finance-space-lg);
+  padding-top: var(--finance-space-xs);
 }
 
 .detailStageCopy {
   display: grid;
-  gap: 0.3rem;
+  gap: var(--finance-space-xs);
+  max-width: 60ch;
 }
 
 .detailStageTitle {
@@ -283,7 +296,7 @@
 
 .detailPanel {
   display: grid;
-  gap: 1rem;
+  gap: var(--finance-space-md);
 }
 
 .hero > .listItem {
@@ -293,8 +306,8 @@
 
 .filters {
   display: grid;
-  gap: 0.85rem;
-  padding: 1rem;
+  gap: var(--finance-space-md);
+  padding: var(--finance-space-md);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 24px;
   background: rgba(255, 255, 255, 0.03);
@@ -303,12 +316,12 @@
 .filtersGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 0.85rem;
+  gap: var(--finance-space-md);
 }
 
 .filtersCompact {
   display: grid;
-  gap: 0.75rem;
+  gap: var(--finance-space-sm);
 }
 
 .sectionTitle {
@@ -319,7 +332,7 @@
 
 .sheetSection {
   display: grid;
-  gap: 0.75rem;
+  gap: var(--finance-space-sm);
 }
 
 .sheetSectionTitle {
@@ -334,7 +347,7 @@
 .quickFilters {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.65rem;
+  gap: var(--finance-space-sm);
 }
 
 .secondaryActions {
@@ -344,7 +357,7 @@
 
 .segmentWrap {
   display: grid;
-  padding: 0.35rem;
+  padding: var(--finance-space-xs);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 24px;
   background: rgba(255, 255, 255, 0.03);
@@ -396,7 +409,7 @@
 .metrics {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-  gap: 1rem;
+  gap: var(--finance-space-md);
 }
 
 .metricCard,
@@ -466,28 +479,30 @@
 .columns {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
+  gap: var(--finance-space-md);
 }
 
 .panel {
-  padding: 1.25rem;
+  display: grid;
+  gap: var(--finance-space-md);
+  padding: var(--finance-space-lg);
 }
 
 .summarySheetBody {
   display: grid;
-  gap: 1rem;
-  padding: 1rem;
+  gap: var(--finance-space-md);
+  padding: var(--finance-space-md);
 }
 
 .panelTitle {
-  margin: 0 0 0.85rem;
+  margin: 0;
   color: #fff;
   font-size: 1.05rem;
 }
 
 .list {
   display: grid;
-  gap: 0.75rem;
+  gap: var(--finance-space-md);
 }
 
 .infiniteSentinel {
@@ -508,11 +523,11 @@
 .listItem {
   display: flex;
   justify-content: space-between;
-  gap: 1rem;
+  gap: var(--finance-space-md);
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  padding: 0.9rem 1rem;
+  padding: var(--finance-space-md);
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.05);
   background:
