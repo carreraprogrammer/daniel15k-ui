@@ -79,7 +79,7 @@ export const BudgetsPage = () => {
     loading: wizardDataLoading,
     error: wizardDataError,
     reload: reloadWizardData,
-  } = useWizardData({ enabled: wizardOpen });
+  } = useWizardData({ enabled: wizardOpen, month });
 
   // ── Page data load ──────────────────────────────────────────────────────────
 

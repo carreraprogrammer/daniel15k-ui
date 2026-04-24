@@ -5,6 +5,8 @@ import type { WizardData } from '../types/finance.types';
 interface UseWizardDataOptions {
   /** Only fetches when true — prevents network calls until the wizard is about to open. */
   enabled: boolean;
+  /** Month string in "YYYY-MM" format — used to pre-populate confirmed budget amounts. */
+  month?: string;
 }
 
 interface UseWizardDataResult {
@@ -14,7 +16,7 @@ interface UseWizardDataResult {
   reload: () => void;
 }
 
-export const useWizardData = ({ enabled }: UseWizardDataOptions): UseWizardDataResult => {
+export const useWizardData = ({ enabled, month }: UseWizardDataOptions): UseWizardDataResult => {
   const [wizardData, setWizardData] = useState<WizardData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +29,7 @@ export const useWizardData = ({ enabled }: UseWizardDataOptions): UseWizardDataR
     setLoading(true);
     setError(null);
     try {
-      const data = await financeService.fetchWizardData();
+      const data = await financeService.fetchWizardData(month);
       setWizardData(data);
     } catch (err) {
       setError(

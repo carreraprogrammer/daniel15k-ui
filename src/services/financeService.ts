@@ -315,8 +315,14 @@ export const financeService = {
   // ── Budget Wizard endpoints ────────────────────────────────────────────────
 
   /** GET /api/v1/monthly_plans/wizard_data */
-  async fetchWizardData(): Promise<WizardData> {
-    const { data } = await api.get('/api/v1/monthly_plans/wizard_data');
+  async fetchWizardData(month?: string): Promise<WizardData> {
+    const params: Record<string, string | number> = {};
+    if (month) {
+      const [year, mon] = month.split('-');
+      params.year = Number(year);
+      params.month = Number(mon);
+    }
+    const { data } = await api.get('/api/v1/monthly_plans/wizard_data', { params });
     return (data.data ?? data) as WizardData;
   },
 
