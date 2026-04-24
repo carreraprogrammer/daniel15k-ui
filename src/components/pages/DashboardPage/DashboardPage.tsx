@@ -26,16 +26,15 @@ export const DashboardPage = () => {
       };
     }
 
-    const baseIncome = summary.monthly_plan?.base_budget_income ?? 0;
-    const expenses = summary.balance.expense_confirmed;
-    const remainingBase = baseIncome > 0 ? baseIncome - expenses : summary.balance.balance_confirmed;
+    const confirmedBalance = summary.balance.balance_confirmed;
+    const incomeConfirmed = summary.balance.income_confirmed;
     const recommendedAction = summary.financial_context?.recommended_action ?? 'Todavía no hay una acción recomendada.';
     const overflow = summary.overflow_status?.realized_overflow ?? 0;
 
     return {
-      title: remainingBase >= 0 ? 'Así va tu mes' : 'Tu mes ya va pasado',
-      value: formatCop(remainingBase),
-      caption: baseIncome > 0 ? 'Disponible frente a tu ingreso base presupuestable' : 'Balance confirmado del período',
+      title: confirmedBalance >= 0 ? 'Así va tu mes' : 'Tu mes ya va pasado',
+      value: formatCop(confirmedBalance),
+      caption: incomeConfirmed > 0 ? 'Balance confirmado del período (ingresos − gastos)' : 'Sin ingresos registrados aún',
       text:
         overflow > 0
           ? `Ya hay overflow disponible. ${recommendedAction}`
@@ -45,15 +44,15 @@ export const DashboardPage = () => {
 
   const monthProgress = useMemo(() => {
     if (!summary) return null;
-    const baseIncome = summary.monthly_plan?.base_budget_income ?? 0;
+    const incomeConfirmed = summary.balance.income_confirmed;
     const expenses = summary.balance.expense_confirmed;
-    if (baseIncome <= 0) return null;
-    const pct = Math.max(0, Math.min(100, Math.round((expenses / baseIncome) * 100)));
+    if (incomeConfirmed <= 0) return null;
+    const pct = Math.max(0, Math.min(100, Math.round((expenses / incomeConfirmed) * 100)));
     return {
       pct,
       used: expenses,
-      total: baseIncome,
-      warn: pct > 100,
+      total: incomeConfirmed,
+      warn: pct > 90,
     };
   }, [summary]);
 
@@ -90,7 +89,7 @@ export const DashboardPage = () => {
                     />
                   </div>
                   <p className={styles.focusSupportText}>
-                    {formatCop(monthProgress.used)} de {formatCop(monthProgress.total)} del ingreso base ya están comprometidos por gasto confirmado.
+                    {formatCop(monthProgress.used)} gastados de {formatCop(monthProgress.total)} ingresados en el período.
                   </p>
                 </section>
               ) : null}
