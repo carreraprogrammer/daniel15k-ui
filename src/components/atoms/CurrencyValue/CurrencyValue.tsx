@@ -6,6 +6,8 @@ export interface CurrencyValueProps {
   currency?: string;
   locale?: string;
   mode?: CurrencyDisplayMode;
+  minimumFractionDigits?: number;
+  maximumFractionDigits?: number;
   className?: string;
   exactOnHover?: boolean;
 }
@@ -15,10 +17,18 @@ export const CurrencyValue = ({
   currency = 'COP',
   locale = 'es-CO',
   mode = 'full',
+  minimumFractionDigits,
+  maximumFractionDigits,
   className,
   exactOnHover = true,
 }: CurrencyValueProps) => {
-  const visibleValue = formatCurrency(amount, { currency, locale, mode });
+  const visibleValue = formatCurrency(amount, {
+    currency,
+    locale,
+    mode,
+    minimumFractionDigits,
+    maximumFractionDigits,
+  });
   const exactValue = exactOnHover
     ? formatCurrency(amount, { currency, locale, mode: 'full' })
     : undefined;

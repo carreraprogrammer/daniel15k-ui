@@ -1,10 +1,6 @@
 import type { WizardCategory } from '../../../types/finance.types';
+import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import styles from './BudgetSummaryStep.module.css';
-
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
-const formatCOP = (amount: number): string =>
-  '$' + Math.round(amount).toLocaleString('es-CO').replace(/,/g, '.');
 
 const formatPct = (pct: number): string => `${Math.round(pct)}%`;
 
@@ -65,7 +61,7 @@ export const BudgetSummaryStep = ({
         <div className={styles.incomeBar} style={{ '--bar-color': 'var(--color-income)' } as React.CSSProperties} />
         <span className={styles.incomeName}>Ingreso total</span>
         <div className={styles.incomeNumbers}>
-          <span className={styles.incomeAmount}>{formatCOP(totalIncome)}</span>
+          <span className={styles.incomeAmount}>{formatCurrencyCompact(totalIncome)}</span>
           <span className={styles.incomePct}>100%</span>
         </div>
       </div>
@@ -106,7 +102,7 @@ export const BudgetSummaryStep = ({
                   <span className={styles.categoryName}>{cat.name}</span>
                 </div>
                 <div className={styles.categoryRight}>
-                  <span className={styles.categoryAmount}>{formatCOP(cat.total)}</span>
+                  <span className={styles.categoryAmount}>{formatCurrencyCompact(cat.total)}</span>
                   <span className={styles.categoryPct}>{formatPct(pct)}</span>
                 </div>
               </div>
@@ -143,7 +139,7 @@ export const BudgetSummaryStep = ({
               <span className={styles.categoryName}>Sin asignar</span>
             </div>
             <div className={styles.categoryRight}>
-              <span className={styles.categoryAmount}>{formatCOP(unassigned)}</span>
+              <span className={styles.categoryAmount}>{formatCurrencyCompact(unassigned)}</span>
               <span className={styles.categoryPct}>{formatPct((unassigned / incomeForCalc) * 100)}</span>
             </div>
           </div>
@@ -154,7 +150,7 @@ export const BudgetSummaryStep = ({
       <div className={styles.totalsCard}>
         <div className={styles.totalsRow}>
           <span className={styles.totalsLabel}>Total asignado</span>
-          <span className={styles.totalsValue}>{formatCOP(totalAssigned)}</span>
+          <span className={styles.totalsValue}>{formatCurrencyCompact(totalAssigned)}</span>
         </div>
         <div className={styles.totalsRow}>
           <span className={styles.totalsLabel}>Sin asignar</span>
@@ -164,7 +160,7 @@ export const BudgetSummaryStep = ({
               unassigned < 0 ? styles.totalsNegative : styles.totalsPositive,
             ].join(' ')}
           >
-            {formatCOP(unassigned)}
+            {formatCurrencyCompact(unassigned)}
           </strong>
         </div>
       </div>

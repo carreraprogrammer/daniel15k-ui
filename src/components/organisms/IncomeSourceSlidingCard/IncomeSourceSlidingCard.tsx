@@ -2,10 +2,8 @@ import { IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding } from 
 import { createOutline, trashOutline } from 'ionicons/icons';
 import type { IncomeSource } from '../../../types/finance.types';
 import { cadenceLabel, classificationLabel, incomeWindowLabel, reliabilityLabel } from '../../../utils/incomeProfile';
+import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import styles from './IncomeSourceSlidingCard.module.css';
-
-const formatCop = (value: number) =>
-  new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(value);
 
 export interface IncomeSourceSlidingCardProps {
   source: IncomeSource;
@@ -31,7 +29,7 @@ export const IncomeSourceSlidingCard = ({ source, onEdit, onDelete }: IncomeSour
         </div>
         <div className={styles.secondary}>
           <span className={styles.label}>Mensual esperado</span>
-          <strong className={styles.amount}>{formatCop(source.attributes.expected_amount)}</strong>
+          <strong className={styles.amount}>{formatCurrencyCompact(source.attributes.expected_amount)}</strong>
         </div>
       </div>
     </IonItem>

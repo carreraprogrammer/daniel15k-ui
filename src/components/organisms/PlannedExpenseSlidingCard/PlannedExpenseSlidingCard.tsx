@@ -1,10 +1,8 @@
 import { IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding } from '@ionic/react';
 import { checkmarkDoneOutline, closeOutline, createOutline } from 'ionicons/icons';
 import type { PlannedExpense } from '../../../types/finance.types';
+import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import styles from './PlannedExpenseSlidingCard.module.css';
-
-const formatCop = (value: number) =>
-  new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(value);
 
 const formatDate = (value: string) =>
   new Intl.DateTimeFormat('es-CO', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(`${value}T00:00:00`));
@@ -57,7 +55,7 @@ export const PlannedExpenseSlidingCard = ({
 
           <div className={styles.secondary}>
             <span className={styles.label}>Estimado</span>
-            <strong className={styles.amount}>{formatCop(attrs.amount_estimated)}</strong>
+            <strong className={styles.amount}>{formatCurrencyCompact(attrs.amount_estimated)}</strong>
           </div>
         </div>
       </IonItem>

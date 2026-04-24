@@ -16,6 +16,7 @@ import {
   buildIncomeSchedules,
   windowRange,
 } from '../../../utils/incomeProfile';
+import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import styles from './IncomeSetupWizard.module.css';
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -253,7 +254,7 @@ export const IncomeSetupWizard = ({ isOpen, onClose, onComplete }: IncomeSetupWi
               />
               {(base.cadence === 'biweekly' || base.cadence === 'weekly') && baseMonthlyExpected ? (
                 <p className={[styles.hint, styles.spanTwo].join(' ')}>
-                  Total mensual esperado calculado: <strong>${baseMonthlyExpected.toLocaleString('es-CO')}</strong>
+                  Total mensual esperado calculado: <strong>{formatCurrencyCompact(baseMonthlyExpected)}</strong>
                 </p>
               ) : null}
               <div />
@@ -362,7 +363,7 @@ export const IncomeSetupWizard = ({ isOpen, onClose, onComplete }: IncomeSetupWi
               />
               {(varIncome.cadence === 'biweekly' || varIncome.cadence === 'weekly') && variableMonthlyExpected ? (
                 <p className={[styles.hint, styles.spanTwo].join(' ')}>
-                  Total mensual esperado calculado: <strong>${variableMonthlyExpected.toLocaleString('es-CO')}</strong>
+                  Total mensual esperado calculado: <strong>{formatCurrencyCompact(variableMonthlyExpected)}</strong>
                 </p>
               ) : null}
               <SelectInput

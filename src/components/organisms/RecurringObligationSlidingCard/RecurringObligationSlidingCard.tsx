@@ -2,10 +2,8 @@ import { IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding } from 
 import { closeCircleOutline, createOutline, trashOutline } from 'ionicons/icons';
 import type { RecurringObligation } from '../../../types/finance.types';
 import { resolveNamedIcon } from '../BudgetWizard/iconRegistry';
+import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import styles from './RecurringObligationSlidingCard.module.css';
-
-const formatCop = (value: number) =>
-  new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(value);
 
 export interface RecurringObligationSlidingCardProps {
   obligation: RecurringObligation;
@@ -69,7 +67,7 @@ export const RecurringObligationSlidingCard = ({
 
           {/* ── Secondary info ── */}
           <div className={styles.secondary}>
-            <strong className={styles.amount}>{formatCop(attrs.amount)}</strong>
+            <strong className={styles.amount}>{formatCurrencyCompact(attrs.amount)}</strong>
             <span className={[styles.badge, isActive ? styles.badgeActive : styles.badgeInactive].join(' ')}>
               {isActive ? 'Activa' : 'Inactiva'}
             </span>

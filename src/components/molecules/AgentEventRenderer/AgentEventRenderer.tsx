@@ -18,12 +18,10 @@ import type {
   ShowCardPayload,
   ShowCategorySelectorPayload,
 } from '../../../types/finance.types';
+import { formatCurrencyCompact, formatCurrencyFull } from '../../../utils/formatCurrency';
 import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
 import styles from './AgentEventRenderer.module.css';
-
-const formatCop = (value: number) =>
-  new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(value);
 
 const renderMarkdown = (text: string) => {
   const escaped = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -93,28 +91,28 @@ const PlanProposalCard = ({ event }: { event: AgentUiEvent }) => {
       <div className={styles.proposalSummary}>
         <div className={styles.summaryItem}>
           <span className={styles.summaryLabel}>Ingreso base</span>
-          <strong className={styles.summaryValue}>{formatCop(baseIncome)}</strong>
+          <strong className={styles.summaryValue}>{formatCurrencyCompact(baseIncome)}</strong>
         </div>
         <div className={`${styles.summaryItem} ${styles.summarySubtract}`}>
           <span className={styles.summaryLabel}>Obligaciones fijas</span>
-          <span className={styles.summaryValueMuted}>− {formatCop(obligationsTotal)}</span>
+          <span className={styles.summaryValueMuted}>− {formatCurrencyCompact(obligationsTotal)}</span>
         </div>
         {debtMinimums > 0 && (
           <div className={`${styles.summaryItem} ${styles.summarySubtract}`}>
             <span className={styles.summaryLabel}>Mínimos de deuda</span>
-            <span className={styles.summaryValueMuted}>− {formatCop(debtMinimums)}</span>
+            <span className={styles.summaryValueMuted}>− {formatCurrencyCompact(debtMinimums)}</span>
           </div>
         )}
         {sinkingFunds > 0 && (
           <div className={`${styles.summaryItem} ${styles.summarySubtract}`}>
             <span className={styles.summaryLabel}>Bolsillos (sinking funds)</span>
-            <span className={styles.summaryValueMuted}>− {formatCop(sinkingFunds)}</span>
+            <span className={styles.summaryValueMuted}>− {formatCurrencyCompact(sinkingFunds)}</span>
           </div>
         )}
         {buffer > 0 && (
           <div className={`${styles.summaryItem} ${styles.summarySubtract}`}>
             <span className={styles.summaryLabel}>Buffer de protección</span>
-            <span className={styles.summaryValueMuted}>− {formatCop(buffer)}</span>
+            <span className={styles.summaryValueMuted}>− {formatCurrencyCompact(buffer)}</span>
           </div>
         )}
         <div
@@ -126,7 +124,7 @@ const PlanProposalCard = ({ event }: { event: AgentUiEvent }) => {
           ].filter(Boolean).join(' ')}
         >
           <span className={styles.summaryLabel}>Margen libre</span>
-          <strong className={styles.summaryValueAccent}>{formatCop(freeMargin)}</strong>
+          <strong className={styles.summaryValueAccent}>{formatCurrencyCompact(freeMargin)}</strong>
         </div>
       </div>
 
@@ -137,7 +135,7 @@ const PlanProposalCard = ({ event }: { event: AgentUiEvent }) => {
             {distribution.map(({ key, amount }) => (
               <div key={key} className={styles.distributionItem}>
                 <span className={styles.distributionLabel}>{key}</span>
-                <span className={styles.distributionAmount}>{formatCop(amount)}</span>
+                <span className={styles.distributionAmount}>{formatCurrencyCompact(amount)}</span>
               </div>
             ))}
           </div>
@@ -285,19 +283,19 @@ const AmountEditorCard = ({ event }: { event: AgentUiEvent }) => {
               <input
                 type="text"
                 className={styles.amountInput}
-                value={amounts[item.code] ? formatCop(amounts[item.code]) : ''}
+                value={amounts[item.code] ? formatCurrencyFull(amounts[item.code]) : ''}
                 onChange={(e) => setAmount(item.code, e.target.value)}
                 placeholder="$0"
               />
             ) : (
-              <span className={styles.amountFixed}>{formatCop(item.amount)}</span>
+              <span className={styles.amountFixed}>{formatCurrencyCompact(item.amount)}</span>
             )}
           </div>
         ))}
       </div>
       <div className={styles.amountTotalRow}>
         <span className={styles.summaryLabel}>Total asignado</span>
-        <strong className={styles.summaryValueAccent}>{formatCop(total)}</strong>
+        <strong className={styles.summaryValueAccent}>{formatCurrencyCompact(total)}</strong>
       </div>
       <div className={styles.modalActions}>
         <Button label="Confirmar montos" onClick={confirm} />

@@ -4,10 +4,8 @@ import { createOutline, trashOutline } from 'ionicons/icons';
 import type { CategoryLookupItem } from '../../../utils/financeBehavior';
 import type { Transaction } from '../../../types/finance.types';
 import { resolveNamedIcon } from '../BudgetWizard/iconRegistry';
+import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import styles from './TransactionSlidingCard.module.css';
-
-const formatCop = (value: number) =>
-  new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(value);
 
 const statusLabels: Record<string, string> = {
   confirmed: 'Confirmada',
@@ -77,7 +75,7 @@ export const TransactionSlidingCard = ({ transaction, category, onEdit, onDelete
           {/* ── Secondary info ── */}
           <div className={styles.secondary}>
             <strong className={[styles.amount, isIncome ? styles.amountIncome : ''].filter(Boolean).join(' ')}>
-              {isIncome ? '+' : ''}{formatCop(transaction.attributes.amount)}
+              {isIncome ? '+' : ''}{formatCurrencyCompact(transaction.attributes.amount)}
             </strong>
             <span className={`${styles.status} ${styles[`status_${status}`] ?? ''}`}>
               {statusLabels[status] ?? status}

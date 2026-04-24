@@ -17,12 +17,10 @@ import { SortSheet } from '../../molecules/SortSheet';
 import { DebtComposer } from '../../organisms/DebtComposer';
 import { DebtSlidingCard } from '../../organisms/DebtSlidingCard';
 import { financeService } from '../../../services/financeService';
+import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import type { Debt, DebtPayload, DebtQueryParams, RecurringObligation } from '../../../types/finance.types';
 import styles from '../FinancePage.module.css';
 import formStyles from '../../organisms/ComposerForm.module.css';
-
-const formatCop = (value: number) =>
-  new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(value);
 
 const initialFilters: DebtQueryParams = {
   q: '',
@@ -189,7 +187,7 @@ export const DebtsPage = () => {
           && (!linkedDebtId || linkedDebtId === linkingDebt.id);
       })
       .map((obligation) => ({
-        label: `${obligation.attributes.name} · ${formatCop(obligation.attributes.amount)}${obligation.attributes.due_day ? ` · Día ${obligation.attributes.due_day}` : ''}`,
+        label: `${obligation.attributes.name} · ${formatCurrencyCompact(obligation.attributes.amount)}${obligation.attributes.due_day ? ` · Día ${obligation.attributes.due_day}` : ''}`,
         value: obligation.id,
       }));
   }, [linkingDebt, obligations]);
@@ -294,7 +292,7 @@ export const DebtsPage = () => {
                   </p>
                 </div>
                 <div>
-                  <div className={styles.focusValue}>{formatCop(metrics.totalBalance)}</div>
+                  <div className={styles.focusValue}>{formatCurrencyCompact(metrics.totalBalance)}</div>
                   <p className={styles.focusCaption}>Saldo activo acumulado</p>
                 </div>
               </div>
@@ -315,7 +313,7 @@ export const DebtsPage = () => {
               ) : null}
 
               <div className={styles.focusMeta}>
-                <span className={styles.focusBadge}>{formatCop(metrics.totalMonthly)} al mes</span>
+                <span className={styles.focusBadge}>{formatCurrencyCompact(metrics.totalMonthly)} al mes</span>
                 <span className={styles.focusBadge}>{metrics.totalCount} registradas</span>
               </div>
 

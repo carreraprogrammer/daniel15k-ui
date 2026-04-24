@@ -18,6 +18,7 @@ import { RecurringObligationSlidingCard } from '../../organisms/RecurringObligat
 import { IncomeSourceComposer } from '../../organisms/IncomeSourceComposer';
 import { IncomeSourceSlidingCard } from '../../organisms/IncomeSourceSlidingCard';
 import { financeService } from '../../../services/financeService';
+import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import type {
   CategoryResource,
   IncomeSource,
@@ -29,9 +30,6 @@ import type {
   RecurringObligationQueryParams,
 } from '../../../types/finance.types';
 import styles from '../FinancePage.module.css';
-
-const formatCop = (value: number) =>
-  new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(value);
 
 const initialObligationFilters: RecurringObligationQueryParams = {
   q: '',
@@ -300,7 +298,7 @@ export const RecurringObligationsPage = () => {
                 </div>
                 <div>
                   <div className={styles.focusValue}>
-                    {activeView === 'income' ? formatCop(metrics.incomeTotal) : formatCop(metrics.obligationsTotal)}
+                    {activeView === 'income' ? formatCurrencyCompact(metrics.incomeTotal) : formatCurrencyCompact(metrics.obligationsTotal)}
                   </div>
                   <p className={styles.focusCaption}>
                     {activeView === 'income' ? 'Ingreso esperado recurrente' : 'Carga recurrente mensual'}
@@ -321,7 +319,7 @@ export const RecurringObligationsPage = () => {
                     />
                   </div>
                   <p className={styles.focusSupportText}>
-                    {formatCop(metrics.incomeTotal)} de ingresos recurrentes frente a {formatCop(metrics.obligationsTotal)} en obligaciones.
+                    {formatCurrencyCompact(metrics.incomeTotal)} de ingresos recurrentes frente a {formatCurrencyCompact(metrics.obligationsTotal)} en obligaciones.
                   </p>
                 </section>
               ) : null}

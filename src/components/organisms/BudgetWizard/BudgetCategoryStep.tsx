@@ -1,13 +1,9 @@
 import { IonIcon } from '@ionic/react';
 import { useState } from 'react';
 import type { WizardCategory, WizardSubcategory } from '../../../types/finance.types';
+import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import { resolveNamedIcon } from './iconRegistry';
 import styles from './BudgetCategoryStep.module.css';
-
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
-const formatCOP = (amount: number): string =>
-  '$' + Math.round(amount).toLocaleString('es-CO').replace(/,/g, '.');
 
 const CONFIDENCE_LABELS: Record<WizardSubcategory['confidence'], string> = {
   high:   '●',
@@ -172,7 +168,7 @@ export const BudgetCategoryStep = ({
                   />
                 ) : (
                   <>
-                    <span className={styles.amountText}>{formatCOP(amount)}</span>
+                    <span className={styles.amountText}>{formatCurrencyCompact(amount)}</span>
                     {isLocked ? (
                       <span className={styles.lockedText}>Bloqueado</span>
                     ) : (
@@ -211,7 +207,7 @@ export const BudgetCategoryStep = ({
       >
         <div className={styles.footerRow}>
           <span className={styles.footerLabel}>Total {category.name}</span>
-          <span className={styles.footerCategoryTotal}>{formatCOP(categoryTotal)}</span>
+          <span className={styles.footerCategoryTotal}>{formatCurrencyCompact(categoryTotal)}</span>
         </div>
         <div className={styles.footerRow}>
           <span className={styles.footerLabel}>Disponible restante</span>
@@ -223,7 +219,7 @@ export const BudgetCategoryStep = ({
               .filter(Boolean)
               .join(' ')}
           >
-            {formatCOP(remaining)}
+            {formatCurrencyCompact(remaining)}
           </span>
         </div>
       </div>

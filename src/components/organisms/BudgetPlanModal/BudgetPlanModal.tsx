@@ -7,11 +7,9 @@ import { BrandMark } from '../../atoms/BrandMark';
 import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
 import { financeService } from '../../../services/financeService';
+import { formatCurrencyCompact, formatCurrencyFull } from '../../../utils/formatCurrency';
 import type { BudgetAvailableCategory, BudgetProposal, BudgetProposalCategory } from '../../../types/finance.types';
 import styles from './BudgetPlanModal.module.css';
-
-const formatCop = (v: number) =>
-  new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(v);
 
 interface Props {
   isOpen: boolean;
@@ -177,7 +175,7 @@ export const BudgetPlanModal = ({ isOpen, onClose, onSaved }: Props) => {
               <h3 className={styles.sectionTitle}>Ingreso base</h3>
               <div className={styles.incomeRow}>
                 <div>
-                  <p className={styles.incomeValue}>{formatCop(proposal.income.fixed_total)}</p>
+                  <p className={styles.incomeValue}>{formatCurrencyCompact(proposal.income.fixed_total)}</p>
                   <p className={styles.incomeLabel}>
                     {proposal.income.fixed_sources.map((s) => s.name).join(', ') || 'Ingreso fijo'}
                   </p>
@@ -191,7 +189,7 @@ export const BudgetPlanModal = ({ isOpen, onClose, onSaved }: Props) => {
                       onChange={(e) => toggleVariable(e.target.checked)}
                     />
                     <span className={styles.toggleText}>
-                      + variable ({formatCop(proposal.income.variable_projection)})
+                      + variable ({formatCurrencyCompact(proposal.income.variable_projection)})
                     </span>
                   </label>
                 )}
@@ -207,24 +205,24 @@ export const BudgetPlanModal = ({ isOpen, onClose, onSaved }: Props) => {
                 ).map(([cat, data]) => (
                   <div key={cat} className={styles.committedRow}>
                     <span className={styles.committedName}>{cat}</span>
-                    <span className={styles.committedAmount}>{formatCop(data.total)}</span>
+                    <span className={styles.committedAmount}>{formatCurrencyCompact(data.total)}</span>
                   </div>
                 ))}
                 {proposal.committed.debt_minimums_total > 0 && (
                   <div className={styles.committedRow}>
                     <span className={styles.committedName}>Mínimos de deuda</span>
-                    <span className={styles.committedAmount}>{formatCop(proposal.committed.debt_minimums_total)}</span>
+                    <span className={styles.committedAmount}>{formatCurrencyCompact(proposal.committed.debt_minimums_total)}</span>
                   </div>
                 )}
                 {proposal.committed.sinking_funds_total > 0 && (
                   <div className={styles.committedRow}>
                     <span className={styles.committedName}>Bolsillos</span>
-                    <span className={styles.committedAmount}>{formatCop(proposal.committed.sinking_funds_total)}</span>
+                    <span className={styles.committedAmount}>{formatCurrencyCompact(proposal.committed.sinking_funds_total)}</span>
                   </div>
                 )}
                 <div className={`${styles.committedRow} ${styles.committedTotal}`}>
                   <span className={styles.committedName}>Total comprometido</span>
-                  <span className={styles.committedAmount}>{formatCop(committed)}</span>
+                  <span className={styles.committedAmount}>{formatCurrencyCompact(committed)}</span>
                 </div>
               </div>
             </section>
@@ -262,7 +260,7 @@ export const BudgetPlanModal = ({ isOpen, onClose, onSaved }: Props) => {
                     <input
                       type="text"
                       className={styles.amountInput}
-                      value={amounts[cat.code] ? formatCop(amounts[cat.code]) : ''}
+                      value={amounts[cat.code] ? formatCurrencyFull(amounts[cat.code]) : ''}
                       onChange={(e) => setAmount(cat.code, e.target.value)}
                       placeholder={cat.range_hint ?? '$0'}
                     />
@@ -307,12 +305,12 @@ export const BudgetPlanModal = ({ isOpen, onClose, onSaved }: Props) => {
               <div className={styles.footerSummary}>
                 <div className={styles.footerRow}>
                   <span className={styles.footerLabel}>Total asignado</span>
-                  <span className={styles.footerValue}>{formatCop(committed + totalCategories)}</span>
+                  <span className={styles.footerValue}>{formatCurrencyCompact(committed + totalCategories)}</span>
                 </div>
                 <div className={styles.footerRow}>
                   <span className={styles.footerLabel}>Sin asignar</span>
                   <strong className={margin >= 0 ? styles.marginPositive : styles.marginNegative}>
-                    {formatCop(margin)}
+                    {formatCurrencyCompact(margin)}
                   </strong>
                 </div>
               </div>

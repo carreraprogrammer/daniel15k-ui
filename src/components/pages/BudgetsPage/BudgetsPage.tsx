@@ -21,16 +21,8 @@ import type {
   CurrentPlan,
   SummaryResponse,
 } from '../../../types/finance.types';
+import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import styles from '../FinancePage.module.css';
-
-// ── Helpers ────────────────────────────────────────────────────────────────────
-
-const formatCop = (value: number) =>
-  new Intl.NumberFormat('es-CO', {
-    style: 'currency',
-    currency: 'COP',
-    maximumFractionDigits: 0,
-  }).format(value);
 
 /** Derive the current month string, e.g. "2026-05" */
 const currentMonthString = (): string => {
@@ -232,7 +224,7 @@ export const BudgetsPage = () => {
                       </div>
                       <div>
                         <div className={styles.focusValue}>
-                          {topRisk ? formatCop(topRisk.projected) : '—'}
+                          {topRisk ? formatCurrencyCompact(topRisk.projected) : '—'}
                         </div>
                         <p className={styles.focusCaption}>
                           {topRisk
@@ -256,8 +248,8 @@ export const BudgetsPage = () => {
                         />
                       </div>
                       <p className={styles.focusSupportText}>
-                        {formatCop(topRisk.spent)} gastados de {formatCop(topRisk.budget)};
-                        proyectado a {formatCop(topRisk.projected)}.
+                        {formatCurrencyCompact(topRisk.spent)} gastados de {formatCurrencyCompact(topRisk.budget)};
+                        proyectado a {formatCurrencyCompact(topRisk.projected)}.
                       </p>
                     </section>
                   ) : null}
@@ -411,11 +403,11 @@ export const BudgetsPage = () => {
                                 `Categoría ${budget.attributes.category_id}`}
                             </td>
                             <td className={styles.numeric}>
-                              {formatCop(budget.attributes.amount_limit)}
+                              {formatCurrencyCompact(budget.attributes.amount_limit)}
                             </td>
-                            <td className={styles.numeric}>{formatCop(burnRate?.spent ?? 0)}</td>
+                            <td className={styles.numeric}>{formatCurrencyCompact(burnRate?.spent ?? 0)}</td>
                             <td className={styles.numeric}>
-                              {formatCop(burnRate?.projected ?? 0)}
+                              {formatCurrencyCompact(burnRate?.projected ?? 0)}
                             </td>
                             <td
                               className={

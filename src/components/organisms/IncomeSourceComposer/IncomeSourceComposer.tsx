@@ -15,6 +15,7 @@ import {
   RELIABILITY_OPTIONS,
   inferWindowKey,
 } from '../../../utils/incomeProfile';
+import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import styles from '../ComposerForm.module.css';
 
 interface Values {
@@ -178,7 +179,7 @@ export const IncomeSourceComposer = ({ source = null, loading, onCreate, onUpdat
           />
           {(values.cadence === 'biweekly' || values.cadence === 'weekly') && monthlyExpected ? (
             <p className={[styles.hint, styles.spanTwo].join(' ')}>
-              Total mensual esperado calculado: <strong>${monthlyExpected.toLocaleString('es-CO')}</strong>
+              Total mensual esperado calculado: <strong>{formatCurrencyCompact(monthlyExpected)}</strong>
             </p>
           ) : null}
           <SelectInput

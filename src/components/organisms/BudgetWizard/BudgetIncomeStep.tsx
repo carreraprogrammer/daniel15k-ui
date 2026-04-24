@@ -1,10 +1,6 @@
 import type { WizardData } from '../../../types/finance.types';
+import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import styles from './BudgetIncomeStep.module.css';
-
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
-const formatCOP = (amount: number): string =>
-  '$' + Math.round(amount).toLocaleString('es-CO').replace(/,/g, '.');
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -64,7 +60,7 @@ export const BudgetIncomeStep = ({
                 </div>
                 <div className={styles.sourceAmount}>
                   <span className={styles.amountText}>
-                    {formatCOP(source.monthly_amount)}
+                    {formatCurrencyCompact(source.monthly_amount)}
                   </span>
                 </div>
               </div>
@@ -121,7 +117,7 @@ export const BudgetIncomeStep = ({
 
       <div className={styles.totalRow}>
         <span className={styles.totalLabel}>Ingreso base del plan</span>
-        <span className={styles.totalAmount}>{formatCOP(totalIncome)}</span>
+        <span className={styles.totalAmount}>{formatCurrencyCompact(totalIncome)}</span>
       </div>
 
       <p className={styles.hint}>

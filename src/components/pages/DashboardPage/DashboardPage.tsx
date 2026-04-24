@@ -9,15 +9,9 @@ import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
 import { ErrorState } from '../../molecules/ErrorState';
 import { useDashboardData } from '../../../hooks/useDashboardData';
+import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import pageStyles from '../FinancePage.module.css';
 import styles from './DashboardPage.module.css';
-
-const formatCop = (v: number) =>
-  new Intl.NumberFormat('es-CO', {
-    style: 'currency',
-    currency: 'COP',
-    maximumFractionDigits: 0,
-  }).format(v);
 
 const COLORS = ['#C0392B', '#C9980A', '#1A9E4A', '#D4732A', '#8A4FD8'];
 
@@ -168,7 +162,7 @@ export const DashboardPage = () => {
                         .filter(Boolean)
                         .join(' ')}
                     >
-                      {liquidity ? formatCop(liquidity.safe_to_deploy) : '—'}
+                      {liquidity ? formatCurrencyCompact(liquidity.safe_to_deploy) : '—'}
                     </span>
                     <span className={styles.metricCaption}>
                       después de cubrir obligaciones
@@ -197,8 +191,8 @@ export const DashboardPage = () => {
                       />
                     </div>
                     <p className={styles.pressureCaption}>
-                      {formatCop(liquidity.projected_eom_balance)} proyectados para
-                      cubrir {formatCop(liquidity.next_cycle_obligations)} en obligaciones
+                      {formatCurrencyCompact(liquidity.projected_eom_balance)} proyectados para
+                      cubrir {formatCurrencyCompact(liquidity.next_cycle_obligations)} en obligaciones
                     </p>
                   </div>
                 ) : null}
@@ -207,7 +201,7 @@ export const DashboardPage = () => {
                   <span className={styles.badge}>{pending.length} pendientes</span>
                   {summary.debts ? (
                     <span className={styles.badge}>
-                      {formatCop(summary.debts.total_balance)} en deuda
+                      {formatCurrencyCompact(summary.debts.total_balance)} en deuda
                     </span>
                   ) : null}
                   {liquidity ? (
@@ -253,14 +247,14 @@ export const DashboardPage = () => {
                     <div className={styles.kpi}>
                       <span className={styles.kpiLabel}>Balance hoy</span>
                       <strong className={styles.kpiValue}>
-                        {formatCop(summary.balance.balance_confirmed)}
+                        {formatCurrencyCompact(summary.balance.balance_confirmed)}
                       </strong>
                       <span className={styles.kpiHint}>ingresos − gastos confirmados</span>
                     </div>
                     <div className={styles.kpi}>
                       <span className={styles.kpiLabel}>Ingreso pendiente</span>
                       <strong className={styles.kpiValue}>
-                        {liquidity ? formatCop(liquidity.pending_income) : '—'}
+                        {liquidity ? formatCurrencyCompact(liquidity.pending_income) : '—'}
                       </strong>
                       <span className={styles.kpiHint}>
                         variable aún no confirmado este mes
@@ -269,7 +263,7 @@ export const DashboardPage = () => {
                     <div className={styles.kpi}>
                       <span className={styles.kpiLabel}>Reservado próximo ciclo</span>
                       <strong className={[styles.kpiValue, styles.kpiValueWarn].join(' ')}>
-                        {liquidity ? formatCop(liquidity.next_cycle_obligations) : '—'}
+                        {liquidity ? formatCurrencyCompact(liquidity.next_cycle_obligations) : '—'}
                       </strong>
                       <span className={styles.kpiHint}>
                         obligaciones + mínimos de deuda
@@ -302,7 +296,7 @@ export const DashboardPage = () => {
                               ))}
                             </Pie>
                             <Tooltip
-                              formatter={(value) => formatCop(Number(value ?? 0))}
+                              formatter={(value) => formatCurrencyCompact(Number(value ?? 0))}
                               {...TOOLTIP_STYLE}
                             />
                           </PieChart>
@@ -345,7 +339,7 @@ export const DashboardPage = () => {
                             />
                             <Tooltip
                               formatter={(value, name) => [
-                                formatCop(Number(value ?? 0)),
+                                formatCurrencyCompact(Number(value ?? 0)),
                                 name === 'gastado' ? 'Gastado' : 'Presupuesto',
                               ]}
                               {...TOOLTIP_STYLE}
@@ -391,7 +385,7 @@ export const DashboardPage = () => {
                               </span>
                             </div>
                             <span className={styles.listAmount}>
-                              {formatCop(t.attributes.amount)}
+                              {formatCurrencyCompact(t.attributes.amount)}
                             </span>
                           </div>
                         ))}
@@ -414,7 +408,7 @@ export const DashboardPage = () => {
                               </span>
                             </div>
                             <span className={styles.listAmount}>
-                              {formatCop(o.attributes.amount)}
+                              {formatCurrencyCompact(o.attributes.amount)}
                             </span>
                           </div>
                         ))}
@@ -441,10 +435,10 @@ export const DashboardPage = () => {
                                 <td>{d.attributes.name}</td>
                                 <td>{d.attributes.status}</td>
                                 <td className={pageStyles.numeric}>
-                                  {formatCop(d.attributes.current_balance)}
+                                  {formatCurrencyCompact(d.attributes.current_balance)}
                                 </td>
                                 <td className={pageStyles.numeric}>
-                                  {formatCop(d.attributes.monthly_payment)}
+                                  {formatCurrencyCompact(d.attributes.monthly_payment)}
                                 </td>
                               </tr>
                             ))}

@@ -5,10 +5,8 @@ import type { CurrentPlan, CurrentPlanCategory, CurrentPlanSubcategory } from '.
 import { Button } from '../../atoms/Button';
 import { CurrencyValue } from '../../atoms/CurrencyValue';
 import { resolveNamedIcon } from '../BudgetWizard/iconRegistry';
+import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import styles from './ActivePlanView.module.css';
-
-const formatCOP = (amount: number): string =>
-  '$' + Math.round(amount).toLocaleString('es-CO').replace(/,/g, '.');
 
 const clampPct = (value: number): number => Math.max(0, Math.min(Math.round(value), 999));
 
@@ -49,12 +47,12 @@ const buildHeroCopy = (currentPlan: CurrentPlan, categories: CurrentPlanCategory
       : positiveCount
         ? 'No todo desvío es malo. Hay movimientos que mejoran tu posición financiera aunque se salgan del plan original.'
         : 'La portada del presupuesto debería bastar para decirte si el mes sigue sano sin obligarte a leer toda la estructura.',
-    headlineValue: formatCOP(remainingTotal),
+    headlineValue: formatCurrencyCompact(remainingTotal),
     headlineCaption: topRisk
       ? `Disponible total frente al plan`
       : 'Disponible total frente al plan',
     supportLabel: outOfRangeCount ? 'Exceso actual' : 'Margen libre',
-    supportValue: outOfRangeCount ? formatCOP(topRiskOverrun) : formatCOP(freeMargin),
+    supportValue: outOfRangeCount ? formatCurrencyCompact(topRiskOverrun) : formatCurrencyCompact(freeMargin),
     supportTone: outOfRangeCount ? 'warning' : 'calm',
     outOfRangeCount,
     positiveCount,
@@ -206,7 +204,7 @@ export const CategoryGroup = ({ category, defaultExpanded = false }: CategoryGro
               </span>
             </div>
             <p className={styles.categorySummary}>
-              {formatCOP(totalSpent)} gastados de {formatCOP(totalBudgeted)}.
+              {formatCurrencyCompact(totalSpent)} gastados de {formatCurrencyCompact(totalBudgeted)}.
             </p>
             {category.signal_detail ? (
               <p className={styles.categorySignalText}>{category.signal_detail}</p>
@@ -232,15 +230,21 @@ export const CategoryGroup = ({ category, defaultExpanded = false }: CategoryGro
           <dl className={styles.categoryStats}>
             <div className={styles.categoryStat}>
               <dt>Presupuesto</dt>
-              <dd>{formatCOP(totalBudgeted)}</dd>
+              <dd>
+                <CurrencyValue amount={totalBudgeted} mode="compact" />
+              </dd>
             </div>
             <div className={styles.categoryStat}>
               <dt>Gastado</dt>
-              <dd>{formatCOP(totalSpent)}</dd>
+              <dd>
+                <CurrencyValue amount={totalSpent} mode="compact" />
+              </dd>
             </div>
             <div className={styles.categoryStat}>
               <dt>Restante</dt>
-              <dd className={remaining < 0 ? styles.negativeValue : ''}>{formatCOP(remaining)}</dd>
+              <dd className={remaining < 0 ? styles.negativeValue : ''}>
+                <CurrencyValue amount={remaining} mode="compact" />
+              </dd>
             </div>
             <div className={styles.categoryStat}>
               <dt>Estado</dt>

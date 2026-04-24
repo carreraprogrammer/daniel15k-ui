@@ -17,11 +17,9 @@ import { TransactionSlidingCard } from '../../organisms/TransactionSlidingCard';
 import type { Transaction, TransactionCreatePayload, TransactionUpdatePayload } from '../../../types/finance.types';
 import { resolveTransactionCategory } from '../../../utils/financeBehavior';
 import { initialTransactionFilters, useTransactionsPage } from '../../../hooks/useTransactionsPage';
+import { formatCurrencyCompact, formatCurrencyFull } from '../../../utils/formatCurrency';
 import { resolveNamedIcon } from '../../organisms/BudgetWizard/iconRegistry';
 import styles from '../FinancePage.module.css';
-
-const formatCop = (value: number) =>
-  new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(value);
 
 export const TransactionsPage = () => {
   const [composerOpen, setComposerOpen] = useState(false);
@@ -142,7 +140,7 @@ export const TransactionsPage = () => {
     await presentAlert({
       cssClass: 'brand-alert',
       header: 'Borrar transacción',
-      message: `¿Seguro que quieres borrar "${transaction.attributes.concept}" por ${formatCop(transaction.attributes.amount)}?`,
+      message: `¿Seguro que quieres borrar "${transaction.attributes.concept}" por ${formatCurrencyFull(transaction.attributes.amount)}?`,
       buttons: [
         {
           text: 'Cancelar',
@@ -193,7 +191,7 @@ export const TransactionsPage = () => {
                 </div>
                 <div>
                   <div className={styles.focusValue}>
-                    {latestTransaction ? formatCop(latestTransaction.attributes.amount) : '—'}
+                    {latestTransaction ? formatCurrencyCompact(latestTransaction.attributes.amount) : '—'}
                   </div>
                   <p className={styles.focusCaption}>
                     {latestTransaction

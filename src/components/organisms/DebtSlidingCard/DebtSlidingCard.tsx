@@ -1,10 +1,8 @@
 import { IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding } from '@ionic/react';
 import { createOutline, linkOutline, trashOutline } from 'ionicons/icons';
 import type { Debt } from '../../../types/finance.types';
+import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import styles from './DebtSlidingCard.module.css';
-
-const formatCop = (value: number) =>
-  new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(value);
 
 const statusLabels: Record<string, string> = {
   active: 'Activa',
@@ -33,7 +31,7 @@ export const DebtSlidingCard = ({ debt, linkedObligationLabel, onManageLink, onE
             </span>
           </div>
           <strong className={styles.name}>{debt.attributes.name}</strong>
-          <span className={styles.meta}>Pago mensual {formatCop(debt.attributes.monthly_payment)}</span>
+          <span className={styles.meta}>Pago mensual {formatCurrencyCompact(debt.attributes.monthly_payment)}</span>
           <span className={styles.linked}>
             {linkedObligationLabel ?? 'Sin obligación recurrente vinculada'}
           </span>
@@ -41,7 +39,7 @@ export const DebtSlidingCard = ({ debt, linkedObligationLabel, onManageLink, onE
 
         <div className={styles.secondary}>
           <span className={styles.label}>Saldo</span>
-          <strong className={styles.amount}>{formatCop(debt.attributes.current_balance)}</strong>
+          <strong className={styles.amount}>{formatCurrencyCompact(debt.attributes.current_balance)}</strong>
         </div>
       </div>
     </IonItem>

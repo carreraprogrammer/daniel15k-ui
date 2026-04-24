@@ -15,6 +15,7 @@ import { SortSheet } from '../../molecules/SortSheet';
 import { PlannedExpenseComposer } from '../../organisms/PlannedExpenseComposer';
 import { PlannedExpenseSlidingCard } from '../../organisms/PlannedExpenseSlidingCard';
 import { financeService } from '../../../services/financeService';
+import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import type {
   CategoryResource,
   PlannedExpense,
@@ -22,9 +23,6 @@ import type {
   PlannedExpenseQueryParams,
 } from '../../../types/finance.types';
 import styles from '../FinancePage.module.css';
-
-const formatCop = (value: number) =>
-  new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(value);
 
 const planningTypeLabels: Record<string, string> = {
   mandatory_one_off: 'Obligatorio puntual',
@@ -163,7 +161,7 @@ export const PlannedExpensesPage = () => {
                     </p>
                   </div>
                   <div>
-                    <div className={styles.focusValue}>{formatCop(metrics.totalEstimated)}</div>
+                    <div className={styles.focusValue}>{formatCurrencyCompact(metrics.totalEstimated)}</div>
                     <p className={styles.focusCaption}>Monto estimado pendiente</p>
                   </div>
                 </div>
