@@ -3,6 +3,7 @@ import { IonIcon } from '@ionic/react';
 import { chevronDownOutline, chevronForwardOutline } from 'ionicons/icons';
 import type { CurrentPlan, CurrentPlanCategory, CurrentPlanSubcategory } from '../../../types/finance.types';
 import { Button } from '../../atoms/Button';
+import { CurrencyValue } from '../../atoms/CurrencyValue';
 import { resolveNamedIcon } from '../BudgetWizard/iconRegistry';
 import styles from './ActivePlanView.module.css';
 
@@ -106,7 +107,8 @@ const SubcategoryCard = ({ sub, accentColor }: { sub: CurrentPlanSubcategory; ac
           <div className={styles.subcategoryCopy}>
             <h4 className={styles.subcategoryName}>{sub.name ?? sub.code ?? 'Sin nombre'}</h4>
             <p className={styles.subcategoryMeta}>
-              {formatCOP(spent)} de {formatCOP(budgeted)}
+              <CurrencyValue amount={spent} mode="compact" /> de{' '}
+              <CurrencyValue amount={budgeted} mode="compact" />
             </p>
           </div>
         </div>
@@ -135,15 +137,21 @@ const SubcategoryCard = ({ sub, accentColor }: { sub: CurrentPlanSubcategory; ac
       <dl className={styles.subcategoryStats}>
         <div className={styles.subcategoryStat}>
           <dt>Presupuesto</dt>
-          <dd>{formatCOP(budgeted)}</dd>
+          <dd>
+            <CurrencyValue amount={budgeted} mode="compact" />
+          </dd>
         </div>
         <div className={styles.subcategoryStat}>
           <dt>Gastado</dt>
-          <dd>{formatCOP(spent)}</dd>
+          <dd>
+            <CurrencyValue amount={spent} mode="compact" />
+          </dd>
         </div>
         <div className={styles.subcategoryStat}>
           <dt>Restante</dt>
-          <dd className={remaining < 0 ? styles.negativeValue : ''}>{formatCOP(remaining)}</dd>
+          <dd className={remaining < 0 ? styles.negativeValue : ''}>
+            <CurrencyValue amount={remaining} mode="compact" />
+          </dd>
         </div>
       </dl>
     </article>
