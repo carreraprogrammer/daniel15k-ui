@@ -586,6 +586,36 @@ export interface BudgetPlanDraft {
   lines: BudgetLineItem[];
 }
 
+// ── Agent Insights — recomendaciones diarias ─────────────────────────────────
+
+export interface AgentInsightSignal {
+  type: 'warn' | 'info' | 'ok';
+  category: string;
+  message: string;
+}
+
+export interface AgentInsightRecommendations {
+  primary_action: string;
+  safe_to_deploy_suggested: number;
+  rationale: string;
+}
+
+export interface AgentInsight {
+  id: number;
+  account_id: number;
+  period_month: number;
+  period_year: number;
+  generated_at: string;
+  key_metrics_snapshot: Record<string, unknown>;
+  recommendations: AgentInsightRecommendations;
+  reasoning: string;
+  signals: AgentInsightSignal[];
+  safe_to_deploy_amount: number | null;
+  trigger_reason: string | null;
+  stale: boolean;
+  created_at: string;
+}
+
 // Agent UI Events — canal agente → front-end
 
 export type AgentUiEventType =

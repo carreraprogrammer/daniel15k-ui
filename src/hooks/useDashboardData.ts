@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { financeService } from '../services/financeService';
-import type { CategoryResource, Debt, RecurringObligation, SummaryResponse, Transaction } from '../types/finance.types';
+import type { AgentInsight, CategoryResource, Debt, RecurringObligation, SummaryResponse, Transaction } from '../types/finance.types';
 import { buildCategoryLookup, buildBehaviorSignals, summarizeBehavior } from '../utils/financeBehavior';
 
 export const useDashboardData = () => {
   const [summary, setSummary] = useState<SummaryResponse | null>(null);
+  const [insight, setInsight] = useState<AgentInsight | null>(null);
   const [debts, setDebts] = useState<Debt[]>([]);
   const [pending, setPending] = useState<Transaction[]>([]);
   const [obligations, setObligations] = useState<RecurringObligation[]>([]);
@@ -29,18 +30,21 @@ export const useDashboardData = () => {
         obligationsResponse,
         transactionsResponse,
         categoriesResponse,
+        insightResponse,
       ] = await Promise.all([
         financeService.fetchDebts(),
         financeService.fetchPendingTransactions(),
         financeService.fetchRecurringObligations(),
         financeService.fetchTransactions({ page: 1, per_page: 50, sort_by: 'date', sort_dir: 'desc' }),
         financeService.fetchCategories(),
+        financeService.fetchCurrentInsight().catch(() => null),
       ]);
       setDebts(debtsResponse.data);
       setPending(pendingResponse.data);
       setObligations(obligationsResponse.data);
       setMonthTransactions(transactionsResponse.data);
       setCategories(categoriesResponse.data);
+      setInsight(insightResponse);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No fue posible cargar el resumen financiero.');
       setLoading(false);
@@ -60,6 +64,7 @@ export const useDashboardData = () => {
 
   return {
     summary,
+    insight,
     debts,
     pending,
     obligations,

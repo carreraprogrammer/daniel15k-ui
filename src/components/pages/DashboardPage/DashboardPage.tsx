@@ -32,11 +32,43 @@ const TOOLTIP_STYLE = {
   itemStyle: { color: '#fff', fontSize: 12 },
 };
 
+const AGENTS_URL = import.meta.env.VITE_AGENTS_URL as string | undefined;
+const SERVICE_TOKEN = import.meta.env.VITE_SERVICE_TOKEN as string | undefined;
+
+const formatRelativeTime = (iso: string): string => {
+  const diff = Date.now() - new Date(iso).getTime();
+  const days = Math.floor(diff / 86_400_000);
+  if (days === 0) return 'hoy';
+  if (days === 1) return 'hace 1 día';
+  return `hace ${days} días`;
+};
+
 export const DashboardPage = () => {
-  const { summary, debts, pending, obligations, loading, error, reload } =
+  const { summary, insight, debts, pending, obligations, loading, error, reload } =
     useDashboardData();
   const [snapshotOpen, setSnapshotOpen] = useState(true);
   const [detailOpen, setDetailOpen] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshMsg, setRefreshMsg] = useState<string | null>(null);
+
+  const handleRefreshInsight = async () => {
+    if (!AGENTS_URL || !SERVICE_TOKEN) return;
+    setRefreshing(true);
+    setRefreshMsg(null);
+    try {
+      const res = await fetch(`${AGENTS_URL}/agents/insight`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${SERVICE_TOKEN}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      });
+      const body = await res.json() as { ok: boolean; message?: string };
+      setRefreshMsg(body.message ?? (body.ok ? 'Análisis en proceso...' : 'No disponible aún.'));
+    } catch {
+      setRefreshMsg('Error al conectar con el agente.');
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const liquidity = summary?.liquidity;
   const burnCategories = summary?.burn_rate?.categories ?? [];
@@ -103,10 +135,26 @@ export const DashboardPage = () => {
                     <span className={styles.eyebrow}>Resumen ejecutivo</span>
                     <h2 className={styles.heroTitle}>{heroTitle}</h2>
                     <p className={styles.heroDesc}>{heroDesc}</p>
-                    {summary.financial_context?.recommended_action ? (
-                      <p className={styles.heroAction}>
-                        {summary.financial_context.recommended_action}
-                      </p>
+
+                    {/* Recomendación: insight del agente > fallback del summary */}
+                    {insight && !insight.stale ? (
+                      <div className={styles.insightBlock}>
+                        <p className={styles.heroAction}>
+                          {insight.recommendations.primary_action}
+                        </p>
+                        <span className={styles.insightMeta}>
+                          Evaluado {formatRelativeTime(insight.generated_at)}
+                        </span>
+                      </div>
+                    ) : insight?.stale ? (
+                      <p className={styles.insightStale}>Análisis en proceso…</p>
+                    ) : summary.financial_context?.recommended_action ? (
+                      <div className={styles.insightBlock}>
+                        <p className={styles.heroAction}>
+                          {summary.financial_context.recommended_action}
+                        </p>
+                        <span className={styles.insightMeta}>Estimado</span>
+                      </div>
                     ) : null}
                   </div>
 
@@ -185,7 +233,17 @@ export const DashboardPage = () => {
                     variant="ghost"
                     onClick={() => setDetailOpen((v) => !v)}
                   />
+                  {AGENTS_URL && SERVICE_TOKEN ? (
+                    <Button
+                      label={refreshing ? 'Actualizando…' : 'Actualizar análisis'}
+                      variant="ghost"
+                      onClick={() => void handleRefreshInsight()}
+                    />
+                  ) : null}
                 </div>
+                {refreshMsg ? (
+                  <p className={styles.insightMeta}>{refreshMsg}</p>
+                ) : null}
               </div>
 
               {/* ── ZONA 2 — Snapshot ─────────────────────────────────────── */}

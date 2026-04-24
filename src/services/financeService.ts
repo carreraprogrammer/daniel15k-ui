@@ -1,5 +1,6 @@
 import { api } from './api';
 import type {
+  AgentInsight,
   AgentUiEvent,
   Budget,
   BudgetLineItem,
@@ -86,6 +87,11 @@ export const financeService = {
   async fetchSummary(month = defaultMonth, year = defaultYear): Promise<SummaryResponse> {
     const { data } = await api.get('/api/v1/summary', { params: { month, year } });
     return data as SummaryResponse;
+  },
+
+  async fetchCurrentInsight(month = defaultMonth, year = defaultYear): Promise<AgentInsight | null> {
+    const { data } = await api.get('/api/v1/agent_insights/current', { params: { month, year } });
+    return (data as { data: AgentInsight | null }).data ?? null;
   },
 
   async fetchTransactions(params: TransactionQueryParams = {}): Promise<JsonApiCollection<Transaction>> {
