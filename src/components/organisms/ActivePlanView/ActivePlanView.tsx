@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import type { CurrentPlan, CurrentPlanCategory } from '../../../types/finance.types';
+import type { CurrentPlan, CurrentPlanCategory, CurrentPlanSubcategory } from '../../../types/finance.types';
 import { Button } from '../../atoms/Button';
 import styles from './ActivePlanView.module.css';
 
@@ -56,10 +56,43 @@ export interface CategoryGroupProps {
   category: CurrentPlanCategory;
 }
 
+const SubcategoryRow = ({ sub }: { sub: CurrentPlanSubcategory }) => {
+  const budgeted = sub.budgeted ?? 0;
+  const spent = sub.spent ?? 0;
+  const projected = sub.projected ?? 0;
+  const pct = budgeted > 0 ? Math.min((spent / budgeted) * 100, 100) : 0;
+  const isOver = projected > budgeted;
+
+  return (
+    <div className={styles.subcategoryRow}>
+      <div className={styles.subcategoryHeader}>
+        <span className={styles.subcategoryName}>{sub.name ?? sub.code ?? '—'}</span>
+        <span className={styles.subcategoryFigures}>
+          {formatCOP(spent)}{' '}
+          <span className={styles.separator}>/</span>{' '}
+          {formatCOP(budgeted)}
+        </span>
+      </div>
+      <div className={styles.subBarTrack} aria-hidden="true">
+        <div
+          className={[styles.subBarFill, isOver ? styles.barFillWarn : ''].filter(Boolean).join(' ')}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      {isOver ? (
+        <span className={styles.statusWarn} style={{ fontSize: 'var(--text-xs)' }}>
+          ⚠ proyectado: {formatCOP(projected)}
+        </span>
+      ) : null}
+    </div>
+  );
+};
+
 export const CategoryGroup = ({ category }: CategoryGroupProps) => {
   const totalBudgeted = category.budgeted ?? 0;
   const totalSpent = category.spent ?? 0;
   const totalProjected = category.projected ?? 0;
+  const subcategories = category.subcategories ?? [];
 
   const pct = totalBudgeted > 0 ? Math.min((totalSpent / totalBudgeted) * 100, 100) : 0;
   const isOverProjected = totalProjected > totalBudgeted;
@@ -105,6 +138,14 @@ export const CategoryGroup = ({ category }: CategoryGroupProps) => {
           <span className={styles.statusOk}>&#10003; en ritmo</span>
         )}
       </div>
+
+      {subcategories.length > 0 ? (
+        <div className={styles.subcategoryList}>
+          {subcategories.map((sub) => (
+            <SubcategoryRow key={sub.id ?? sub.code ?? sub.name} sub={sub} />
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 };

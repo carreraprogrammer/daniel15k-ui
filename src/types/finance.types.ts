@@ -469,6 +469,15 @@ export interface BudgetProposal {
 
 // ── Current monthly plan (active plan view) ──────────────────────────────────
 
+export interface CurrentPlanSubcategory {
+  id?: number | null;
+  code?: string | null;
+  name?: string | null;
+  budgeted: number;
+  spent: number;
+  projected: number;
+}
+
 export interface CurrentPlanCategory {
   code?: string | null;
   name?: string | null;
@@ -476,6 +485,7 @@ export interface CurrentPlanCategory {
   budgeted: number;
   spent: number;
   projected: number;
+  subcategories?: CurrentPlanSubcategory[];
 }
 
 export interface CurrentPlan {
