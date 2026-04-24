@@ -1,290 +1,406 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { IonContent } from '@ionic/react';
+import {
+  PieChart, Pie, Cell,
+  BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip,
+} from 'recharts';
 import { AppLayout } from '../../templates/AppLayout';
-import { useAuthStore } from '../../../store/authStore';
 import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
 import { ErrorState } from '../../molecules/ErrorState';
 import { useDashboardData } from '../../../hooks/useDashboardData';
-import styles from '../FinancePage.module.css';
+import pageStyles from '../FinancePage.module.css';
+import styles from './DashboardPage.module.css';
 
-const formatCop = (value: number) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(value);
+const formatCop = (v: number) =>
+  new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    maximumFractionDigits: 0,
+  }).format(v);
+
+const COLORS = ['#C0392B', '#C9980A', '#1A9E4A', '#D4732A', '#8A4FD8'];
+
+const TOOLTIP_STYLE = {
+  contentStyle: {
+    background: 'rgba(11,15,21,0.96)',
+    border: '1px solid rgba(255,255,255,0.08)',
+    borderRadius: 12,
+    fontSize: 12,
+  },
+  labelStyle: { color: 'rgba(231,236,244,0.8)', fontSize: 12 },
+  itemStyle: { color: '#fff', fontSize: 12 },
+};
 
 export const DashboardPage = () => {
-  const user = useAuthStore((state) => state.user);
-  const [detailsOpen, setDetailsOpen] = useState(false);
-  const { summary, debts, pending, obligations, loading, error, behaviorSummary, behaviorSignals, reload } =
+  const { summary, debts, pending, obligations, loading, error, reload } =
     useDashboardData();
+  const [snapshotOpen, setSnapshotOpen] = useState(true);
+  const [detailOpen, setDetailOpen] = useState(false);
 
-  const focusState = useMemo(() => {
-    if (!summary) {
-      return {
-        title: 'Todavía no hay lectura del mes',
-        value: '—',
-        caption: 'Carga el resumen para ver balance, presión y siguiente acción.',
-        text: 'Esta pantalla debería responder cómo vas y qué importa hoy, no obligarte a leer seis widgets iguales.',
-      };
-    }
+  const liquidity = summary?.liquidity;
+  const burnCategories = summary?.burn_rate?.categories ?? [];
 
-    const confirmedBalance = summary.balance.balance_confirmed;
-    const incomeConfirmed = summary.balance.income_confirmed;
-    const recommendedAction = summary.financial_context?.recommended_action ?? 'Todavía no hay una acción recomendada.';
-    const overflow = summary.overflow_status?.realized_overflow ?? 0;
+  // ── Hero copy ──────────────────────────────────────────────────────────────
+  const heroTitle = !liquidity
+    ? 'Sin plan activo'
+    : liquidity.buffer_status === 'comfortable'
+    ? 'Mes bajo control'
+    : liquidity.buffer_status === 'tight'
+    ? 'El mes cierra justo'
+    : 'Prioriza el flujo de caja';
 
-    return {
-      title: confirmedBalance >= 0 ? 'Así va tu mes' : 'Tu mes ya va pasado',
-      value: formatCop(confirmedBalance),
-      caption: incomeConfirmed > 0 ? 'Balance confirmado del período (ingresos − gastos)' : 'Sin ingresos registrados aún',
-      text:
-        overflow > 0
-          ? `Ya hay overflow disponible. ${recommendedAction}`
-          : recommendedAction,
-    };
-  }, [summary]);
+  const heroDesc = !liquidity
+    ? 'Crea un plan mensual para ver tu posición real de liquidez.'
+    : liquidity.buffer_status === 'comfortable'
+    ? 'Tienes margen real después de cubrir las obligaciones del próximo ciclo.'
+    : liquidity.buffer_status === 'tight'
+    ? 'Cubre primero. Mueve lo que sobre con cuidado.'
+    : 'Las obligaciones del próximo ciclo necesitan cubrirse antes de mover cualquier dinero.';
 
-  const monthProgress = useMemo(() => {
-    if (!summary) return null;
-    const incomeConfirmed = summary.balance.income_confirmed;
-    const expenses = summary.balance.expense_confirmed;
-    if (incomeConfirmed <= 0) return null;
-    const pct = Math.max(0, Math.min(100, Math.round((expenses / incomeConfirmed) * 100)));
-    return {
-      pct,
-      used: expenses,
-      total: incomeConfirmed,
-      warn: pct > 90,
-    };
-  }, [summary]);
+  const isWarn = liquidity?.buffer_status !== 'comfortable';
+
+  const coveragePct =
+    liquidity && liquidity.next_cycle_obligations > 0
+      ? Math.min(
+          Math.round(
+            (liquidity.projected_eom_balance / liquidity.next_cycle_obligations) * 100,
+          ),
+          100,
+        )
+      : 0;
+
+  // ── Chart data ─────────────────────────────────────────────────────────────
+  const donutData = burnCategories
+    .filter((c) => c.spent > 0)
+    .map((c, i) => ({
+      name: c.category,
+      value: c.spent,
+      color: COLORS[i % COLORS.length],
+    }));
+
+  const barData = burnCategories.map((c, i) => ({
+    name: c.category.length > 13 ? c.category.slice(0, 12) + '…' : c.category,
+    gastado: c.spent,
+    presupuesto: c.budget,
+    color: COLORS[i % COLORS.length],
+  }));
 
   return (
     <AppLayout title="Dashboard">
-      <IonContent className={styles.pageContent}>
-      <section className={`${styles.stack} ${!detailsOpen && !loading && !error ? styles.stackFill : ''}`}>
-        {!detailsOpen && !loading && !error ? (
-          <div className={styles.focusStage}>
-            <div className={`${styles.focusCard} ${styles.focusCardFull} ${styles.focusCardCentered}`}>
-              <div className={styles.focusGrid}>
-                <div className={styles.focusCopy}>
-                  <span className={styles.eyebrow}>Resumen ejecutivo</span>
-                  <p className={styles.focusQuestion}>{`¿Cómo voy este mes y qué debería mirar primero, ${user?.name ?? 'Daniel'}?`}</p>
-                  <h2 className={styles.focusTitle}>{focusState.title}</h2>
-                  <p className={styles.focusText}>{focusState.text}</p>
-                </div>
-                <div>
-                  <div className={styles.focusValue}>{focusState.value}</div>
-                  <p className={styles.focusCaption}>{focusState.caption}</p>
-                </div>
-              </div>
+      <IonContent className={pageStyles.pageContent}>
+        <section className={pageStyles.stack}>
 
-              {monthProgress ? (
-                <section className={styles.focusSupport}>
-                  <div className={styles.focusSupportHeader}>
-                    <h3 className={styles.focusSupportTitle}>Presión del mes</h3>
-                    <span className={styles.focusSupportValue}>{monthProgress.pct}% consumido</span>
+          {loading ? <Spinner size="lg" /> : null}
+          {error ? <ErrorState message={error} onRetry={() => void reload()} /> : null}
+
+          {!loading && !error && summary ? (
+            <>
+              {/* ── ZONA 1 — Hero ─────────────────────────────────────────── */}
+              <div className={styles.heroCard}>
+                <div className={styles.heroTop}>
+                  <div className={styles.heroCopy}>
+                    <span className={styles.eyebrow}>Resumen ejecutivo</span>
+                    <h2 className={styles.heroTitle}>{heroTitle}</h2>
+                    <p className={styles.heroDesc}>{heroDesc}</p>
+                    {summary.financial_context?.recommended_action ? (
+                      <p className={styles.heroAction}>
+                        {summary.financial_context.recommended_action}
+                      </p>
+                    ) : null}
                   </div>
-                  <div className={styles.focusRail}>
-                    <div
-                      className={`${styles.focusRailFill} ${monthProgress.pct >= 100 ? styles.focusRailFillWarn : ''}`}
-                      style={{ width: `${Math.min(monthProgress.pct, 100)}%` }}
-                    />
+
+                  <div className={styles.heroMetric}>
+                    <span className={styles.metricLabel}>Disponible para mover</span>
+                    <span
+                      className={[
+                        styles.metricValue,
+                        isWarn ? styles.metricWarn : '',
+                      ]
+                        .filter(Boolean)
+                        .join(' ')}
+                    >
+                      {liquidity ? formatCop(liquidity.safe_to_deploy) : '—'}
+                    </span>
+                    <span className={styles.metricCaption}>
+                      después de cubrir obligaciones
+                    </span>
                   </div>
-                  <p className={styles.focusSupportText}>
-                    {formatCop(monthProgress.used)} gastados de {formatCop(monthProgress.total)} ingresados en el período.
-                  </p>
-                </section>
-              ) : null}
-
-              {!loading && !error && summary ? (
-                <div className={styles.focusMeta}>
-                  <span className={styles.focusBadge}>{pending.length} pendientes</span>
-                  <span className={styles.focusBadge}>{formatCop(summary.debts?.total_balance ?? 0)} en deuda activa</span>
-                  <span className={styles.focusBadge}>{formatCop(behaviorSummary.totals.discretionary)} discrecional</span>
                 </div>
-              ) : null}
 
-              <div className={styles.focusActions}>
-                <Button
-                  label="Ver detalle del mes"
-                  variant="ghost"
-                  onClick={() => setDetailsOpen(true)}
-                />
-              </div>
-            </div>
-          </div>
-        ) : null}
+                {/* Barra de cobertura del próximo ciclo */}
+                {liquidity ? (
+                  <div className={styles.pressureWrap}>
+                    <div className={styles.pressureHeader}>
+                      <span className={styles.pressureLabel}>
+                        Cobertura del próximo ciclo
+                      </span>
+                      <span className={styles.pressurePct}>{coveragePct}%</span>
+                    </div>
+                    <div className={styles.pressureTrack}>
+                      <div
+                        className={[
+                          styles.pressureFill,
+                          coveragePct < 100 ? styles.pressureFillWarn : '',
+                        ]
+                          .filter(Boolean)
+                          .join(' ')}
+                        style={{ width: `${coveragePct}%` }}
+                      />
+                    </div>
+                    <p className={styles.pressureCaption}>
+                      {formatCop(liquidity.projected_eom_balance)} proyectados para
+                      cubrir {formatCop(liquidity.next_cycle_obligations)} en obligaciones
+                    </p>
+                  </div>
+                ) : null}
 
-        {loading ? <Spinner size="lg" /> : null}
-        {error ? <ErrorState message={error} onRetry={() => void reload()} /> : null}
-
-        {!loading && !error && summary && detailsOpen ? (
-          <div className={styles.detailStage}>
-            <div className={styles.detailStageHeader}>
-              <div className={styles.detailStageCopy}>
-                <h3 className={styles.detailStageTitle}>Detalle del mes</h3>
-                <p className={styles.detailStageText}>Aquí sí entran métricas, señales y breakdowns. El resumen principal ya cumplió su trabajo arriba.</p>
-              </div>
-              <Button label="Volver al resumen" variant="ghost" onClick={() => setDetailsOpen(false)} />
-            </div>
-            <div className={styles.metrics}>
-              <article className={styles.metricCard}>
-                <span className={styles.metricLabel}>Balance confirmado</span>
-                <strong className={styles.metricValue}>{formatCop(summary.balance.balance_confirmed)}</strong>
-                <p className={styles.metricHint}>Ingreso confirmado menos gasto confirmado del período.</p>
-              </article>
-              <article className={styles.metricCard}>
-                <span className={styles.metricLabel}>Gasto pendiente</span>
-                <strong className={styles.metricValue}>{formatCop(summary.balance.expense_pending)}</strong>
-                <p className={styles.metricHint}>Transacciones que siguen necesitando aclaración o confirmación.</p>
-              </article>
-              <article className={styles.metricCard}>
-                <span className={styles.metricLabel}>Deuda activa</span>
-                <strong className={styles.metricValue}>{formatCop(summary.debts?.total_balance ?? 0)}</strong>
-                <p className={styles.metricHint}>Saldo acumulado de deudas activas cargadas en la API.</p>
-              </article>
-              <article className={styles.metricCard}>
-                <span className={styles.metricLabel}>Pendientes abiertos</span>
-                <strong className={styles.metricValue}>{pending.length}</strong>
-                <p className={styles.metricHint}>Casos que el agente todavía no puede cerrar solo.</p>
-              </article>
-              <article className={styles.metricCard}>
-                <span className={styles.metricLabel}>Discrecional</span>
-                <strong className={styles.metricValue}>{formatCop(behaviorSummary.totals.discretionary)}</strong>
-                <p className={styles.metricHint}>Gasto elegido. Si esto sube, acá está la presión real para cambiar hábito.</p>
-              </article>
-              <article className={styles.metricCard}>
-                <span className={styles.metricLabel}>Inversión</span>
-                <strong className={styles.metricValue}>{formatCop(behaviorSummary.totals.investment)}</strong>
-                <p className={styles.metricHint}>Lo que hoy sí está construyendo futuro, no solo manteniendo el sistema.</p>
-              </article>
-            </div>
-
-            <div className={styles.columns}>
-              <section className={styles.panel}>
-                <h3 className={styles.panelTitle}>Burn rate</h3>
-                <div className={styles.list}>
-                  {(summary.burn_rate?.categories ?? []).slice(0, 4).map((category) => (
-                    <article key={category.category_id} className={styles.listItem}>
-                      <div className={styles.listPrimary}>
-                        <span className={styles.listLabel}>{category.category}</span>
-                        <span className={styles.listMeta}>
-                          {formatCop(category.spent)} gastados de {formatCop(category.budget)}
-                        </span>
-                      </div>
-                      <div className={styles.listSecondary}>
-                        <span className={category.on_track ? styles.statusGood : styles.statusWarn}>
-                          {category.on_track ? 'En rango' : 'Fuera de rango'}
-                        </span>
-                        <span className={styles.listMeta}>{formatCop(category.projected)} proyectados</span>
-                      </div>
-                    </article>
-                  ))}
+                <div className={styles.heroBadges}>
+                  <span className={styles.badge}>{pending.length} pendientes</span>
+                  {summary.debts ? (
+                    <span className={styles.badge}>
+                      {formatCop(summary.debts.total_balance)} en deuda
+                    </span>
+                  ) : null}
+                  {liquidity ? (
+                    <span
+                      className={[
+                        styles.badge,
+                        styles[`badge_${liquidity.buffer_status}`],
+                      ].join(' ')}
+                    >
+                      {liquidity.buffer_status}
+                    </span>
+                  ) : null}
                 </div>
-              </section>
 
-              <section className={styles.panel}>
-                <h3 className={styles.panelTitle}>Acción sugerida</h3>
-                <div className={styles.list}>
-                  <article className={styles.listItem}>
-                    <div className={styles.listPrimary}>
-                      <span className={styles.listLabel}>Fase actual</span>
-                      <span className={styles.listMeta}>{summary.financial_context?.phase ?? 'sin definir'}</span>
+                <div className={styles.heroActions}>
+                  <Button
+                    label={snapshotOpen ? 'Ocultar análisis' : 'Ver análisis'}
+                    variant="ghost"
+                    onClick={() => setSnapshotOpen((v) => !v)}
+                  />
+                  <Button
+                    label={detailOpen ? 'Ocultar detalle' : 'Ver detalle'}
+                    variant="ghost"
+                    onClick={() => setDetailOpen((v) => !v)}
+                  />
+                </div>
+              </div>
+
+              {/* ── ZONA 2 — Snapshot ─────────────────────────────────────── */}
+              {snapshotOpen ? (
+                <div className={styles.snapshot}>
+                  <div className={styles.kpiRow}>
+                    <div className={styles.kpi}>
+                      <span className={styles.kpiLabel}>Balance hoy</span>
+                      <strong className={styles.kpiValue}>
+                        {formatCop(summary.balance.balance_confirmed)}
+                      </strong>
+                      <span className={styles.kpiHint}>ingresos − gastos confirmados</span>
                     </div>
-                    <div className={styles.listSecondary}>
-                      <span className={styles.pill}>{summary.financial_context?.strategy ?? 'sin estrategia'}</span>
-                    </div>
-                  </article>
-                  <article className={styles.listItem}>
-                    <div className={styles.listPrimary}>
-                      <span className={styles.listLabel}>Recomendación del sistema</span>
-                      <span className={styles.listMeta}>
-                        {summary.financial_context?.recommended_action ?? 'Aún no hay acción calculada.'}
+                    <div className={styles.kpi}>
+                      <span className={styles.kpiLabel}>Ingreso pendiente</span>
+                      <strong className={styles.kpiValue}>
+                        {liquidity ? formatCop(liquidity.pending_income) : '—'}
+                      </strong>
+                      <span className={styles.kpiHint}>
+                        variable aún no confirmado este mes
                       </span>
                     </div>
-                  </article>
-                </div>
-              </section>
-            </div>
-
-            <section className={styles.panel}>
-              <h3 className={styles.panelTitle}>Lectura conductual del mes</h3>
-              <div className={styles.list}>
-                {behaviorSignals.map((signal) => (
-                  <article key={`${signal.tone}-${signal.title}`} className={styles.listItem}>
-                    <div className={styles.listPrimary}>
-                      <span className={styles.listLabel}>{signal.title}</span>
-                      <span className={styles.listMeta}>{signal.message}</span>
+                    <div className={styles.kpi}>
+                      <span className={styles.kpiLabel}>Reservado próximo ciclo</span>
+                      <strong className={[styles.kpiValue, styles.kpiValueWarn].join(' ')}>
+                        {liquidity ? formatCop(liquidity.next_cycle_obligations) : '—'}
+                      </strong>
+                      <span className={styles.kpiHint}>
+                        obligaciones + mínimos de deuda
+                      </span>
                     </div>
-                    <div className={styles.listSecondary}>
-                      <span className={styles.pill}>{signal.tone}</span>
+                  </div>
+
+                  {burnCategories.length > 0 ? (
+                    <div className={styles.charts}>
+                      {/* Donut — distribución de gastos */}
+                      <div className={styles.chartCard}>
+                        <h3 className={styles.chartTitle}>Distribución de gastos</h3>
+                        <ResponsiveContainer width="100%" height={190}>
+                          <PieChart>
+                            <Pie
+                              data={donutData}
+                              cx="50%"
+                              cy="50%"
+                              innerRadius={52}
+                              outerRadius={82}
+                              paddingAngle={2}
+                              dataKey="value"
+                            >
+                              {donutData.map((entry) => (
+                                <Cell
+                                  key={entry.name}
+                                  fill={entry.color}
+                                  opacity={0.88}
+                                />
+                              ))}
+                            </Pie>
+                            <Tooltip
+                              formatter={(value) => formatCop(Number(value ?? 0))}
+                              {...TOOLTIP_STYLE}
+                            />
+                          </PieChart>
+                        </ResponsiveContainer>
+                        <div className={styles.legend}>
+                          {donutData.map((entry) => (
+                            <div key={entry.name} className={styles.legendItem}>
+                              <span
+                                className={styles.legendDot}
+                                style={{ background: entry.color }}
+                              />
+                              <span className={styles.legendLabel}>{entry.name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Horizontal bars — burn rate */}
+                      <div className={styles.chartCard}>
+                        <h3 className={styles.chartTitle}>Burn rate por categoría</h3>
+                        <ResponsiveContainer width="100%" height={190}>
+                          <BarChart
+                            data={barData}
+                            layout="vertical"
+                            barCategoryGap="28%"
+                            margin={{ left: 0, right: 12, top: 4, bottom: 4 }}
+                          >
+                            <XAxis type="number" hide />
+                            <YAxis
+                              type="category"
+                              dataKey="name"
+                              width={90}
+                              tick={{
+                                fill: 'rgba(231,236,244,0.68)',
+                                fontSize: 11,
+                                fontFamily: 'var(--font-sans)',
+                              }}
+                              tickLine={false}
+                              axisLine={false}
+                            />
+                            <Tooltip
+                              formatter={(value, name) => [
+                                formatCop(Number(value ?? 0)),
+                                name === 'gastado' ? 'Gastado' : 'Presupuesto',
+                              ]}
+                              {...TOOLTIP_STYLE}
+                            />
+                            <Bar
+                              dataKey="presupuesto"
+                              fill="rgba(255,255,255,0.08)"
+                              radius={[0, 4, 4, 0]}
+                              barSize={7}
+                            />
+                            <Bar
+                              dataKey="gastado"
+                              radius={[0, 4, 4, 0]}
+                              barSize={7}
+                            >
+                              {barData.map((entry) => (
+                                <Cell key={entry.name} fill={entry.color} />
+                              ))}
+                            </Bar>
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
                     </div>
-                  </article>
-                ))}
-              </div>
-            </section>
-
-            <div className={styles.columns}>
-              <section className={styles.panel}>
-                <h3 className={styles.panelTitle}>Pendientes recientes</h3>
-                <div className={styles.list}>
-                  {pending.slice(0, 5).map((transaction) => (
-                    <article key={transaction.id} className={styles.listItem}>
-                      <div className={styles.listPrimary}>
-                        <span className={styles.listLabel}>{transaction.attributes.concept}</span>
-                        <span className={styles.listMeta}>
-                          {transaction.attributes.date} · {transaction.attributes.product}
-                        </span>
-                      </div>
-                      <div className={styles.listSecondary}>
-                        <span className={styles.listLabel}>{formatCop(transaction.attributes.amount)}</span>
-                      </div>
-                    </article>
-                  ))}
+                  ) : null}
                 </div>
-              </section>
+              ) : null}
 
-              <section className={styles.panel}>
-                <h3 className={styles.panelTitle}>Compromisos cargados</h3>
-                <div className={styles.list}>
-                  {obligations.slice(0, 5).map((obligation) => (
-                    <article key={obligation.id} className={styles.listItem}>
-                      <div className={styles.listPrimary}>
-                        <span className={styles.listLabel}>{obligation.attributes.name}</span>
-                        <span className={styles.listMeta}>Día {obligation.attributes.due_day}</span>
+              {/* ── ZONA 3 — Detalle ──────────────────────────────────────── */}
+              {detailOpen ? (
+                <div className={styles.detail}>
+                  {pending.length > 0 ? (
+                    <section className={styles.detailSection}>
+                      <h3 className={styles.detailTitle}>Transacciones pendientes</h3>
+                      <div className={styles.list}>
+                        {pending.slice(0, 8).map((t) => (
+                          <div key={t.id} className={styles.listRow}>
+                            <div className={styles.listMain}>
+                              <span className={styles.listPrimary}>
+                                {t.attributes.concept}
+                              </span>
+                              <span className={styles.listSecondary}>
+                                {t.attributes.date} · {t.attributes.product}
+                              </span>
+                            </div>
+                            <span className={styles.listAmount}>
+                              {formatCop(t.attributes.amount)}
+                            </span>
+                          </div>
+                        ))}
                       </div>
-                      <div className={styles.listSecondary}>
-                        <span className={styles.listLabel}>{formatCop(obligation.attributes.amount)}</span>
+                    </section>
+                  ) : null}
+
+                  {obligations.length > 0 ? (
+                    <section className={styles.detailSection}>
+                      <h3 className={styles.detailTitle}>Obligaciones próximo ciclo</h3>
+                      <div className={styles.list}>
+                        {obligations.slice(0, 10).map((o) => (
+                          <div key={o.id} className={styles.listRow}>
+                            <div className={styles.listMain}>
+                              <span className={styles.listPrimary}>
+                                {o.attributes.name}
+                              </span>
+                              <span className={styles.listSecondary}>
+                                Día {o.attributes.due_day}
+                              </span>
+                            </div>
+                            <span className={styles.listAmount}>
+                              {formatCop(o.attributes.amount)}
+                            </span>
+                          </div>
+                        ))}
                       </div>
-                    </article>
-                  ))}
+                    </section>
+                  ) : null}
+
+                  {debts.length > 0 ? (
+                    <section className={styles.detailSection}>
+                      <h3 className={styles.detailTitle}>Deudas activas</h3>
+                      <div className={pageStyles.tableWrap}>
+                        <table className={pageStyles.table}>
+                          <thead>
+                            <tr>
+                              <th>Deuda</th>
+                              <th>Estado</th>
+                              <th className={pageStyles.numeric}>Saldo</th>
+                              <th className={pageStyles.numeric}>Pago mensual</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {debts.map((d) => (
+                              <tr key={d.id}>
+                                <td>{d.attributes.name}</td>
+                                <td>{d.attributes.status}</td>
+                                <td className={pageStyles.numeric}>
+                                  {formatCop(d.attributes.current_balance)}
+                                </td>
+                                <td className={pageStyles.numeric}>
+                                  {formatCop(d.attributes.monthly_payment)}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  ) : null}
                 </div>
-              </section>
-            </div>
+              ) : null}
+            </>
+          ) : null}
 
-            <div className={styles.tableWrap}>
-              <table className={styles.table}>
-                <thead>
-                  <tr>
-                    <th>Deuda</th>
-                    <th>Estado</th>
-                    <th className={styles.numeric}>Saldo</th>
-                    <th className={styles.numeric}>Pago mensual</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {debts.slice(0, 6).map((debt) => (
-                    <tr key={debt.id}>
-                      <td>{debt.attributes.name}</td>
-                      <td>{debt.attributes.status}</td>
-                      <td className={styles.numeric}>{formatCop(debt.attributes.current_balance)}</td>
-                      <td className={styles.numeric}>{formatCop(debt.attributes.monthly_payment)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        ) : null}
-      </section>
+        </section>
       </IonContent>
     </AppLayout>
   );

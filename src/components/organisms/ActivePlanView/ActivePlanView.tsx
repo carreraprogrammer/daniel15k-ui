@@ -64,6 +64,16 @@ const buildStatusLabel = (category: CurrentPlanCategory) => {
   return category.signal_label ?? 'En ritmo';
 };
 
+const buildCompactSignalLabel = (
+  signalKind: CurrentPlanCategory['signal_kind'] | CurrentPlanSubcategory['signal_kind'],
+  signalLabel?: string,
+) => {
+  if (signalKind === 'positive') return 'Bien';
+  if (signalKind === 'attention') return 'Atención';
+  if (signalLabel === 'Sin movimiento') return 'Sin mov.';
+  return 'En ritmo';
+};
+
 const signalClassFor = (
   kind: CurrentPlanCategory['signal_kind'] | CurrentPlanSubcategory['signal_kind'],
   positiveClass: string,
@@ -80,11 +90,13 @@ const SubcategoryCard = ({ sub, accentColor }: { sub: CurrentPlanSubcategory; ac
   const remaining = budgeted - spent;
   const pct = budgeted > 0 ? clampPct((spent / budgeted) * 100) : 0;
   const isOver = spent > budgeted;
+  const signalTitle = sub.signal_detail ?? sub.signal_label ?? 'Sin señal adicional';
 
   return (
     <article
       className={styles.subcategoryCard}
       style={{ '--subcategory-accent': accentColor } as CSSProperties}
+      title={signalTitle}
     >
       <div className={styles.subcategoryTop}>
         <div className={styles.subcategoryIdentity}>
@@ -100,11 +112,16 @@ const SubcategoryCard = ({ sub, accentColor }: { sub: CurrentPlanSubcategory; ac
         </div>
         <span
           className={[
-            styles.subcategoryState,
-            signalClassFor(sub.signal_kind, styles.subcategoryStatePositive, styles.subcategoryStateAttention),
+            styles.subcategorySignal,
+            signalClassFor(sub.signal_kind, styles.subcategorySignalPositive, styles.subcategorySignalAttention),
           ].filter(Boolean).join(' ')}
+          title={signalTitle}
+          aria-label={sub.signal_label ?? signalTitle}
         >
-          {sub.signal_label ?? `${pct}%`}
+          <span className={styles.subcategorySignalDot} />
+          <span className={styles.subcategorySignalLabel}>
+            {buildCompactSignalLabel(sub.signal_kind, sub.signal_label)}
+          </span>
         </span>
       </div>
 
@@ -121,18 +138,14 @@ const SubcategoryCard = ({ sub, accentColor }: { sub: CurrentPlanSubcategory; ac
           <dd>{formatCOP(budgeted)}</dd>
         </div>
         <div className={styles.subcategoryStat}>
+          <dt>Gastado</dt>
+          <dd>{formatCOP(spent)}</dd>
+        </div>
+        <div className={styles.subcategoryStat}>
           <dt>Restante</dt>
           <dd className={remaining < 0 ? styles.negativeValue : ''}>{formatCOP(remaining)}</dd>
         </div>
-        <div className={styles.subcategoryStat}>
-          <dt>Estado</dt>
-          <dd>{sub.signal_label ?? 'En ritmo'}</dd>
-        </div>
       </dl>
-
-      {sub.signal_detail ? (
-        <p className={styles.subcategorySignalText}>{sub.signal_detail}</p>
-      ) : null}
     </article>
   );
 };
