@@ -306,8 +306,6 @@ export interface RecurringObligation {
     subcategory_icon?: string | null;
     source_type?: 'Debt' | 'Investment' | null;
     source_id?: number | null;
-    allocatable_type?: string | null;
-    allocatable_id?: number | null;
     notes?: string | null;
   };
 }

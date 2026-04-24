@@ -221,3 +221,11 @@ Los radios actuales (4–12px) son demasiado angulares para la personalidad rela
 2. **El fondo oscuro es el protagonista** — los colores son joyas sobre piedra, no pintura en pared.
 3. **Espaciado generoso** — entre cards, entre ítems de lista, entre secciones. La respiración visual es parte del relajamiento.
 4. **Sin rojos alarmantes para errores de UX** — usar `--color-error` solo para errores técnicos. Para overspending en presupuesto, usar la paleta de categorías (Comprometido en Granada) no el rojo de error.
+
+---
+
+## Referencias
+
+- **Taxonomía completa y Budget Wizard** — definición autoritativa de categorías, subcategorías, iconos y lógica del wizard: `daniel15k-api/specs/finanzas/taxonomy-and-budget-wizard.md`
+  - Los colores definidos aquí en "Paleta de categorías conductuales" deben mantenerse sincronizados con los `category_code` de ese spec.
+  - Los iconos del "Mapa completo subcategoría → ícono" deben mantenerse sincronizados con los `subcategory_icon` sembrados en `db/seeds.rb`.

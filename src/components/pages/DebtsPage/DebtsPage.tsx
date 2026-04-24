@@ -139,9 +139,6 @@ export const DebtsPage = () => {
     if (obligation.attributes.source_type === 'Debt' && obligation.attributes.source_id) {
       return String(obligation.attributes.source_id);
     }
-    if (obligation.attributes.allocatable_type === 'Debt' && obligation.attributes.allocatable_id) {
-      return String(obligation.attributes.allocatable_id);
-    }
     return null;
   };
 

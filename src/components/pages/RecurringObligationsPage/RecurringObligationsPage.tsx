@@ -509,9 +509,7 @@ export const RecurringObligationsPage = () => {
                       linkedDebtLabel={
                         obligation.attributes.source_type === 'Debt' && obligation.attributes.source_id
                           ? `Deuda: ${debtById.get(String(obligation.attributes.source_id))?.attributes.name ?? `#${obligation.attributes.source_id}`}`
-                          : obligation.attributes.allocatable_type === 'Debt' && obligation.attributes.allocatable_id
-                            ? `Deuda: ${debtById.get(String(obligation.attributes.allocatable_id))?.attributes.name ?? `#${obligation.attributes.allocatable_id}`}`
-                            : null
+                          : null
                       }
                       onEdit={(nextObligation) => {
                         setEditingObligation(nextObligation);
