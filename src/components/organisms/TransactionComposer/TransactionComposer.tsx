@@ -9,6 +9,7 @@ import { AddSubcategorySheet } from '../BudgetWizard/AddSubcategorySheet';
 import { resolveNamedIcon } from '../BudgetWizard/iconRegistry';
 import type {
   CategoryResource,
+  PaymentSource,
   Transaction,
   TransactionCreatePayload,
   TransactionStatus,
@@ -27,6 +28,12 @@ const transactionStatusOptions = [
   { label: 'Pendiente', value: 'pending' },
 ];
 
+const PAYMENT_SOURCE_OPTIONS: { value: PaymentSource; label: string }[] = [
+  { value: 'credit_card', label: 'Tarjeta de crédito' },
+  { value: 'debit',       label: 'Débito / Nequi' },
+  { value: 'cash',        label: 'Efectivo' },
+];
+
 interface TransactionComposerValues {
   date: string;
   concept: string;
@@ -36,6 +43,7 @@ interface TransactionComposerValues {
   status: TransactionStatus;
   categoryId: string;
   subcategoryId: string;
+  paymentSource: PaymentSource | null;
 }
 
 const emptyValues: TransactionComposerValues = {
@@ -47,6 +55,7 @@ const emptyValues: TransactionComposerValues = {
   status: 'confirmed',
   categoryId: '',
   subcategoryId: '',
+  paymentSource: null,
 };
 
 const toInputDate = (value: string) => {
@@ -69,12 +78,13 @@ const valuesFromTransaction = (transaction: Transaction | null): TransactionComp
   return {
     date: toInputDate(transaction.attributes.date),
     concept: transaction.attributes.concept,
-    product: transaction.attributes.product,
+    product: transaction.attributes.product ?? '',
     amount: transaction.attributes.amount,
     transactionType: transaction.attributes.transaction_type ?? 'expense',
     status: transaction.attributes.status ?? 'confirmed',
     categoryId: transaction.attributes.category_id ? String(transaction.attributes.category_id) : '',
     subcategoryId: transaction.attributes.subcategory_id ? String(transaction.attributes.subcategory_id) : '',
+    paymentSource: (transaction.attributes.payment_source as PaymentSource | null) ?? null,
   };
 };
 
@@ -125,8 +135,8 @@ export const TransactionComposer = ({
   };
 
   const handleSubmit = async () => {
-    if (!values.date || !values.concept.trim() || !values.product.trim() || values.amount === '' || values.amount <= 0) {
-      setError('Completa fecha, concepto, producto y un monto mayor a cero.');
+    if (!values.date || !values.concept.trim() || !values.paymentSource || values.amount === '' || values.amount <= 0) {
+      setError('Completa fecha, concepto, medio de pago y un monto mayor a cero.');
       return;
     }
 
@@ -135,12 +145,13 @@ export const TransactionComposer = ({
     const basePayload = {
       date: toApiDate(values.date),
       concept: values.concept.trim(),
-      product: values.product.trim(),
+      product: values.product.trim() || undefined,
       amount: Number(values.amount),
       status: values.status,
       category_id: values.categoryId ? Number(values.categoryId) : null,
       subcategory_id: values.subcategoryId ? Number(values.subcategoryId) : null,
       source: 'manual' as const,
+      payment_source: values.paymentSource ?? undefined,
     };
 
     try {
@@ -224,15 +235,39 @@ export const TransactionComposer = ({
               />
             </div>
             <div className={styles.spanTwo}>
-              <TextInput
-                name="transaction-product"
-                label="Producto"
-                value={values.product}
-                onChange={(product) => setValues((current) => ({ ...current, product }))}
-                placeholder="Ej. Nequi, débito, TC LifeMiles"
-                required
-              />
+              <p className={styles.fieldLabel}>Medio de pago *</p>
+              <div className={styles.paymentSourceRow}>
+                {PAYMENT_SOURCE_OPTIONS.map(({ value, label }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    className={[
+                      styles.paymentSourceBtn,
+                      values.paymentSource === value ? styles.paymentSourceBtnActive : '',
+                    ].filter(Boolean).join(' ')}
+                    onClick={() =>
+                      setValues((current) => ({
+                        ...current,
+                        paymentSource: current.paymentSource === value ? null : value,
+                      }))
+                    }
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
             </div>
+            {values.paymentSource === 'credit_card' ? (
+              <div className={styles.spanTwo}>
+                <TextInput
+                  name="transaction-product"
+                  label="Nombre de la tarjeta (opcional)"
+                  value={values.product}
+                  onChange={(product) => setValues((current) => ({ ...current, product }))}
+                  placeholder="Ej. LifeMiles, TC Davivienda"
+                />
+              </div>
+            ) : null}
           </div>
         </div>
 

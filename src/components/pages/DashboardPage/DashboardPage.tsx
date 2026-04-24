@@ -416,6 +416,25 @@ export const DashboardPage = () => {
                     </section>
                   ) : null}
 
+                  {(summary?.credit_card_pending ?? 0) > 0 ? (
+                    <section className={styles.detailSection}>
+                      <h3 className={styles.detailTitle}>Tarjeta de crédito — pendiente de pagar</h3>
+                      <div className={styles.list}>
+                        <div className={styles.listRow}>
+                          <div className={styles.listMain}>
+                            <span className={styles.listPrimary}>Compras sin abonar al banco</span>
+                            <span className={styles.listSecondary}>
+                              Se liquidarán cuando registres el pago mensual
+                            </span>
+                          </div>
+                          <span className={[styles.listAmount, styles.metricWarn].join(' ')}>
+                            {formatCurrencyCompact(summary!.credit_card_pending!)}
+                          </span>
+                        </div>
+                      </div>
+                    </section>
+                  ) : null}
+
                   {debts.length > 0 ? (
                     <section className={styles.detailSection}>
                       <h3 className={styles.detailTitle}>Deudas activas</h3>

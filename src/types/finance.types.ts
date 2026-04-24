@@ -9,6 +9,8 @@ export interface SummaryBalance {
 
 export type TransactionType = 'expense' | 'income';
 export type TransactionStatus = 'confirmed' | 'pending';
+export type PaymentSource = 'credit_card' | 'debit' | 'cash';
+export type CreditCardStatus = 'pending' | 'settled';
 
 export interface BurnRateCategory {
   category: string;
@@ -87,6 +89,7 @@ export interface LiquidityProjection {
   pending_income: number;
   projected_eom_balance: number;
   next_cycle_obligations: number;
+  credit_card_pending: number;
   protected_buffer: number;
   free_after_obligations: number;
   safe_to_deploy: number;
@@ -105,6 +108,7 @@ export interface SummaryResponse {
   overflow_status?: SummaryOverflowStatus | null;
   financial_context: FinancialContextSummary | null;
   liquidity?: LiquidityProjection | null;
+  credit_card_pending?: number;
 }
 
 export type CompletenessStatus = 'missing' | 'partial' | 'sufficient' | 'stale' | 'conflicting';
@@ -141,6 +145,8 @@ export interface Transaction {
     source_event_id?: string | null;
     month?: number;
     year?: number;
+    payment_source?: PaymentSource | null;
+    credit_card_status?: CreditCardStatus | null;
   };
   relationships?: {
     category?: {
@@ -196,24 +202,26 @@ export interface ResolvedTransactionCategory {
 export interface TransactionCreatePayload {
   date: string;
   concept: string;
-  product: string;
+  product?: string;
   amount: number;
   transaction_type: TransactionType;
   status: TransactionStatus;
   category_id?: number | null;
   subcategory_id?: number | null;
   source?: 'manual';
+  payment_source?: PaymentSource | null;
 }
 
 export interface TransactionUpdatePayload {
   date: string;
   concept: string;
-  product: string;
+  product?: string;
   amount: number;
   status: TransactionStatus;
   category_id?: number | null;
   subcategory_id?: number | null;
   source?: 'manual';
+  payment_source?: PaymentSource | null;
 }
 
 export interface Debt {
