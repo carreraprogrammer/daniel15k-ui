@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { financeService } from '../services/financeService';
 import type { CategoryResource, Debt, RecurringObligation, SummaryResponse, Transaction } from '../types/finance.types';
 import { buildCategoryLookup, buildBehaviorSignals, summarizeBehavior } from '../utils/financeBehavior';
@@ -13,26 +13,29 @@ export const useDashboardData = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
+      // Carga crítica: summary desbloquea el render principal
+      const summaryResponse = await financeService.fetchSummary();
+      setSummary(summaryResponse);
+      setLoading(false);
+
+      // Carga secundaria en paralelo sin bloquear UI
       const [
-        summaryResponse,
         debtsResponse,
         pendingResponse,
         obligationsResponse,
         transactionsResponse,
         categoriesResponse,
       ] = await Promise.all([
-        financeService.fetchSummary(),
         financeService.fetchDebts(),
         financeService.fetchPendingTransactions(),
         financeService.fetchRecurringObligations(),
-        financeService.fetchTransactions({ page: 1, per_page: 200, sort_by: 'date', sort_dir: 'desc' }),
+        financeService.fetchTransactions({ page: 1, per_page: 50, sort_by: 'date', sort_dir: 'desc' }),
         financeService.fetchCategories(),
       ]);
-      setSummary(summaryResponse);
       setDebts(debtsResponse.data);
       setPending(pendingResponse.data);
       setObligations(obligationsResponse.data);
@@ -40,14 +43,13 @@ export const useDashboardData = () => {
       setCategories(categoriesResponse.data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No fue posible cargar el resumen financiero.');
-    } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     void load();
-  }, []);
+  }, [load]);
 
   const categoryLookup = useMemo(() => buildCategoryLookup(categories), [categories]);
   const behaviorSummary = useMemo(
@@ -65,6 +67,6 @@ export const useDashboardData = () => {
     error,
     behaviorSummary,
     behaviorSignals,
-    reload: load,
+    reload: () => void load(),
   };
 };
