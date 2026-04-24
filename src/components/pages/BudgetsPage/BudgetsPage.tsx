@@ -10,7 +10,7 @@ import { AppliedFiltersBar } from '../../molecules/AppliedFiltersBar';
 import { SortSheet } from '../../molecules/SortSheet';
 import { BudgetPlanModal } from '../../organisms/BudgetPlanModal/BudgetPlanModal';
 import { BudgetWizardModal } from '../../organisms/BudgetWizard';
-import { ActivePlanView } from '../../organisms/ActivePlanView';
+import { ActivePlanView, CategoryGroup } from '../../organisms/ActivePlanView/ActivePlanView';
 import { useWizardData } from '../../../hooks/useWizardData';
 import { financeService } from '../../../services/financeService';
 import type {
@@ -72,6 +72,8 @@ export const BudgetsPage = () => {
   const [wizardSuccess, setWizardSuccess] = useState(false);
 
   const [filters, setFilters] = useState<BudgetQueryParams>(initialFilters);
+
+  const month = currentMonthString();
 
   // ── Wizard data hook ────────────────────────────────────────────────────────
   const {
@@ -183,8 +185,6 @@ export const BudgetsPage = () => {
   const outOfRange = burnCategories.filter((item) => item.on_track === false);
   const topRisk = outOfRange[0] ?? burnCategories[0] ?? null;
 
-  const month = currentMonthString();
-
   // ── Render ──────────────────────────────────────────────────────────────────
 
   return (
@@ -197,7 +197,11 @@ export const BudgetsPage = () => {
             <div className={styles.focusStage}>
               <div className={`${styles.focusCard} ${styles.focusCardFull} ${styles.focusCardCentered}`}>
                 {currentPlan ? (
-                  <ActivePlanView currentPlan={currentPlan} onEditPlan={handleOpenWizard} />
+                  <ActivePlanView
+                    currentPlan={currentPlan}
+                    onEditPlan={handleOpenWizard}
+                    onExploreDetail={() => setDetailsOpen(true)}
+                  />
                 ) : (
                   <>
                   {/* Burn-rate focus card (pre-plan state) */}
@@ -301,15 +305,23 @@ export const BudgetsPage = () => {
             <div className={styles.detailStage}>
               <div className={styles.detailStageHeader}>
                 <div className={styles.detailStageCopy}>
-                  <h3 className={styles.detailStageTitle}>Detalle de presupuestos</h3>
+                  <h3 className={styles.detailStageTitle}>Detalle del plan</h3>
                   <p className={styles.detailStageText}>
-                    La tabla completa y los filtros aparecen en esta vista secundaria, no apilados
-                    debajo del estado inicial.
+                    Seguimiento por categoría: gastado, presupuestado y proyección del mes.
                   </p>
                 </div>
-                <Button label="Volver al resumen" variant="ghost" onClick={() => setDetailsOpen(false)} />
+                <Button label="← Volver" variant="ghost" onClick={() => setDetailsOpen(false)} />
               </div>
-              <div className={styles.detailPanel}>
+
+              {/* Category breakdown from current plan */}
+              {currentPlan && Array.isArray(currentPlan.categories) && currentPlan.categories.length > 0 ? (
+                <div className={styles.detailPanel}>
+                  {currentPlan.categories.map((cat) => (
+                    <CategoryGroup key={cat.code ?? cat.name ?? 'unknown'} category={cat} />
+                  ))}
+                </div>
+              ) : null}
+              {!currentPlan ? <div className={styles.detailPanel}>
                 <ListToolbar
                   searchLabel="Buscar presupuestos"
                   searchPlaceholder="Categoría"
@@ -368,11 +380,11 @@ export const BudgetsPage = () => {
                     setFilters(initialFilters);
                   }}
                 />
-              </div>
+              </div> : null}
             </div>
           ) : null}
 
-          {detailsOpen ? (
+          {detailsOpen && !currentPlan ? (
             <>
               {loading ? <Spinner size="lg" /> : null}
               {error ? <ErrorState message={error} onRetry={() => void load()} /> : null}

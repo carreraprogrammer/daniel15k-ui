@@ -52,11 +52,11 @@ const buildHeroCopy = (currentPlan: CurrentPlan, categories: CurrentPlanCategory
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-interface CategoryGroupProps {
+export interface CategoryGroupProps {
   category: CurrentPlanCategory;
 }
 
-const CategoryGroup = ({ category }: CategoryGroupProps) => {
+export const CategoryGroup = ({ category }: CategoryGroupProps) => {
   const totalBudgeted = category.budgeted ?? 0;
   const totalSpent = category.spent ?? 0;
   const totalProjected = category.projected ?? 0;
@@ -188,17 +188,8 @@ export const ActivePlanView = ({
       <div className={styles.focusActions}>
         <Button label="Editar plan" onClick={onEditPlan} />
         {onExploreDetail ? (
-          <Button label="Explorar detalle" variant="ghost" onClick={onExploreDetail} />
+          <Button label="Ver detalle" variant="ghost" onClick={onExploreDetail} />
         ) : null}
-      </div>
-
-      <div className={styles.groupList}>
-        {categories.map((category) => (
-          <CategoryGroup
-            key={category.code ?? category.name ?? 'unknown-category'}
-            category={category}
-          />
-        ))}
       </div>
     </section>
   );
