@@ -21,6 +21,13 @@ const CONFIDENCE_TITLES: Record<WizardSubcategory['confidence'], string> = {
   low:    'Referencia de benchmark',
 };
 
+const SOURCE_LABELS: Record<NonNullable<WizardSubcategory['source']>, string> = {
+  recurring: 'Fijo',
+  planned_expense: 'Planeado',
+  history: 'Historial',
+  benchmark: 'Referencia',
+};
+
 // ── Types ────────────────────────────────────────────────────────────────────
 
 interface BudgetCategoryStepProps {
@@ -30,6 +37,7 @@ interface BudgetCategoryStepProps {
   alreadyCommitted: number;
   onAmountChange: (subcategoryCode: string, amount: number) => void;
   onAddSubcategory: () => void;
+  onOpenSourceOfTruth: (subcategory: WizardSubcategory) => void;
 }
 
 // ── Component ────────────────────────────────────────────────────────────────
@@ -41,6 +49,7 @@ export const BudgetCategoryStep = ({
   alreadyCommitted,
   onAmountChange,
   onAddSubcategory,
+  onOpenSourceOfTruth,
 }: BudgetCategoryStepProps) => {
   const [editingCode, setEditingCode] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
@@ -96,11 +105,14 @@ export const BudgetCategoryStep = ({
         {category.subcategories.map((sub) => {
           const amount = amounts[sub.code] ?? sub.suggested_amount;
           const isEditing = editingCode === sub.code;
+          const isLocked = sub.locked === true;
+          const sourceLabel = sub.source ? SOURCE_LABELS[sub.source] : null;
+          const confidenceTitle = sub.edit_hint ?? CONFIDENCE_TITLES[sub.confidence];
 
           return (
             <div
               key={sub.code}
-              className={styles.subRow}
+              className={[styles.subRow, isLocked ? styles.subRowLocked : ''].filter(Boolean).join(' ')}
               style={{ '--cat-color': catColorVar } as React.CSSProperties}
             >
               {/* Icon */}
@@ -110,19 +122,43 @@ export const BudgetCategoryStep = ({
 
               {/* Name + confidence */}
               <div className={styles.subMeta}>
-                <span className={styles.subName}>{sub.name}</span>
-                <span
-                  className={styles.confidence}
-                  data-level={sub.confidence}
-                  title={CONFIDENCE_TITLES[sub.confidence]}
-                >
-                  {CONFIDENCE_LABELS[sub.confidence]}
-                </span>
+                <div className={styles.subMetaTop}>
+                  <span className={styles.subName}>{sub.name}</span>
+                  {sourceLabel && (
+                    <span className={[styles.sourceBadge, isLocked ? styles.sourceBadgeLocked : ''].filter(Boolean).join(' ')}>
+                      {sourceLabel}
+                    </span>
+                  )}
+                  <span
+                    className={styles.confidence}
+                    data-level={sub.confidence}
+                    title={confidenceTitle}
+                  >
+                    {CONFIDENCE_LABELS[sub.confidence]}
+                  </span>
+                </div>
+                {sub.edit_hint && (
+                  <span className={styles.subHint}>
+                    {sub.edit_hint}
+                    {sub.source_of_truth && sub.source_of_truth !== 'benchmarks' && (
+                      <>
+                        {' '}
+                        <button
+                          type="button"
+                          className={styles.inlineLink}
+                          onClick={() => onOpenSourceOfTruth(sub)}
+                        >
+                          Abrir origen
+                        </button>
+                      </>
+                    )}
+                  </span>
+                )}
               </div>
 
               {/* Amount */}
               <div className={styles.amountCell}>
-                {isEditing ? (
+                {isEditing && !isLocked ? (
                   <input
                     type="number"
                     className={styles.amountInput}
@@ -137,14 +173,18 @@ export const BudgetCategoryStep = ({
                 ) : (
                   <>
                     <span className={styles.amountText}>{formatCOP(amount)}</span>
-                    <button
-                      type="button"
-                      className={styles.editBtn}
-                      onClick={() => startEdit(sub.code, amount)}
-                      aria-label={`Editar monto de ${sub.name}`}
-                    >
-                      ✎
-                    </button>
+                    {isLocked ? (
+                      <span className={styles.lockedText}>Bloqueado</span>
+                    ) : (
+                      <button
+                        type="button"
+                        className={styles.editBtn}
+                        onClick={() => startEdit(sub.code, amount)}
+                        aria-label={`Editar monto de ${sub.name}`}
+                      >
+                        ✎
+                      </button>
+                    )}
                   </>
                 )}
               </div>

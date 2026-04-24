@@ -497,6 +497,10 @@ export interface WizardSubcategory {
   icon: string;
   suggested_amount: number;
   confidence: 'high' | 'medium' | 'low';
+  source?: 'recurring' | 'planned_expense' | 'history' | 'benchmark';
+  locked?: boolean;
+  source_of_truth?: 'recurring_obligations' | 'planned_expenses' | 'transactions' | 'benchmarks';
+  edit_hint?: string;
 }
 
 export interface WizardCategory {
@@ -534,6 +538,10 @@ export interface WizardData {
   income: {
     sources: WizardIncomeSource[];
     suggested_total: number;
+    source_of_truth?: 'income_sources';
+    can_edit_in_wizard?: boolean;
+    needs_setup?: boolean;
+    edit_hint?: string;
   };
   categories: WizardCategory[];
 }

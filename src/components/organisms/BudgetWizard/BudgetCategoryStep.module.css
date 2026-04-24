@@ -72,6 +72,11 @@
   border-color: rgba(255, 255, 255, 0.08);
 }
 
+.subRowLocked {
+  background: color-mix(in srgb, var(--cat-color) 6%, rgba(255, 255, 255, 0.02));
+  border-color: color-mix(in srgb, var(--cat-color) 20%, rgba(255, 255, 255, 0.05));
+}
+
 /* ── Icon ─────────────────────────────────────────────────────────────────── */
 
 .subIconWrap {
@@ -95,10 +100,16 @@
 /* ── Meta ─────────────────────────────────────────────────────────────────── */
 
 .subMeta {
+  display: grid;
+  gap: 0.2rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.subMetaTop {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  flex: 1;
   min-width: 0;
 }
 
@@ -109,6 +120,46 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.subHint {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-normal);
+}
+
+.inlineLink {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--cat-color);
+  font: inherit;
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+}
+
+.inlineLink:hover {
+  text-decoration: underline;
+}
+
+.sourceBadge {
+  flex-shrink: 0;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-text-secondary);
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  font-weight: var(--font-semibold);
+  letter-spacing: 0.02em;
+}
+
+.sourceBadgeLocked {
+  color: var(--cat-color);
+  border-color: color-mix(in srgb, var(--cat-color) 26%, rgba(255, 255, 255, 0.08));
+  background: color-mix(in srgb, var(--cat-color) 10%, transparent);
 }
 
 /* ── Confidence indicator ─────────────────────────────────────────────────── */
@@ -169,6 +220,15 @@
   background: color-mix(in srgb, var(--cat-color) 12%, transparent);
   color: var(--cat-color);
   border-color: color-mix(in srgb, var(--cat-color) 30%, transparent);
+}
+
+.lockedText {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .amountInput {

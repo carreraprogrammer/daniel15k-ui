@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { IonContent, IonModal } from '@ionic/react';
+import { useHistory } from 'react-router-dom';
 import type {
   BudgetLineItem,
   BudgetPlanDraft,
@@ -54,13 +55,6 @@ function buildInitialStepData(
     }
   }
   return data;
-}
-
-/** Build initial income source amounts from wizardData */
-function buildInitialIncomeSources(
-  wizardData: WizardData,
-): number[] {
-  return wizardData.income.sources.map((s) => s.monthly_amount);
 }
 
 /** Category at a given step (steps 1–5 → index 0–4) */
@@ -120,9 +114,9 @@ export const BudgetWizardModal = ({
   wizardData,
   month,
 }: BudgetWizardModalProps) => {
+  const history = useHistory();
   const [currentStep, setCurrentStep] = useState(0);
   const [stepData, setStepData] = useState<Record<string, Record<string, number>>>({});
-  const [incomeSources, setIncomeSources] = useState<number[]>([]);
   const [includeVariable, setIncludeVariable] = useState(true);
 
   // ── Subcategory sheet state ────────────────────────────────────────────────
@@ -139,7 +133,6 @@ export const BudgetWizardModal = ({
   useEffect(() => {
     if (!wizardData) return;
     setStepData(buildInitialStepData(wizardData));
-    setIncomeSources(buildInitialIncomeSources(wizardData));
   }, [wizardData]);
 
   // Reset step to 0 every time modal opens
@@ -152,10 +145,9 @@ export const BudgetWizardModal = ({
   const categories = wizardData?.categories ?? [];
 
   const totalIncome = wizardData
-    ? incomeSources.reduce((sum, amt, i) => {
-        const source = wizardData.income.sources[i];
+    ? wizardData.income.sources.reduce((sum, source) => {
         if (!includeVariable && source?.is_variable) return sum;
-        return sum + amt;
+        return sum + source.monthly_amount;
       }, 0)
     : 0;
 
@@ -169,6 +161,8 @@ export const BudgetWizardModal = ({
   const canGoBack = currentStep > 0;
   const isLastStep = currentStep === SUMMARY_STEP;
   const currentStepNumber = currentStep + 1;
+  const incomeNeedsSetup = wizardData?.income.needs_setup === true;
+  const nextDisabled = !wizardData || (currentStep === 0 && incomeNeedsSetup);
 
   // ── Navigation ─────────────────────────────────────────────────────────────
 
@@ -185,14 +179,6 @@ export const BudgetWizardModal = ({
   };
 
   // ── Handlers ───────────────────────────────────────────────────────────────
-
-  const handleIncomeChange = (sourceIndex: number, amount: number) => {
-    setIncomeSources((prev) => {
-      const next = [...prev];
-      next[sourceIndex] = amount;
-      return next;
-    });
-  };
 
   const handleAmountChange = (categoryCode: string, subcategoryCode: string, amount: number) => {
     setStepData((prev) => ({
@@ -262,6 +248,22 @@ export const BudgetWizardModal = ({
     onComplete(draft);
   };
 
+  const navigateToSourceOfTruth = (route: string) => {
+    onClose();
+    history.push(route);
+  };
+
+  const handleSubcategorySourceNavigation = (subcategory: WizardSubcategory) => {
+    if (subcategory.source_of_truth === 'recurring_obligations') {
+      navigateToSourceOfTruth('/recurring');
+      return;
+    }
+
+    if (subcategory.source_of_truth === 'planned_expenses') {
+      navigateToSourceOfTruth('/planned-expenses');
+    }
+  };
+
   return (
     <>
       <IonModal
@@ -308,11 +310,10 @@ export const BudgetWizardModal = ({
                   {currentStep === 0 && (
                     <BudgetIncomeStep
                       wizardData={wizardData}
-                      incomeSources={incomeSources}
                       totalIncome={totalIncome}
                       includeVariable={includeVariable}
-                      onIncomeChange={handleIncomeChange}
                       onToggleVariable={() => setIncludeVariable((v) => !v)}
+                      onGoToIncomeSource={() => navigateToSourceOfTruth('/recurring')}
                     />
                   )}
 
@@ -342,6 +343,7 @@ export const BudgetWizardModal = ({
                           setAddSubCategory(cat);
                           setAddSubOpen(true);
                         }}
+                        onOpenSourceOfTruth={handleSubcategorySourceNavigation}
                       />
                     );
                   })()}
@@ -367,7 +369,9 @@ export const BudgetWizardModal = ({
                     <span className={styles.actionsHint}>
                       {isLastStep
                         ? 'Revisa el balance antes de guardar.'
-                        : 'Avanza cuando este paso refleje tu mes real.'}
+                        : currentStep === 0 && incomeNeedsSetup
+                          ? 'Primero registra tus ingresos estructurales.'
+                          : 'Avanza cuando este paso refleje tu mes real.'}
                     </span>
                   </div>
 
@@ -392,7 +396,7 @@ export const BudgetWizardModal = ({
                         type="button"
                         className={styles.nextBtn}
                         onClick={goNext}
-                        disabled={!wizardData}
+                        disabled={nextDisabled}
                       >
                         {currentStep === CATEGORY_STEP_LAST ? 'Ver resumen' : 'Siguiente'} →
                       </button>

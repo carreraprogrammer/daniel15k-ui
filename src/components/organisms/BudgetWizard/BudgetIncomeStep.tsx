@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import type { WizardData } from '../../../types/finance.types';
 import styles from './BudgetIncomeStep.module.css';
 
@@ -11,49 +10,23 @@ const formatCOP = (amount: number): string =>
 
 interface BudgetIncomeStepProps {
   wizardData: WizardData;
-  incomeSources: number[];
   totalIncome: number;
   includeVariable: boolean;
-  onIncomeChange: (sourceIndex: number, amount: number) => void;
   onToggleVariable: () => void;
+  onGoToIncomeSource: () => void;
 }
 
 // ── Component ────────────────────────────────────────────────────────────────
 
 export const BudgetIncomeStep = ({
   wizardData,
-  incomeSources,
   totalIncome,
   includeVariable,
-  onIncomeChange,
   onToggleVariable,
+  onGoToIncomeSource,
 }: BudgetIncomeStepProps) => {
-  const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [editValue, setEditValue] = useState('');
-
   const hasVariableSources = wizardData.income.sources.some((s) => s.is_variable);
-
-  const startEdit = (index: number, currentAmount: number) => {
-    setEditingIndex(index);
-    setEditValue(String(Math.round(currentAmount)));
-  };
-
-  const commitEdit = (index: number) => {
-    const parsed = parseInt(editValue.replace(/\D/g, ''), 10);
-    if (!isNaN(parsed) && parsed >= 0) {
-      onIncomeChange(index, parsed);
-    }
-    setEditingIndex(null);
-    setEditValue('');
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent, index: number) => {
-    if (e.key === 'Enter') commitEdit(index);
-    if (e.key === 'Escape') {
-      setEditingIndex(null);
-      setEditValue('');
-    }
-  };
+  const hasSources = wizardData.income.sources.length > 0;
 
   return (
     <div className={styles.root}>
@@ -63,63 +36,61 @@ export const BudgetIncomeStep = ({
             <span className={styles.icon}>↑</span>
           </div>
           <div className={styles.headerCopy}>
-            <h2 className={styles.title}>Definí el ingreso base</h2>
+            <h2 className={styles.title}>Confirmá el ingreso base</h2>
             <p className={styles.description}>
-              Este monto ordena todo el plan del mes. Si quieres un escenario más conservador,
-              deja por fuera los ingresos variables.
+              El wizard lee tus ingresos desde su fuente de verdad. Si quieres un escenario
+              más conservador, deja por fuera los ingresos variables.
             </p>
           </div>
         </div>
       </div>
 
       <div className={styles.sourceList}>
-        {wizardData.income.sources.map((source, index) => {
-          const isExcluded = source.is_variable && !includeVariable;
-          return (
-            <div
-              key={index}
-              className={[styles.sourceRow, isExcluded ? styles.sourceRowExcluded : '']
-                .filter(Boolean)
-                .join(' ')}
-            >
-              <div className={styles.sourceInfo}>
-                <span className={styles.sourceName}>{source.name}</span>
-                {source.is_variable && (
-                  <span className={styles.variableBadge}>variable</span>
-                )}
+        {hasSources ? (
+          wizardData.income.sources.map((source, index) => {
+            const isExcluded = source.is_variable && !includeVariable;
+            return (
+              <div
+                key={index}
+                className={[styles.sourceRow, isExcluded ? styles.sourceRowExcluded : '']
+                  .filter(Boolean)
+                  .join(' ')}
+              >
+                <div className={styles.sourceInfo}>
+                  <span className={styles.sourceName}>{source.name}</span>
+                  {source.is_variable && (
+                    <span className={styles.variableBadge}>variable</span>
+                  )}
+                </div>
+                <div className={styles.sourceAmount}>
+                  <span className={styles.amountText}>
+                    {formatCOP(source.monthly_amount)}
+                  </span>
+                </div>
               </div>
-              <div className={styles.sourceAmount}>
-                {editingIndex === index ? (
-                  <input
-                    type="number"
-                    className={styles.amountInput}
-                    value={editValue}
-                    min={0}
-                    autoFocus
-                    onChange={(e) => setEditValue(e.target.value)}
-                    onBlur={() => commitEdit(index)}
-                    onKeyDown={(e) => handleKeyDown(e, index)}
-                    aria-label={`Monto de ${source.name}`}
-                  />
-                ) : (
-                  <>
-                    <span className={styles.amountText}>
-                      {formatCOP(incomeSources[index] ?? source.monthly_amount)}
-                    </span>
-                    <button
-                      type="button"
-                      className={styles.editBtn}
-                      onClick={() => startEdit(index, incomeSources[index] ?? source.monthly_amount)}
-                      aria-label={`Editar monto de ${source.name}`}
-                    >
-                      ✎
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
-          );
-        })}
+            );
+          })
+        ) : (
+          <div className={styles.emptyCard}>
+            <strong className={styles.emptyTitle}>Faltan ingresos estructurales</strong>
+            <p className={styles.emptyText}>
+              Antes de cerrar este plan, registra al menos una fuente de ingreso en la sección de ingresos.
+            </p>
+            <button type="button" className={styles.sourceLinkBtn} onClick={onGoToIncomeSource}>
+              Ir a ingresos
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className={styles.sourceOfTruthCard}>
+        <span className={styles.sourceOfTruthLabel}>Fuente de verdad</span>
+        <p className={styles.sourceOfTruthText}>
+          {wizardData.income.edit_hint ?? 'Los ingresos se administran fuera del wizard.'}
+        </p>
+        <button type="button" className={styles.sourceLinkBtn} onClick={onGoToIncomeSource}>
+          Abrir ingresos
+        </button>
       </div>
 
       {/* Variable income toggle — only shown when variable sources exist */}
@@ -154,7 +125,7 @@ export const BudgetIncomeStep = ({
       </div>
 
       <p className={styles.hint}>
-        Ajusta solo lo necesario para que esta base refleje el mes real.
+        Este paso confirma el cálculo base; no redefine ingresos desde adentro.
       </p>
     </div>
   );
