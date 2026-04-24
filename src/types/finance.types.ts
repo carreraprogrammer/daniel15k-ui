@@ -469,13 +469,10 @@ export interface BudgetProposal {
 
 // ── Current monthly plan (active plan view) ──────────────────────────────────
 
-export interface CurrentPlanLine {
-  /** Subcategory code, e.g. "committed_rent" */
-  subcategory_code: string;
-  subcategory_name: string;
-  /** Behavioral category code, e.g. "committed" */
-  category_code: string;
-  category_name: string;
+export interface CurrentPlanCategory {
+  code?: string | null;
+  name?: string | null;
+  color?: string | null;
   budgeted: number;
   spent: number;
   projected: number;
@@ -483,10 +480,12 @@ export interface CurrentPlanLine {
 
 export interface CurrentPlan {
   id: string;
-  month: string;   // "YYYY-MM"
-  status: string;  // "confirmed" | "draft" | etc.
+  month: number;
+  year: number;
+  status: string;
   total_income: number;
-  lines: CurrentPlanLine[];
+  month_label?: string;
+  categories: CurrentPlanCategory[];
 }
 
 // ── Budget Wizard types ──────────────────────────────────────────────────────

@@ -1,4 +1,5 @@
-import type { CurrentPlan, CurrentPlanLine } from '../../../types/finance.types';
+import type { CSSProperties } from 'react';
+import type { CurrentPlan, CurrentPlanCategory } from '../../../types/finance.types';
 import { Button } from '../../atoms/Button';
 import styles from './ActivePlanView.module.css';
 
@@ -7,52 +8,29 @@ import styles from './ActivePlanView.module.css';
 const formatCOP = (amount: number): string =>
   '$' + Math.round(amount).toLocaleString('es-CO').replace(/,/g, '.');
 
-/** Group plan lines by behavioral category, preserving order of first appearance. */
-function groupByCategory(
-  lines: CurrentPlanLine[],
-): Array<{ categoryCode: string; categoryName: string; lines: CurrentPlanLine[] }> {
-  const order: string[] = [];
-  const map = new Map<string, { categoryCode: string; categoryName: string; lines: CurrentPlanLine[] }>();
-
-  for (const line of lines) {
-    if (!map.has(line.category_code)) {
-      order.push(line.category_code);
-      map.set(line.category_code, {
-        categoryCode: line.category_code,
-        categoryName: line.category_name,
-        lines: [],
-      });
-    }
-    map.get(line.category_code)!.lines.push(line);
-  }
-
-  return order.map((code) => map.get(code)!);
-}
-
 // ── Sub-components ────────────────────────────────────────────────────────────
 
 interface CategoryGroupProps {
-  categoryCode: string;
-  categoryName: string;
-  lines: CurrentPlanLine[];
+  category: CurrentPlanCategory;
 }
 
-const CategoryGroup = ({ categoryCode, categoryName, lines }: CategoryGroupProps) => {
-  const totalBudgeted = lines.reduce((sum, l) => sum + l.budgeted, 0);
-  const totalSpent = lines.reduce((sum, l) => sum + l.spent, 0);
-  const totalProjected = lines.reduce((sum, l) => sum + l.projected, 0);
+const CategoryGroup = ({ category }: CategoryGroupProps) => {
+  const totalBudgeted = category.budgeted ?? 0;
+  const totalSpent = category.spent ?? 0;
+  const totalProjected = category.projected ?? 0;
 
   const pct = totalBudgeted > 0 ? Math.min((totalSpent / totalBudgeted) * 100, 100) : 0;
   const isOverProjected = totalProjected > totalBudgeted;
+  const categoryCode = category.code ?? 'unknown';
+  const categoryName = category.name ?? 'Sin categoría';
   const colorVar = `var(--color-${categoryCode})`;
   const subtleVar = `var(--color-${categoryCode}-subtle)`;
 
   return (
     <div
       className={styles.categoryGroup}
-      style={{ '--cat-color': colorVar, '--cat-subtle': subtleVar } as React.CSSProperties}
+      style={{ '--cat-color': colorVar, '--cat-subtle': subtleVar } as CSSProperties}
     >
-      {/* Category header row */}
       <div className={styles.categoryHeader}>
         <div className={styles.colorDot} />
         <span className={styles.categoryName}>{categoryName}</span>
@@ -63,7 +41,6 @@ const CategoryGroup = ({ categoryCode, categoryName, lines }: CategoryGroupProps
         </span>
       </div>
 
-      {/* Progress bar */}
       <div className={styles.barTrack} aria-hidden="true">
         <div
           className={[
@@ -76,7 +53,6 @@ const CategoryGroup = ({ categoryCode, categoryName, lines }: CategoryGroupProps
         />
       </div>
 
-      {/* Status row */}
       <div className={styles.statusRow}>
         <span className={styles.pctLabel}>{Math.round(pct)}%</span>
         {isOverProjected ? (
@@ -87,29 +63,6 @@ const CategoryGroup = ({ categoryCode, categoryName, lines }: CategoryGroupProps
           <span className={styles.statusOk}>&#10003; en ritmo</span>
         )}
       </div>
-
-      {/* Subcategory detail */}
-      {lines.length > 1 && (
-        <ul className={styles.subList}>
-          {lines.map((line) => {
-            const linePct =
-              line.budgeted > 0
-                ? Math.min((line.spent / line.budgeted) * 100, 100)
-                : 0;
-            return (
-              <li key={line.subcategory_code} className={styles.subRow}>
-                <span className={styles.subName}>{line.subcategory_name}</span>
-                <span className={styles.subFigures}>
-                  {formatCOP(line.spent)}{' '}
-                  <span className={styles.separator}>/</span>{' '}
-                  {formatCOP(line.budgeted)}
-                </span>
-                <span className={styles.subPct}>{Math.round(linePct)}%</span>
-              </li>
-            );
-          })}
-        </ul>
-      )}
     </div>
   );
 };
@@ -136,13 +89,15 @@ export const ActivePlanView = ({ currentPlan, onEditPlan }: ActivePlanViewProps)
     );
   }
 
-  const groups = groupByCategory(currentPlan.lines);
+  const categories = Array.isArray(currentPlan.categories) ? currentPlan.categories : [];
 
   return (
     <section className={styles.root}>
       <div className={styles.planHeader}>
         <div>
-          <h3 className={styles.planTitle}>Plan de {currentPlan.month}</h3>
+          <h3 className={styles.planTitle}>
+            Plan de {currentPlan.month_label ?? currentPlan.month}
+          </h3>
           <span className={[styles.statusBadge, styles[`badge_${currentPlan.status}`]].join(' ')}>
             {currentPlan.status}
           </span>
@@ -153,12 +108,10 @@ export const ActivePlanView = ({ currentPlan, onEditPlan }: ActivePlanViewProps)
       </div>
 
       <div className={styles.groupList}>
-        {groups.map((group) => (
+        {categories.map((category) => (
           <CategoryGroup
-            key={group.categoryCode}
-            categoryCode={group.categoryCode}
-            categoryName={group.categoryName}
-            lines={group.lines}
+            key={category.code ?? category.name ?? 'unknown-category'}
+            category={category}
           />
         ))}
       </div>
