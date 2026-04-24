@@ -82,6 +82,17 @@ export interface SummaryOverflowStatus {
   suggested_action?: string | null;
 }
 
+export interface LiquidityProjection {
+  confirmed_balance: number;
+  pending_income: number;
+  projected_eom_balance: number;
+  next_cycle_obligations: number;
+  protected_buffer: number;
+  free_after_obligations: number;
+  safe_to_deploy: number;
+  buffer_status: 'critical' | 'tight' | 'comfortable';
+}
+
 export interface SummaryResponse {
   period: {
     month: number;
@@ -93,6 +104,7 @@ export interface SummaryResponse {
   monthly_plan?: SummaryMonthlyPlan | null;
   overflow_status?: SummaryOverflowStatus | null;
   financial_context: FinancialContextSummary | null;
+  liquidity?: LiquidityProjection | null;
 }
 
 export type CompletenessStatus = 'missing' | 'partial' | 'sufficient' | 'stale' | 'conflicting';
