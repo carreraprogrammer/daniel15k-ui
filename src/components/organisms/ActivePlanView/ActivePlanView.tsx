@@ -8,6 +8,48 @@ import styles from './ActivePlanView.module.css';
 const formatCOP = (amount: number): string =>
   '$' + Math.round(amount).toLocaleString('es-CO').replace(/,/g, '.');
 
+const getPlanHealth = (categories: CurrentPlanCategory[]) => {
+  const safeCategories = Array.isArray(categories) ? categories : [];
+  const outOfRange = safeCategories.filter((category) => (category.projected ?? 0) > (category.budgeted ?? 0));
+  const topRisk = outOfRange[0] ?? safeCategories[0] ?? null;
+
+  return {
+    outOfRangeCount: outOfRange.length,
+    topRisk,
+  };
+};
+
+const buildHeroCopy = (currentPlan: CurrentPlan, categories: CurrentPlanCategory[]) => {
+  const { outOfRangeCount, topRisk } = getPlanHealth(categories);
+
+  return {
+    eyebrow: 'Presupuestos',
+    question: '¿Mi plan mensual sigue sano?',
+    title: outOfRangeCount
+      ? `${outOfRangeCount} categorías fuera de rango`
+      : 'El plan mensual sigue estable',
+    text: topRisk
+      ? `${topRisk.name ?? 'Una categoría'} es la señal más útil para revisar primero. No necesitas bajar a la tabla para entender dónde mirar.`
+      : 'Este resumen te muestra si el plan confirmado sigue bajo control antes de entrar al detalle.',
+    primaryValue: topRisk ? formatCOP(topRisk.projected ?? 0) : formatCOP(currentPlan.total_income ?? 0),
+    primaryCaption: topRisk
+      ? `Proyección actual de ${topRisk.name ?? 'la categoría'}`
+      : 'Ingreso total del plan',
+    supportTitle: 'Riesgo principal',
+    supportValue: topRisk && (topRisk.budgeted ?? 0) > 0
+      ? `${Math.round(Math.min(((topRisk.spent ?? 0) / (topRisk.budgeted ?? 1)) * 100, 100))}%`
+      : '—',
+    supportText: topRisk
+      ? `${formatCOP(topRisk.spent ?? 0)} gastados de ${formatCOP(topRisk.budgeted ?? 0)}; proyectado a ${formatCOP(topRisk.projected ?? 0)}.`
+      : 'Cuando existan categorías activas, aquí verás la tensión principal del plan.',
+    supportPct: topRisk && (topRisk.budgeted ?? 0) > 0
+      ? Math.min(Math.round(((topRisk.spent ?? 0) / (topRisk.budgeted ?? 1)) * 100), 100)
+      : 0,
+    supportWarn: Boolean(topRisk && (topRisk.projected ?? 0) > (topRisk.budgeted ?? 0)),
+    outOfRangeCount,
+  };
+};
+
 // ── Sub-components ────────────────────────────────────────────────────────────
 
 interface CategoryGroupProps {
@@ -72,11 +114,16 @@ const CategoryGroup = ({ category }: CategoryGroupProps) => {
 interface ActivePlanViewProps {
   currentPlan: CurrentPlan | null;
   onEditPlan: () => void;
+  onExploreDetail?: () => void;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export const ActivePlanView = ({ currentPlan, onEditPlan }: ActivePlanViewProps) => {
+export const ActivePlanView = ({
+  currentPlan,
+  onEditPlan,
+  onExploreDetail,
+}: ActivePlanViewProps) => {
   if (!currentPlan) {
     return (
       <div className={styles.emptyState}>
@@ -90,21 +137,59 @@ export const ActivePlanView = ({ currentPlan, onEditPlan }: ActivePlanViewProps)
   }
 
   const categories = Array.isArray(currentPlan.categories) ? currentPlan.categories : [];
+  const hero = buildHeroCopy(currentPlan, categories);
 
   return (
     <section className={styles.root}>
-      <div className={styles.planHeader}>
-        <div>
-          <h3 className={styles.planTitle}>
-            Plan de {currentPlan.month_label ?? currentPlan.month}
-          </h3>
+      <div className={styles.focusGrid}>
+        <div className={styles.focusCopy}>
+          <span className={styles.eyebrow}>{hero.eyebrow}</span>
+          <p className={styles.focusQuestion}>{hero.question}</p>
+          <h2 className={styles.focusTitle}>{hero.title}</h2>
+          <p className={styles.focusText}>{hero.text}</p>
+        </div>
+
+        <div className={styles.focusMetric}>
+          <div className={styles.focusValue}>{hero.primaryValue}</div>
+          <p className={styles.focusCaption}>{hero.primaryCaption}</p>
           <span className={[styles.statusBadge, styles[`badge_${currentPlan.status}`]].join(' ')}>
             {currentPlan.status}
           </span>
         </div>
-        <button type="button" className={styles.editBtn} onClick={onEditPlan}>
-          Editar plan
-        </button>
+      </div>
+
+      <section className={styles.focusSupport}>
+        <div className={styles.focusSupportHeader}>
+          <h3 className={styles.focusSupportTitle}>{hero.supportTitle}</h3>
+          <span className={styles.focusSupportValue}>{hero.supportValue}</span>
+        </div>
+
+        <div className={styles.focusRail}>
+          <div
+            className={[
+              styles.focusRailFill,
+              hero.supportWarn ? styles.focusRailFillWarn : '',
+            ]
+              .filter(Boolean)
+              .join(' ')}
+            style={{ width: `${hero.supportPct}%` }}
+          />
+        </div>
+
+        <p className={styles.focusSupportText}>{hero.supportText}</p>
+      </section>
+
+      <div className={styles.focusMeta}>
+        <span className={styles.focusBadge}>{categories.length} categorías</span>
+        <span className={styles.focusBadge}>{hero.outOfRangeCount} alertas</span>
+        <span className={styles.focusBadge}>{currentPlan.month_label ?? `${currentPlan.year}-${String(currentPlan.month).padStart(2, '0')}`}</span>
+      </div>
+
+      <div className={styles.focusActions}>
+        <Button label="Editar plan" onClick={onEditPlan} />
+        {onExploreDetail ? (
+          <Button label="Explorar detalle" variant="ghost" onClick={onExploreDetail} />
+        ) : null}
       </div>
 
       <div className={styles.groupList}>
