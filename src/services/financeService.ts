@@ -358,9 +358,20 @@ export const financeService = {
   /** POST /api/v1/subcategories */
   async createSubcategory(params: SubcategoryCreateParams): Promise<SubcategoryCreated> {
     const { data } = await api.post('/api/v1/subcategories', params);
-    // API may return { data: { ... } } or a flat object
-    const raw = (data.data ?? data) as SubcategoryCreated;
-    return raw;
+    const resource = normalizeSingle<{
+      name?: string;
+      code?: string;
+      icon?: string;
+      category_id?: string | number;
+    }>(data);
+
+    return {
+      id: resource.id,
+      code: String(resource.attributes.code ?? ''),
+      name: String(resource.attributes.name ?? ''),
+      icon: String(resource.attributes.icon ?? ''),
+      category_id: String(resource.attributes.category_id ?? ''),
+    };
   },
 
   async startWebChat(message: string): Promise<{ session_id: string }> {
