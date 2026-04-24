@@ -272,9 +272,9 @@ export const BudgetWizardModal = ({
         onDidDismiss={onClose}
         keepContentsMounted
         style={{
-          '--border-radius': '28px',
-          '--width': 'min(1180px, 98vw)',
-          '--height': 'min(94dvh, 980px)',
+          '--border-radius': '0px',
+          '--width': '100vw',
+          '--height': '100dvh',
         }}
       >
         <IonContent className={styles.content}>

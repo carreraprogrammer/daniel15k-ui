@@ -56,6 +56,31 @@
   height: 100%;
 }
 
+.budgetHeroSurface {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--finance-space-md);
+  min-height: 100%;
+}
+
+.budgetHeroSurface > *:first-child {
+  flex: 1 1 auto;
+}
+
+.budgetToast {
+  align-self: flex-start;
+  padding: 0.72rem 1rem;
+  border-radius: 999px;
+  background: rgba(124, 224, 211, 0.08);
+  border: 1px solid rgba(124, 224, 211, 0.18);
+  color: rgba(223, 249, 244, 0.92);
+  font-size: 0.86rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
 .focusCard {
   display: grid;
   gap: var(--finance-space-md);
