@@ -143,6 +143,9 @@ export const DebtsPage = () => {
     return null;
   };
 
+  const obligationCanLinkToDebt = (obligation: RecurringObligation) =>
+    obligation.attributes.subcategory_code === 'creditos';
+
   const buildLinkedObligationMap = (items: RecurringObligation[]) => {
     const map = new Map<string, RecurringObligation>();
     items.forEach((obligation) => {
@@ -181,7 +184,9 @@ export const DebtsPage = () => {
     return obligations
       .filter((obligation) => {
         const linkedDebtId = linkedDebtIdForObligation(obligation);
-        return obligation.attributes.active !== false && (!linkedDebtId || linkedDebtId === linkingDebt.id);
+        return obligation.attributes.active !== false
+          && obligationCanLinkToDebt(obligation)
+          && (!linkedDebtId || linkedDebtId === linkingDebt.id);
       })
       .map((obligation) => ({
         label: `${obligation.attributes.name} · ${formatCop(obligation.attributes.amount)}${obligation.attributes.due_day ? ` · Día ${obligation.attributes.due_day}` : ''}`,
@@ -228,6 +233,11 @@ export const DebtsPage = () => {
 
       if (selectedObligationId && !selectedObligation) {
         setLinkError('La obligación seleccionada ya no existe en la data más reciente. Recarga la vista y vuelve a intentar.');
+        return;
+      }
+
+      if (selectedObligation && !obligationCanLinkToDebt(selectedObligation)) {
+        setLinkError('Solo puedes vincular deudas a obligaciones recurrentes con subcategoría Créditos.');
         return;
       }
 

@@ -1,5 +1,5 @@
 import { IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding } from '@ionic/react';
-import { createOutline, trashOutline } from 'ionicons/icons';
+import { closeCircleOutline, createOutline, trashOutline } from 'ionicons/icons';
 import type { RecurringObligation } from '../../../types/finance.types';
 import { resolveNamedIcon } from '../BudgetWizard/iconRegistry';
 import styles from './RecurringObligationSlidingCard.module.css';
@@ -10,6 +10,7 @@ const formatCop = (value: number) =>
 export interface RecurringObligationSlidingCardProps {
   obligation: RecurringObligation;
   linkedDebtLabel?: string | null;
+  onUnlinkDebt?: (obligation: RecurringObligation) => void;
   onEdit: (obligation: RecurringObligation) => void;
   onDelete: (obligation: RecurringObligation) => void;
 }
@@ -17,6 +18,7 @@ export interface RecurringObligationSlidingCardProps {
 export const RecurringObligationSlidingCard = ({
   obligation,
   linkedDebtLabel,
+  onUnlinkDebt,
   onEdit,
   onDelete,
 }: RecurringObligationSlidingCardProps) => {
@@ -76,6 +78,11 @@ export const RecurringObligationSlidingCard = ({
       </IonItem>
 
       <IonItemOptions side="end">
+        {linkedDebtLabel && onUnlinkDebt ? (
+          <IonItemOption className={styles.optionEdit} onClick={() => onUnlinkDebt(obligation)}>
+            <IonIcon icon={closeCircleOutline} />
+          </IonItemOption>
+        ) : null}
         <IonItemOption className={styles.optionEdit} onClick={() => onEdit(obligation)}>
           <IonIcon icon={createOutline} />
         </IonItemOption>

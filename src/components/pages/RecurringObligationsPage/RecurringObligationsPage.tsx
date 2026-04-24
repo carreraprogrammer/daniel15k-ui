@@ -64,6 +64,7 @@ export const RecurringObligationsPage = () => {
   const [incomeFiltersVisible, setIncomeFiltersVisible] = useState(false);
   const [editingObligation, setEditingObligation] = useState<RecurringObligation | null>(null);
   const [deletingObligation, setDeletingObligation] = useState<RecurringObligation | null>(null);
+  const [unlinkingObligation, setUnlinkingObligation] = useState<RecurringObligation | null>(null);
   const [obligationFilters, setObligationFilters] = useState<RecurringObligationQueryParams>(initialObligationFilters);
   const [incomeFilters, setIncomeFilters] = useState<IncomeSourceQueryParams>(initialIncomeFilters);
   const [incomeSortOpen, setIncomeSortOpen] = useState(false);
@@ -236,6 +237,40 @@ export const RecurringObligationsPage = () => {
     () => new Map(debts.map((debt) => [debt.id, debt])),
     [debts],
   );
+
+  const debtLinkLabel = (obligation: RecurringObligation) => {
+    if (obligation.attributes.source_type !== 'Debt' || !obligation.attributes.source_id) {
+      return null;
+    }
+
+    const linkedDebt = debtById.get(String(obligation.attributes.source_id));
+    if (linkedDebt) {
+      return `Deuda: ${linkedDebt.attributes.name}`;
+    }
+
+    return `Deuda inexistente (#${obligation.attributes.source_id})`;
+  };
+
+  const handleUnlinkDebt = async () => {
+    if (!unlinkingObligation) {
+      return;
+    }
+
+    setSubmitting(true);
+    setError(null);
+    try {
+      await financeService.updateRecurringObligation(unlinkingObligation.id, {
+        source_type: null,
+        source_id: null,
+      });
+      setUnlinkingObligation(null);
+      await load();
+    } catch (unlinkError) {
+      setError(unlinkError instanceof Error ? unlinkError.message : 'No fue posible quitar el vínculo de deuda.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <AppLayout title="Recurrentes">
@@ -506,11 +541,8 @@ export const RecurringObligationsPage = () => {
                     <RecurringObligationSlidingCard
                       key={obligation.id}
                       obligation={obligation}
-                      linkedDebtLabel={
-                        obligation.attributes.source_type === 'Debt' && obligation.attributes.source_id
-                          ? `Deuda: ${debtById.get(String(obligation.attributes.source_id))?.attributes.name ?? `#${obligation.attributes.source_id}`}`
-                          : null
-                      }
+                      linkedDebtLabel={debtLinkLabel(obligation)}
+                      onUnlinkDebt={setUnlinkingObligation}
                       onEdit={(nextObligation) => {
                         setEditingObligation(nextObligation);
                         setComposerOpen(true);
@@ -568,6 +600,19 @@ export const RecurringObligationsPage = () => {
         danger
         onCancel={() => setDeletingObligation(null)}
         onConfirm={() => void handleDelete()}
+      />
+
+      <ConfirmModal
+        isOpen={Boolean(unlinkingObligation)}
+        title="Quitar vínculo de deuda"
+        message={
+          unlinkingObligation
+            ? `Vas a quitar el vínculo de deuda de "${unlinkingObligation.attributes.name}". La obligación recurrente seguirá existiendo, solo se elimina la relación estructural.`
+            : ''
+        }
+        confirmLabel="Quitar vínculo"
+        onCancel={() => setUnlinkingObligation(null)}
+        onConfirm={() => void handleUnlinkDebt()}
       />
 
       <CrudModal

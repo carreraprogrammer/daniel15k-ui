@@ -302,6 +302,7 @@ export interface RecurringObligation {
     category_code?: string | null;
     category_color?: string | null;
     subcategory_id?: number | null;
+    subcategory_code?: string | null;
     subcategory_name?: string | null;
     subcategory_icon?: string | null;
     source_type?: 'Debt' | 'Investment' | null;
