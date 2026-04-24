@@ -19,7 +19,7 @@ import styles from './BudgetWizardModal.module.css';
 
 /**
  * Step sequence:
- *  0 — Ingreso (income anchor)
+ *  0 — Ingreso (solo cuando falta setup)
  *  1 — Comprometido
  *  2 — Necesario
  *  3 — Inversión
@@ -135,14 +135,17 @@ export const BudgetWizardModal = ({
     setStepData(buildInitialStepData(wizardData));
   }, [wizardData]);
 
-  // Reset step to 0 every time modal opens
-  useEffect(() => {
-    if (isOpen) setCurrentStep(0);
-  }, [isOpen]);
-
   // ── Derived state ──────────────────────────────────────────────────────────
 
   const categories = wizardData?.categories ?? [];
+  const incomeNeedsSetup = wizardData?.income.needs_setup === true;
+  const firstStep = incomeNeedsSetup ? 0 : CATEGORY_STEP_FIRST;
+
+  // Reset step every time modal opens. When income is already defined,
+  // the wizard starts directly on the first editable category.
+  useEffect(() => {
+    if (isOpen) setCurrentStep(firstStep);
+  }, [firstStep, isOpen]);
 
   const totalIncome = wizardData
     ? wizardData.income.sources.reduce((sum, source) => {
@@ -158,10 +161,10 @@ export const BudgetWizardModal = ({
     localSubcategories,
   );
 
-  const canGoBack = currentStep > 0;
+  const visibleStepCount = incomeNeedsSetup ? TOTAL_STEPS : TOTAL_STEPS - 1;
+  const canGoBack = currentStep > firstStep;
   const isLastStep = currentStep === SUMMARY_STEP;
-  const currentStepNumber = currentStep + 1;
-  const incomeNeedsSetup = wizardData?.income.needs_setup === true;
+  const currentStepNumber = currentStep - firstStep + 1;
   const nextDisabled = !wizardData || (currentStep === 0 && incomeNeedsSetup);
 
   // ── Navigation ─────────────────────────────────────────────────────────────
@@ -173,7 +176,7 @@ export const BudgetWizardModal = ({
   };
 
   const goBack = () => {
-    if (currentStep > 0) {
+    if (currentStep > firstStep) {
       setCurrentStep((s) => s - 1);
     }
   };
@@ -298,7 +301,7 @@ export const BudgetWizardModal = ({
                   </div>
 
                   <div className={styles.topbarMeta}>
-                    <span className={styles.stepPill}>Paso {currentStepNumber} de {TOTAL_STEPS}</span>
+                    <span className={styles.stepPill}>Paso {currentStepNumber} de {visibleStepCount}</span>
                     <button type="button" onClick={onClose} className={styles.closeBtn}>
                       Cerrar
                     </button>
@@ -307,7 +310,7 @@ export const BudgetWizardModal = ({
 
                 <div className={styles.stage}>
                   {/* Step 0: Income */}
-                  {currentStep === 0 && (
+                  {currentStep === 0 && incomeNeedsSetup && (
                     <BudgetIncomeStep
                       wizardData={wizardData}
                       totalIncome={totalIncome}
@@ -371,6 +374,8 @@ export const BudgetWizardModal = ({
                         ? 'Revisa el balance antes de guardar.'
                         : currentStep === 0 && incomeNeedsSetup
                           ? 'Primero registra tus ingresos estructurales.'
+                          : currentStep === firstStep && !incomeNeedsSetup
+                            ? 'Los ingresos ya quedaron definidos antes de abrir el wizard.'
                           : 'Avanza cuando este paso refleje tu mes real.'}
                     </span>
                   </div>

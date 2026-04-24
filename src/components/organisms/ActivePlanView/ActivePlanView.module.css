@@ -5,18 +5,40 @@
 }
 
 .heroShell {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(240px, 0.7fr);
   gap: var(--space-6);
   min-height: clamp(34rem, calc(100dvh - 14rem), 46rem);
   padding: clamp(1.4rem, 2.4vw, 2.4rem);
-  border-radius: 34px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   background:
-    radial-gradient(circle at top right, rgba(124, 224, 211, 0.08), transparent 28%),
-    radial-gradient(circle at bottom left, rgba(243, 210, 122, 0.06), transparent 24%),
-    linear-gradient(180deg, rgba(15, 20, 28, 0.95), rgba(9, 12, 17, 0.98));
-  box-shadow: 0 26px 72px rgba(2, 6, 23, 0.26);
+    var(--surface-highlight),
+    var(--surface-glow),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.018) 56%),
+    rgba(10, 15, 25, 0.9);
+  box-shadow: var(--shadow-float);
+  backdrop-filter: blur(16px) saturate(120%);
+}
+
+.heroShell::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 18%),
+    radial-gradient(circle at top center, rgba(255, 255, 255, 0.06), transparent 42%);
+  opacity: 0.95;
+}
+
+.heroShell > * {
+  position: relative;
+  z-index: 1;
 }
 
 .heroMain {
@@ -103,16 +125,22 @@
   display: grid;
   gap: var(--space-3);
   align-content: start;
+  width: min(100%, 24rem);
+  justify-self: end;
 }
 
 .metricBlock {
   display: grid;
   gap: var(--space-2);
   padding: var(--space-4);
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  border-radius: 20px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
+    rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 10px 24px rgba(2, 6, 23, 0.14);
 }
 
 .metricBlockWarn {
@@ -503,6 +531,11 @@
   .heroShell {
     grid-template-columns: 1fr;
     min-height: auto;
+  }
+
+  .heroMetrics {
+    width: 100%;
+    justify-self: stretch;
   }
 
   .heroActions {
