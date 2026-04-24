@@ -303,13 +303,13 @@ export const BudgetsPage = () => {
           {/* ── Detail view ── */}
           {detailsOpen ? (
             <div className={styles.detailStage}>
-              <div className={styles.detailStageHeader}>
-                <div className={styles.detailStageCopy}>
-                  <h3 className={styles.detailStageTitle}>Detalle del plan</h3>
-                  <p className={styles.detailStageText}>
-                    Seguimiento por categoría: gastado, presupuestado y proyección del mes.
+                <div className={styles.detailStageHeader}>
+                  <div className={styles.detailStageCopy}>
+                    <h3 className={styles.detailStageTitle}>Detalle del plan</h3>
+                    <p className={styles.detailStageText}>
+                    Seguimiento por categoría: cuánto definiste, cuánto llevas y cuánto te queda.
                   </p>
-                </div>
+                  </div>
                 <Button label="← Volver" variant="ghost" onClick={() => setDetailsOpen(false)} />
               </div>
 

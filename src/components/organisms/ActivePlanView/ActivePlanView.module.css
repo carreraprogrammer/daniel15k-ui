@@ -154,9 +154,9 @@
   gap: var(--space-4);
   padding: var(--space-4);
   border-radius: 28px;
-  border: 1px solid color-mix(in srgb, var(--cat-color) 18%, rgba(255, 255, 255, 0.08));
+  border: 1px solid rgba(255, 255, 255, 0.08);
   background:
-    linear-gradient(180deg, color-mix(in srgb, var(--cat-subtle) 60%, rgba(255, 255, 255, 0.02)), rgba(8, 11, 16, 0.96)),
+    linear-gradient(180deg, rgba(18, 22, 30, 0.96), rgba(10, 13, 19, 0.98)),
     rgba(255, 255, 255, 0.02);
 }
 
@@ -191,8 +191,8 @@
   width: 2.8rem;
   height: 2.8rem;
   border-radius: 18px;
-  background: color-mix(in srgb, var(--cat-color) 14%, transparent);
-  border: 1px solid color-mix(in srgb, var(--cat-color) 26%, transparent);
+  background: color-mix(in srgb, var(--cat-color) 10%, rgba(255, 255, 255, 0.01));
+  border: 1px solid color-mix(in srgb, var(--cat-color) 18%, rgba(255, 255, 255, 0.04));
   flex-shrink: 0;
 }
 
@@ -247,6 +247,11 @@
   color: var(--color-warning);
 }
 
+.categoryStateCaution {
+  background: rgba(124, 224, 211, 0.1);
+  color: var(--color-accent);
+}
+
 .categoryAside {
   display: flex;
   align-items: center;
@@ -283,7 +288,7 @@
 }
 
 .categoryRailFill {
-  background: var(--cat-color);
+  background: color-mix(in srgb, var(--cat-color) 65%, white 8%);
 }
 
 .subcategoryRailFill {
@@ -302,7 +307,7 @@
 
 .categoryStats {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--space-3);
   margin: 0;
 }
@@ -342,7 +347,7 @@
   gap: var(--space-3);
   padding: var(--space-4);
   border-radius: 22px;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.025);
   border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
@@ -366,8 +371,8 @@
   width: 2.4rem;
   height: 2.4rem;
   border-radius: 16px;
-  background: color-mix(in srgb, var(--subcategory-accent) 14%, transparent);
-  border: 1px solid color-mix(in srgb, var(--subcategory-accent) 24%, transparent);
+  background: color-mix(in srgb, var(--subcategory-accent) 10%, rgba(255, 255, 255, 0.01));
+  border: 1px solid color-mix(in srgb, var(--subcategory-accent) 18%, rgba(255, 255, 255, 0.04));
   flex-shrink: 0;
 }
 
@@ -412,6 +417,11 @@
 .subcategoryStateWarn {
   background: rgba(241, 180, 76, 0.12);
   color: var(--color-warning);
+}
+
+.subcategoryStateCaution {
+  background: rgba(124, 224, 211, 0.1);
+  color: var(--color-accent);
 }
 
 .subcategoryStats {

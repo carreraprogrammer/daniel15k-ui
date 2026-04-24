@@ -13,19 +13,30 @@ const clampPct = (value: number): number => Math.max(0, Math.min(Math.round(valu
 
 const getPlanHealth = (categories: CurrentPlanCategory[]) => {
   const safeCategories = Array.isArray(categories) ? categories : [];
-  const outOfRange = safeCategories.filter((category) => (category.projected ?? 0) > (category.budgeted ?? 0));
-  const topRisk = outOfRange[0] ?? safeCategories[0] ?? null;
+  const attention = safeCategories.filter((category) => {
+    const budgeted = category.budgeted ?? 0;
+    const spent = category.spent ?? 0;
+    if (budgeted <= 0) return false;
+    return spent > budgeted || (spent / budgeted) >= 0.85;
+  });
+  const ranked = [...attention].sort((left, right) => {
+    const leftRatio = (left.budgeted ?? 0) > 0 ? (left.spent ?? 0) / (left.budgeted ?? 1) : 0;
+    const rightRatio = (right.budgeted ?? 0) > 0 ? (right.spent ?? 0) / (right.budgeted ?? 1) : 0;
+    return rightRatio - leftRatio;
+  });
+  const topRisk = ranked[0] ?? safeCategories[0] ?? null;
 
   return {
-    outOfRangeCount: outOfRange.length,
+    outOfRangeCount: attention.length,
     topRisk,
   };
 };
 
 const buildHeroCopy = (currentPlan: CurrentPlan, categories: CurrentPlanCategory[]) => {
   const { outOfRangeCount, topRisk } = getPlanHealth(categories);
-  const topRiskOverrun = topRisk ? Math.max((topRisk.projected ?? 0) - (topRisk.budgeted ?? 0), 0) : 0;
+  const topRiskOverrun = topRisk ? Math.max((topRisk.spent ?? 0) - (topRisk.budgeted ?? 0), 0) : 0;
   const assigned = categories.reduce((sum, category) => sum + (category.budgeted ?? 0), 0);
+  const remainingTotal = categories.reduce((sum, category) => sum + ((category.budgeted ?? 0) - (category.spent ?? 0)), 0);
   const freeMargin = (currentPlan.total_income ?? 0) - assigned;
 
   return {
@@ -36,13 +47,11 @@ const buildHeroCopy = (currentPlan: CurrentPlan, categories: CurrentPlanCategory
     text: outOfRangeCount
       ? `${topRisk?.name ?? 'La categoría principal'} es la señal más útil para revisar primero. El resto del detalle puede esperar hasta que abras las secciones.`
       : 'La portada del presupuesto debería bastar para decirte si el mes sigue sano sin obligarte a leer toda la estructura.',
-    headlineValue: topRisk
-      ? formatCOP(topRisk.projected ?? 0)
-      : formatCOP(currentPlan.total_income ?? 0),
+    headlineValue: formatCOP(remainingTotal),
     headlineCaption: topRisk
-      ? `Proyección actual de ${topRisk.name ?? 'la categoría principal'}`
-      : 'Ingreso total presupuestado',
-    supportLabel: outOfRangeCount ? 'Exceso proyectado' : 'Margen libre',
+      ? `Disponible total frente al plan`
+      : 'Disponible total frente al plan',
+    supportLabel: outOfRangeCount ? 'Exceso actual' : 'Margen libre',
     supportValue: outOfRangeCount ? formatCOP(topRiskOverrun) : formatCOP(freeMargin),
     supportTone: outOfRangeCount ? 'warning' : 'calm',
     outOfRangeCount,
@@ -50,9 +59,10 @@ const buildHeroCopy = (currentPlan: CurrentPlan, categories: CurrentPlanCategory
 };
 
 const buildStatusLabel = (category: CurrentPlanCategory) => {
-  const projected = category.projected ?? 0;
   const budgeted = category.budgeted ?? 0;
-  if (projected > budgeted) return 'Fuera de rango';
+  const spent = category.spent ?? 0;
+  if (spent > budgeted) return 'Exceso';
+  if (budgeted > 0 && (spent / budgeted) >= 0.85) return 'Atención';
   if ((category.spent ?? 0) === 0) return 'Sin movimiento';
   return 'En ritmo';
 };
@@ -60,11 +70,10 @@ const buildStatusLabel = (category: CurrentPlanCategory) => {
 const SubcategoryCard = ({ sub, accentColor }: { sub: CurrentPlanSubcategory; accentColor: string }) => {
   const budgeted = sub.budgeted ?? 0;
   const spent = sub.spent ?? 0;
-  const projected = sub.projected ?? 0;
   const remaining = budgeted - spent;
   const pct = budgeted > 0 ? clampPct((spent / budgeted) * 100) : 0;
-  const projectedPct = budgeted > 0 ? clampPct((projected / budgeted) * 100) : 0;
-  const isOver = projected > budgeted;
+  const isOver = spent > budgeted;
+  const isNearLimit = !isOver && budgeted > 0 && (spent / budgeted) >= 0.85;
 
   return (
     <article
@@ -83,15 +92,21 @@ const SubcategoryCard = ({ sub, accentColor }: { sub: CurrentPlanSubcategory; ac
             </p>
           </div>
         </div>
-        <span className={[styles.subcategoryState, isOver ? styles.subcategoryStateWarn : ''].filter(Boolean).join(' ')}>
-          {isOver ? 'Exceso' : `${pct}%`}
+        <span
+          className={[
+            styles.subcategoryState,
+            isOver ? styles.subcategoryStateWarn : '',
+            isNearLimit ? styles.subcategoryStateCaution : '',
+          ].filter(Boolean).join(' ')}
+        >
+          {isOver ? 'Exceso' : isNearLimit ? 'Atención' : `${pct}%`}
         </span>
       </div>
 
       <div className={styles.subcategoryRail} aria-hidden="true">
         <div
           className={[styles.subcategoryRailFill, isOver ? styles.subcategoryRailFillWarn : ''].filter(Boolean).join(' ')}
-          style={{ width: `${Math.min(projectedPct, 100)}%` }}
+          style={{ width: `${Math.min(pct, 100)}%` }}
         />
       </div>
 
@@ -101,12 +116,12 @@ const SubcategoryCard = ({ sub, accentColor }: { sub: CurrentPlanSubcategory; ac
           <dd>{formatCOP(budgeted)}</dd>
         </div>
         <div className={styles.subcategoryStat}>
-          <dt>Proyección</dt>
-          <dd>{formatCOP(projected)}</dd>
-        </div>
-        <div className={styles.subcategoryStat}>
           <dt>Restante</dt>
           <dd className={remaining < 0 ? styles.negativeValue : ''}>{formatCOP(remaining)}</dd>
+        </div>
+        <div className={styles.subcategoryStat}>
+          <dt>Estado</dt>
+          <dd>{isOver ? 'Exceso' : isNearLimit ? 'Atención' : 'En ritmo'}</dd>
         </div>
       </dl>
     </article>
@@ -122,18 +137,17 @@ export const CategoryGroup = ({ category, defaultExpanded = false }: CategoryGro
   const [expanded, setExpanded] = useState(defaultExpanded);
   const totalBudgeted = category.budgeted ?? 0;
   const totalSpent = category.spent ?? 0;
-  const totalProjected = category.projected ?? 0;
   const categoryCode = category.code ?? 'unknown';
   const categoryName = category.name ?? 'Sin categoría';
   const categoryIcon = category.icon ?? 'ellipseOutline';
   const subcategories = category.subcategories ?? [];
   const spentPct = totalBudgeted > 0 ? clampPct((totalSpent / totalBudgeted) * 100) : 0;
-  const projectedPct = totalBudgeted > 0 ? clampPct((totalProjected / totalBudgeted) * 100) : 0;
   const remaining = totalBudgeted - totalSpent;
   const statusLabel = buildStatusLabel(category);
   const colorVar = `var(--color-${categoryCode})`;
   const subtleVar = `var(--color-${categoryCode}-subtle)`;
-  const isOverProjected = totalProjected > totalBudgeted;
+  const isOverSpent = totalSpent > totalBudgeted;
+  const isNearLimit = !isOverSpent && totalBudgeted > 0 && (totalSpent / totalBudgeted) >= 0.85;
 
   return (
     <section
@@ -153,12 +167,18 @@ export const CategoryGroup = ({ category, defaultExpanded = false }: CategoryGro
           <div className={styles.categoryCopy}>
             <div className={styles.categoryHeadingRow}>
               <h3 className={styles.categoryTitle}>{categoryName}</h3>
-              <span className={[styles.categoryState, isOverProjected ? styles.categoryStateWarn : ''].filter(Boolean).join(' ')}>
+              <span
+                className={[
+                  styles.categoryState,
+                  isOverSpent ? styles.categoryStateWarn : '',
+                  isNearLimit ? styles.categoryStateCaution : '',
+                ].filter(Boolean).join(' ')}
+              >
                 {statusLabel}
               </span>
             </div>
             <p className={styles.categorySummary}>
-              {formatCOP(totalSpent)} gastados de {formatCOP(totalBudgeted)}. Proyección: {formatCOP(totalProjected)}.
+              {formatCOP(totalSpent)} gastados de {formatCOP(totalBudgeted)}.
             </p>
           </div>
         </div>
@@ -171,8 +191,8 @@ export const CategoryGroup = ({ category, defaultExpanded = false }: CategoryGro
 
       <div className={styles.categoryRail} aria-hidden="true">
         <div
-          className={[styles.categoryRailFill, isOverProjected ? styles.categoryRailFillWarn : ''].filter(Boolean).join(' ')}
-          style={{ width: `${Math.min(projectedPct, 100)}%` }}
+          className={[styles.categoryRailFill, isOverSpent ? styles.categoryRailFillWarn : ''].filter(Boolean).join(' ')}
+          style={{ width: `${Math.min(spentPct, 100)}%` }}
         />
       </div>
 
@@ -190,6 +210,10 @@ export const CategoryGroup = ({ category, defaultExpanded = false }: CategoryGro
             <div className={styles.categoryStat}>
               <dt>Restante</dt>
               <dd className={remaining < 0 ? styles.negativeValue : ''}>{formatCOP(remaining)}</dd>
+            </div>
+            <div className={styles.categoryStat}>
+              <dt>Estado</dt>
+              <dd>{statusLabel}</dd>
             </div>
           </dl>
 
