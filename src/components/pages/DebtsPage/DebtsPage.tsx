@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import axios from 'axios';
 import { IonContent, IonIcon } from '@ionic/react';
 import { addOutline } from 'ionicons/icons';
 import { AppLayout } from '../../templates/AppLayout';
@@ -142,15 +143,29 @@ export const DebtsPage = () => {
     return null;
   };
 
-  const linkedObligationByDebtId = useMemo(() => {
+  const buildLinkedObligationMap = (items: RecurringObligation[]) => {
     const map = new Map<string, RecurringObligation>();
-    obligations.forEach((obligation) => {
+    items.forEach((obligation) => {
       const linkedDebtId = linkedDebtIdForObligation(obligation);
       if (linkedDebtId) {
         map.set(linkedDebtId, obligation);
       }
     });
     return map;
+  };
+
+  const getRequestErrorMessage = (nextError: unknown, fallback: string) => {
+    if (axios.isAxiosError(nextError)) {
+      const detail = nextError.response?.data?.errors?.[0]?.detail;
+      if (typeof detail === 'string' && detail.trim()) {
+        return detail;
+      }
+    }
+    return nextError instanceof Error ? nextError.message : fallback;
+  };
+
+  const linkedObligationByDebtId = useMemo(() => {
+    return buildLinkedObligationMap(obligations);
   }, [obligations]);
 
   const currentLinkedObligation = useMemo(
@@ -191,13 +206,37 @@ export const DebtsPage = () => {
       return;
     }
 
-    const currentlyLinked = linkedObligationByDebtId.get(linkingDebt.id) ?? null;
-    const selectedObligation = obligations.find((obligation) => obligation.id === selectedObligationId) ?? null;
-
     setSubmitting(true);
     setLinkError(null);
 
     try {
+      const [freshDebtsResponse, freshObligationsResponse] = await Promise.all([
+        financeService.fetchDebts(filters),
+        financeService.fetchRecurringObligations({ active: 'all', sort_by: 'due_day', sort_dir: 'asc' }),
+      ]);
+
+      const freshDebt = freshDebtsResponse.data.find((debt) => debt.id === linkingDebt.id) ?? null;
+      if (!freshDebt) {
+        setLinkError('La deuda ya no existe en la data más reciente. Recarga la vista y vuelve a intentar.');
+        return;
+      }
+
+      const freshObligations = freshObligationsResponse.data;
+      const freshLinkedObligationByDebtId = buildLinkedObligationMap(freshObligations);
+      const currentlyLinked = freshLinkedObligationByDebtId.get(freshDebt.id) ?? null;
+      const selectedObligation = freshObligations.find((obligation) => obligation.id === selectedObligationId) ?? null;
+
+      if (selectedObligationId && !selectedObligation) {
+        setLinkError('La obligación seleccionada ya no existe en la data más reciente. Recarga la vista y vuelve a intentar.');
+        return;
+      }
+
+      const freshDebtId = Number(freshDebt.id);
+      if (!Number.isFinite(freshDebtId) || freshDebtId <= 0) {
+        setLinkError(`El id de la deuda no es válido: ${freshDebt.id}`);
+        return;
+      }
+
       if (currentlyLinked && currentlyLinked.id !== selectedObligation?.id) {
         await financeService.updateRecurringObligation(currentlyLinked.id, {
           source_type: null,
@@ -208,14 +247,14 @@ export const DebtsPage = () => {
       if (selectedObligation && selectedObligation.id !== currentlyLinked?.id) {
         await financeService.updateRecurringObligation(selectedObligation.id, {
           source_type: 'Debt',
-          source_id: Number(linkingDebt.id),
+          source_id: freshDebtId,
         });
       }
 
       handleCloseLinkModal();
       await load();
     } catch (nextError) {
-      setLinkError(nextError instanceof Error ? nextError.message : 'No fue posible actualizar el vínculo con la obligación.');
+      setLinkError(getRequestErrorMessage(nextError, 'No fue posible actualizar el vínculo con la obligación.'));
     } finally {
       setSubmitting(false);
     }
