@@ -489,6 +489,9 @@ export interface CurrentPlanSubcategory {
   budgeted: number;
   spent: number;
   projected: number;
+  signal_kind?: 'positive' | 'neutral' | 'attention';
+  signal_label?: string;
+  signal_detail?: string;
 }
 
 export interface CurrentPlanCategory {
@@ -499,6 +502,9 @@ export interface CurrentPlanCategory {
   budgeted: number;
   spent: number;
   projected: number;
+  signal_kind?: 'positive' | 'neutral' | 'attention';
+  signal_label?: string;
+  signal_detail?: string;
   subcategories?: CurrentPlanSubcategory[];
 }
 

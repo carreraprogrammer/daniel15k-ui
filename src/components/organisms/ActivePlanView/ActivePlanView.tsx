@@ -13,12 +13,8 @@ const clampPct = (value: number): number => Math.max(0, Math.min(Math.round(valu
 
 const getPlanHealth = (categories: CurrentPlanCategory[]) => {
   const safeCategories = Array.isArray(categories) ? categories : [];
-  const attention = safeCategories.filter((category) => {
-    const budgeted = category.budgeted ?? 0;
-    const spent = category.spent ?? 0;
-    if (budgeted <= 0) return false;
-    return spent > budgeted || (spent / budgeted) >= 0.85;
-  });
+  const attention = safeCategories.filter((category) => category.signal_kind === 'attention');
+  const positive = safeCategories.filter((category) => category.signal_kind === 'positive');
   const ranked = [...attention].sort((left, right) => {
     const leftRatio = (left.budgeted ?? 0) > 0 ? (left.spent ?? 0) / (left.budgeted ?? 1) : 0;
     const rightRatio = (right.budgeted ?? 0) > 0 ? (right.spent ?? 0) / (right.budgeted ?? 1) : 0;
@@ -28,12 +24,13 @@ const getPlanHealth = (categories: CurrentPlanCategory[]) => {
 
   return {
     outOfRangeCount: attention.length,
+    positiveCount: positive.length,
     topRisk,
   };
 };
 
 const buildHeroCopy = (currentPlan: CurrentPlan, categories: CurrentPlanCategory[]) => {
-  const { outOfRangeCount, topRisk } = getPlanHealth(categories);
+  const { outOfRangeCount, positiveCount, topRisk } = getPlanHealth(categories);
   const topRiskOverrun = topRisk ? Math.max((topRisk.spent ?? 0) - (topRisk.budgeted ?? 0), 0) : 0;
   const assigned = categories.reduce((sum, category) => sum + (category.budgeted ?? 0), 0);
   const remainingTotal = categories.reduce((sum, category) => sum + ((category.budgeted ?? 0) - (category.spent ?? 0)), 0);
@@ -43,10 +40,14 @@ const buildHeroCopy = (currentPlan: CurrentPlan, categories: CurrentPlanCategory
     eyebrow: 'Plan activo',
     title: outOfRangeCount
       ? `${outOfRangeCount} categorías piden atención`
+      : positiveCount
+        ? `${positiveCount} avance${positiveCount === 1 ? '' : 's'} positivo${positiveCount === 1 ? '' : 's'} este mes`
       : 'Tu plan mensual sigue bajo control',
     text: outOfRangeCount
-      ? `${topRisk?.name ?? 'La categoría principal'} es la señal más útil para revisar primero. El resto del detalle puede esperar hasta que abras las secciones.`
-      : 'La portada del presupuesto debería bastar para decirte si el mes sigue sano sin obligarte a leer toda la estructura.',
+      ? `${topRisk?.name ?? 'La categoría principal'} es la señal más útil para revisar primero.${positiveCount ? ' También ya hay movimientos que fortalecen tu posición.' : ' El resto del detalle puede esperar hasta que abras las secciones.'}`
+      : positiveCount
+        ? 'No todo desvío es malo. Hay movimientos que mejoran tu posición financiera aunque se salgan del plan original.'
+        : 'La portada del presupuesto debería bastar para decirte si el mes sigue sano sin obligarte a leer toda la estructura.',
     headlineValue: formatCOP(remainingTotal),
     headlineCaption: topRisk
       ? `Disponible total frente al plan`
@@ -55,16 +56,22 @@ const buildHeroCopy = (currentPlan: CurrentPlan, categories: CurrentPlanCategory
     supportValue: outOfRangeCount ? formatCOP(topRiskOverrun) : formatCOP(freeMargin),
     supportTone: outOfRangeCount ? 'warning' : 'calm',
     outOfRangeCount,
+    positiveCount,
   };
 };
 
 const buildStatusLabel = (category: CurrentPlanCategory) => {
-  const budgeted = category.budgeted ?? 0;
-  const spent = category.spent ?? 0;
-  if (spent > budgeted) return 'Exceso';
-  if (budgeted > 0 && (spent / budgeted) >= 0.85) return 'Atención';
-  if ((category.spent ?? 0) === 0) return 'Sin movimiento';
-  return 'En ritmo';
+  return category.signal_label ?? 'En ritmo';
+};
+
+const signalClassFor = (
+  kind: CurrentPlanCategory['signal_kind'] | CurrentPlanSubcategory['signal_kind'],
+  positiveClass: string,
+  attentionClass: string,
+): string => {
+  if (kind === 'positive') return positiveClass;
+  if (kind === 'attention') return attentionClass;
+  return '';
 };
 
 const SubcategoryCard = ({ sub, accentColor }: { sub: CurrentPlanSubcategory; accentColor: string }) => {
@@ -73,7 +80,6 @@ const SubcategoryCard = ({ sub, accentColor }: { sub: CurrentPlanSubcategory; ac
   const remaining = budgeted - spent;
   const pct = budgeted > 0 ? clampPct((spent / budgeted) * 100) : 0;
   const isOver = spent > budgeted;
-  const isNearLimit = !isOver && budgeted > 0 && (spent / budgeted) >= 0.85;
 
   return (
     <article
@@ -95,11 +101,10 @@ const SubcategoryCard = ({ sub, accentColor }: { sub: CurrentPlanSubcategory; ac
         <span
           className={[
             styles.subcategoryState,
-            isOver ? styles.subcategoryStateWarn : '',
-            isNearLimit ? styles.subcategoryStateCaution : '',
+            signalClassFor(sub.signal_kind, styles.subcategoryStatePositive, styles.subcategoryStateAttention),
           ].filter(Boolean).join(' ')}
         >
-          {isOver ? 'Exceso' : isNearLimit ? 'Atención' : `${pct}%`}
+          {sub.signal_label ?? `${pct}%`}
         </span>
       </div>
 
@@ -121,9 +126,13 @@ const SubcategoryCard = ({ sub, accentColor }: { sub: CurrentPlanSubcategory; ac
         </div>
         <div className={styles.subcategoryStat}>
           <dt>Estado</dt>
-          <dd>{isOver ? 'Exceso' : isNearLimit ? 'Atención' : 'En ritmo'}</dd>
+          <dd>{sub.signal_label ?? 'En ritmo'}</dd>
         </div>
       </dl>
+
+      {sub.signal_detail ? (
+        <p className={styles.subcategorySignalText}>{sub.signal_detail}</p>
+      ) : null}
     </article>
   );
 };
@@ -147,7 +156,6 @@ export const CategoryGroup = ({ category, defaultExpanded = false }: CategoryGro
   const colorVar = `var(--color-${categoryCode})`;
   const subtleVar = `var(--color-${categoryCode}-subtle)`;
   const isOverSpent = totalSpent > totalBudgeted;
-  const isNearLimit = !isOverSpent && totalBudgeted > 0 && (totalSpent / totalBudgeted) >= 0.85;
 
   return (
     <section
@@ -170,8 +178,7 @@ export const CategoryGroup = ({ category, defaultExpanded = false }: CategoryGro
               <span
                 className={[
                   styles.categoryState,
-                  isOverSpent ? styles.categoryStateWarn : '',
-                  isNearLimit ? styles.categoryStateCaution : '',
+                  signalClassFor(category.signal_kind, styles.categoryStatePositive, styles.categoryStateAttention),
                 ].filter(Boolean).join(' ')}
               >
                 {statusLabel}
@@ -180,6 +187,9 @@ export const CategoryGroup = ({ category, defaultExpanded = false }: CategoryGro
             <p className={styles.categorySummary}>
               {formatCOP(totalSpent)} gastados de {formatCOP(totalBudgeted)}.
             </p>
+            {category.signal_detail ? (
+              <p className={styles.categorySignalText}>{category.signal_detail}</p>
+            ) : null}
           </div>
         </div>
 
@@ -282,6 +292,11 @@ export const ActivePlanView = ({
             </span>
             <span className={styles.metaPill}>{categories.length} categorías activas</span>
             <span className={styles.metaPill}>{hero.outOfRangeCount} alertas</span>
+            {hero.positiveCount > 0 ? (
+              <span className={`${styles.metaPill} ${styles.metaPillPositive}`}>
+                {hero.positiveCount} avance{hero.positiveCount === 1 ? '' : 's'} positivo{hero.positiveCount === 1 ? '' : 's'}
+              </span>
+            ) : null}
             <span className={styles.metaPill}>
               {currentPlan.month_label ?? `${currentPlan.year}-${String(currentPlan.month).padStart(2, '0')}`}
             </span>
