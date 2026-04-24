@@ -473,6 +473,7 @@ export interface CurrentPlanSubcategory {
   id?: number | null;
   code?: string | null;
   name?: string | null;
+  icon?: string | null;
   budgeted: number;
   spent: number;
   projected: number;
@@ -482,6 +483,7 @@ export interface CurrentPlanCategory {
   code?: string | null;
   name?: string | null;
   color?: string | null;
+  icon?: string | null;
   budgeted: number;
   spent: number;
   projected: number;

@@ -193,7 +193,7 @@ export const BudgetsPage = () => {
         <section className={`${styles.stack} ${currentPlan || !detailsOpen ? styles.stackFill : ''}`}>
 
           {/* ── Active plan view (shown when there is a confirmed plan) ── */}
-          {!loading && !error && (currentPlan || !detailsOpen) ? (
+          {!loading && !error && ((currentPlan && !detailsOpen) || (!currentPlan && !detailsOpen)) ? (
             <div className={styles.focusStage}>
               <div className={`${styles.focusCard} ${styles.focusCardFull} ${styles.focusCardCentered}`}>
                 {currentPlan ? (
@@ -316,8 +316,12 @@ export const BudgetsPage = () => {
               {/* Category breakdown from current plan */}
               {currentPlan && Array.isArray(currentPlan.categories) && currentPlan.categories.length > 0 ? (
                 <div className={styles.detailPanel}>
-                  {currentPlan.categories.map((cat) => (
-                    <CategoryGroup key={cat.code ?? cat.name ?? 'unknown'} category={cat} />
+                  {currentPlan.categories.map((cat, index) => (
+                    <CategoryGroup
+                      key={cat.code ?? cat.name ?? 'unknown'}
+                      category={cat}
+                      defaultExpanded={index === 0}
+                    />
                   ))}
                 </div>
               ) : null}
