@@ -17,6 +17,7 @@ const NAV_ITEMS = [
   { to: '/planned-expenses', label: 'Planeados' },
   { to: '/recurring', label: 'Recurrentes' },
   { to: '/budgets', label: 'Presupuestos' },
+  { to: '/savings-goals', label: 'Metas' },
   { to: '/profile', label: 'Mi perfil' },
 ];
 

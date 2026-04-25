@@ -18,10 +18,13 @@ import type {
   PlannedExpense,
   PlannedExpensePayload,
   PlannedExpenseQueryParams,
+  MonthlyPlanHistory,
   JsonApiCollection,
   RecurringObligation,
   RecurringObligationPayload,
   RecurringObligationQueryParams,
+  SavingsGoal,
+  SavingsGoalPayload,
   SubcategoryCreateParams,
   SubcategoryCreated,
   SummaryResponse,
@@ -215,6 +218,35 @@ export const financeService = {
   async fetchCompleteness(month = defaultMonth, year = defaultYear): Promise<CompletenessResponse> {
     const { data } = await api.get('/api/v1/completeness', { params: { month, year } });
     return (data as { data: CompletenessResponse }).data;
+  },
+
+  async getMonthlyPlans(page?: number): Promise<{ data: MonthlyPlanHistory[]; meta?: JsonApiCollection<MonthlyPlanHistory>['meta'] }> {
+    const { data } = await api.get('/api/v1/monthly_plans', { params: page ? { page } : undefined });
+    return data as { data: MonthlyPlanHistory[]; meta?: JsonApiCollection<MonthlyPlanHistory>['meta'] };
+  },
+
+  async closeMonthlyPlan(id: number): Promise<MonthlyPlanHistory> {
+    const { data } = await api.post(`/api/v1/monthly_plans/${id}/close`);
+    return (data.data ?? data) as MonthlyPlanHistory;
+  },
+
+  async getSavingsGoals(): Promise<SavingsGoal[]> {
+    const { data } = await api.get('/api/v1/savings_goals');
+    return ((data as { data?: SavingsGoal[] }).data ?? []) as SavingsGoal[];
+  },
+
+  async createSavingsGoal(payload: SavingsGoalPayload): Promise<SavingsGoal> {
+    const { data } = await api.post('/api/v1/savings_goals', payload);
+    return (data.data ?? data) as SavingsGoal;
+  },
+
+  async updateSavingsGoal(id: number, payload: Partial<SavingsGoalPayload>): Promise<SavingsGoal> {
+    const { data } = await api.patch(`/api/v1/savings_goals/${id}`, payload);
+    return (data.data ?? data) as SavingsGoal;
+  },
+
+  async deleteSavingsGoal(id: number): Promise<void> {
+    await api.delete(`/api/v1/savings_goals/${id}`);
   },
 
   async fetchCategories(): Promise<JsonApiCollection<CategoryResource>> {

@@ -111,7 +111,7 @@ export interface SummaryResponse {
   credit_card_pending?: number;
 }
 
-export type CompletenessStatus = 'missing' | 'partial' | 'sufficient' | 'stale' | 'conflicting';
+export type CompletenessStatus = 'missing' | 'partial' | 'sufficient' | 'stale' | 'conflicting' | 'pending_confirmation';
 
 export interface CompletenessDimension {
   status: CompletenessStatus;
@@ -126,7 +126,53 @@ export interface CompletenessResponse {
   missing: string[];
   partial: string[];
   stale: string[];
+  pending_confirmation?: string[];
   conflicting: string[];
+}
+
+export interface MonthlyPlanHistory {
+  id: number;
+  month: number;
+  year: number;
+  status: string;
+  mode?: string;
+  base_budget_income: number;
+  expected_variable_income?: number;
+  recurring_obligations_total?: number;
+  debt_minimums_total?: number;
+  discretionary_limit?: number;
+  income_actual: number;
+  expense_actual: number;
+  closed_at: string | null;
+  confirmed_at: string | null;
+  assumptions: Record<string, any>;
+  execution_snapshot: Record<string, any>;
+}
+
+export interface SavingsGoal {
+  id: number;
+  user_id: number;
+  account_id: number | null;
+  name: string;
+  target_amount: number;
+  current_amount: number;
+  target_date: string | null;
+  monthly_contribution: number;
+  monthly_contribution_needed: number | null;
+  status: 'active' | 'paused' | 'completed';
+  priority: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SavingsGoalPayload {
+  name: string;
+  target_amount: number;
+  current_amount?: number;
+  target_date?: string | null;
+  monthly_contribution?: number;
+  status?: 'active' | 'paused' | 'completed';
+  priority?: number;
 }
 
 export interface Transaction {

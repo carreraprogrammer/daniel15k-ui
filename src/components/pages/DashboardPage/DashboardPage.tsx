@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { IonContent } from '@ionic/react';
+import { useHistory } from 'react-router-dom';
 import {
   PieChart, Pie, Cell,
   BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip,
@@ -38,8 +39,9 @@ const formatRelativeTime = (iso: string): string => {
 };
 
 export const DashboardPage = () => {
-  const { summary, insight, debts, pending, obligations, loading, error, reload } =
+  const { summary, insight, debts, pending, obligations, completeness, loading, error, reload } =
     useDashboardData();
+  const history = useHistory();
   const [snapshotOpen, setSnapshotOpen] = useState(true);
   const [detailOpen, setDetailOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -66,6 +68,12 @@ export const DashboardPage = () => {
 
   const liquidity = summary?.liquidity;
   const burnCategories = summary?.burn_rate?.categories ?? [];
+  const hasPlanPendingConfirmation = completeness?.pending_confirmation?.includes('monthly_plan') ?? false;
+  const planMonthLabel = summary?.period
+    ? new Intl.DateTimeFormat('es-CO', { month: 'long', year: 'numeric' }).format(
+        new Date(summary.period.year, summary.period.month - 1, 1),
+      )
+    : 'este mes';
 
   // ── Hero copy ──────────────────────────────────────────────────────────────
   const heroTitle = !liquidity
@@ -122,6 +130,21 @@ export const DashboardPage = () => {
 
           {!loading && !error && summary ? (
             <>
+              {hasPlanPendingConfirmation ? (
+                <div className={styles.planBanner}>
+                  <p className={styles.planBannerText}>
+                    Tu plan de {planMonthLabel} está listo para revisar — heredado del mes anterior.
+                  </p>
+                  <button
+                    type="button"
+                    className={styles.planBannerBtn}
+                    onClick={() => history.push('/budgets')}
+                  >
+                    Revisar plan
+                  </button>
+                </div>
+              ) : null}
+
               {/* ── ZONA 1 — Hero ─────────────────────────────────────────── */}
               <div className={styles.heroCard}>
                 <div className={styles.heroTop}>

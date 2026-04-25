@@ -19,6 +19,7 @@ import type {
   BudgetQueryParams,
   CategoryResource,
   CurrentPlan,
+  MonthlyPlanHistory,
   SummaryResponse,
 } from '../../../types/finance.types';
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
@@ -30,6 +31,26 @@ const currentMonthString = (): string => {
   const y = now.getFullYear();
   const m = String(now.getMonth() + 1).padStart(2, '0');
   return `${y}-${m}`;
+};
+
+const formatPlanPeriod = (plan: MonthlyPlanHistory): string =>
+  new Intl.DateTimeFormat('es-CO', { month: 'long', year: 'numeric' }).format(
+    new Date(plan.year, plan.month - 1, 1),
+  );
+
+const plannedExpenseTotal = (plan: MonthlyPlanHistory): number => {
+  const snapshotCategories = plan.execution_snapshot?.categories;
+  if (Array.isArray(snapshotCategories)) {
+    return snapshotCategories.reduce((sum, category) => sum + Number(category?.budgeted ?? 0), 0);
+  }
+  return Number(plan.recurring_obligations_total ?? 0) +
+    Number(plan.debt_minimums_total ?? 0) +
+    Number(plan.discretionary_limit ?? 0);
+};
+
+const planStatusLabel = (plan: MonthlyPlanHistory): string => {
+  if (plan.status === 'draft' && plan.assumptions?.inherited_from) return 'Pendiente confirmar';
+  return plan.status;
 };
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -47,8 +68,10 @@ export const BudgetsPage = () => {
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [summary, setSummary] = useState<SummaryResponse | null>(null);
   const [currentPlan, setCurrentPlan] = useState<CurrentPlan | null>(null);
+  const [planHistory, setPlanHistory] = useState<MonthlyPlanHistory[]>([]);
   const [categories, setCategories] = useState<CategoryResource[]>([]);
   const [loading, setLoading] = useState(true);
+  const [closingPlanId, setClosingPlanId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // Sheet / modal state
@@ -81,17 +104,19 @@ export const BudgetsPage = () => {
     setLoading(true);
     setError(null);
     try {
-      const [budgetsResponse, summaryResponse, categoriesResponse, currentPlanResponse] =
+      const [budgetsResponse, summaryResponse, categoriesResponse, currentPlanResponse, monthlyPlansResponse] =
         await Promise.all([
           financeService.fetchBudgets(filters),
           financeService.fetchSummary(),
           financeService.fetchCategories(),
           financeService.fetchCurrentPlan(),
+          financeService.getMonthlyPlans(),
         ]);
       setBudgets(budgetsResponse.data);
       setSummary(summaryResponse);
       setCurrentPlan(currentPlanResponse);
       setCategories(categoriesResponse.data);
+      setPlanHistory(monthlyPlansResponse.data ?? []);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : 'No fue posible cargar los presupuestos.',
@@ -139,6 +164,17 @@ export const BudgetsPage = () => {
     if (wizardSaving) return; // block close while saving
     setWizardOpen(false);
     setWizardError(null);
+  };
+
+  const handleCloseMonth = async (planId: number) => {
+    setClosingPlanId(planId);
+    try {
+      await financeService.closeMonthlyPlan(planId);
+      const monthlyPlansResponse = await financeService.getMonthlyPlans();
+      setPlanHistory(monthlyPlansResponse.data ?? []);
+    } finally {
+      setClosingPlanId(null);
+    }
   };
 
   // ── Derived state ───────────────────────────────────────────────────────────
@@ -424,6 +460,63 @@ export const BudgetsPage = () => {
                 </div>
               ) : null}
             </>
+          ) : null}
+
+          {!loading && !error ? (
+            <section className={styles.panel}>
+              <div className={styles.detailStageHeader}>
+                <div className={styles.detailStageCopy}>
+                  <h3 className={styles.detailStageTitle}>Historial de planes</h3>
+                  <p className={styles.detailStageText}>
+                    Revisa planes anteriores, cierres mensuales y borradores heredados pendientes de confirmar.
+                  </p>
+                </div>
+              </div>
+
+              {planHistory.length ? (
+                <div className={styles.list}>
+                  {planHistory.map((plan) => {
+                    const plannedIncome = Number(plan.base_budget_income ?? 0) + Number(plan.expected_variable_income ?? 0);
+                    const actualIncome = Number(plan.execution_snapshot?.income_actual ?? plan.income_actual ?? 0);
+                    const plannedExpense = plannedExpenseTotal(plan);
+                    const actualExpense = Number(plan.execution_snapshot?.expense_actual ?? plan.expense_actual ?? 0);
+                    const closed = Boolean(plan.closed_at);
+                    const pendingInherited = plan.status === 'draft' && Boolean(plan.assumptions?.inherited_from);
+
+                    return (
+                      <article key={plan.id} className={styles.listItem}>
+                        <div className={styles.listPrimary}>
+                          <span className={styles.listLabel}>{formatPlanPeriod(plan)}</span>
+                          <span className={styles.listMeta}>
+                            Ingreso planeado {formatCurrencyCompact(plannedIncome)}
+                            {closed ? ` vs real ${formatCurrencyCompact(actualIncome)}` : ''}
+                          </span>
+                          <span className={styles.listMeta}>
+                            Gasto planeado {formatCurrencyCompact(plannedExpense)}
+                            {closed ? ` vs real ${formatCurrencyCompact(actualExpense)}` : ''}
+                          </span>
+                        </div>
+                        <div className={styles.listSecondary}>
+                          <span className={styles.pill}>{planStatusLabel(plan)}</span>
+                          {pendingInherited ? <span className={styles.listMeta}>Heredado del mes anterior</span> : null}
+                          {plan.status === 'confirmed' && !plan.closed_at ? (
+                            <Button
+                              label={closingPlanId === plan.id ? 'Cerrando…' : 'Cerrar mes'}
+                              variant="ghost"
+                              size="sm"
+                              disabled={closingPlanId === plan.id}
+                              onClick={() => void handleCloseMonth(plan.id)}
+                            />
+                          ) : null}
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              ) : (
+                <EmptyState message="Todavía no hay planes mensuales en el historial." />
+              )}
+            </section>
           ) : null}
         </section>
 

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { financeService } from '../services/financeService';
-import type { AgentInsight, CategoryResource, Debt, RecurringObligation, SummaryResponse, Transaction } from '../types/finance.types';
+import type { AgentInsight, CategoryResource, CompletenessResponse, Debt, RecurringObligation, SummaryResponse, Transaction } from '../types/finance.types';
 import { buildCategoryLookup, buildBehaviorSignals, summarizeBehavior } from '../utils/financeBehavior';
 
 export const useDashboardData = () => {
@@ -9,6 +9,7 @@ export const useDashboardData = () => {
   const [debts, setDebts] = useState<Debt[]>([]);
   const [pending, setPending] = useState<Transaction[]>([]);
   const [obligations, setObligations] = useState<RecurringObligation[]>([]);
+  const [completeness, setCompleteness] = useState<CompletenessResponse | null>(null);
   const [monthTransactions, setMonthTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<CategoryResource[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,6 +32,7 @@ export const useDashboardData = () => {
         transactionsResponse,
         categoriesResponse,
         insightResponse,
+        completenessResponse,
       ] = await Promise.all([
         financeService.fetchDebts(),
         financeService.fetchPendingTransactions(),
@@ -38,6 +40,7 @@ export const useDashboardData = () => {
         financeService.fetchTransactions({ page: 1, per_page: 50, sort_by: 'date', sort_dir: 'desc' }),
         financeService.fetchCategories(),
         financeService.fetchCurrentInsight().catch(() => null),
+        financeService.fetchCompleteness().catch(() => null),
       ]);
       setDebts(debtsResponse.data);
       setPending(pendingResponse.data);
@@ -45,6 +48,7 @@ export const useDashboardData = () => {
       setMonthTransactions(transactionsResponse.data);
       setCategories(categoriesResponse.data);
       setInsight(insightResponse);
+      setCompleteness(completenessResponse);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No fue posible cargar el resumen financiero.');
       setLoading(false);
@@ -68,6 +72,7 @@ export const useDashboardData = () => {
     debts,
     pending,
     obligations,
+    completeness,
     loading,
     error,
     behaviorSummary,
