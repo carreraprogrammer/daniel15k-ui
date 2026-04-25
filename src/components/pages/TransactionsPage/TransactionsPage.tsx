@@ -55,11 +55,47 @@ export const TransactionsPage = () => {
   } = useTransactionsPage();
 
   const latestTransaction = transactions[0] ?? null;
-  const latestCategory = useMemo(
-    () => (latestTransaction ? resolveTransactionCategory(latestTransaction, categoryLookup) : null),
-    [categoryLookup, latestTransaction],
-  );
-  const reviewPressurePct = metrics.count ? Math.round((metrics.pendingCount / metrics.count) * 100) : 0;
+
+  const TYPE_LABELS: Record<string, string> = {
+    committed:     'Comprometido',
+    necessary:     'Necesario',
+    discretionary: 'Discrecional',
+    investment:    'Inversión',
+    social:        'Social',
+  };
+  const TYPE_ORDER = ['committed', 'necessary', 'discretionary', 'investment', 'social'];
+  const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const monthName = summary?.period ? MESES[summary.period.month - 1] : MESES[new Date().getMonth()];
+
+  const stackedSegments = useMemo(() => {
+    const byType: Record<string, { spent: number; color: string; label: string }> = {};
+    transactions
+      .filter((t) => t.attributes.transaction_type === 'expense')
+      .forEach((t) => {
+        const catId = t.attributes.category_id;
+        if (!catId) return;
+        const cat = categories.find((c) => String(c.id) === String(catId));
+        const type = cat?.attributes.category_type ?? 'other';
+        const color = cat?.attributes.color ?? 'rgba(255,255,255,0.18)';
+        if (!byType[type]) byType[type] = { spent: 0, color, label: TYPE_LABELS[type] ?? 'Otro' };
+        byType[type].spent += t.attributes.amount;
+      });
+    const total = Object.values(byType).reduce((s, g) => s + g.spent, 0);
+    if (total === 0) return [];
+    return Object.entries(byType)
+      .map(([type, g]) => ({ type, ...g, pct: (g.spent / total) * 100 }))
+      .sort((a, b) => TYPE_ORDER.indexOf(a.type) - TYPE_ORDER.indexOf(b.type));
+  }, [transactions, categories]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const spotlight = useMemo(() => {
+    const cats = summary?.burn_rate?.categories;
+    if (!cats?.length) return null;
+    const over = cats.filter((c) => !c.on_track && c.budget > 0);
+    if (over.length) return over.reduce((a, b) => (a.pct > b.pct ? a : b));
+    const withBudget = cats.filter((c) => c.budget > 0);
+    if (withBudget.length) return withBudget.reduce((a, b) => (a.pct > b.pct ? a : b));
+    return cats.reduce((a, b) => (a.spent > b.spent ? a : b));
+  }, [summary]);
   const selectedCategoryId = filters.category_id ? String(filters.category_id) : '';
   const selectedSubcategoryId = filters.subcategory_id ? String(filters.subcategory_id) : '';
   const selectedCategory = useMemo(
@@ -175,63 +211,79 @@ export const TransactionsPage = () => {
       <section className={`${styles.stack} ${!detailsOpen ? styles.stackFill : ''}`}>
         {!detailsOpen ? (
           <div className={styles.focusStage}>
-            <div className={`${styles.focusCard} ${styles.focusCardFull} ${styles.focusCardCentered}`}>
+            <div className={`${styles.focusCard} ${styles.focusCardFull}`}>
+
+              {/* Header */}
               <div className={styles.focusGrid}>
                 <div className={styles.focusCopy}>
-                  <span className={styles.eyebrow}>Transacciones</span>
-                  <p className={styles.focusQuestion}>¿Qué fue lo último que pasó y necesito revisar?</p>
-                  <h2 className={styles.focusTitle}>
-                    {latestTransaction ? latestTransaction.attributes.concept : 'Todavía no hay movimientos en esta vista'}
-                  </h2>
-                  <p className={styles.focusText}>
-                    {latestTransaction
-                      ? 'La pantalla inicial debería bastar para confirmar que tu último movimiento quedó bien y decidir si hay que corregirlo.'
-                      : 'Cuando registres movimientos, esta vista mostrará primero el último caso para que no tengas que escanear toda la lista.'}
-                  </p>
-                </div>
-                <div>
+                  <span className={styles.eyebrow}>{monthName}</span>
                   <div className={styles.focusValue}>
-                    {latestTransaction ? formatCurrencyCompact(latestTransaction.attributes.amount) : '—'}
+                    {formatCurrencyCompact(metrics.expenseTotal)}
                   </div>
-                  <p className={styles.focusCaption}>
-                    {latestTransaction
-                      ? `${latestTransaction.attributes.date} · ${latestTransaction.attributes.status === 'pending' ? 'Pendiente' : 'Confirmada'}`
-                      : 'Sin transacciones visibles todavía'}
-                  </p>
+                  <p className={styles.focusCaption}>gastados este mes</p>
+                </div>
+                <div className={styles.focusMeta} style={{ alignSelf: 'start', justifyContent: 'flex-end' }}>
+                  {metrics.pendingCount > 0 ? (
+                    <span className={styles.focusBadge}>{metrics.pendingCount} pendientes</span>
+                  ) : null}
+                  <span className={styles.focusBadge}>{metrics.count} movimientos</span>
                 </div>
               </div>
 
-              {metrics.count ? (
-                <section className={styles.focusSupport}>
-                  <div className={styles.focusSupportHeader}>
-                    <h3 className={styles.focusSupportTitle}>Casos que piden revisión</h3>
-                    <span className={styles.focusSupportValue}>{metrics.pendingCount} de {metrics.count}</span>
+              {/* Stacked spend bar */}
+              {stackedSegments.length > 0 ? (
+                <div className={styles.spendWrap}>
+                  <div className={styles.spendBar}>
+                    {stackedSegments.map((seg) => (
+                      <div
+                        key={seg.type}
+                        className={styles.spendSegment}
+                        style={{ width: `${seg.pct}%`, background: seg.color }}
+                        title={`${seg.label}: ${formatCurrencyCompact(seg.spent)}`}
+                      />
+                    ))}
                   </div>
-                  <div className={styles.focusRail}>
-                    <div
-                      className={`${styles.focusRailFill} ${reviewPressurePct >= 40 ? styles.focusRailFillWarn : ''}`}
-                      style={{ width: `${reviewPressurePct}%` }}
-                    />
+                  <div className={styles.spendLegend}>
+                    {stackedSegments.map((seg) => (
+                      <div key={seg.type} className={styles.spendLegendItem}>
+                        <span className={styles.spendLegendDot} style={{ background: seg.color }} />
+                        <span className={styles.spendLegendLabel}>{seg.label}</span>
+                        <span className={styles.spendLegendAmount}>{formatCurrencyCompact(seg.spent)}</span>
+                      </div>
+                    ))}
                   </div>
-                  <p className={styles.focusSupportText}>
-                    {reviewPressurePct === 0
-                      ? 'No hay ruido pendiente en esta vista.'
-                      : `${reviewPressurePct}% de la vista sigue pidiendo confirmación o aclaración.`}
-                  </p>
-                </section>
+                </div>
               ) : null}
 
-              <div className={styles.focusMeta}>
-                {latestCategory ? (
-                  <span className={styles.focusBadge}>
-                    {latestCategory.categoryName}
-                    {latestCategory.subcategoryName ? ` · ${latestCategory.subcategoryName}` : ''}
-                  </span>
-                ) : null}
-                <span className={styles.focusBadge}>{metrics.count} resultados</span>
-                <span className={styles.focusBadge}>{metrics.pendingCount} pendientes</span>
-              </div>
+              {/* Spotlight */}
+              {spotlight ? (
+                <div className={`${styles.focusSupport} ${!spotlight.on_track ? styles.focusSupportWarn : ''}`}>
+                  <div className={styles.focusSupportHeader}>
+                    <h3 className={styles.focusSupportTitle}>
+                      {!spotlight.on_track ? '⚠ ' : ''}{spotlight.category}
+                    </h3>
+                    <span className={styles.focusSupportValue}>{formatCurrencyCompact(spotlight.spent)}</span>
+                  </div>
+                  {spotlight.budget > 0 ? (
+                    <>
+                      <div className={styles.focusRail}>
+                        <div
+                          className={`${styles.focusRailFill} ${!spotlight.on_track ? styles.focusRailFillWarn : ''}`}
+                          style={{ width: `${Math.min(spotlight.pct, 100)}%` }}
+                        />
+                      </div>
+                      <p className={styles.focusSupportText}>
+                        {spotlight.pct}% de {formatCurrencyCompact(spotlight.budget)} presupuestados
+                        {!spotlight.on_track ? ' — va a superarse' : ''}
+                      </p>
+                    </>
+                  ) : (
+                    <p className={styles.focusSupportText}>mayor gasto del mes</p>
+                  )}
+                </div>
+              ) : null}
 
+              {/* Actions */}
               <div className={styles.focusActions}>
                 <IconButton
                   label="Nueva transacción"
@@ -247,18 +299,8 @@ export const TransactionsPage = () => {
                   variant="ghost"
                   onClick={() => setDetailsOpen(true)}
                 />
-                {latestTransaction ? (
-                  <Button
-                    label="Editar última"
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => {
-                      setEditingTransaction(latestTransaction);
-                      setComposerOpen(true);
-                    }}
-                  />
-                ) : null}
               </div>
+
             </div>
           </div>
         ) : null}
