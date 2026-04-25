@@ -96,6 +96,22 @@ export interface LiquidityProjection {
   buffer_status: 'critical' | 'tight' | 'comfortable';
 }
 
+export interface SummaryGoal {
+  name: string;
+  target_amount: number;
+  current_amount: number;
+  monthly_contribution_needed: number | null;
+  target_date: string | null;
+  status: 'active' | 'paused' | 'completed';
+}
+
+export interface UserMilestone {
+  id: number;
+  code: string;
+  achieved_at: string;
+  metadata: Record<string, unknown>;
+}
+
 export interface SummaryResponse {
   period: {
     month: number;
@@ -109,6 +125,7 @@ export interface SummaryResponse {
   financial_context: FinancialContextSummary | null;
   liquidity?: LiquidityProjection | null;
   credit_card_pending?: number;
+  savings_goals?: SummaryGoal[];
 }
 
 export type CompletenessStatus = 'missing' | 'partial' | 'sufficient' | 'stale' | 'conflicting' | 'pending_confirmation';

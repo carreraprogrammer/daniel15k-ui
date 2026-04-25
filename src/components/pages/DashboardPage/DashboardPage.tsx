@@ -38,8 +38,24 @@ const formatRelativeTime = (iso: string): string => {
   return `hace ${days} días`;
 };
 
+const MILESTONE_LABELS: Record<string, string> = {
+  debt_paid_off: '🎉 Deuda liquidada',
+  first_debt_paid_off: '🎉 Primera deuda liquidada',
+  debt_free: '🏆 Sin deudas',
+  emergency_fund_reached: '🛡️ Fondo de emergencia listo',
+  first_monthly_plan: '📋 Primer plan mensual',
+  three_months_planned: '📅 3 meses planificados',
+  investment_started: '📈 Inversión iniciada',
+  month_positive_balance: '✅ Mes en positivo',
+  discretionary_under_budget: '💪 Discrecional bajo presupuesto',
+  overflow_deployed: '⚡ Overflow desplegado',
+};
+
+const formatMilestoneLabel = (code: string): string =>
+  MILESTONE_LABELS[code] ?? `🏅 ${code.replace(/_/g, ' ')}`;
+
 export const DashboardPage = () => {
-  const { summary, insight, debts, pending, obligations, completeness, loading, error, reload } =
+  const { summary, insight, debts, pending, obligations, completeness, milestones, loading, error, reload } =
     useDashboardData();
   const history = useHistory();
   const [snapshotOpen, setSnapshotOpen] = useState(true);
@@ -69,6 +85,8 @@ export const DashboardPage = () => {
   const liquidity = summary?.liquidity;
   const burnCategories = summary?.burn_rate?.categories ?? [];
   const hasPlanPendingConfirmation = completeness?.pending_confirmation?.includes('monthly_plan') ?? false;
+  const lastMilestone = milestones.length > 0 ? milestones[0] : null;
+  const activeSavingsGoals = summary?.savings_goals?.filter((g) => g.status === 'active') ?? [];
   const planMonthLabel = summary?.period
     ? new Intl.DateTimeFormat('es-CO', { month: 'long', year: 'numeric' }).format(
         new Date(summary.period.year, summary.period.month - 1, 1),
@@ -235,6 +253,19 @@ export const DashboardPage = () => {
                       ].join(' ')}
                     >
                       {liquidity.buffer_status}
+                    </span>
+                  ) : null}
+                  {lastMilestone ? (
+                    <span
+                      className={[styles.badge, styles.badge_milestone].join(' ')}
+                      title={`Logrado ${formatRelativeTime(lastMilestone.achieved_at)}`}
+                    >
+                      {formatMilestoneLabel(lastMilestone.code)}
+                    </span>
+                  ) : null}
+                  {activeSavingsGoals.length > 0 ? (
+                    <span className={styles.badge}>
+                      🎯 {activeSavingsGoals.length} {activeSavingsGoals.length === 1 ? 'meta' : 'metas'} activa{activeSavingsGoals.length === 1 ? '' : 's'}
                     </span>
                   ) : null}
                 </div>

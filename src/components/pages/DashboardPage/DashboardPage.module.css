@@ -255,6 +255,12 @@
   color: #ff8a7a;
 }
 
+.badge_milestone {
+  background: rgba(243, 210, 122, 0.12);
+  border-color: rgba(243, 210, 122, 0.28);
+  color: #f5d87a;
+}
+
 /* ── Hero actions ─────────────────────────────────────────────────────────── */
 
 .heroActions {

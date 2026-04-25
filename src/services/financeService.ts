@@ -28,6 +28,7 @@ import type {
   SubcategoryCreateParams,
   SubcategoryCreated,
   SummaryResponse,
+  UserMilestone,
   Transaction,
   TransactionCreatePayload,
   TransactionQueryParams,
@@ -416,6 +417,11 @@ export const financeService = {
       icon: String(resource.attributes.icon ?? ''),
       category_id: String(resource.attributes.category_id ?? ''),
     };
+  },
+
+  async fetchMilestones(): Promise<UserMilestone[]> {
+    const { data } = await api.get('/api/v1/milestones');
+    return ((data as { data?: UserMilestone[] }).data ?? (Array.isArray(data) ? data : [])) as UserMilestone[];
   },
 
   async startWebChat(message: string): Promise<{ session_id: string }> {

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { financeService } from '../services/financeService';
-import type { AgentInsight, CategoryResource, CompletenessResponse, Debt, RecurringObligation, SummaryResponse, Transaction } from '../types/finance.types';
+import type { AgentInsight, CategoryResource, CompletenessResponse, Debt, RecurringObligation, SummaryResponse, Transaction, UserMilestone } from '../types/finance.types';
 import { buildCategoryLookup, buildBehaviorSignals, summarizeBehavior } from '../utils/financeBehavior';
 
 export const useDashboardData = () => {
@@ -12,6 +12,7 @@ export const useDashboardData = () => {
   const [completeness, setCompleteness] = useState<CompletenessResponse | null>(null);
   const [monthTransactions, setMonthTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<CategoryResource[]>([]);
+  const [milestones, setMilestones] = useState<UserMilestone[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,6 +34,7 @@ export const useDashboardData = () => {
         categoriesResponse,
         insightResponse,
         completenessResponse,
+        milestonesResponse,
       ] = await Promise.all([
         financeService.fetchDebts(),
         financeService.fetchPendingTransactions(),
@@ -41,6 +43,7 @@ export const useDashboardData = () => {
         financeService.fetchCategories(),
         financeService.fetchCurrentInsight().catch(() => null),
         financeService.fetchCompleteness().catch(() => null),
+        financeService.fetchMilestones().catch(() => []),
       ]);
       setDebts(debtsResponse.data);
       setPending(pendingResponse.data);
@@ -49,6 +52,7 @@ export const useDashboardData = () => {
       setCategories(categoriesResponse.data);
       setInsight(insightResponse);
       setCompleteness(completenessResponse);
+      setMilestones(milestonesResponse);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No fue posible cargar el resumen financiero.');
       setLoading(false);
@@ -73,6 +77,7 @@ export const useDashboardData = () => {
     pending,
     obligations,
     completeness,
+    milestones,
     loading,
     error,
     behaviorSummary,
