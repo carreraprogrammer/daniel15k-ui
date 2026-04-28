@@ -1,0 +1,38 @@
+.content {
+  --background: var(--color-bg-primary, #05070C);
+}
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: 24px 16px 32px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+}
+
+.successBadge {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-investment, #1A9E4A);
+  background: rgba(26, 158, 74, 0.12);
+  padding: 4px 10px;
+  border-radius: 20px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.composerWrap {
+  flex: 1;
+}

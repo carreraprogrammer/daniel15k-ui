@@ -16,6 +16,7 @@ const PlannedExpensesPage = lazy(() => import('../components/pages/PlannedExpens
 const RecurringObligationsPage = lazy(() => import('../components/pages/RecurringObligationsPage').then(m => ({ default: m.RecurringObligationsPage })));
 const BudgetsPage = lazy(() => import('../components/pages/BudgetsPage').then(m => ({ default: m.BudgetsPage })));
 const SavingsGoalsPage = lazy(() => import('../components/pages/SavingsGoalsPage').then(m => ({ default: m.SavingsGoalsPage })));
+const QuickCapturePage = lazy(() => import('../components/pages/QuickCapturePage').then(m => ({ default: m.QuickCapturePage })));
 
 const PageFallback = () => (
   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', minHeight: '200px' }}>
@@ -81,6 +82,7 @@ export const AppRouter = () => {
         <ProtectedRoute exact path="/budgets" component={BudgetsPage} />
         <ProtectedRoute exact path="/savings-goals" component={SavingsGoalsPage} />
         <ProtectedRoute exact path="/profile" component={ProfilePage} />
+        <ProtectedRoute exact path="/quick" component={QuickCapturePage} />
         <Route component={NotFoundPage} />
       </IonRouterOutlet>
     </Suspense>
