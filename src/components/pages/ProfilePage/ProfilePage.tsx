@@ -1,86 +1,152 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { IonContent } from '@ionic/react';
 import { useToast } from '../../../hooks/useToast';
-import { authService } from '../../../services/authService';
 import { useAuthStore } from '../../../store/authStore';
+import { api } from '../../../services/api';
 import { DynamicForm } from '../../organisms/DynamicForm';
 import { AppLayout } from '../../templates/AppLayout';
 import styles from './ProfilePage.module.css';
 
+interface FinancialCtx {
+  phase?: string | null;
+  strategy?: string | null;
+  notes?: string | null;
+}
+
+const PHASE_LABEL: Record<string, string> = {
+  debt_payoff:     'Pago de deudas',
+  emergency_fund:  'Fondo de emergencia',
+  investing:       'Inversión',
+  wealth_building: 'Construcción de patrimonio',
+};
+
+const STRATEGY_LABEL: Record<string, string> = {
+  snowball:  'Bola de nieve (menor deuda primero)',
+  avalanche: 'Avalancha (mayor interés primero)',
+};
+
 export const ProfilePage = () => {
-  const user = useAuthStore((state) => state.user);
+  const user    = useAuthStore((state) => state.user);
   const setUser = useAuthStore((state) => state.setUser);
   const { showError, showSuccess, toast } = useToast();
+  const [financialContext, setFinancialContext] = useState<FinancialCtx | null>(null);
+
+  useEffect(() => {
+    api.get('/api/v1/financial_context')
+      .then(({ data }) => {
+        const attrs = (data as { data?: { attributes?: FinancialCtx } })?.data?.attributes ?? null;
+        setFinancialContext(attrs);
+      })
+      .catch(() => { /* silencioso — sección simplemente no se muestra */ });
+  }, []);
+
+  const profileSchema = useMemo(
+    () => ({
+      slug:            'profile-form',
+      title:           'Perfil',
+      submit_endpoint: `/api/v1/users/${user?.id ?? ':id'}`,
+      submit_method:   'PATCH' as const,
+      fields: [
+        { name: 'name', type: 'text' as const, label: 'Nombre' },
+        { name: 'city', type: 'text' as const, label: 'Ciudad', placeholder: 'Ej: Medellín, Colombia' },
+      ],
+    }),
+    [user?.id],
+  );
 
   const initialValues = useMemo(
-    () => ({ name: user?.name ?? '', email: user?.email ?? '' }),
-    [user?.email, user?.name],
+    () => ({ name: user?.name ?? '', city: user?.city ?? '' }),
+    [user?.name, user?.city],
   );
 
   return (
     <AppLayout title="Mi perfil">
       <IonContent className={styles.pageContent}>
-      <section className={styles.grid}>
-        <article className={styles.summaryCard}>
-          <span className={styles.eyebrow}>Perfil</span>
-          <h2 className={styles.title}>Gestiona tu información</h2>
-          <p className={styles.description}>
-            Mantén tus datos actualizados y revisa rápidamente el alcance actual de tu cuenta dentro del workspace.
-          </p>
+        <section className={styles.grid}>
 
-          <div className={styles.userMeta}>
-            <div>
-              <span className={styles.metaLabel}>Nombre</span>
-              <strong>{user?.name ?? 'Sin nombre'}</strong>
-            </div>
-            <div>
-              <span className={styles.metaLabel}>Correo</span>
-              <strong>{user?.email ?? 'Sin correo'}</strong>
-            </div>
-            <div>
-              <span className={styles.metaLabel}>Rol</span>
-              <strong>{user?.superAdmin ? 'Superadministrador' : 'Colaborador'}</strong>
-            </div>
-          </div>
-        </article>
+          {/* ── Left: summary ── */}
+          <aside className={styles.summaryCard}>
+            <span className={styles.eyebrow}>Perfil</span>
+            <h2 className={styles.title}>Tu cuenta</h2>
 
-        <article className={styles.formCard}>
-          <div className={styles.formHeader}>
-            <span className={styles.eyebrow}>Editar perfil</span>
-            <h2 className={styles.formTitle}>Actualiza tu nombre visible</h2>
-            <p className={styles.formDescription}>
-              El correo se gestiona desde tu proveedor de acceso. Aquí solo actualizas el nombre con el que te
-              identificas dentro de Daniel15K.
-            </p>
-          </div>
+            <div className={styles.userMeta}>
+              <div>
+                <span className={styles.metaLabel}>Nombre</span>
+                <strong>{user?.name ?? 'Sin nombre'}</strong>
+              </div>
+              <div>
+                <span className={styles.metaLabel}>Ciudad</span>
+                <strong>{user?.city || '—'}</strong>
+              </div>
+              <div>
+                <span className={styles.metaLabel}>Correo</span>
+                <strong>{user?.email ?? '—'}</strong>
+              </div>
+              <div>
+                <span className={styles.metaLabel}>Rol</span>
+                <strong>{user?.superAdmin ? 'Superadministrador' : 'Usuario'}</strong>
+              </div>
+            </div>
 
-          <DynamicForm
-            schema={{
-              slug: 'profile-form',
-              title: 'Perfil',
-              submit_endpoint: `/api/v1/users/${user?.id ?? ':id'}`,
-              submit_method: 'PATCH',
-              fields: [{ name: 'name', type: 'text', label: 'Nombre' }],
-            }}
-            initialValues={initialValues}
-            onSuccess={async () => {
-              try {
-                const nextUser = await authService.me();
-                setUser(nextUser);
+            {financialContext && (
+              <>
+                <span className={styles.eyebrow} style={{ marginTop: '8px' }}>Contexto financiero</span>
+                <div className={styles.userMeta}>
+                  <div>
+                    <span className={styles.metaLabel}>Fase actual</span>
+                    <strong>{PHASE_LABEL[financialContext.phase ?? ''] ?? financialContext.phase ?? '—'}</strong>
+                  </div>
+                  <div>
+                    <span className={styles.metaLabel}>Estrategia de deuda</span>
+                    <strong>{STRATEGY_LABEL[financialContext.strategy ?? ''] ?? financialContext.strategy ?? '—'}</strong>
+                  </div>
+                  {financialContext.notes && (
+                    <div>
+                      <span className={styles.metaLabel}>Notas / objetivo</span>
+                      <strong>{financialContext.notes}</strong>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </aside>
+
+          {/* ── Right: edit form ── */}
+          <article className={styles.formCard}>
+            <div className={styles.formHeader}>
+              <span className={styles.eyebrow}>Editar perfil</span>
+              <h2 className={styles.formTitle}>Actualiza tu información</h2>
+              <p className={styles.formDescription}>
+                El correo se gestiona desde tu proveedor de acceso. El nombre y la ciudad
+                se usan como contexto en el asistente financiero.
+              </p>
+            </div>
+
+            <DynamicForm
+              schema={profileSchema}
+              initialValues={initialValues}
+              submitLabel="Guardar cambios"
+              onSuccess={(response) => {
+                const attrs = (response as { data?: { attributes?: { name?: string; city?: string | null } } })
+                  ?.data?.attributes;
+                if (user && attrs) {
+                  setUser({
+                    ...user,
+                    ...(attrs.name != null && { name: attrs.name }),
+                    ...(attrs.city !== undefined && { city: attrs.city }),
+                  });
+                }
                 showSuccess('Perfil actualizado.');
-              } catch (error) {
-                console.error('[ProfilePage] refresh:user:error', error);
-                showError('Guardé el cambio, pero no pude refrescar tu sesión.');
-              }
-            }}
-            onError={(error) => {
-              console.error('[ProfilePage] submit:error', error);
-              showError('No pude actualizar tu perfil.');
-            }}
-          />
-          {toast}
-        </article>
-      </section>
+              }}
+              onError={(error) => {
+                console.error('[ProfilePage] submit:error', error);
+                showError('No pude actualizar tu perfil.');
+              }}
+            />
+            {toast}
+          </article>
+
+        </section>
       </IonContent>
     </AppLayout>
   );

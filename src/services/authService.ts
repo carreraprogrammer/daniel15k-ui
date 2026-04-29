@@ -2,13 +2,24 @@ import { api, apiBaseUrl } from './api';
 import type { AuthResponse, LoginCredentials, RegisterPayload } from '../types/auth.types';
 import type { AuthUser } from '../types/authorization.types';
 
-const mapMeResponse = (data: { data?: { id?: number | string; attributes?: Partial<AuthUser> & { superAdmin?: boolean; super_admin?: boolean } } }): AuthUser => ({
-  id: Number(data.data?.id ?? data.data?.attributes?.id ?? 0),
+type MeAttributes = {
+  email?: string;
+  name?: string;
+  city?: string | null;
+  avatar_url?: string | null;
+  auth_provider?: string | null;
+  super_admin?: boolean;
+  permissions?: string[];
+};
+
+const mapMeResponse = (data: { data?: { id?: number | string; attributes?: MeAttributes } }): AuthUser => ({
+  id: Number(data.data?.id ?? 0),
   email: data.data?.attributes?.email ?? '',
   name: data.data?.attributes?.name ?? '',
-  avatarUrl: data.data?.attributes?.avatarUrl ?? null,
-  authProvider: data.data?.attributes?.authProvider ?? null,
-  superAdmin: data.data?.attributes?.superAdmin ?? data.data?.attributes?.super_admin ?? false,
+  city: data.data?.attributes?.city ?? null,
+  avatarUrl: data.data?.attributes?.avatar_url ?? null,
+  authProvider: data.data?.attributes?.auth_provider ?? null,
+  superAdmin: data.data?.attributes?.super_admin ?? false,
   permissions: data.data?.attributes?.permissions ?? [],
 });
 
