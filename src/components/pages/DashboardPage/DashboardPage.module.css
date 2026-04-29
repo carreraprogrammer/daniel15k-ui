@@ -167,6 +167,40 @@
   font-size: 0.82rem;
 }
 
+.availableBand {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1.05rem 1.15rem;
+  border: 1px solid rgba(124, 224, 211, 0.16);
+  border-radius: 20px;
+  background:
+    linear-gradient(135deg, rgba(124, 224, 211, 0.1), rgba(255, 255, 255, 0.025)),
+    rgba(255, 255, 255, 0.02);
+}
+
+.availableBandLabel {
+  color: rgba(231, 236, 244, 0.62);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.availableBandValue {
+  color: #fff;
+  font-size: clamp(2.6rem, 9vw, 5.4rem);
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  line-height: 0.9;
+  overflow-wrap: anywhere;
+}
+
+.availableBandHint {
+  color: rgba(231, 236, 244, 0.54);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
 /* ── Pressure / coverage bar ──────────────────────────────────────────────── */
 
 .pressureWrap {

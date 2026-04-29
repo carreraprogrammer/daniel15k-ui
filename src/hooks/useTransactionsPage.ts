@@ -36,6 +36,7 @@ export const useTransactionsPage = () => {
   const [hasNextPage, setHasNextPage] = useState(false);
   const [totalResults, setTotalResults] = useState(0);
   const [pendingCount, setPendingCount] = useState(0);
+  const [creditCardPending, setCreditCardPending] = useState<Transaction[]>([]);
   const pendingPageRef = useRef<number | null>(null);
 
   const load = async (nextPage = 1, options?: { append?: boolean; withSummary?: boolean }) => {
@@ -67,6 +68,10 @@ export const useTransactionsPage = () => {
       }
       if (pendingResponse) {
         setPendingCount(pendingResponse.data.length);
+      }
+      if (withSummary) {
+        const creditCardPendingResponse = await financeService.fetchCreditCardPendingTransactions();
+        setCreditCardPending(creditCardPendingResponse.data);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No fue posible cargar las transacciones.');
@@ -149,8 +154,10 @@ export const useTransactionsPage = () => {
       incomeTotal,
       expenseTotal,
       pendingCount,
+      creditCardPendingCount: creditCardPending.length,
+      creditCardPendingTotal: creditCardPending.reduce((sum, transaction) => sum + transaction.attributes.amount, 0),
     };
-  }, [totalResults, transactions, summary, pendingCount]);
+  }, [totalResults, transactions, summary, pendingCount, creditCardPending]);
 
   const categoryLookup = useMemo(() => buildCategoryLookup(categories), [categories]);
   const behaviorSummary = useMemo(() => summarizeBehavior(transactions, categoryLookup), [categoryLookup, transactions]);
@@ -182,6 +189,7 @@ export const useTransactionsPage = () => {
 
   return {
     transactions,
+    creditCardPending,
     summary,
     categories,
     loading,

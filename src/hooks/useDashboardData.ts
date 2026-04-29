@@ -8,6 +8,7 @@ export const useDashboardData = () => {
   const [insight, setInsight] = useState<AgentInsight | null>(null);
   const [debts, setDebts] = useState<Debt[]>([]);
   const [pending, setPending] = useState<Transaction[]>([]);
+  const [creditCardPending, setCreditCardPending] = useState<Transaction[]>([]);
   const [obligations, setObligations] = useState<RecurringObligation[]>([]);
   const [completeness, setCompleteness] = useState<CompletenessResponse | null>(null);
   const [monthTransactions, setMonthTransactions] = useState<Transaction[]>([]);
@@ -29,6 +30,7 @@ export const useDashboardData = () => {
       const [
         debtsResponse,
         pendingResponse,
+        creditCardPendingResponse,
         obligationsResponse,
         transactionsResponse,
         categoriesResponse,
@@ -38,6 +40,7 @@ export const useDashboardData = () => {
       ] = await Promise.all([
         financeService.fetchDebts(),
         financeService.fetchPendingTransactions(),
+        financeService.fetchCreditCardPendingTransactions(),
         financeService.fetchRecurringObligations(),
         financeService.fetchTransactions({ page: 1, per_page: 50, sort_by: 'date', sort_dir: 'desc' }),
         financeService.fetchCategories(),
@@ -47,6 +50,7 @@ export const useDashboardData = () => {
       ]);
       setDebts(debtsResponse.data);
       setPending(pendingResponse.data);
+      setCreditCardPending(creditCardPendingResponse.data);
       setObligations(obligationsResponse.data);
       setMonthTransactions(transactionsResponse.data);
       setCategories(categoriesResponse.data);
@@ -75,6 +79,7 @@ export const useDashboardData = () => {
     insight,
     debts,
     pending,
+    creditCardPending,
     obligations,
     completeness,
     milestones,

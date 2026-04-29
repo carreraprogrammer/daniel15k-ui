@@ -55,7 +55,7 @@ const formatMilestoneLabel = (code: string): string =>
   MILESTONE_LABELS[code] ?? `🏅 ${code.replace(/_/g, ' ')}`;
 
 export const DashboardPage = () => {
-  const { summary, insight, debts, pending, obligations, completeness, milestones, loading, error, reload } =
+  const { summary, insight, debts, pending, creditCardPending, obligations, completeness, milestones, loading, error, reload } =
     useDashboardData();
   const history = useHistory();
   const [snapshotOpen, setSnapshotOpen] = useState(true);
@@ -210,6 +210,18 @@ export const DashboardPage = () => {
                     </span>
                   </div>
                 </div>
+
+                {liquidity ? (
+                  <div className={styles.availableBand}>
+                    <span className={styles.availableBandLabel}>Dinero disponible hoy para decidir</span>
+                    <strong className={[styles.availableBandValue, isWarn ? styles.metricWarn : ''].filter(Boolean).join(' ')}>
+                      {formatCurrencyCompact(liquidity.safe_to_deploy)}
+                    </strong>
+                    <span className={styles.availableBandHint}>
+                      Ya descuenta obligaciones del próximo ciclo y compras de crédito pendientes.
+                    </span>
+                  </div>
+                ) : null}
 
                 {/* Barra de cobertura del próximo ciclo */}
                 {liquidity ? (
@@ -474,11 +486,22 @@ export const DashboardPage = () => {
                     <section className={styles.detailSection}>
                       <h3 className={styles.detailTitle}>Tarjeta de crédito — pendiente de pagar</h3>
                       <div className={styles.list}>
+                        {creditCardPending.slice(0, 8).map((t) => (
+                          <div key={t.id} className={styles.listRow}>
+                            <div className={styles.listMain}>
+                              <span className={styles.listPrimary}>{t.attributes.concept}</span>
+                              <span className={styles.listSecondary}>{t.attributes.date}</span>
+                            </div>
+                            <span className={styles.listAmount}>
+                              {formatCurrencyCompact(t.attributes.amount)}
+                            </span>
+                          </div>
+                        ))}
                         <div className={styles.listRow}>
                           <div className={styles.listMain}>
-                            <span className={styles.listPrimary}>Compras sin abonar al banco</span>
+                            <span className={styles.listPrimary}>Total por abonar</span>
                             <span className={styles.listSecondary}>
-                              Se liquidarán cuando registres el pago mensual
+                              Se liquida cuando registres el pago al banco
                             </span>
                           </div>
                           <span className={[styles.listAmount, styles.metricWarn].join(' ')}>

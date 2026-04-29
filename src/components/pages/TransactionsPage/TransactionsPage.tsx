@@ -1,6 +1,6 @@
 import { useMemo, useState, type CSSProperties } from 'react';
 import { IonContent, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, useIonAlert, useIonToast } from '@ionic/react';
-import { addOutline } from 'ionicons/icons';
+import { addOutline, cardOutline } from 'ionicons/icons';
 import { AppLayout } from '../../templates/AppLayout';
 import { IconButton } from '../../atoms/IconButton';
 import { Button } from '../../atoms/Button';
@@ -32,6 +32,7 @@ export const TransactionsPage = () => {
 
   const {
     transactions,
+    creditCardPending,
     summary,
     categories,
     loading,
@@ -55,6 +56,7 @@ export const TransactionsPage = () => {
   } = useTransactionsPage();
 
   const latestTransaction = transactions[0] ?? null;
+  const creditCardPendingPreview = creditCardPending.slice(0, 4);
 
   const TYPE_LABELS: Record<string, string> = {
     committed:     'Comprometido',
@@ -226,6 +228,9 @@ export const TransactionsPage = () => {
                   {metrics.pendingCount > 0 ? (
                     <span className={styles.focusBadge}>{metrics.pendingCount} pendientes</span>
                   ) : null}
+                  {metrics.creditCardPendingCount > 0 ? (
+                    <span className={styles.focusBadge}>{formatCurrencyCompact(metrics.creditCardPendingTotal)} por pagar TC</span>
+                  ) : null}
                   <span className={styles.focusBadge}>{metrics.count} movimientos</span>
                 </div>
               </div>
@@ -281,6 +286,40 @@ export const TransactionsPage = () => {
                     <p className={styles.focusSupportText}>mayor gasto del mes</p>
                   )}
                 </div>
+              ) : null}
+
+              {creditCardPending.length > 0 ? (
+                <section className={styles.creditPoolPanel}>
+                  <div className={styles.creditPoolHeader}>
+                    <div className={styles.creditPoolTitleWrap}>
+                      <span className={styles.creditPoolIcon}>
+                        <IonIcon icon={cardOutline} />
+                      </span>
+                      <div>
+                        <h3 className={styles.creditPoolTitle}>Tarjeta de crédito pendiente</h3>
+                        <p className={styles.creditPoolText}>
+                          Compras ya registradas; falta confirmar el abono al banco.
+                        </p>
+                      </div>
+                    </div>
+                    <strong className={styles.creditPoolTotal}>{formatCurrencyCompact(metrics.creditCardPendingTotal)}</strong>
+                  </div>
+                  <div className={styles.creditPoolList}>
+                    {creditCardPendingPreview.map((transaction) => (
+                      <div key={transaction.id} className={styles.creditPoolRow}>
+                        <span className={styles.creditPoolConcept}>{transaction.attributes.concept}</span>
+                        <span className={styles.creditPoolAmount}>
+                          {formatCurrencyCompact(transaction.attributes.amount)}
+                        </span>
+                      </div>
+                    ))}
+                    {creditCardPending.length > creditCardPendingPreview.length ? (
+                      <div className={styles.creditPoolMore}>
+                        +{creditCardPending.length - creditCardPendingPreview.length} compras más
+                      </div>
+                    ) : null}
+                  </div>
+                </section>
               ) : null}
 
               {/* Actions */}
