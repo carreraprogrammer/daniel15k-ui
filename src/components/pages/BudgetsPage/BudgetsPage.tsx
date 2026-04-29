@@ -12,7 +12,6 @@ import { BudgetPlanModal } from '../../organisms/BudgetPlanModal/BudgetPlanModal
 import { BudgetWizardModal } from '../../organisms/BudgetWizard';
 import { ActivePlanView, CategoryGroup } from '../../organisms/ActivePlanView/ActivePlanView';
 import { useWizardData } from '../../../hooks/useWizardData';
-import { useAgentUI } from '../../../contexts/AgentUIContext';
 import { financeService } from '../../../services/financeService';
 import type {
   Budget,
@@ -91,10 +90,7 @@ export const BudgetsPage = () => {
 
   const month = currentMonthString();
 
-  // ── Agent UI (web chat wizard flow) ────────────────────────────────────────
-  const { startChat } = useAgentUI();
-
-  // ── Wizard data hook (static fallback) ─────────────────────────────────────
+  // ── Wizard data hook ───────────────────────────────────────────────────────
   const {
     wizardData,
     loading: wizardDataLoading,
@@ -161,8 +157,7 @@ export const BudgetsPage = () => {
   const handleOpenWizard = () => {
     setWizardError(null);
     setWizardSuccess(false);
-    // Prefer agent-driven wizard; fall back to static wizard if agent is unavailable
-    void startChat('Quiero crear mi plan mensual').catch(() => setWizardOpen(true));
+    setWizardOpen(true);
   };
 
   const handleCloseWizard = () => {
