@@ -6,6 +6,7 @@ import { Spinner } from '../components/atoms/Spinner/Spinner';
 
 const LoginPage = lazy(() => import('../components/pages/LoginPage/LoginPage').then(m => ({ default: m.LoginPage })));
 const RegisterPage = lazy(() => import('../components/pages/RegisterPage/RegisterPage').then(m => ({ default: m.RegisterPage })));
+const LandingPage = lazy(() => import('../components/pages/LandingPage').then(m => ({ default: m.LandingPage })));
 const DashboardPage = lazy(() => import('../components/pages/DashboardPage/DashboardPage').then(m => ({ default: m.DashboardPage })));
 const ProfilePage = lazy(() => import('../components/pages/ProfilePage/ProfilePage').then(m => ({ default: m.ProfilePage })));
 const NotFoundPage = lazy(() => import('../components/pages/NotFoundPage/NotFoundPage').then(m => ({ default: m.NotFoundPage })));
@@ -64,6 +65,7 @@ export const AppRouter = () => {
   return (
     <Suspense fallback={<PageFallback />}>
       <IonRouterOutlet>
+        <Route exact path="/" component={LandingPage} />
         <GuestRoute exact path="/login" component={LoginPage} />
         <GuestRoute exact path="/register" component={RegisterPage} />
         <Route exact path="/auth/callback" component={OAuthCallbackPage} />
