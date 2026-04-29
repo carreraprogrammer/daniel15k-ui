@@ -1,29 +1,35 @@
 import { IonRouterOutlet } from '@ionic/react';
-import { lazy, Suspense, type ComponentType } from 'react';
-import { Redirect, Route } from 'react-router-dom';
+import type { ComponentType } from 'react';
+import { Redirect, Route, Switch, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { Spinner } from '../components/atoms/Spinner/Spinner';
+import { AppLayout } from '../components/templates/AppLayout';
+import { LoginPage } from '../components/pages/LoginPage/LoginPage';
+import { RegisterPage } from '../components/pages/RegisterPage/RegisterPage';
+import { LandingPage } from '../components/pages/LandingPage';
+import { DashboardContent } from '../components/pages/DashboardPage/DashboardPage';
+import { ProfileContent } from '../components/pages/ProfilePage/ProfilePage';
+import { NotFoundPage } from '../components/pages/NotFoundPage/NotFoundPage';
+import { OAuthCallbackPage } from '../components/pages/OAuthCallbackPage';
+import { TransactionsContent } from '../components/pages/TransactionsPage';
+import { DebtsContent } from '../components/pages/DebtsPage';
+import { PlannedExpensesContent } from '../components/pages/PlannedExpensesPage';
+import { RecurringObligationsContent } from '../components/pages/RecurringObligationsPage';
+import { BudgetsContent } from '../components/pages/BudgetsPage';
+import { SavingsGoalsContent } from '../components/pages/SavingsGoalsPage';
+import { QuickCapturePage } from '../components/pages/QuickCapturePage';
 
-const LoginPage = lazy(() => import('../components/pages/LoginPage/LoginPage').then(m => ({ default: m.LoginPage })));
-const RegisterPage = lazy(() => import('../components/pages/RegisterPage/RegisterPage').then(m => ({ default: m.RegisterPage })));
-const LandingPage = lazy(() => import('../components/pages/LandingPage').then(m => ({ default: m.LandingPage })));
-const DashboardPage = lazy(() => import('../components/pages/DashboardPage/DashboardPage').then(m => ({ default: m.DashboardPage })));
-const ProfilePage = lazy(() => import('../components/pages/ProfilePage/ProfilePage').then(m => ({ default: m.ProfilePage })));
-const NotFoundPage = lazy(() => import('../components/pages/NotFoundPage/NotFoundPage').then(m => ({ default: m.NotFoundPage })));
-const OAuthCallbackPage = lazy(() => import('../components/pages/OAuthCallbackPage').then(m => ({ default: m.OAuthCallbackPage })));
-const TransactionsPage = lazy(() => import('../components/pages/TransactionsPage').then(m => ({ default: m.TransactionsPage })));
-const DebtsPage = lazy(() => import('../components/pages/DebtsPage').then(m => ({ default: m.DebtsPage })));
-const PlannedExpensesPage = lazy(() => import('../components/pages/PlannedExpensesPage').then(m => ({ default: m.PlannedExpensesPage })));
-const RecurringObligationsPage = lazy(() => import('../components/pages/RecurringObligationsPage').then(m => ({ default: m.RecurringObligationsPage })));
-const BudgetsPage = lazy(() => import('../components/pages/BudgetsPage').then(m => ({ default: m.BudgetsPage })));
-const SavingsGoalsPage = lazy(() => import('../components/pages/SavingsGoalsPage').then(m => ({ default: m.SavingsGoalsPage })));
-const QuickCapturePage = lazy(() => import('../components/pages/QuickCapturePage').then(m => ({ default: m.QuickCapturePage })));
+const INTERNAL_ROUTES = [
+  { path: '/dashboard', title: 'Dashboard', component: DashboardContent },
+  { path: '/transactions', title: 'Transacciones', component: TransactionsContent },
+  { path: '/debts', title: 'Deudas', component: DebtsContent },
+  { path: '/planned-expenses', title: 'Planeados', component: PlannedExpensesContent },
+  { path: '/recurring', title: 'Recurrentes', component: RecurringObligationsContent },
+  { path: '/budgets', title: 'Presupuestos', component: BudgetsContent },
+  { path: '/savings-goals', title: 'Metas', component: SavingsGoalsContent },
+  { path: '/profile', title: 'Mi perfil', component: ProfileContent },
+] satisfies Array<{ path: string; title: string; component: ComponentType }>;
 
-const PageFallback = () => (
-  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', minHeight: '200px' }}>
-    <Spinner size="lg" />
-  </div>
-);
+const INTERNAL_PATHS = INTERNAL_ROUTES.map((route) => route.path);
 
 const ProtectedRoute = ({
   component: Component,
@@ -61,25 +67,42 @@ const GuestRoute = ({
   );
 };
 
+const InternalShell = () => {
+  const location = useLocation();
+  const activeRoute = INTERNAL_ROUTES.find((route) => route.path === location.pathname) ?? INTERNAL_ROUTES[0];
+
+  return (
+    <AppLayout title={activeRoute.title}>
+      <Switch>
+        {INTERNAL_ROUTES.map(({ path, component: Component }) => (
+          <Route key={path} exact path={path} component={Component} />
+        ))}
+      </Switch>
+    </AppLayout>
+  );
+};
+
+const ProtectedShellRoute = () => {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
+  return (
+    <Route
+      path={INTERNAL_PATHS}
+      render={() => (isAuthenticated ? <InternalShell /> : <Redirect to="/login" />)}
+    />
+  );
+};
+
 export const AppRouter = () => {
   return (
-    <Suspense fallback={<PageFallback />}>
-      <IonRouterOutlet>
-        <Route exact path="/" component={LandingPage} />
-        <GuestRoute exact path="/login" component={LoginPage} />
-        <GuestRoute exact path="/register" component={RegisterPage} />
-        <Route exact path="/auth/callback" component={OAuthCallbackPage} />
-        <ProtectedRoute exact path="/dashboard" component={DashboardPage} />
-        <ProtectedRoute exact path="/transactions" component={TransactionsPage} />
-        <ProtectedRoute exact path="/debts" component={DebtsPage} />
-        <ProtectedRoute exact path="/planned-expenses" component={PlannedExpensesPage} />
-        <ProtectedRoute exact path="/recurring" component={RecurringObligationsPage} />
-        <ProtectedRoute exact path="/budgets" component={BudgetsPage} />
-        <ProtectedRoute exact path="/savings-goals" component={SavingsGoalsPage} />
-        <ProtectedRoute exact path="/profile" component={ProfilePage} />
-        <ProtectedRoute exact path="/quick" component={QuickCapturePage} />
-        <Route component={NotFoundPage} />
-      </IonRouterOutlet>
-    </Suspense>
+    <IonRouterOutlet animated={false}>
+      <Route exact path="/" component={LandingPage} />
+      <GuestRoute exact path="/login" component={LoginPage} />
+      <GuestRoute exact path="/register" component={RegisterPage} />
+      <Route exact path="/auth/callback" component={OAuthCallbackPage} />
+      <ProtectedShellRoute />
+      <ProtectedRoute exact path="/quick" component={QuickCapturePage} />
+      <Route component={NotFoundPage} />
+    </IonRouterOutlet>
   );
 };

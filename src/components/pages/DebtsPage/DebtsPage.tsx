@@ -30,7 +30,7 @@ const initialFilters: DebtQueryParams = {
   sort_dir: 'desc',
 };
 
-export const DebtsPage = () => {
+export const DebtsContent = () => {
   const [debts, setDebts] = useState<Debt[]>([]);
   const [obligations, setObligations] = useState<RecurringObligation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -274,8 +274,7 @@ export const DebtsPage = () => {
   };
 
   return (
-    <AppLayout title="Deudas">
-      <IonContent className={styles.pageContent}>
+    <IonContent className={styles.pageContent}>
       <section className={`${styles.stack} ${!detailsOpen ? styles.stackFill : ''}`}>
         {!detailsOpen ? (
           <div className={styles.focusStage}>
@@ -527,7 +526,12 @@ export const DebtsPage = () => {
           </div>
         </section>
       </CrudModal>
-      </IonContent>
-    </AppLayout>
+    </IonContent>
   );
 };
+
+export const DebtsPage = () => (
+  <AppLayout title="Deudas">
+    <DebtsContent />
+  </AppLayout>
+);

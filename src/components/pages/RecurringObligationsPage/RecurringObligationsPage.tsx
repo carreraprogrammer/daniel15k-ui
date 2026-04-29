@@ -47,7 +47,7 @@ const initialIncomeFilters: IncomeSourceQueryParams = {
   sort_dir: 'asc',
 };
 
-export const RecurringObligationsPage = () => {
+export const RecurringObligationsContent = () => {
   const [obligations, setObligations] = useState<RecurringObligation[]>([]);
   const [debts, setDebts] = useState<Debt[]>([]);
   const [incomeSources, setIncomeSources] = useState<IncomeSource[]>([]);
@@ -271,8 +271,7 @@ export const RecurringObligationsPage = () => {
   };
 
   return (
-    <AppLayout title="Recurrentes">
-      <IonContent className={styles.pageContent}>
+    <IonContent className={styles.pageContent}>
       <section className={`${styles.stack} ${!detailsOpen && !loading && !error ? styles.stackFill : ''}`}>
         {!detailsOpen && !loading && !error ? (
           <div className={styles.focusStage}>
@@ -659,7 +658,12 @@ export const RecurringObligationsPage = () => {
         onCancel={() => setDeletingIncome(null)}
         onConfirm={() => void handleDeleteIncome()}
       />
-      </IonContent>
-    </AppLayout>
+    </IonContent>
   );
 };
+
+export const RecurringObligationsPage = () => (
+  <AppLayout title="Recurrentes">
+    <RecurringObligationsContent />
+  </AppLayout>
+);

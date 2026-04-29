@@ -47,7 +47,7 @@ const formToPayload = (form: GoalForm): SavingsGoalPayload => ({
   monthly_contribution: Number(form.monthly_contribution || 0),
 });
 
-export const SavingsGoalsPage = () => {
+export const SavingsGoalsContent = () => {
   const [goals, setGoals] = useState<SavingsGoal[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -121,8 +121,7 @@ export const SavingsGoalsPage = () => {
   };
 
   return (
-    <AppLayout title="Metas">
-      <IonContent className={pageStyles.pageContent}>
+    <IonContent className={pageStyles.pageContent}>
         <section className={pageStyles.stack}>
           <div className={pageStyles.focusStage}>
             <div className={`${pageStyles.focusCard} ${pageStyles.focusCardFull}`}>
@@ -248,7 +247,12 @@ export const SavingsGoalsPage = () => {
             </div>
           </form>
         </CrudModal>
-      </IonContent>
-    </AppLayout>
+    </IonContent>
   );
 };
+
+export const SavingsGoalsPage = () => (
+  <AppLayout title="Metas">
+    <SavingsGoalsContent />
+  </AppLayout>
+);

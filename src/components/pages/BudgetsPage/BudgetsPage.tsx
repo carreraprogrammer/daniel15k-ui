@@ -64,7 +64,7 @@ const initialFilters: BudgetQueryParams = {
 
 // ── Component ──────────────────────────────────────────────────────────────────
 
-export const BudgetsPage = () => {
+export const BudgetsContent = () => {
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [summary, setSummary] = useState<SummaryResponse | null>(null);
   const [currentPlan, setCurrentPlan] = useState<CurrentPlan | null>(null);
@@ -216,8 +216,7 @@ export const BudgetsPage = () => {
   // ── Render ──────────────────────────────────────────────────────────────────
 
   return (
-    <AppLayout title="Presupuestos">
-      <IonContent className={styles.pageContent}>
+    <IonContent className={styles.pageContent}>
         <section className={`${styles.stack} ${currentPlan || !detailsOpen ? styles.stackFill : ''}`}>
 
           {/* ── Active plan view (shown when there is a confirmed plan) ── */}
@@ -665,7 +664,12 @@ export const BudgetsPage = () => {
           onChangeSortDir={(sort_dir) => setFilters((current) => ({ ...current, sort_dir }))}
         />
 
-      </IonContent>
-    </AppLayout>
+    </IonContent>
   );
 };
+
+export const BudgetsPage = () => (
+  <AppLayout title="Presupuestos">
+    <BudgetsContent />
+  </AppLayout>
+);

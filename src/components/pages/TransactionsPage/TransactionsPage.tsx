@@ -21,7 +21,7 @@ import { formatCurrencyCompact, formatCurrencyFull } from '../../../utils/format
 import { resolveNamedIcon } from '../../organisms/BudgetWizard/iconRegistry';
 import styles from '../FinancePage.module.css';
 
-export const TransactionsPage = () => {
+export const TransactionsContent = () => {
   const [composerOpen, setComposerOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
   const [filtersVisible, setFiltersVisible] = useState(false);
@@ -208,7 +208,7 @@ export const TransactionsPage = () => {
   };
 
   return (
-    <AppLayout title="Transacciones">
+    <>
       <IonContent className={styles.pageContent}>
       <section className={`${styles.stack} ${!detailsOpen ? styles.stackFill : ''}`}>
         {!detailsOpen ? (
@@ -553,6 +553,12 @@ export const TransactionsPage = () => {
           }}
         />
       </CrudModal>
-    </AppLayout>
+    </>
   );
 };
+
+export const TransactionsPage = () => (
+  <AppLayout title="Transacciones">
+    <TransactionsContent />
+  </AppLayout>
+);

@@ -54,7 +54,7 @@ const MILESTONE_LABELS: Record<string, string> = {
 const formatMilestoneLabel = (code: string): string =>
   MILESTONE_LABELS[code] ?? `🏅 ${code.replace(/_/g, ' ')}`;
 
-export const DashboardPage = () => {
+export const DashboardContent = () => {
   const { summary, insight, debts, pending, creditCardPending, obligations, completeness, milestones, loading, error, reload } =
     useDashboardData();
   const history = useHistory();
@@ -139,8 +139,7 @@ export const DashboardPage = () => {
   }));
 
   return (
-    <AppLayout title="Dashboard">
-      <IonContent className={pageStyles.pageContent}>
+    <IonContent className={pageStyles.pageContent}>
         <section className={pageStyles.stack}>
 
           {loading ? <Spinner size="lg" /> : null}
@@ -549,7 +548,12 @@ export const DashboardPage = () => {
           ) : null}
 
         </section>
-      </IonContent>
-    </AppLayout>
+    </IonContent>
   );
 };
+
+export const DashboardPage = () => (
+  <AppLayout title="Dashboard">
+    <DashboardContent />
+  </AppLayout>
+);

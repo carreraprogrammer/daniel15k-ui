@@ -25,7 +25,7 @@ const STRATEGY_LABEL: Record<string, string> = {
   avalanche: 'Avalancha (mayor interés primero)',
 };
 
-export const ProfilePage = () => {
+export const ProfileContent = () => {
   const user    = useAuthStore((state) => state.user);
   const setUser = useAuthStore((state) => state.setUser);
   const { showError, showSuccess, toast } = useToast();
@@ -60,8 +60,7 @@ export const ProfilePage = () => {
   );
 
   return (
-    <AppLayout title="Mi perfil">
-      <IonContent className={styles.pageContent}>
+    <IonContent className={styles.pageContent}>
         <section className={styles.grid}>
 
           {/* ── Left: summary ── */}
@@ -147,7 +146,12 @@ export const ProfilePage = () => {
           </article>
 
         </section>
-      </IonContent>
-    </AppLayout>
+    </IonContent>
   );
 };
+
+export const ProfilePage = () => (
+  <AppLayout title="Mi perfil">
+    <ProfileContent />
+  </AppLayout>
+);

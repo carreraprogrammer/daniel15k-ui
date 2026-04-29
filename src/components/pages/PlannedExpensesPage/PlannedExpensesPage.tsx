@@ -40,7 +40,7 @@ const initialFilters: PlannedExpenseQueryParams = {
   sort_dir: 'asc',
 };
 
-export const PlannedExpensesPage = () => {
+export const PlannedExpensesContent = () => {
   const [plannedExpenses, setPlannedExpenses] = useState<PlannedExpense[]>([]);
   const [categories, setCategories] = useState<CategoryResource[]>([]);
   const [loading, setLoading] = useState(true);
@@ -143,8 +143,7 @@ export const PlannedExpensesPage = () => {
   };
 
   return (
-    <AppLayout title="Planeados">
-      <IonContent className={styles.pageContent}>
+    <IonContent className={styles.pageContent}>
         <section className={`${styles.stack} ${!detailsOpen ? styles.stackFill : ''}`}>
           {!detailsOpen ? (
             <div className={styles.focusStage}>
@@ -323,7 +322,12 @@ export const PlannedExpensesPage = () => {
             }}
           />
         </CrudModal>
-      </IonContent>
-    </AppLayout>
+    </IonContent>
   );
 };
+
+export const PlannedExpensesPage = () => (
+  <AppLayout title="Planeados">
+    <PlannedExpensesContent />
+  </AppLayout>
+);
