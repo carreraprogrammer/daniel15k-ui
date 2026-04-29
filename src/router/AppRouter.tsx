@@ -61,16 +61,9 @@ const GuestRoute = ({
 };
 
 export const AppRouter = () => {
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-
   return (
     <Suspense fallback={<PageFallback />}>
       <IonRouterOutlet>
-        <Route
-          exact
-          path="/"
-          render={() => <Redirect to={isAuthenticated ? '/dashboard' : '/login'} />}
-        />
         <GuestRoute exact path="/login" component={LoginPage} />
         <GuestRoute exact path="/register" component={RegisterPage} />
         <Route exact path="/auth/callback" component={OAuthCallbackPage} />
