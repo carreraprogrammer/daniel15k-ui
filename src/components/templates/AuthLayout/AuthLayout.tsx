@@ -36,9 +36,9 @@ export const AuthLayout = ({ title, children }: { title: string; children: React
             </div>
 
             <div className={styles.signalRow}>
-              <span className={styles.signalChip}>Dark glass</span>
-              <span className={styles.signalChip}>Glow controlado</span>
-              <span className={styles.signalChip}>Foco financiero</span>
+              <span className={styles.signalChip}>Presupuesto guiado</span>
+              <span className={styles.signalChip}>Burn rate claro</span>
+              <span className={styles.signalChip}>Decisiones con contexto</span>
             </div>
           </div>
         </section>

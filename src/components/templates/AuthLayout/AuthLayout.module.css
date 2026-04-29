@@ -1,3 +1,14 @@
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .authPage,
 .authContent {
   --background: transparent;
@@ -38,6 +49,7 @@
   box-shadow: var(--shadow-float);
   backdrop-filter: blur(16px) saturate(120%);
   overflow: hidden;
+  animation: fadeSlideUp 0.52s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .heroCard::before {
@@ -191,6 +203,7 @@
     rgba(7, 11, 20, 0.92);
   box-shadow: 0 32px 80px rgba(0, 0, 0, 0.42);
   backdrop-filter: blur(18px) saturate(120%);
+  animation: fadeSlideUp 0.52s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
 }
 
 @media (max-width: 960px) {
@@ -218,13 +231,15 @@
   }
 
   .description {
-    max-width: none;
-    font-size: 0.98rem;
-    line-height: 1.5;
+    display: none;
   }
 
   .metricRow {
-    grid-template-columns: 1fr;
+    display: none;
+  }
+
+  .signalRow {
+    display: none;
   }
 
   .panel {
@@ -268,11 +283,6 @@
     font-size: clamp(1.9rem, 8vw, 2.4rem);
   }
 
-  .description {
-    font-size: 0.92rem;
-    color: rgba(240, 240, 248, 0.66);
-  }
-
   .metricCard {
     padding: var(--space-4);
     border-radius: 20px;
@@ -284,5 +294,12 @@
 
   .panelBody {
     padding: 18px 16px 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .heroCard,
+  .panelBody {
+    animation: none;
   }
 }

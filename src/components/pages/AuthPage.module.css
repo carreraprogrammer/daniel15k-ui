@@ -50,10 +50,15 @@
   font-size: var(--text-sm);
   font-weight: var(--font-medium);
   width: fit-content;
+  justify-self: center;
+  transition: color var(--transition-base);
 }
 
 .link:hover {
   color: #fff;
+  text-decoration: underline;
+  text-decoration-color: rgba(243, 210, 122, 0.5);
+  text-underline-offset: 3px;
 }
 
 @media (max-width: 640px) {
