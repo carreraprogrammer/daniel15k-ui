@@ -71,9 +71,13 @@ export interface SummaryOverflowStatus {
   base_budget_income: number;
   confirmed_income: number;
   expected_variable_income: number;
+  realized_expected_variable_income: number;
   realized_overflow: number;
   remaining_expected_overflow: number;
-  status: 'waiting' | 'available';
+  safe_to_deploy: number;
+  deployable_overflow: number;
+  blocked_by_liquidity: boolean;
+  status: 'waiting' | 'available' | 'blocked_by_liquidity';
   suggested_destination?: {
     type: string;
     label?: string;

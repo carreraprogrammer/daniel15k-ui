@@ -193,7 +193,7 @@ export const DashboardContent = () => {
                   </div>
 
                   <div className={styles.heroMetric}>
-                    <span className={styles.metricLabel}>Para abonar este mes</span>
+                    <span className={styles.metricLabel}>Disponible para abonar hoy</span>
                     <span
                       className={[
                         styles.metricValue,
@@ -202,22 +202,28 @@ export const DashboardContent = () => {
                         .filter(Boolean)
                         .join(' ')}
                     >
-                      {liquidity ? formatCurrencyCompact(liquidity.deployable_this_cycle) : '—'}
+                      {summary.overflow_status != null
+                        ? formatCurrencyCompact(summary.overflow_status.deployable_overflow)
+                        : '—'}
                     </span>
                     <span className={styles.metricCaption}>
-                      si el ingreso variable llega según lo proyectado
+                      {summary.overflow_status?.status === 'waiting'
+                        ? 'Esperando que llegue el ingreso variable'
+                        : summary.overflow_status?.status === 'blocked_by_liquidity'
+                        ? 'Bloqueado — hay que cubrir obligaciones primero'
+                        : 'Ingreso sobre el plan base, listo para mover'}
                     </span>
                   </div>
                 </div>
 
-                {liquidity ? (
+                {liquidity && liquidity.pending_variable > 0 && liquidity.deployable_this_cycle > 0 ? (
                   <div className={styles.availableBand}>
-                    <span className={styles.availableBandLabel}>Potencial de abono al cierre del mes</span>
+                    <span className={styles.availableBandLabel}>Proyección si llega el ingreso pendiente</span>
                     <strong className={[styles.availableBandValue, isWarn ? styles.metricWarn : ''].filter(Boolean).join(' ')}>
                       {formatCurrencyCompact(liquidity.deployable_this_cycle)}
                     </strong>
                     <span className={styles.availableBandHint}>
-                      Si el ingreso variable llega y gastás dentro del plan. El ingreso de mayo cubre las obligaciones del próximo ciclo.
+                      Solo si el ingreso variable llega antes del cierre del mes y gastás dentro del plan.
                     </span>
                   </div>
                 ) : null}
