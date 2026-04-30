@@ -15,12 +15,13 @@ const statusLabels: Record<string, string> = {
 export interface TransactionSlidingCardProps {
   transaction: Transaction;
   category: CategoryLookupItem;
+  linkedLabel?: string | null;
   onEdit: (transaction: Transaction) => void;
   onDelete: (transaction: Transaction) => void;
   onLink?: (transaction: Transaction) => void;
 }
 
-export const TransactionSlidingCard = ({ transaction, category, onEdit, onDelete, onLink }: TransactionSlidingCardProps) => {
+export const TransactionSlidingCard = ({ transaction, category, linkedLabel, onEdit, onDelete, onLink }: TransactionSlidingCardProps) => {
   const slidingRef = useRef<HTMLIonItemSlidingElement | null>(null);
 
   const status   = transaction.attributes.status ?? 'confirmed';
@@ -76,6 +77,9 @@ export const TransactionSlidingCard = ({ transaction, category, onEdit, onDelete
               {transaction.attributes.product && transaction.attributes.date ? ' · ' : ''}
               {transaction.attributes.date}
             </span>
+            {linkedLabel ? (
+              <span className={styles.linked}>{linkedLabel}</span>
+            ) : null}
           </div>
 
           {/* ── Secondary info ── */}

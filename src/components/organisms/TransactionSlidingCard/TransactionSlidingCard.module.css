@@ -153,6 +153,15 @@
   text-overflow: ellipsis;
 }
 
+.linked {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  color: #8fe9dd;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* ── Secondary ──────────────────────────────────────────────────────────── */
 
 .secondary {

@@ -656,6 +656,11 @@ export const TransactionsContent = () => {
                 key={transaction.id}
                 transaction={transaction}
                 category={resolveTransactionCategory(transaction, categoryLookup)}
+                linkedLabel={
+                  transaction.attributes.transaction_type === 'income'
+                    ? (incomeSources.find((s) => String(s.id) === String(transaction.attributes.income_source_id))?.attributes.name ?? null)
+                    : (obligations.find((o) => String(o.id) === String(transaction.attributes.recurring_obligation_id))?.attributes.name ?? null)
+                }
                 onEdit={(nextTransaction) => {
                   setEditingTransaction(nextTransaction);
                   setComposerOpen(true);
@@ -663,7 +668,7 @@ export const TransactionsContent = () => {
                 onDelete={(selectedTransaction) => {
                   void requestDelete(selectedTransaction);
                 }}
-                onLink={(tx) => { void handleOpenLink(tx); }}
+                onLink={(tx) => { handleOpenLink(tx); }}
               />
             ))}
           </div>
