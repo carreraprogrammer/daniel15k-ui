@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { IonContent, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, useIonAlert, useIonToast } from '@ionic/react';
 import { addOutline, cardOutline } from 'ionicons/icons';
 import { AppLayout } from '../../templates/AppLayout';
@@ -35,6 +35,7 @@ export const TransactionsContent = () => {
   const [selectedLinkId, setSelectedLinkId] = useState('');
   const [linkError, setLinkError] = useState<string | null>(null);
   const [linkSubmitting, setLinkSubmitting] = useState(false);
+  const [linkOptionsLoading, setLinkOptionsLoading] = useState(false);
   const [presentAlert] = useIonAlert();
   const [presentToast] = useIonToast();
 
@@ -63,15 +64,25 @@ export const TransactionsContent = () => {
     deleteTransaction,
   } = useTransactionsPage();
 
-  useEffect(() => {
-    void Promise.all([
-      financeService.fetchIncomeSources({ active: 'all' }),
-      financeService.fetchRecurringObligations({ active: 'all', sort_by: 'due_day', sort_dir: 'asc' }),
-    ]).then(([srcRes, obRes]) => {
+  const loadLinkOptions = useCallback(async () => {
+    setLinkOptionsLoading(true);
+    try {
+      const [srcRes, obRes] = await Promise.all([
+        financeService.fetchIncomeSources({ active: 'all' }),
+        financeService.fetchRecurringObligations({ active: 'all', sort_by: 'due_day', sort_dir: 'asc' }),
+      ]);
       setIncomeSources(srcRes.data);
       setObligations(obRes.data);
-    });
+    } catch (err) {
+      setLinkError(err instanceof Error ? err.message : 'No fue posible cargar las relaciones disponibles.');
+    } finally {
+      setLinkOptionsLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    void loadLinkOptions();
+  }, [loadLinkOptions]);
 
   const latestTransaction = transactions[0] ?? null;
   const creditCardPendingPreview = creditCardPending.slice(0, 4);
@@ -225,14 +236,15 @@ export const TransactionsContent = () => {
     setLinkingTransaction(transaction);
     setSelectedLinkId(currentId ? String(currentId) : '');
     setLinkError(null);
+    if ((isIncome && incomeSources.length === 0) || (!isIncome && obligations.length === 0)) {
+      void loadLinkOptions();
+    }
   };
 
   const handleCloseLinkModal = () => {
     setLinkingTransaction(null);
     setSelectedLinkId('');
     setLinkError(null);
-    setIncomeSources([]);
-    setObligations([]);
   };
 
   const handleSaveLink = async () => {
@@ -648,7 +660,7 @@ export const TransactionsContent = () => {
                   value: src.id,
                 }))}
                 placeholder="Sin fuente vinculada"
-                hint="Solo aparecen las fuentes de ingreso registradas."
+                hint={linkOptionsLoading ? 'Cargando fuentes...' : 'Solo aparecen las fuentes de ingreso registradas.'}
               />
             ) : (
               <SelectInput
@@ -661,7 +673,7 @@ export const TransactionsContent = () => {
                   value: ob.id,
                 }))}
                 placeholder="Sin obligación vinculada"
-                hint="Solo aparecen las obligaciones recurrentes activas."
+                hint={linkOptionsLoading ? 'Cargando obligaciones...' : 'Solo aparecen las obligaciones recurrentes activas.'}
               />
             )}
 
