@@ -1,4 +1,4 @@
-import { useMemo, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { IonContent, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, useIonAlert, useIonToast } from '@ionic/react';
 import { addOutline, cardOutline } from 'ionicons/icons';
 import { AppLayout } from '../../templates/AppLayout';
@@ -62,6 +62,16 @@ export const TransactionsContent = () => {
     updateTransaction,
     deleteTransaction,
   } = useTransactionsPage();
+
+  useEffect(() => {
+    void Promise.all([
+      financeService.fetchIncomeSources({ active: 'all' }),
+      financeService.fetchRecurringObligations({ active: 'all', sort_by: 'due_day', sort_dir: 'asc' }),
+    ]).then(([srcRes, obRes]) => {
+      setIncomeSources(srcRes.data);
+      setObligations(obRes.data);
+    });
+  }, []);
 
   const latestTransaction = transactions[0] ?? null;
   const creditCardPendingPreview = creditCardPending.slice(0, 4);
@@ -207,29 +217,14 @@ export const TransactionsContent = () => {
     });
   };
 
-  const handleOpenLink = async (transaction: Transaction) => {
-    setLinkingTransaction(transaction);
-    setLinkError(null);
+  const handleOpenLink = (transaction: Transaction) => {
     const isIncome = transaction.attributes.transaction_type === 'income';
-    if (isIncome) {
-      const currentId = transaction.attributes.income_source_id;
-      setSelectedLinkId(currentId ? String(currentId) : '');
-      try {
-        const response = await financeService.fetchIncomeSources({ active: 'all' });
-        setIncomeSources(response.data);
-      } catch {
-        setLinkError('No fue posible cargar los ingresos.');
-      }
-    } else {
-      const currentId = transaction.attributes.recurring_obligation_id;
-      setSelectedLinkId(currentId ? String(currentId) : '');
-      try {
-        const response = await financeService.fetchRecurringObligations({ active: 'all', sort_by: 'due_day', sort_dir: 'asc' });
-        setObligations(response.data);
-      } catch {
-        setLinkError('No fue posible cargar las obligaciones.');
-      }
-    }
+    const currentId = isIncome
+      ? transaction.attributes.income_source_id
+      : transaction.attributes.recurring_obligation_id;
+    setLinkingTransaction(transaction);
+    setSelectedLinkId(currentId ? String(currentId) : '');
+    setLinkError(null);
   };
 
   const handleCloseLinkModal = () => {
