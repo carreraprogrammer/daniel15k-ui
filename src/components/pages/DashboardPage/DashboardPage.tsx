@@ -192,6 +192,14 @@ export const DashboardContent = () => {
                     ) : null}
                   </div>
 
+                  {/* Balance operable hoy — el número más útil del día a día */}
+                  <div className={styles.heroMetric}>
+                    <span className={styles.metricLabel}>Balance hoy</span>
+                    <span className={[styles.metricValue, isWarn ? styles.metricWarn : ''].filter(Boolean).join(' ')}>
+                      {formatCurrencyCompact(summary.balance.balance_confirmed)}
+                    </span>
+                    <span className={styles.metricCaption}>ingresos − gastos confirmados</span>
+                  </div>
                 </div>
 
                 {liquidity && liquidity.pending_variable > 0 && liquidity.deployable_this_cycle > 0 ? (
@@ -293,13 +301,6 @@ export const DashboardContent = () => {
               {snapshotOpen ? (
                 <div className={styles.snapshot}>
                   <div className={styles.kpiRow}>
-                    <div className={styles.kpi}>
-                      <span className={styles.kpiLabel}>Balance hoy</span>
-                      <strong className={styles.kpiValue}>
-                        {formatCurrencyCompact(summary.balance.balance_confirmed)}
-                      </strong>
-                      <span className={styles.kpiHint}>ingresos − gastos confirmados</span>
-                    </div>
                     <div className={styles.kpi}>
                       <span className={styles.kpiLabel}>Ingreso pendiente este mes</span>
                       <strong className={styles.kpiValue}>
