@@ -1,161 +1,212 @@
-import { IonContent, IonPage } from '@ionic/react';
+import { IonContent, IonIcon, IonPage } from '@ionic/react';
+import {
+  analyticsOutline,
+  cardOutline,
+  chatbubblesOutline,
+  checkmarkCircleOutline,
+  flashOutline,
+  lockClosedOutline,
+  pulseOutline,
+  shieldCheckmarkOutline,
+  trendingUpOutline,
+  walletOutline,
+} from 'ionicons/icons';
 import { Link } from 'react-router-dom';
 import { BrandMark } from '../../atoms/BrandMark';
 import { useAuthStore } from '../../../store/authStore';
 import styles from './LandingPage.module.css';
 
-const behaviorRows = [
-  { label: 'Comprometido', value: '$3.420.000', tone: 'committed', caption: 'Carga fija protegida' },
-  { label: 'Necesario', value: '$820.000', tone: 'necessary', caption: 'Mantenimiento del mes' },
-  { label: 'Discrecional', value: '$410.000', tone: 'discretionary', caption: 'Elecciones visibles' },
-  { label: 'Inversión', value: '$1.200.000', tone: 'investment', caption: 'Capital futuro' },
-];
-
-const features = [
+const intelligenceLayers = [
   {
-    title: 'Captura sin fricción',
-    text: 'Registra gastos, ingresos y deuda desde Telegram o desde la app sin convertir cada movimiento en una tarea administrativa.',
+    icon: walletOutline,
+    label: 'Caja viva',
+    text: 'Disponible real después de obligaciones, deuda y compras pendientes.',
   },
   {
-    title: 'Caja real, no ruido',
-    text: 'Separa compras con tarjeta, pagos efectivos y obligaciones estructurales para que el dinero disponible sea confiable.',
+    icon: analyticsOutline,
+    label: 'Lectura conductual',
+    text: 'Cada movimiento entra por intención: comprometido, necesario, inversión o elección.',
   },
   {
-    title: 'Agente con contexto',
-    text: 'El brain revisa deudas, recurrentes, presupuesto y flujo antes de responder o registrar una decisión financiera.',
+    icon: shieldCheckmarkOutline,
+    label: 'Relaciones protegidas',
+    text: 'Abonos, cuotas, tarjeta y recurrentes mantienen historial y saldo correcto.',
   },
 ];
 
-const workflow = [
-  ['01', 'Escribes lo que pasó', 'Un mensaje natural basta: gasto, abono, ingreso o corrección.'],
-  ['02', 'El sistema clasifica', 'Categoría conductual, medio de pago y relación estructural quedan resueltos.'],
-  ['03', 'Decides con números', 'El dashboard muestra cuánto puedes mover sin romper caja ni obligaciones.'],
+const signalRows = [
+  { label: 'Ingreso confirmado', value: '$7.500.000', tone: 'income', width: '100%' },
+  { label: 'Compromisos blindados', value: '$3.420.000', tone: 'committed', width: '72%' },
+  { label: 'Margen flexible', value: '$1.082.400', tone: 'investment', width: '46%' },
+];
+
+const systemSignals = [
+  ['Completeness graph', 'Sabe qué falta, qué está confirmado y qué dato ya envejeció.'],
+  ['Plan mensual ejecutable', 'El presupuesto deja de ser intención y se vuelve tablero de decisiones.'],
+  ['Agente contextual', 'Antes de responder, cruza deuda, pagos, ingreso, recurrentes y flujo.'],
 ];
 
 export const LandingPage = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const primaryPath = isAuthenticated ? '/dashboard' : '/login';
-  const primaryLabel = isAuthenticated ? 'Abrir dashboard' : 'Entrar a la app';
+  const primaryLabel = isAuthenticated ? 'Abrir dashboard' : 'Entrar a Daniel 15K';
+  const navLabel = isAuthenticated ? 'Dashboard' : 'Entrar';
 
   return (
     <IonPage className={styles.page}>
       <IonContent fullscreen className={styles.content}>
         <header className={styles.nav}>
           <Link className={styles.brand} to="/">
-            <BrandMark variant="principal" size="sm" />
+            <BrandMark variant="monoline" size="md" />
             <span className={styles.brandText}>
-              <span className={styles.brandKicker}>Daniel 15K</span>
+              <span>Daniel 15K</span>
               <strong>Ascent Finance</strong>
             </span>
           </Link>
 
           <nav className={styles.links} aria-label="Secciones">
-            <a href="#flujo">Flujo</a>
             <a href="#sistema">Sistema</a>
+            <a href="#inteligencia">Inteligencia</a>
             <a href="#agente">Agente</a>
           </nav>
 
           <Link className={styles.navButton} to={primaryPath}>
-            {primaryLabel}
+            {navLabel}
           </Link>
         </header>
 
-        <main>
+        <main className={styles.main}>
           <section className={styles.hero}>
+            <div className={styles.heroAmbient} aria-hidden="true">
+              <span className={styles.ambientRing} />
+              <span className={styles.ambientGrid} />
+            </div>
+
             <div className={styles.heroCopy}>
-              <p className={styles.eyebrow}>Finanzas personales operadas por agente</p>
-              <h1>Ascent Finance</h1>
+              <p className={styles.eyebrow}>Sistema financiero personal con agente</p>
+              <h1>Daniel 15K</h1>
               <p className={styles.heroText}>
-                Una superficie privada para ver caja disponible, deuda, compras pendientes y decisiones del mes sin perderte en planillas.
+                Un tablero privado que entiende caja, deuda, presupuesto vivo y decisiones diarias como partes del mismo sistema.
               </p>
-              <div className={styles.actions}>
+              <div className={styles.heroActions}>
                 <Link className={styles.primaryAction} to={primaryPath}>
                   {primaryLabel}
                 </Link>
                 <a className={styles.secondaryAction} href="#sistema">
-                  Ver sistema
+                  Ver arquitectura
                 </a>
               </div>
             </div>
 
-            <div className={styles.productSurface} aria-label="Vista resumida del producto">
-              <div className={styles.surfaceTop}>
-                <span>Hoy puedes mover</span>
-                <strong>$1.082.400</strong>
-                <small>Después de deudas, recurrentes y compras pendientes.</small>
-              </div>
-
-              <div className={styles.surfaceGrid}>
-                <section className={styles.metricPanel}>
-                  <span>Pool tarjeta crédito</span>
-                  <strong>$238.000</strong>
-                  <small>4 compras pendientes de pago</small>
-                </section>
-                <section className={styles.metricPanel}>
-                  <span>Deuda prioritaria</span>
-                  <strong>$7.327.886</strong>
-                  <small>TC LifeMiles #7248</small>
-                </section>
-              </div>
-
-              <div className={styles.behaviorPanel}>
-                <div className={styles.panelHeader}>
-                  <span>Lectura conductual</span>
-                  <small>Abril</small>
+            <div className={styles.livingSystem} aria-label="Sistema financiero vivo">
+              <div className={styles.orbitStage}>
+                <div className={`${styles.orbit} ${styles.orbitOuter}`} aria-hidden="true" />
+                <div className={`${styles.orbit} ${styles.orbitInner}`} aria-hidden="true" />
+                <div className={`${styles.node} ${styles.nodeIncome}`}>
+                  <IonIcon icon={walletOutline} />
+                  <span>Ingreso</span>
                 </div>
-                {behaviorRows.map((row) => (
-                  <div className={styles.behaviorRow} key={row.label}>
-                    <span className={`${styles.colorRail} ${styles[row.tone]}`} aria-hidden="true" />
-                    <div>
-                      <strong>{row.label}</strong>
-                      <small>{row.caption}</small>
+                <div className={`${styles.node} ${styles.nodeDebt}`}>
+                  <IonIcon icon={cardOutline} />
+                  <span>Deuda</span>
+                </div>
+                <div className={`${styles.node} ${styles.nodeAgent}`}>
+                  <IonIcon icon={pulseOutline} />
+                  <span>Brain</span>
+                </div>
+                <div className={styles.coreSignal}>
+                  <span>Hoy puedes mover</span>
+                  <strong>$1.08M</strong>
+                  <small>$1.082.400 disponibles sin romper caja ni obligaciones.</small>
+                </div>
+              </div>
+
+              <div className={styles.signalPanel}>
+                <div className={styles.panelTitle}>
+                  <IonIcon icon={flashOutline} />
+                  <span>Lectura de abril</span>
+                </div>
+                {signalRows.map((row) => (
+                  <div className={styles.signalRow} key={row.label}>
+                    <div className={styles.signalMeta}>
+                      <span>{row.label}</span>
+                      <strong>{row.value}</strong>
                     </div>
-                    <span className={styles.rowValue}>{row.value}</span>
+                    <div className={styles.track}>
+                      <span
+                        className={`${styles.fill} ${styles[row.tone]}`}
+                        style={{ width: row.width }}
+                      />
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
           </section>
 
-          <section className={styles.workflow} id="flujo">
-            {workflow.map(([step, title, text]) => (
-              <article className={styles.workflowItem} key={step}>
-                <span>{step}</span>
-                <h2>{title}</h2>
-                <p>{text}</p>
-              </article>
-            ))}
-          </section>
-
-          <section className={styles.systemSection} id="sistema">
-            <div className={styles.sectionIntro}>
-              <p className={styles.eyebrow}>Arquitectura de decisión</p>
-              <h2>El sistema separa movimientos diarios de obligaciones estructurales.</h2>
+          <section className={styles.systemBand} id="sistema">
+            <div className={styles.sectionHeader}>
+              <p className={styles.eyebrow}>No es un landing genérico</p>
+              <h2>La primera pantalla muestra el producto: un sistema que ordena decisiones, no una promesa suelta.</h2>
             </div>
-
-            <div className={styles.featureGrid}>
-              {features.map((feature) => (
-                <article className={styles.featureCard} key={feature.title}>
-                  <h3>{feature.title}</h3>
-                  <p>{feature.text}</p>
+            <div className={styles.signalGrid}>
+              {systemSignals.map(([title, text], index) => (
+                <article className={styles.signalCard} key={title}>
+                  <span className={styles.index}>0{index + 1}</span>
+                  <h3>{title}</h3>
+                  <p>{text}</p>
                 </article>
               ))}
             </div>
           </section>
 
-          <section className={styles.agentSection} id="agente">
+          <section className={styles.intelligenceBand} id="inteligencia">
+            <div className={styles.sectionHeader}>
+              <p className={styles.eyebrow}>Premium por profundidad</p>
+              <h2>La información se agrupa por capas de decisión.</h2>
+            </div>
+            <div className={styles.layerGrid}>
+              {intelligenceLayers.map((layer) => (
+                <article className={styles.layer} key={layer.label}>
+                  <IonIcon icon={layer.icon} />
+                  <h3>{layer.label}</h3>
+                  <p>{layer.text}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className={styles.agentBand} id="agente">
             <div className={styles.agentCopy}>
               <p className={styles.eyebrow}>Brain financiero</p>
-              <h2>El agente no solo registra: mantiene relaciones.</h2>
+              <h2>El agente registra con contexto y conserva las relaciones importantes.</h2>
               <p>
-                Una cuota del iPhone descuenta deuda; una compra diaria con tarjeta entra al pool; un abono queda en el historial correcto.
+                Un pago a tarjeta reduce deuda; una compra con crédito entra al pool pendiente; un gasto recurrente cambia la lectura del mes.
               </p>
             </div>
 
-            <div className={styles.chatPanel}>
-              <div className={styles.messageOut}>Se descontaron $221.000 de la TC LifeMiles por el iPhone.</div>
+            <div className={styles.conversation}>
+              <div className={styles.messageOut}>
+                Pagué $221.000 a LifeMiles por la cuota del iPhone.
+              </div>
               <div className={styles.messageIn}>
-                Registrado como abono a deuda. La transacción quedó ligada a TC LifeMiles #7248 y el saldo bajó a $7.327.886.
+                <IonIcon icon={checkmarkCircleOutline} />
+                <span>Registrado como abono a deuda. Saldo actualizado y transacción ligada al plan mensual.</span>
+              </div>
+              <div className={styles.securityLine}>
+                <IonIcon icon={lockClosedOutline} />
+                <span>Contexto privado, trazable y corregible.</span>
+              </div>
+              <div className={styles.trendLine}>
+                <IonIcon icon={trendingUpOutline} />
+                <span>Impacto en margen flexible: +$221.000 liberados del pool.</span>
+              </div>
+              <div className={styles.messageOut}>
+                ¿Puedo mover $450.000 a ahorro hoy?
+              </div>
+              <div className={styles.messageIn}>
+                <IonIcon icon={chatbubblesOutline} />
+                <span>Sí, pero dejaría $632.400 de margen. Mantén $180.000 para transporte y mercado.</span>
               </div>
             </div>
           </section>
