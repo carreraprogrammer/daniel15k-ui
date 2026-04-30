@@ -87,12 +87,16 @@ export interface SummaryOverflowStatus {
 export interface LiquidityProjection {
   confirmed_balance: number;
   pending_income: number;
+  pending_variable: number;
+  pending_base: number;
+  next_cycle_base: number;
   projected_eom_balance: number;
   next_cycle_obligations: number;
   credit_card_pending: number;
   protected_buffer: number;
   free_after_obligations: number;
   safe_to_deploy: number;
+  deployable_this_cycle: number;
   buffer_status: 'critical' | 'tight' | 'comfortable';
 }
 

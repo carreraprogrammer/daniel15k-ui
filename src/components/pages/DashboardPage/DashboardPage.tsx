@@ -193,7 +193,7 @@ export const DashboardContent = () => {
                   </div>
 
                   <div className={styles.heroMetric}>
-                    <span className={styles.metricLabel}>Disponible para mover</span>
+                    <span className={styles.metricLabel}>Para abonar este mes</span>
                     <span
                       className={[
                         styles.metricValue,
@@ -202,22 +202,22 @@ export const DashboardContent = () => {
                         .filter(Boolean)
                         .join(' ')}
                     >
-                      {liquidity ? formatCurrencyCompact(liquidity.safe_to_deploy) : '—'}
+                      {liquidity ? formatCurrencyCompact(liquidity.deployable_this_cycle) : '—'}
                     </span>
                     <span className={styles.metricCaption}>
-                      después de cubrir obligaciones
+                      si el ingreso variable llega según lo proyectado
                     </span>
                   </div>
                 </div>
 
                 {liquidity ? (
                   <div className={styles.availableBand}>
-                    <span className={styles.availableBandLabel}>Dinero disponible hoy para decidir</span>
+                    <span className={styles.availableBandLabel}>Potencial de abono al cierre del mes</span>
                     <strong className={[styles.availableBandValue, isWarn ? styles.metricWarn : ''].filter(Boolean).join(' ')}>
-                      {formatCurrencyCompact(liquidity.safe_to_deploy)}
+                      {formatCurrencyCompact(liquidity.deployable_this_cycle)}
                     </strong>
                     <span className={styles.availableBandHint}>
-                      Ya descuenta obligaciones del próximo ciclo y compras de crédito pendientes.
+                      Si el ingreso variable llega y gastás dentro del plan. El ingreso de mayo cubre las obligaciones del próximo ciclo.
                     </span>
                   </div>
                 ) : null}
