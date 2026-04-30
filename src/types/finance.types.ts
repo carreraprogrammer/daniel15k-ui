@@ -285,6 +285,8 @@ export interface Transaction {
     year?: number;
     payment_source?: PaymentSource | null;
     credit_card_status?: CreditCardStatus | null;
+    recurring_obligation_id?: number | null;
+    income_source_id?: number | null;
   };
   relationships?: {
     category?: {
@@ -360,6 +362,13 @@ export interface TransactionUpdatePayload {
   subcategory_id?: number | null;
   source?: 'manual';
   payment_source?: PaymentSource | null;
+  recurring_obligation_id?: number | null;
+  income_source_id?: number | null;
+}
+
+export interface TransactionLinkPayload {
+  recurring_obligation_id?: number | null;
+  income_source_id?: number | null;
 }
 
 export interface Debt {

@@ -1,0 +1,257 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+}
+
+/* ── Section ── */
+
+.section {
+  padding: 16px;
+}
+
+.section + .section {
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 12px;
+}
+
+.sectionTitle {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(231, 236, 244, 0.5);
+}
+
+.sectionMeta {
+  font-size: 12px;
+  color: rgba(231, 236, 244, 0.55);
+}
+
+/* ── Execution row ── */
+
+.row {
+  display: grid;
+  grid-template-columns: 20px 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.rowIcon {
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1;
+}
+
+.row_covered .rowIcon  { color: #1A9E4A; }
+.row_partial .rowIcon  { color: #D4732A; }
+.row_pending .rowIcon  { color: rgba(231, 236, 244, 0.35); }
+.row_unplanned .rowIcon { color: rgba(231, 236, 244, 0.35); }
+
+.rowInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.rowName {
+  font-size: 13px;
+  color: rgba(231, 236, 244, 0.9);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.row_covered .rowName {
+  color: rgba(231, 236, 244, 0.55);
+}
+
+.rowMeta {
+  font-size: 11px;
+  color: rgba(231, 236, 244, 0.35);
+}
+
+.rowAmounts {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  white-space: nowrap;
+}
+
+.rowDelivered {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(231, 236, 244, 0.85);
+}
+
+.row_covered .rowDelivered {
+  color: #1A9E4A;
+}
+
+.rowExpected {
+  font-size: 11px;
+  color: rgba(231, 236, 244, 0.35);
+}
+
+.linkBtn {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(100, 160, 255, 0.85);
+  background: none;
+  border: 1px solid rgba(100, 160, 255, 0.25);
+  border-radius: 6px;
+  padding: 3px 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.linkBtn:hover {
+  background: rgba(100, 160, 255, 0.1);
+  border-color: rgba(100, 160, 255, 0.4);
+}
+
+/* ── Modal overlay ── */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 0 env(safe-area-inset-bottom, 0);
+}
+
+.modal {
+  width: 100%;
+  max-width: 520px;
+  background: #121820;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px 20px 0 0;
+  padding: 24px 20px 20px;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modalTitle {
+  font-size: 15px;
+  color: rgba(231, 236, 244, 0.9);
+  margin: 0;
+}
+
+.modalTitle strong {
+  font-weight: 700;
+}
+
+.modalHint {
+  font-size: 12px;
+  color: rgba(231, 236, 244, 0.45);
+  margin: 0;
+}
+
+.modalEmpty {
+  font-size: 13px;
+  color: rgba(231, 236, 244, 0.45);
+  text-align: center;
+  padding: 24px 0;
+  margin: 0;
+}
+
+.modalList {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-height: 0;
+}
+
+.modalRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+  width: 100%;
+}
+
+.modalRow:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.modalRow:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.modalRowInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.modalRowConcept {
+  font-size: 13px;
+  color: rgba(231, 236, 244, 0.9);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.modalRowMeta {
+  font-size: 11px;
+  color: rgba(231, 236, 244, 0.4);
+}
+
+.modalRowAmount {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(231, 236, 244, 0.75);
+  white-space: nowrap;
+}
+
+.modalCancel {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(231, 236, 244, 0.5);
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  text-align: center;
+  width: 100%;
+}
+
+.modalCancel:hover {
+  color: rgba(231, 236, 244, 0.8);
+}

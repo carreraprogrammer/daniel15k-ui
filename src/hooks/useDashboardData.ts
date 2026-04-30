@@ -81,6 +81,7 @@ export const useDashboardData = () => {
     pending,
     creditCardPending,
     obligations,
+    monthTransactions,
     completeness,
     milestones,
     loading,

@@ -9,6 +9,7 @@ import { AppLayout } from '../../templates/AppLayout';
 import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
 import { ErrorState } from '../../molecules/ErrorState';
+import { ExecutionPanel } from './ExecutionPanel';
 import { useDashboardData } from '../../../hooks/useDashboardData';
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import pageStyles from '../FinancePage.module.css';
@@ -297,7 +298,16 @@ export const DashboardContent = () => {
                 ) : null}
               </div>
 
-              {/* ── ZONA 2 — Snapshot ─────────────────────────────────────── */}
+              {/* ── ZONA 2 — Ejecución del mes ───────────────────────────── */}
+              {summary.month_execution ? (
+                <ExecutionPanel
+                  monthExecution={summary.month_execution}
+                  period={summary.period}
+                  onReload={reload}
+                />
+              ) : null}
+
+              {/* ── ZONA 3 — Snapshot ─────────────────────────────────────── */}
               {snapshotOpen ? (
                 <div className={styles.snapshot}>
                   <div className={styles.kpiRow}>
@@ -321,6 +331,28 @@ export const DashboardContent = () => {
                         obligaciones + mínimos + discrecional
                       </span>
                     </div>
+                    {summary.overflow_status?.status === 'available' &&
+                     (summary.overflow_status.realized_overflow ?? 0) > 0 ? (
+                      <div className={styles.kpi}>
+                        <span className={styles.kpiLabel}>Desplegable hoy</span>
+                        <strong className={[styles.kpiValue, styles.kpiValueOk].join(' ')}>
+                          {formatCurrencyCompact(summary.overflow_status.deployable_overflow)}
+                        </strong>
+                        <span className={styles.kpiHint}>
+                          {summary.overflow_status.deployable_overflow < summary.overflow_status.realized_overflow
+                            ? `de ${formatCurrencyCompact(summary.overflow_status.realized_overflow)} sobre el plan — el resto ya se gastó`
+                            : 'ingreso extra sobre el plan base'}
+                        </span>
+                      </div>
+                    ) : summary.overflow_status?.status === 'blocked_by_liquidity' ? (
+                      <div className={styles.kpi}>
+                        <span className={styles.kpiLabel}>Desplegable hoy</span>
+                        <strong className={[styles.kpiValue, styles.kpiValueWarn].join(' ')}>$0</strong>
+                        <span className={styles.kpiHint}>
+                          hay overflow pero está reservado para el próximo ciclo
+                        </span>
+                      </div>
+                    ) : null}
                   </div>
 
                   {burnCategories.length > 0 ? (
@@ -419,7 +451,7 @@ export const DashboardContent = () => {
                 </div>
               ) : null}
 
-              {/* ── ZONA 3 — Detalle ──────────────────────────────────────── */}
+              {/* ── ZONA 4 — Detalle ──────────────────────────────────────── */}
               {detailOpen ? (
                 <div className={styles.detail}>
                   {pending.length > 0 ? (

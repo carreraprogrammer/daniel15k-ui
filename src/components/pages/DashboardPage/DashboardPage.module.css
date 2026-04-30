@@ -347,6 +347,10 @@
   color: #ffb28a;
 }
 
+.kpiValueOk {
+  color: #4ade80;
+}
+
 .kpiHint {
   color: rgba(231, 236, 244, 0.52);
   font-size: 0.76rem;

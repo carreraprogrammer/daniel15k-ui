@@ -31,6 +31,7 @@ import type {
   UserMilestone,
   Transaction,
   TransactionCreatePayload,
+  TransactionLinkPayload,
   TransactionQueryParams,
   TransactionUpdatePayload,
   WizardData,
@@ -268,6 +269,10 @@ export const financeService = {
   async updateTransaction(id: string, payload: TransactionUpdatePayload): Promise<Transaction> {
     const { data } = await api.patch(`/api/v1/transactions/${id}`, payload);
     return normalizeSingle<Transaction['attributes']>(data) as Transaction;
+  },
+
+  async linkTransaction(id: string, payload: TransactionLinkPayload): Promise<void> {
+    await api.patch(`/api/v1/transactions/${id}`, payload);
   },
 
   async deleteTransaction(id: string): Promise<void> {
