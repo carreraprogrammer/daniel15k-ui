@@ -203,7 +203,9 @@ export const DashboardContent = () => {
                   </div>
                 </div>
 
-                {liquidity && liquidity.pending_variable > 0 && liquidity.deployable_this_cycle > 0 ? (
+                {liquidity &&
+                 (liquidity.pending_variable + liquidity.pending_base) > 500_000 &&
+                 liquidity.deployable_this_cycle > liquidity.confirmed_balance - liquidity.protected_buffer ? (
                   <div className={styles.availableBand}>
                     <span className={styles.availableBandLabel}>Proyección si llega el ingreso pendiente</span>
                     <strong className={[styles.availableBandValue, isWarn ? styles.metricWarn : ''].filter(Boolean).join(' ')}>
