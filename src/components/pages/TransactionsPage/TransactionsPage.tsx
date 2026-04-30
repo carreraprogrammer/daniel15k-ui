@@ -14,11 +14,13 @@ import { AppliedFiltersBar } from '../../molecules/AppliedFiltersBar';
 import { SortSheet } from '../../molecules/SortSheet';
 import { TransactionComposer } from '../../organisms/TransactionComposer';
 import { TransactionSlidingCard } from '../../organisms/TransactionSlidingCard';
-import type { Transaction, TransactionCreatePayload, TransactionUpdatePayload } from '../../../types/finance.types';
+import type { IncomeSource, RecurringObligation, Transaction, TransactionCreatePayload, TransactionUpdatePayload } from '../../../types/finance.types';
 import { resolveTransactionCategory } from '../../../utils/financeBehavior';
 import { initialTransactionFilters, useTransactionsPage } from '../../../hooks/useTransactionsPage';
 import { formatCurrencyCompact, formatCurrencyFull } from '../../../utils/formatCurrency';
 import { resolveNamedIcon } from '../../organisms/BudgetWizard/iconRegistry';
+import { financeService } from '../../../services/financeService';
+import formStyles from '../../organisms/ComposerForm.module.css';
 import styles from '../FinancePage.module.css';
 
 export const TransactionsContent = () => {
@@ -27,6 +29,12 @@ export const TransactionsContent = () => {
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+  const [linkingTransaction, setLinkingTransaction] = useState<Transaction | null>(null);
+  const [incomeSources, setIncomeSources] = useState<IncomeSource[]>([]);
+  const [obligations, setObligations] = useState<RecurringObligation[]>([]);
+  const [selectedLinkId, setSelectedLinkId] = useState('');
+  const [linkError, setLinkError] = useState<string | null>(null);
+  const [linkSubmitting, setLinkSubmitting] = useState(false);
   const [presentAlert] = useIonAlert();
   const [presentToast] = useIonToast();
 
@@ -197,6 +205,58 @@ export const TransactionsContent = () => {
         },
       ],
     });
+  };
+
+  const handleOpenLink = async (transaction: Transaction) => {
+    setLinkingTransaction(transaction);
+    setLinkError(null);
+    const isIncome = transaction.attributes.transaction_type === 'income';
+    if (isIncome) {
+      const currentId = transaction.attributes.income_source_id;
+      setSelectedLinkId(currentId ? String(currentId) : '');
+      try {
+        const response = await financeService.fetchIncomeSources({ active: 'all' });
+        setIncomeSources(response.data);
+      } catch {
+        setLinkError('No fue posible cargar los ingresos.');
+      }
+    } else {
+      const currentId = transaction.attributes.recurring_obligation_id;
+      setSelectedLinkId(currentId ? String(currentId) : '');
+      try {
+        const response = await financeService.fetchRecurringObligations({ active: 'all', sort_by: 'due_day', sort_dir: 'asc' });
+        setObligations(response.data);
+      } catch {
+        setLinkError('No fue posible cargar las obligaciones.');
+      }
+    }
+  };
+
+  const handleCloseLinkModal = () => {
+    setLinkingTransaction(null);
+    setSelectedLinkId('');
+    setLinkError(null);
+    setIncomeSources([]);
+    setObligations([]);
+  };
+
+  const handleSaveLink = async () => {
+    if (!linkingTransaction) return;
+    setLinkSubmitting(true);
+    setLinkError(null);
+    const isIncome = linkingTransaction.attributes.transaction_type === 'income';
+    try {
+      await financeService.linkTransaction(linkingTransaction.id, isIncome
+        ? { income_source_id: selectedLinkId ? Number(selectedLinkId) : null }
+        : { recurring_obligation_id: selectedLinkId ? Number(selectedLinkId) : null },
+      );
+      handleCloseLinkModal();
+      void reload();
+    } catch (err) {
+      setLinkError(err instanceof Error ? err.message : 'No fue posible guardar el vínculo.');
+    } finally {
+      setLinkSubmitting(false);
+    }
   };
 
   const removeChip = (key: string) => {
@@ -496,6 +556,7 @@ export const TransactionsContent = () => {
                 onDelete={(selectedTransaction) => {
                   void requestDelete(selectedTransaction);
                 }}
+                onLink={(tx) => { void handleOpenLink(tx); }}
               />
             ))}
           </div>
@@ -552,6 +613,75 @@ export const TransactionsContent = () => {
             setEditingTransaction(null);
           }}
         />
+      </CrudModal>
+
+      <CrudModal
+        isOpen={Boolean(linkingTransaction)}
+        title={
+          linkingTransaction?.attributes.transaction_type === 'income'
+            ? `Vincular ingreso: ${linkingTransaction?.attributes.concept ?? ''}`
+            : `Vincular gasto: ${linkingTransaction?.attributes.concept ?? ''}`
+        }
+        subtitle={
+          linkingTransaction?.attributes.transaction_type === 'income'
+            ? 'Asocia este ingreso a una fuente para que el seguimiento del mes refleje la entrega.'
+            : 'Asocia este gasto a una obligación recurrente para que el seguimiento del mes refleje el cubrimiento.'
+        }
+        onClose={handleCloseLinkModal}
+      >
+        <section className={formStyles.panel}>
+          <div className={formStyles.section}>
+            <div className={formStyles.sectionHeader}>
+              <div>
+                <p className={formStyles.sectionEyebrow}>Relación estructural</p>
+                <h3 className={formStyles.sectionTitle}>
+                  {linkingTransaction?.attributes.transaction_type === 'income'
+                    ? 'Fuente de ingreso asociada'
+                    : 'Obligación recurrente asociada'}
+                </h3>
+              </div>
+            </div>
+
+            {linkingTransaction?.attributes.transaction_type === 'income' ? (
+              <SelectInput
+                name="tx-link-income-source"
+                label="Fuente de ingreso"
+                value={selectedLinkId}
+                onChange={(value) => setSelectedLinkId(String(value))}
+                options={incomeSources.map((src) => ({
+                  label: `${src.attributes.name} · ${formatCurrencyCompact(src.attributes.expected_amount)}`,
+                  value: src.id,
+                }))}
+                placeholder="Sin fuente vinculada"
+                hint="Solo aparecen las fuentes de ingreso registradas."
+              />
+            ) : (
+              <SelectInput
+                name="tx-link-obligation"
+                label="Obligación recurrente"
+                value={selectedLinkId}
+                onChange={(value) => setSelectedLinkId(String(value))}
+                options={obligations.map((ob) => ({
+                  label: `${ob.attributes.name} · ${formatCurrencyCompact(ob.attributes.amount)}${ob.attributes.due_day ? ` · Día ${ob.attributes.due_day}` : ''}`,
+                  value: ob.id,
+                }))}
+                placeholder="Sin obligación vinculada"
+                hint="Solo aparecen las obligaciones recurrentes activas."
+              />
+            )}
+
+            {linkError ? <p className={formStyles.error}>{linkError}</p> : null}
+
+            <div className={formStyles.actions}>
+              <Button label="Cancelar" variant="ghost" onClick={handleCloseLinkModal} />
+              <Button
+                label={selectedLinkId ? 'Guardar vínculo' : 'Guardar sin vínculo'}
+                onClick={() => void handleSaveLink()}
+                loading={linkSubmitting}
+              />
+            </div>
+          </div>
+        </section>
       </CrudModal>
     </>
   );
