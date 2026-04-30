@@ -193,6 +193,40 @@
   line-height: 1.45;
 }
 
+.monthCompareGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 16rem));
+  gap: var(--finance-space-lg);
+  align-items: end;
+}
+
+.monthCompareItem {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.monthCompareLabel {
+  color: rgba(231, 236, 244, 0.62);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.monthCompareValue {
+  color: #fff;
+  font-size: 2.45rem;
+  font-weight: 760;
+  letter-spacing: 0;
+  line-height: 0.95;
+  overflow-wrap: anywhere;
+}
+
+.monthCompareIncome {
+  color: #7ce0d3;
+}
+
 .focusMeta {
   display: flex;
   flex-wrap: wrap;
@@ -1035,6 +1069,11 @@
     grid-template-columns: 1fr;
   }
 
+  .monthCompareGrid {
+    grid-template-columns: 1fr;
+    gap: var(--finance-space-sm);
+  }
+
   .executionGrid {
     grid-template-columns: 1fr;
   }
@@ -1088,6 +1127,10 @@
 
   .focusValue {
     font-size: clamp(1.8rem, 9vw, 2.4rem);
+  }
+
+  .monthCompareValue {
+    font-size: 1.85rem;
   }
 
   .focusText {

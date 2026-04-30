@@ -156,6 +156,7 @@ export const TransactionsContent = () => {
     () => appliedChips.filter((chip) => chip.key !== 'q').length,
     [appliedChips],
   );
+  const monthBalance = metrics.incomeTotal - metrics.expenseTotal;
 
   const handleCreate = async (payload: TransactionCreatePayload) => {
     await createTransaction(payload);
@@ -286,10 +287,26 @@ export const TransactionsContent = () => {
               <div className={styles.focusGrid}>
                 <div className={styles.focusCopy}>
                   <span className={styles.eyebrow}>{monthName}</span>
-                  <div className={styles.focusValue}>
-                    {formatCurrencyCompact(metrics.expenseTotal)}
+                  <div className={styles.monthCompareGrid}>
+                    <div className={styles.monthCompareItem}>
+                      <span className={styles.monthCompareLabel}>Ingresos</span>
+                      <strong className={`${styles.monthCompareValue} ${styles.monthCompareIncome}`}>
+                        {formatCurrencyCompact(metrics.incomeTotal)}
+                      </strong>
+                    </div>
+                    <div className={styles.monthCompareItem}>
+                      <span className={styles.monthCompareLabel}>Gastos</span>
+                      <strong className={styles.monthCompareValue}>
+                        {formatCurrencyCompact(metrics.expenseTotal)}
+                      </strong>
+                    </div>
                   </div>
-                  <p className={styles.focusCaption}>gastados este mes</p>
+                  <p className={styles.focusCaption}>
+                    Balance del mes:{' '}
+                    <span className={monthBalance < 0 ? styles.statusWarn : styles.statusGood}>
+                      {formatCurrencyCompact(monthBalance)}
+                    </span>
+                  </p>
                 </div>
                 <div className={styles.focusMeta} style={{ alignSelf: 'start', justifyContent: 'flex-end' }}>
                   {metrics.pendingCount > 0 ? (
