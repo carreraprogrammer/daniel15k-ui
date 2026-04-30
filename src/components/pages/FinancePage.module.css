@@ -332,6 +332,76 @@
   line-height: 1.55;
 }
 
+.executionGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--finance-space-md);
+}
+
+.executionCard {
+  display: grid;
+  gap: var(--finance-space-sm);
+  min-width: 0;
+  padding: var(--finance-space-md);
+  border: 1px solid rgba(124, 224, 211, 0.14);
+  border-radius: 18px;
+  background:
+    linear-gradient(135deg, rgba(124, 224, 211, 0.07), rgba(255, 255, 255, 0.022)),
+    rgba(7, 12, 21, 0.36);
+}
+
+.executionHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--finance-space-md);
+  min-width: 0;
+}
+
+.executionLabel {
+  min-width: 0;
+  color: rgba(231, 236, 244, 0.76);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.executionPct {
+  flex: 0 0 auto;
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 760;
+}
+
+.executionTrack {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.executionFill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(124, 224, 211, 0.82), rgba(243, 210, 122, 0.82));
+}
+
+.executionAmount {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.executionHint {
+  margin: 0;
+  color: rgba(231, 236, 244, 0.58);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
 .creditPoolPanel {
   display: grid;
   gap: var(--finance-space-md);
@@ -962,6 +1032,10 @@
   }
 
   .focusGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .executionGrid {
     grid-template-columns: 1fr;
   }
 }

@@ -28,6 +28,7 @@ import type {
   RecurringObligation,
   RecurringObligationPayload,
   RecurringObligationQueryParams,
+  SummaryResponse,
 } from '../../../types/finance.types';
 import styles from '../FinancePage.module.css';
 
@@ -52,6 +53,7 @@ export const RecurringObligationsContent = () => {
   const [debts, setDebts] = useState<Debt[]>([]);
   const [incomeSources, setIncomeSources] = useState<IncomeSource[]>([]);
   const [categories, setCategories] = useState<CategoryResource[]>([]);
+  const [summary, setSummary] = useState<SummaryResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -75,16 +77,18 @@ export const RecurringObligationsContent = () => {
     setLoading(true);
     setError(null);
     try {
-      const [obligationsResponse, incomeResponse, categoriesResponse, debtsResponse] = await Promise.all([
+      const [obligationsResponse, incomeResponse, categoriesResponse, debtsResponse, summaryResponse] = await Promise.all([
         financeService.fetchRecurringObligations(obligationFilters),
         financeService.fetchIncomeSources(incomeFilters),
         financeService.fetchCategories(),
         financeService.fetchDebts({ status: 'active', sort_by: 'created_at', sort_dir: 'desc' }),
+        financeService.fetchSummary().catch(() => null),
       ]);
       setObligations(obligationsResponse.data);
       setIncomeSources(incomeResponse.data);
       setCategories(categoriesResponse.data);
       setDebts(debtsResponse.data);
+      setSummary(summaryResponse);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No fue posible cargar la operación recurrente.');
     } finally {
@@ -108,6 +112,9 @@ export const RecurringObligationsContent = () => {
   const coveragePct = metrics.obligationsTotal > 0
     ? Math.round((metrics.incomeTotal / metrics.obligationsTotal) * 100)
     : 0;
+  const monthExecution = summary?.month_execution;
+  const incomeExecution = monthExecution?.income;
+  const recurringExecution = monthExecution?.recurring_obligations;
 
   const handleCreate = async (payload: RecurringObligationPayload) => {
     setSubmitting(true);
@@ -320,6 +327,52 @@ export const RecurringObligationsContent = () => {
                   <p className={styles.focusSupportText}>
                     {formatCurrencyCompact(metrics.incomeTotal)} de ingresos recurrentes frente a {formatCurrencyCompact(metrics.obligationsTotal)} en obligaciones.
                   </p>
+                </section>
+              ) : null}
+
+              {incomeExecution || recurringExecution ? (
+                <section className={styles.executionGrid}>
+                  {incomeExecution ? (
+                    <article className={styles.executionCard}>
+                      <div className={styles.executionHeader}>
+                        <span className={styles.executionLabel}>Ingresos entregados</span>
+                        <strong className={styles.executionPct}>{incomeExecution.pct}%</strong>
+                      </div>
+                      <div className={styles.executionTrack}>
+                        <div
+                          className={styles.executionFill}
+                          style={{ width: `${Math.min(incomeExecution.pct, 100)}%` }}
+                        />
+                      </div>
+                      <p className={styles.executionAmount}>
+                        {formatCurrencyCompact(incomeExecution.delivered_expected_total)} de {formatCurrencyCompact(incomeExecution.expected_total)}
+                      </p>
+                      <p className={styles.executionHint}>
+                        {formatCurrencyCompact(incomeExecution.remaining_expected_total)} esperado por entregar
+                      </p>
+                    </article>
+                  ) : null}
+
+                  {recurringExecution ? (
+                    <article className={styles.executionCard}>
+                      <div className={styles.executionHeader}>
+                        <span className={styles.executionLabel}>Recurrentes cubiertos</span>
+                        <strong className={styles.executionPct}>{recurringExecution.pct}%</strong>
+                      </div>
+                      <div className={styles.executionTrack}>
+                        <div
+                          className={styles.executionFill}
+                          style={{ width: `${Math.min(recurringExecution.pct, 100)}%` }}
+                        />
+                      </div>
+                      <p className={styles.executionAmount}>
+                        {formatCurrencyCompact(recurringExecution.covered_total)} de {formatCurrencyCompact(recurringExecution.expected_total)}
+                      </p>
+                      <p className={styles.executionHint}>
+                        {recurringExecution.covered_count}/{recurringExecution.total_count} obligaciones completas · {formatCurrencyCompact(recurringExecution.remaining_total)} por cubrir
+                      </p>
+                    </article>
+                  ) : null}
                 </section>
               ) : null}
 

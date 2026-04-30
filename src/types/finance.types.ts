@@ -104,6 +104,72 @@ export interface LiquidityProjection {
   buffer_status: 'critical' | 'tight' | 'comfortable';
 }
 
+export type MonthExecutionStatus = 'pending' | 'partial' | 'covered' | 'unplanned';
+
+export interface MonthIncomeExecutionBucket {
+  expected_total: number;
+  delivered_total: number;
+  remaining_total: number;
+  pct: number;
+}
+
+export interface MonthIncomeExecutionSource {
+  id: number;
+  name: string;
+  classification?: 'base' | 'variable' | 'seasonal' | 'one_time' | string | null;
+  expected_amount: number;
+  delivered_amount: number;
+  remaining_amount: number;
+  pct: number;
+  status: MonthExecutionStatus;
+  expected_day_from?: number | null;
+  expected_day_to?: number | null;
+}
+
+export interface MonthIncomeExecution {
+  expected_total: number;
+  delivered_expected_total: number;
+  remaining_expected_total: number;
+  pct: number;
+  confirmed_income_total: number;
+  unlinked_confirmed_total: number;
+  base: MonthIncomeExecutionBucket;
+  variable: MonthIncomeExecutionBucket;
+  sources: MonthIncomeExecutionSource[];
+}
+
+export interface MonthRecurringObligationExecutionItem {
+  id: number;
+  name: string;
+  expected_amount: number;
+  covered_amount: number;
+  remaining_amount: number;
+  pct: number;
+  status: MonthExecutionStatus;
+  due_day?: number | null;
+  category_id?: number | null;
+  category_code?: string | null;
+  subcategory_id?: number | null;
+  subcategory_code?: string | null;
+  source_type?: string | null;
+  source_id?: number | null;
+}
+
+export interface MonthRecurringObligationExecution {
+  expected_total: number;
+  covered_total: number;
+  remaining_total: number;
+  pct: number;
+  covered_count: number;
+  total_count: number;
+  items: MonthRecurringObligationExecutionItem[];
+}
+
+export interface SummaryMonthExecution {
+  income: MonthIncomeExecution;
+  recurring_obligations: MonthRecurringObligationExecution;
+}
+
 export interface SummaryGoal {
   name: string;
   target_amount: number;
@@ -126,6 +192,7 @@ export interface SummaryResponse {
     year: number;
   };
   balance: SummaryBalance;
+  month_execution?: SummaryMonthExecution | null;
   burn_rate: SummaryBurnRate | null;
   debts: DebtSummary | null;
   monthly_plan?: SummaryMonthlyPlan | null;
