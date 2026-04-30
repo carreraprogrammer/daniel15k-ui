@@ -192,28 +192,6 @@ export const DashboardContent = () => {
                     ) : null}
                   </div>
 
-                  <div className={styles.heroMetric}>
-                    <span className={styles.metricLabel}>Disponible para abonar hoy</span>
-                    <span
-                      className={[
-                        styles.metricValue,
-                        isWarn ? styles.metricWarn : '',
-                      ]
-                        .filter(Boolean)
-                        .join(' ')}
-                    >
-                      {summary.overflow_status != null
-                        ? formatCurrencyCompact(summary.overflow_status.deployable_overflow)
-                        : '—'}
-                    </span>
-                    <span className={styles.metricCaption}>
-                      {summary.overflow_status?.status === 'waiting'
-                        ? 'Esperando que llegue el ingreso variable'
-                        : summary.overflow_status?.status === 'blocked_by_liquidity'
-                        ? 'Bloqueado — hay que cubrir obligaciones primero'
-                        : 'Ingreso sobre el plan base, listo para mover'}
-                    </span>
-                  </div>
                 </div>
 
                 {liquidity && liquidity.pending_variable > 0 && liquidity.deployable_this_cycle > 0 ? (
