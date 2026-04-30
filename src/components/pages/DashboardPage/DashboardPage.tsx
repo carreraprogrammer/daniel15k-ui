@@ -302,11 +302,7 @@ export const DashboardContent = () => {
 
               {/* ── ZONA 2 — Ejecución del mes ───────────────────────────── */}
               {summary.month_execution ? (
-                <ExecutionPanel
-                  monthExecution={summary.month_execution}
-                  period={summary.period}
-                  onReload={reload}
-                />
+                <ExecutionPanel monthExecution={summary.month_execution} />
               ) : null}
 
               {/* ── ZONA 3 — Snapshot ─────────────────────────────────────── */}

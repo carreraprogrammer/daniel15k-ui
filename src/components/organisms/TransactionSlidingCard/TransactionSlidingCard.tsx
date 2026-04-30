@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { IonButton, IonIcon, IonItem, IonItemOptions, IonItemSliding } from '@ionic/react';
-import { createOutline, trashOutline } from 'ionicons/icons';
+import { createOutline, linkOutline, trashOutline } from 'ionicons/icons';
 import type { CategoryLookupItem } from '../../../utils/financeBehavior';
 import type { Transaction } from '../../../types/finance.types';
 import { resolveNamedIcon } from '../BudgetWizard/iconRegistry';
@@ -17,9 +17,10 @@ export interface TransactionSlidingCardProps {
   category: CategoryLookupItem;
   onEdit: (transaction: Transaction) => void;
   onDelete: (transaction: Transaction) => void;
+  onLink?: (transaction: Transaction) => void;
 }
 
-export const TransactionSlidingCard = ({ transaction, category, onEdit, onDelete }: TransactionSlidingCardProps) => {
+export const TransactionSlidingCard = ({ transaction, category, onEdit, onDelete, onLink }: TransactionSlidingCardProps) => {
   const slidingRef = useRef<HTMLIonItemSlidingElement | null>(null);
 
   const status   = transaction.attributes.status ?? 'confirmed';
@@ -37,6 +38,11 @@ export const TransactionSlidingCard = ({ transaction, category, onEdit, onDelete
   const handleDelete = () => {
     void slidingRef.current?.close();
     onDelete(transaction);
+  };
+
+  const handleLink = () => {
+    void slidingRef.current?.close();
+    onLink?.(transaction);
   };
 
   return (
@@ -86,6 +92,11 @@ export const TransactionSlidingCard = ({ transaction, category, onEdit, onDelete
 
       <IonItemOptions side="end" className={styles.options}>
         <div className={styles.buttonsWrapper}>
+          {onLink ? (
+            <IonButton fill="clear" onClick={handleLink}>
+              <IonIcon icon={linkOutline} className={`${styles.buttonIcon} ${styles.linkIcon}`} />
+            </IonButton>
+          ) : null}
           <IonButton fill="clear" onClick={handleEdit}>
             <IonIcon icon={createOutline} className={`${styles.buttonIcon} ${styles.editIcon}`} />
           </IonButton>

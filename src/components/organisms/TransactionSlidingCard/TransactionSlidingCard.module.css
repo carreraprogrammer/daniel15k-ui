@@ -33,7 +33,8 @@
   font-size: 24px;
 }
 
-.editIcon  { color: var(--color-accent); }
+.linkIcon   { color: #8fe9dd; }
+.editIcon   { color: var(--color-accent); }
 .deleteIcon { color: #ff8f8f; }
 
 /* ── Card shell ─────────────────────────────────────────────────────────── */
