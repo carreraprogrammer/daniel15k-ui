@@ -287,6 +287,7 @@ export interface Transaction {
     credit_card_status?: CreditCardStatus | null;
     recurring_obligation_id?: number | null;
     income_source_id?: number | null;
+    metadata?: Record<string, unknown> | null;
   };
   relationships?: {
     category?: {
@@ -369,6 +370,7 @@ export interface TransactionUpdatePayload {
 export interface TransactionLinkPayload {
   recurring_obligation_id?: number | null;
   income_source_id?: number | null;
+  metadata?: Record<string, unknown>;
 }
 
 export interface Debt {

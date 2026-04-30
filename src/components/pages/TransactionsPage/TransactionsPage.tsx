@@ -23,6 +23,70 @@ import { financeService } from '../../../services/financeService';
 import formStyles from '../../organisms/ComposerForm.module.css';
 import styles from '../FinancePage.module.css';
 
+const periodFormatter = new Intl.DateTimeFormat('es-CO', { month: 'long', year: 'numeric' });
+
+const padMonth = (month: number) => String(month).padStart(2, '0');
+
+const periodKey = (year: number, month: number) => `${year}-${padMonth(month)}`;
+
+const shiftPeriod = (year: number, month: number, offset: number) => {
+  const date = new Date(year, month - 1 + offset, 1);
+  return { year: date.getFullYear(), month: date.getMonth() + 1 };
+};
+
+const parsePeriodKey = (value: string) => {
+  const match = value.match(/^(\d{4})-(\d{2})$/);
+  if (!match) return null;
+  return { year: Number(match[1]), month: Number(match[2]) };
+};
+
+const transactionPeriod = (transaction: Transaction) => {
+  if (transaction.attributes.year && transaction.attributes.month) {
+    return { year: transaction.attributes.year, month: transaction.attributes.month };
+  }
+
+  const rawDate = transaction.attributes.date;
+  const isoMatch = rawDate.match(/^(\d{4})-(\d{2})-\d{2}/);
+  if (isoMatch) return { year: Number(isoMatch[1]), month: Number(isoMatch[2]) };
+
+  const localMatch = rawDate.match(/^\d{2}\/(\d{2})\/(\d{4})/);
+  if (localMatch) return { year: Number(localMatch[2]), month: Number(localMatch[1]) };
+
+  const now = new Date();
+  return { year: now.getFullYear(), month: now.getMonth() + 1 };
+};
+
+const appliedPeriodFor = (transaction: Transaction) => {
+  const metadata = transaction.attributes.metadata ?? {};
+  const explicitPeriod = typeof metadata.applies_to_period === 'string' ? metadata.applies_to_period : null;
+  if (explicitPeriod?.match(/^\d{4}-\d{2}$/)) return explicitPeriod;
+
+  const explicitYear = Number(metadata.applies_to_year);
+  const explicitMonth = Number(metadata.applies_to_month);
+  if (explicitYear > 0 && explicitMonth > 0) return periodKey(explicitYear, explicitMonth);
+
+  const base = transactionPeriod(transaction);
+  return periodKey(base.year, base.month);
+};
+
+const periodOptionsFor = (transaction: Transaction | null) => {
+  if (!transaction) return [];
+
+  const base = transactionPeriod(transaction);
+  const keys = new Set<string>();
+  [0, 1, -1, 2].forEach((offset) => {
+    const period = shiftPeriod(base.year, base.month, offset);
+    keys.add(periodKey(period.year, period.month));
+  });
+  keys.add(appliedPeriodFor(transaction));
+
+  return Array.from(keys).map((key) => {
+    const parsed = parsePeriodKey(key)!;
+    const label = periodFormatter.format(new Date(parsed.year, parsed.month - 1, 1));
+    return { label: label.charAt(0).toUpperCase() + label.slice(1), value: key };
+  });
+};
+
 export const TransactionsContent = () => {
   const [composerOpen, setComposerOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
@@ -33,6 +97,7 @@ export const TransactionsContent = () => {
   const [incomeSources, setIncomeSources] = useState<IncomeSource[]>([]);
   const [obligations, setObligations] = useState<RecurringObligation[]>([]);
   const [selectedLinkId, setSelectedLinkId] = useState('');
+  const [selectedLinkPeriod, setSelectedLinkPeriod] = useState('');
   const [linkError, setLinkError] = useState<string | null>(null);
   const [linkSubmitting, setLinkSubmitting] = useState(false);
   const [linkOptionsLoading, setLinkOptionsLoading] = useState(false);
@@ -157,6 +222,7 @@ export const TransactionsContent = () => {
     [appliedChips],
   );
   const monthBalance = metrics.incomeTotal - metrics.expenseTotal;
+  const linkPeriodOptions = useMemo(() => periodOptionsFor(linkingTransaction), [linkingTransaction]);
 
   const handleCreate = async (payload: TransactionCreatePayload) => {
     await createTransaction(payload);
@@ -236,6 +302,7 @@ export const TransactionsContent = () => {
       : transaction.attributes.recurring_obligation_id;
     setLinkingTransaction(transaction);
     setSelectedLinkId(currentId ? String(currentId) : '');
+    setSelectedLinkPeriod(appliedPeriodFor(transaction));
     setLinkError(null);
     if ((isIncome && incomeSources.length === 0) || (!isIncome && obligations.length === 0)) {
       void loadLinkOptions();
@@ -245,6 +312,7 @@ export const TransactionsContent = () => {
   const handleCloseLinkModal = () => {
     setLinkingTransaction(null);
     setSelectedLinkId('');
+    setSelectedLinkPeriod('');
     setLinkError(null);
   };
 
@@ -253,10 +321,25 @@ export const TransactionsContent = () => {
     setLinkSubmitting(true);
     setLinkError(null);
     const isIncome = linkingTransaction.attributes.transaction_type === 'income';
+    const selectedPeriod = parsePeriodKey(selectedLinkPeriod) ?? transactionPeriod(linkingTransaction);
+    const metadata: Record<string, unknown> = {
+      ...(linkingTransaction.attributes.metadata ?? {}),
+    };
+
+    if (selectedLinkId) {
+      metadata.applies_to_period = periodKey(selectedPeriod.year, selectedPeriod.month);
+      metadata.applies_to_month = selectedPeriod.month;
+      metadata.applies_to_year = selectedPeriod.year;
+    } else {
+      delete metadata.applies_to_period;
+      delete metadata.applies_to_month;
+      delete metadata.applies_to_year;
+    }
+
     try {
       await financeService.linkTransaction(linkingTransaction.id, isIncome
-        ? { income_source_id: selectedLinkId ? Number(selectedLinkId) : null }
-        : { recurring_obligation_id: selectedLinkId ? Number(selectedLinkId) : null },
+        ? { income_source_id: selectedLinkId ? Number(selectedLinkId) : null, metadata }
+        : { recurring_obligation_id: selectedLinkId ? Number(selectedLinkId) : null, metadata },
       );
       handleCloseLinkModal();
       void reload();
@@ -693,6 +776,18 @@ export const TransactionsContent = () => {
                 hint={linkOptionsLoading ? 'Cargando obligaciones...' : 'Solo aparecen las obligaciones recurrentes activas.'}
               />
             )}
+
+            {linkingTransaction ? (
+              <SelectInput
+                name="tx-link-period"
+                label="Mes aplicado"
+                value={selectedLinkPeriod}
+                onChange={(value) => setSelectedLinkPeriod(String(value))}
+                options={linkPeriodOptions}
+                placeholder="Selecciona mes"
+                hint="Periodo financiero de esta relación."
+              />
+            ) : null}
 
             {linkError ? <p className={formStyles.error}>{linkError}</p> : null}
 
