@@ -223,7 +223,7 @@ export const DashboardContent = () => {
                       {formatCurrencyCompact(liquidity.deployable_this_cycle)}
                     </strong>
                     <span className={styles.availableBandHint}>
-                      Solo si el ingreso variable llega antes del cierre del mes y gastás dentro del plan.
+                      = balance actual ({formatCurrencyCompact(liquidity.confirmed_balance)}) + ingreso pendiente ({formatCurrencyCompact(liquidity.pending_variable + liquidity.pending_base)}) − colchón ({formatCurrencyCompact(liquidity.protected_buffer)})
                     </span>
                   </div>
                 ) : null}
@@ -323,9 +323,11 @@ export const DashboardContent = () => {
                       <span className={styles.kpiHint}>ingresos − gastos confirmados</span>
                     </div>
                     <div className={styles.kpi}>
-                      <span className={styles.kpiLabel}>Ingreso pendiente</span>
+                      <span className={styles.kpiLabel}>Ingreso pendiente este mes</span>
                       <strong className={styles.kpiValue}>
-                        {liquidity ? formatCurrencyCompact(liquidity.pending_income) : '—'}
+                        {liquidity
+                          ? formatCurrencyCompact(liquidity.pending_variable + liquidity.pending_base)
+                          : '—'}
                       </strong>
                       <span className={styles.kpiHint}>
                         variable aún no confirmado este mes
@@ -337,7 +339,7 @@ export const DashboardContent = () => {
                         {liquidity ? formatCurrencyCompact(liquidity.next_cycle_obligations) : '—'}
                       </strong>
                       <span className={styles.kpiHint}>
-                        obligaciones + mínimos de deuda
+                        obligaciones + mínimos + discrecional
                       </span>
                     </div>
                   </div>
