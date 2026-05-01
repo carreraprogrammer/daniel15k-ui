@@ -139,12 +139,13 @@ export const BudgetWizardModal = ({
 
   const categories = wizardData?.categories ?? [];
   const incomeNeedsSetup = wizardData?.income.needs_setup === true;
+  const hasVariableSources = wizardData?.income.sources.some((s) => s.is_variable) ?? false;
+  const firstStep = incomeNeedsSetup ? 0 : CATEGORY_STEP_FIRST;
 
-  // Always start at step 0 so the user can confirm/adjust the income base
-  // regardless of whether income sources are already configured.
+  // Start at firstStep when modal opens.
   useEffect(() => {
-    if (isOpen) setCurrentStep(0);
-  }, [isOpen]);
+    if (isOpen) setCurrentStep(firstStep);
+  }, [firstStep, isOpen]);
 
   const totalIncome = wizardData
     ? wizardData.income.sources.reduce((sum, source) => {
@@ -160,11 +161,10 @@ export const BudgetWizardModal = ({
     localSubcategories,
   );
 
-  const visibleStepCount = TOTAL_STEPS;
-  const canGoBack = currentStep > 0;
+  const visibleStepCount = incomeNeedsSetup ? TOTAL_STEPS : TOTAL_STEPS - 1;
+  const canGoBack = currentStep > firstStep;
   const isLastStep = currentStep === SUMMARY_STEP;
-  const currentStepNumber = currentStep + 1;
-  // Block Next on step 0 only when income still needs to be set up (no sources configured)
+  const currentStepNumber = currentStep - firstStep + 1;
   const nextDisabled = !wizardData || (currentStep === 0 && incomeNeedsSetup);
 
   // ── Navigation ─────────────────────────────────────────────────────────────
@@ -176,7 +176,7 @@ export const BudgetWizardModal = ({
   };
 
   const goBack = () => {
-    if (currentStep > 0) {
+    if (currentStep > firstStep) {
       setCurrentStep((s) => s - 1);
     }
   };
@@ -310,8 +310,8 @@ export const BudgetWizardModal = ({
                 </div>
 
                 <div className={styles.stage}>
-                  {/* Step 0: Income confirmation — always shown */}
-                  {currentStep === 0 && (
+                  {/* Step 0: Income setup — only when sources are not yet configured */}
+                  {currentStep === 0 && incomeNeedsSetup && (
                     <BudgetIncomeStep
                       wizardData={wizardData}
                       totalIncome={totalIncome}
@@ -335,20 +335,42 @@ export const BudgetWizardModal = ({
                     };
 
                     return (
-                      <BudgetCategoryStep
-                        category={mergedCategory}
-                        amounts={stepData[cat.code] ?? {}}
-                        totalIncome={totalIncome}
-                        alreadyCommitted={alreadyCommitted}
-                        onAmountChange={(subCode, amount) =>
-                          handleAmountChange(cat.code, subCode, amount)
-                        }
-                        onAddSubcategory={() => {
-                          setAddSubCategory(cat);
-                          setAddSubOpen(true);
-                        }}
-                        onOpenSourceOfTruth={handleSubcategorySourceNavigation}
-                      />
+                      <>
+                        {/* Compact variable-income toggle — only on first category step when income is already configured */}
+                        {currentStep === CATEGORY_STEP_FIRST && !incomeNeedsSetup && hasVariableSources && (
+                          <div className={styles.incomeModeToggle}>
+                            <span className={styles.incomeModeLabel}>Base del plan</span>
+                            <button
+                              type="button"
+                              className={`${styles.incomeModeBtn} ${!includeVariable ? styles.incomeModeBtnActive : ''}`}
+                              onClick={() => setIncludeVariable(false)}
+                            >
+                              Solo fijo
+                            </button>
+                            <button
+                              type="button"
+                              className={`${styles.incomeModeBtn} ${includeVariable ? styles.incomeModeBtnActive : ''}`}
+                              onClick={() => setIncludeVariable(true)}
+                            >
+                              Fijo + variable
+                            </button>
+                          </div>
+                        )}
+                        <BudgetCategoryStep
+                          category={mergedCategory}
+                          amounts={stepData[cat.code] ?? {}}
+                          totalIncome={totalIncome}
+                          alreadyCommitted={alreadyCommitted}
+                          onAmountChange={(subCode, amount) =>
+                            handleAmountChange(cat.code, subCode, amount)
+                          }
+                          onAddSubcategory={() => {
+                            setAddSubCategory(cat);
+                            setAddSubOpen(true);
+                          }}
+                          onOpenSourceOfTruth={handleSubcategorySourceNavigation}
+                        />
+                      </>
                     );
                   })()}
 
@@ -375,9 +397,7 @@ export const BudgetWizardModal = ({
                         ? 'Revisa el balance antes de guardar.'
                         : currentStep === 0 && incomeNeedsSetup
                           ? 'Primero registra tus ingresos estructurales.'
-                          : currentStep === 0
-                            ? 'Confirmá el ingreso base antes de distribuir el presupuesto.'
-                            : 'Avanza cuando este paso refleje tu mes real.'}
+                          : 'Avanza cuando este paso refleje tu mes real.'}
                     </span>
                   </div>
 
