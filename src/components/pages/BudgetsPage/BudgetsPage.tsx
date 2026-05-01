@@ -461,7 +461,7 @@ export const BudgetsContent = () => {
             </>
           ) : null}
 
-          {!loading && !error ? (
+          {detailsOpen && !loading && !error ? (
             <section className={styles.panel}>
               <div className={styles.detailStageHeader}>
                 <div className={styles.detailStageCopy}>
