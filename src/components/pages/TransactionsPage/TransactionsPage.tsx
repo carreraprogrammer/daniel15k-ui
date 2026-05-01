@@ -404,6 +404,17 @@ export const TransactionsContent = () => {
                       {formatCurrencyCompact(monthBalance)}
                     </span>
                   </p>
+                  {(summary?.balance.carryover_from_previous_month ?? 0) !== 0 && (
+                    <p className={styles.focusCaption} style={{ marginTop: '4px' }}>
+                      Disponible:{' '}
+                      <span className={styles.statusGood}>
+                        {formatCurrencyCompact(summary!.balance.net_balance)}
+                      </span>
+                      <span style={{ opacity: 0.5, fontSize: '0.75em', marginLeft: '4px' }}>
+                        (incl. excedente anterior)
+                      </span>
+                    </p>
+                  )}
                 </div>
                 <div className={styles.focusMeta} style={{ alignSelf: 'start', justifyContent: 'flex-end' }}>
                   {metrics.pendingCount > 0 ? (
