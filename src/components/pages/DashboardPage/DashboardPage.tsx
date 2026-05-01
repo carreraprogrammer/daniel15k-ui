@@ -197,9 +197,13 @@ export const DashboardContent = () => {
                   <div className={styles.heroMetric}>
                     <span className={styles.metricLabel}>Balance hoy</span>
                     <span className={[styles.metricValue, isWarn ? styles.metricWarn : ''].filter(Boolean).join(' ')}>
-                      {formatCurrencyCompact(summary.balance.balance_confirmed)}
+                      {formatCurrencyCompact(summary.balance.net_balance ?? summary.balance.balance_confirmed)}
                     </span>
-                    <span className={styles.metricCaption}>ingresos − gastos confirmados</span>
+                    <span className={styles.metricCaption}>
+                      {(summary.balance.carryover_from_previous_month ?? 0) > 0
+                        ? 'saldo acumulado (incluye excedente anterior)'
+                        : 'ingresos − gastos confirmados'}
+                    </span>
                   </div>
                 </div>
 

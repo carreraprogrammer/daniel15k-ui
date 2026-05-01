@@ -5,6 +5,8 @@ export interface SummaryBalance {
   expense_pending: number;
   balance_confirmed: number;
   balance_total: number;
+  carryover_from_previous_month: number;
+  net_balance: number;
 }
 
 export type TransactionType = 'expense' | 'income';
