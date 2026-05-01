@@ -21,6 +21,7 @@ import type {
   PlannedExpense,
   PlannedExpensePayload,
   PlannedExpenseQueryParams,
+  SinkingFund,
 } from '../../../types/finance.types';
 import styles from '../FinancePage.module.css';
 
@@ -40,8 +41,16 @@ const initialFilters: PlannedExpenseQueryParams = {
   sort_dir: 'asc',
 };
 
+type DetailTab = 'planned' | 'pockets';
+
+const formatDate = (value?: string | null) =>
+  value
+    ? new Intl.DateTimeFormat('es-CO', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(`${value}T00:00:00`))
+    : 'Sin fecha objetivo';
+
 export const PlannedExpensesContent = () => {
   const [plannedExpenses, setPlannedExpenses] = useState<PlannedExpense[]>([]);
+  const [sinkingFunds, setSinkingFunds] = useState<SinkingFund[]>([]);
   const [categories, setCategories] = useState<CategoryResource[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -52,17 +61,20 @@ export const PlannedExpensesContent = () => {
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [editingExpense, setEditingExpense] = useState<PlannedExpense | null>(null);
   const [filters, setFilters] = useState<PlannedExpenseQueryParams>(initialFilters);
+  const [activeTab, setActiveTab] = useState<DetailTab>('planned');
 
   const load = async () => {
     setLoading(true);
     setError(null);
     try {
-      const [expensesResponse, categoriesResponse] = await Promise.all([
+      const [expensesResponse, categoriesResponse, fundsResponse] = await Promise.all([
         financeService.fetchPlannedExpenses(filters),
         financeService.fetchCategories(),
+        financeService.getSinkingFunds(),
       ]);
       setPlannedExpenses(expensesResponse.data);
       setCategories(categoriesResponse.data);
+      setSinkingFunds(fundsResponse);
     } catch (nextError) {
       setError(nextError instanceof Error ? nextError.message : 'No fue posible cargar los gastos planeados.');
     } finally {
@@ -76,12 +88,16 @@ export const PlannedExpensesContent = () => {
 
   const metrics = useMemo(() => {
     const pending = plannedExpenses.filter((expense) => expense.attributes.status === 'planned');
+    const activeFunds = sinkingFunds.filter((fund) => fund.active);
     return {
       totalEstimated: pending.reduce((sum, expense) => sum + expense.attributes.amount_estimated, 0),
       plannedCount: pending.length,
       totalCount: plannedExpenses.length,
+      fundCount: activeFunds.length,
+      fundBalance: activeFunds.reduce((sum, fund) => sum + fund.current_balance, 0),
+      fundMonthly: activeFunds.reduce((sum, fund) => sum + fund.monthly_contribution, 0),
     };
-  }, [plannedExpenses]);
+  }, [plannedExpenses, sinkingFunds]);
 
   const categoryOptions = useMemo(
     () =>
@@ -91,6 +107,11 @@ export const PlannedExpensesContent = () => {
       })),
     [categories],
   );
+
+  const plannedById = useMemo(() => {
+    const entries = plannedExpenses.map((expense) => [Number(expense.id), expense] as const);
+    return new Map(entries);
+  }, [plannedExpenses]);
 
   const handleCreate = async (payload: PlannedExpensePayload) => {
     setSubmitting(true);
@@ -168,6 +189,7 @@ export const PlannedExpensesContent = () => {
                 <div className={styles.focusMeta}>
                   <span className={styles.focusBadge}>{metrics.totalCount} registrados</span>
                   <span className={styles.focusBadge}>{metrics.plannedCount} siguen abiertos</span>
+                  <span className={styles.focusBadge}>{metrics.fundCount} bolsillos activos</span>
                 </div>
 
                 <div className={styles.focusActions}>
@@ -190,72 +212,105 @@ export const PlannedExpensesContent = () => {
             <div className={styles.detailStage}>
               <div className={styles.detailStageHeader}>
                 <div className={styles.detailStageCopy}>
-                  <h3 className={styles.detailStageTitle}>Detalle de gastos planeados</h3>
-                  <p className={styles.detailStageText}>Aquí viven el listado, los filtros y la edición mínima de la planeación futura.</p>
+                  <h3 className={styles.detailStageTitle}>Detalle de planeados</h3>
+                  <p className={styles.detailStageText}>Aquí viven los gastos futuros y los bolsillos que los fondean mes a mes.</p>
                 </div>
-                <Button label="Volver al resumen" variant="ghost" onClick={() => setDetailsOpen(false)} />
+                <div className={styles.detailHeaderActions}>
+                  <div className={styles.detailTabBar} role="tablist" aria-label="Vista de planeados">
+                    <button
+                      type="button"
+                      className={`${styles.detailTabBtn} ${activeTab === 'planned' ? styles.detailTabBtnActive : ''}`}
+                      onClick={() => setActiveTab('planned')}
+                    >
+                      Planeados
+                    </button>
+                    <button
+                      type="button"
+                      className={`${styles.detailTabBtn} ${activeTab === 'pockets' ? styles.detailTabBtnActive : ''}`}
+                      onClick={() => setActiveTab('pockets')}
+                    >
+                      Bolsillos
+                    </button>
+                  </div>
+                  <Button label="Volver al resumen" variant="ghost" onClick={() => setDetailsOpen(false)} />
+                </div>
               </div>
-              <div className={styles.detailPanel}>
-                <ListToolbar
-                  searchLabel="Buscar gastos planeados"
-                  searchPlaceholder="SOAT, viaje, mantenimiento"
-                  searchValue={filters.q ?? ''}
-                  resultLabel={`${plannedExpenses.length} resultados`}
-                  activeFilterCount={activeFilterCount}
-                  onSearchChange={(q) => setFilters((current) => ({ ...current, q }))}
-                  onOpenSort={() => setSortOpen(true)}
-                  onOpenFilters={() => setFiltersVisible((visible) => !visible)}
-                />
+              {activeTab === 'planned' ? (
+                <div className={styles.detailPanel}>
+                  <ListToolbar
+                    searchLabel="Buscar gastos planeados"
+                    searchPlaceholder="SOAT, viaje, mantenimiento"
+                    searchValue={filters.q ?? ''}
+                    resultLabel={`${plannedExpenses.length} resultados`}
+                    activeFilterCount={activeFilterCount}
+                    onSearchChange={(q) => setFilters((current) => ({ ...current, q }))}
+                    onOpenSort={() => setSortOpen(true)}
+                    onOpenFilters={() => setFiltersVisible((visible) => !visible)}
+                  />
 
-                {filtersVisible ? (
-                  <div className={styles.filterPanel}>
-                    <div className={styles.inlineFilters}>
-                      <SelectInput
-                        name="planned-expenses-status"
-                        value={filters.status ?? ''}
-                        onChange={(status) => setFilters((current) => ({ ...current, status: String(status) }))}
-                        options={[
-                          { label: 'Planeado', value: 'planned' },
-                          { label: 'Ejecutado', value: 'executed' },
-                          { label: 'Cancelado', value: 'cancelled' },
-                        ]}
-                        placeholder="Todos los estados"
-                      />
-                      <SelectInput
-                        name="planned-expenses-type"
-                        value={filters.planning_type ?? ''}
-                        onChange={(planning_type) => setFilters((current) => ({ ...current, planning_type: String(planning_type) }))}
-                        options={[
-                          { label: 'Obligatorio puntual', value: 'mandatory_one_off' },
-                          { label: 'Mantenimiento', value: 'irregular_maintenance' },
-                          { label: 'Deseo', value: 'wish' },
-                          { label: 'Compra planeada', value: 'planned_purchase' },
-                        ]}
-                        placeholder="Todos los tipos"
-                      />
-                      <SelectInput
-                        name="planned-expenses-category"
-                        value={filters.category_id ?? ''}
-                        onChange={(category_id) => setFilters((current) => ({ ...current, category_id: String(category_id) }))}
-                        options={categoryOptions}
-                        placeholder="Todas las categorías"
-                      />
+                  {filtersVisible ? (
+                    <div className={styles.filterPanel}>
+                      <div className={styles.inlineFilters}>
+                        <SelectInput
+                          name="planned-expenses-status"
+                          value={filters.status ?? ''}
+                          onChange={(status) => setFilters((current) => ({ ...current, status: String(status) }))}
+                          options={[
+                            { label: 'Planeado', value: 'planned' },
+                            { label: 'Ejecutado', value: 'executed' },
+                            { label: 'Cancelado', value: 'cancelled' },
+                          ]}
+                          placeholder="Todos los estados"
+                        />
+                        <SelectInput
+                          name="planned-expenses-type"
+                          value={filters.planning_type ?? ''}
+                          onChange={(planning_type) => setFilters((current) => ({ ...current, planning_type: String(planning_type) }))}
+                          options={[
+                            { label: 'Obligatorio puntual', value: 'mandatory_one_off' },
+                            { label: 'Mantenimiento', value: 'irregular_maintenance' },
+                            { label: 'Deseo', value: 'wish' },
+                            { label: 'Compra planeada', value: 'planned_purchase' },
+                          ]}
+                          placeholder="Todos los tipos"
+                        />
+                        <SelectInput
+                          name="planned-expenses-category"
+                          value={filters.category_id ?? ''}
+                          onChange={(category_id) => setFilters((current) => ({ ...current, category_id: String(category_id) }))}
+                          options={categoryOptions}
+                          placeholder="Todas las categorías"
+                        />
+                      </div>
+                    </div>
+                  ) : null}
+
+                  <AppliedFiltersBar
+                    chips={appliedChips}
+                    onRemove={removeChip}
+                    onClearAll={() => setFilters(initialFilters)}
+                  />
+                </div>
+              ) : (
+                <div className={styles.detailPanel}>
+                  <div className={styles.metrics}>
+                    <div className={styles.metricCard}>
+                      <span className={styles.metricLabel}>Guardado</span>
+                      <strong className={styles.metricValue}>{formatCurrencyCompact(metrics.fundBalance)}</strong>
+                    </div>
+                    <div className={styles.metricCard}>
+                      <span className={styles.metricLabel}>Aporte mensual</span>
+                      <strong className={styles.metricValue}>{formatCurrencyCompact(metrics.fundMonthly)}</strong>
                     </div>
                   </div>
-                ) : null}
-
-                <AppliedFiltersBar
-                  chips={appliedChips}
-                  onRemove={removeChip}
-                  onClearAll={() => setFilters(initialFilters)}
-                />
-              </div>
+                </div>
+              )}
             </div>
           ) : null}
 
           {loading ? <Spinner size="lg" /> : null}
           {error ? <ErrorState message={error} onRetry={() => void load()} /> : null}
-          {!loading && !error && !plannedExpenses.length ? (
+          {!loading && !error && activeTab === 'planned' && !plannedExpenses.length ? (
             <EmptyState
               message={
                 activeFilterCount || filters.q
@@ -264,8 +319,11 @@ export const PlannedExpensesContent = () => {
               }
             />
           ) : null}
+          {!loading && !error && activeTab === 'pockets' && !sinkingFunds.length ? (
+            <EmptyState message="No hay bolsillos activos para gastos planeados." />
+          ) : null}
 
-          {!loading && !error && plannedExpenses.length && detailsOpen ? (
+          {!loading && !error && activeTab === 'planned' && plannedExpenses.length && detailsOpen ? (
             <div className={styles.list}>
               {plannedExpenses.map((plannedExpense) => (
                 <PlannedExpenseSlidingCard
@@ -280,6 +338,37 @@ export const PlannedExpensesContent = () => {
                   }}
                 />
               ))}
+            </div>
+          ) : null}
+          {!loading && !error && activeTab === 'pockets' && sinkingFunds.length && detailsOpen ? (
+            <div className={styles.list}>
+              {sinkingFunds.map((fund) => {
+                const target = fund.target_amount ?? 0;
+                const progress = target > 0 ? Math.min(Math.round((fund.current_balance / target) * 100), 100) : 0;
+                return (
+                  <article key={fund.id} className={styles.listItem}>
+                    <div className={styles.listPrimary}>
+                      <span className={styles.listLabel}>{fund.name}</span>
+                      <span className={styles.listMeta}>
+                        {formatCurrencyCompact(fund.current_balance)} de {target > 0 ? formatCurrencyCompact(target) : 'objetivo abierto'}
+                      </span>
+                      <div className={styles.progressTrack}>
+                        <div className={styles.progressFill} style={{ width: `${progress}%` }} />
+                      </div>
+                      <span className={styles.listMeta}>Aporte mensual {formatCurrencyCompact(fund.monthly_contribution)}</span>
+                    </div>
+                    <div className={styles.listSecondary}>
+                      <span className={styles.pill}>{progress}%</span>
+                      <span className={styles.listMeta}>Objetivo {formatDate(fund.target_date)}</span>
+                      {fund.planned_expense_id && plannedById.get(fund.planned_expense_id) ? (
+                        <span className={styles.listMeta}>
+                          Vinculado a {plannedById.get(fund.planned_expense_id)?.attributes.name}
+                        </span>
+                      ) : null}
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           ) : null}
         </section>

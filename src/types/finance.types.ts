@@ -508,8 +508,24 @@ export interface PlannedExpense {
     category_code?: string | null;
     subcategory_id?: number | null;
     subcategory_name?: string | null;
+    sinking_fund?: SinkingFund | null;
     notes?: string | null;
   };
+}
+
+export interface SinkingFund {
+  id: number;
+  name: string;
+  monthly_contribution: number;
+  target_amount?: number | null;
+  target_date?: string | null;
+  current_balance: number;
+  budget_category?: string | null;
+  planned_expense_id?: number | null;
+  notes?: string | null;
+  active: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface PlannedExpensePayload {

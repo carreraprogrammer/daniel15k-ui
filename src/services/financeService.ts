@@ -25,6 +25,7 @@ import type {
   RecurringObligationQueryParams,
   SavingsGoal,
   SavingsGoalPayload,
+  SinkingFund,
   SubcategoryCreateParams,
   SubcategoryCreated,
   SummaryResponse,
@@ -220,6 +221,11 @@ export const financeService = {
       },
     });
     return normalizeCollection<PlannedExpense['attributes']>(data) as JsonApiCollection<PlannedExpense>;
+  },
+
+  async getSinkingFunds(): Promise<SinkingFund[]> {
+    const { data } = await api.get('/api/v1/sinking_funds');
+    return ((data as { data?: SinkingFund[] }).data ?? []) as SinkingFund[];
   },
 
   async fetchCompleteness(month = defaultMonth, year = defaultYear): Promise<CompletenessResponse> {
