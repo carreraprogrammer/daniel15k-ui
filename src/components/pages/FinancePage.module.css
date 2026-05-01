@@ -561,10 +561,37 @@
 .detailStageHeader {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: var(--finance-space-lg);
   padding-top: var(--finance-space-xs);
+}
+
+.detailTabBar {
+  display: flex;
+  gap: var(--space-1, 4px);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: var(--radius-full, 999px);
+  padding: 3px;
+}
+
+.detailTabBtn {
+  padding: 6px 18px;
+  border-radius: var(--radius-full, 999px);
+  border: none;
+  background: transparent;
+  color: rgba(231, 236, 244, 0.55);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm, 0.875rem);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.detailTabBtnActive {
+  background: rgba(255, 255, 255, 0.09);
+  color: #fff;
 }
 
 .detailStageCopy {

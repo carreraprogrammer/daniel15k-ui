@@ -85,6 +85,7 @@ export const BudgetsContent = () => {
   const [wizardSaving, setWizardSaving] = useState(false);
   const [wizardError, setWizardError] = useState<string | null>(null);
   const [wizardSuccess, setWizardSuccess] = useState(false);
+  const [detailTab, setDetailTab] = useState<'detail' | 'history'>('detail');
 
   const [filters, setFilters] = useState<BudgetQueryParams>(initialFilters);
 
@@ -318,204 +319,186 @@ export const BudgetsContent = () => {
             </div>
           ) : null}
 
-          {/* ── Detail view ── */}
+          {/* ── Detail view with tabs ── */}
           {detailsOpen ? (
             <div className={styles.detailStage}>
-                <div className={styles.detailStageHeader}>
-                  <div className={styles.detailStageCopy}>
-                    <h3 className={styles.detailStageTitle}>Detalle del plan</h3>
-                    <p className={styles.detailStageText}>
-                    Seguimiento por categoría: cuánto definiste, cuánto llevas y cuánto te queda.
-                  </p>
-                  </div>
+              {/* Header row: tabs + back button */}
+              <div className={styles.detailStageHeader}>
+                <div className={styles.detailTabBar}>
+                  <button
+                    type="button"
+                    className={`${styles.detailTabBtn} ${detailTab === 'detail' ? styles.detailTabBtnActive : ''}`}
+                    onClick={() => setDetailTab('detail')}
+                  >
+                    Detalle
+                  </button>
+                  <button
+                    type="button"
+                    className={`${styles.detailTabBtn} ${detailTab === 'history' ? styles.detailTabBtnActive : ''}`}
+                    onClick={() => setDetailTab('history')}
+                  >
+                    Historial
+                  </button>
+                </div>
                 <Button label="← Volver" variant="ghost" onClick={() => setDetailsOpen(false)} />
               </div>
 
-              {/* Category breakdown from current plan */}
-              {currentPlan && Array.isArray(currentPlan.categories) && currentPlan.categories.length > 0 ? (
-                <div className={styles.detailPanel}>
-                  {currentPlan.categories.map((cat, index) => (
-                    <CategoryGroup
-                      key={cat.code ?? cat.name ?? 'unknown'}
-                      category={cat}
-                      defaultExpanded={index === 0}
-                    />
-                  ))}
-                </div>
+              {/* ── Tab: Detalle ── */}
+              {detailTab === 'detail' ? (
+                <>
+                  {currentPlan && Array.isArray(currentPlan.categories) && currentPlan.categories.length > 0 ? (
+                    <div className={styles.detailPanel}>
+                      {currentPlan.categories.map((cat, index) => (
+                        <CategoryGroup
+                          key={cat.code ?? cat.name ?? 'unknown'}
+                          category={cat}
+                          defaultExpanded={index === 0}
+                        />
+                      ))}
+                    </div>
+                  ) : null}
+
+                  {!currentPlan ? (
+                    <div className={styles.detailPanel}>
+                      <ListToolbar
+                        searchLabel="Buscar presupuestos"
+                        searchPlaceholder="Categoría"
+                        searchValue={filters.q ?? ''}
+                        resultLabel={`${budgets.length} resultados`}
+                        activeFilterCount={activeFilterCount}
+                        onSearchChange={(q) => setFilters((f) => ({ ...f, q }))}
+                        onOpenSort={() => setSortOpen(true)}
+                        onOpenFilters={() => setFiltersVisible((v) => !v)}
+                      />
+                      {filtersVisible ? (
+                        <div className={styles.filterPanel}>
+                          <section className={styles.filterComposer}>
+                            <div className={styles.filterComposerHeader}>
+                              <span className={styles.filterComposerLabel}>Categoría</span>
+                              <span className={styles.filterComposerHint}>Filtra el plan por la categoría que quieres revisar.</span>
+                            </div>
+                            <div className={styles.categoryRail}>
+                              {categoryFilters.map((category) => {
+                                const active = category.id === selectedCategoryId;
+                                return (
+                                  <button
+                                    key={category.id}
+                                    type="button"
+                                    className={[styles.categoryToken, active ? styles.categoryTokenActive : ''].filter(Boolean).join(' ')}
+                                    style={{ '--category-accent': category.color } as CSSProperties}
+                                    onClick={() => setFilters((f) => ({ ...f, category_id: active ? '' : category.id }))}
+                                  >
+                                    <span className={styles.categorySwatch} />
+                                    <span className={styles.categoryTokenText}>{category.name}</span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </section>
+                        </div>
+                      ) : null}
+                      <AppliedFiltersBar
+                        chips={chips}
+                        onRemove={(key) => setFilters((f) => ({ ...f, [key]: '' }))}
+                        onClearAll={() => setFilters(initialFilters)}
+                      />
+                    </div>
+                  ) : null}
+
+                  {!currentPlan ? (
+                    <>
+                      {loading ? <Spinner size="lg" /> : null}
+                      {error ? <ErrorState message={error} onRetry={() => void load()} /> : null}
+                      {!loading && !error && !budgets.length ? (
+                        <EmptyState message="No hay presupuestos definidos para el período actual." />
+                      ) : null}
+                      {!loading && !error && budgets.length ? (
+                        <div className={styles.tableWrap}>
+                          <table className={styles.table}>
+                            <thead>
+                              <tr>
+                                <th>Categoría</th>
+                                <th className={styles.numeric}>Límite</th>
+                                <th className={styles.numeric}>Gastado</th>
+                                <th className={styles.numeric}>Proyectado</th>
+                                <th>Estado</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {budgets.map((budget) => {
+                                const burnRate = summary?.burn_rate?.categories.find(
+                                  (item) => item.category_id === budget.attributes.category_id,
+                                );
+                                return (
+                                  <tr key={budget.id}>
+                                    <td>{budget.attributes.category_name ?? `Categoría ${budget.attributes.category_id}`}</td>
+                                    <td className={styles.numeric}>{formatCurrencyCompact(budget.attributes.amount_limit)}</td>
+                                    <td className={styles.numeric}>{formatCurrencyCompact(burnRate?.spent ?? 0)}</td>
+                                    <td className={styles.numeric}>{formatCurrencyCompact(burnRate?.projected ?? 0)}</td>
+                                    <td className={burnRate?.on_track === false ? styles.statusWarn : styles.statusGood}>
+                                      {burnRate?.on_track === false ? 'Fuera de rango' : 'En rango'}
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      ) : null}
+                    </>
+                  ) : null}
+                </>
               ) : null}
-              {!currentPlan ? <div className={styles.detailPanel}>
-                <ListToolbar
-                  searchLabel="Buscar presupuestos"
-                  searchPlaceholder="Categoría"
-                  searchValue={filters.q ?? ''}
-                  resultLabel={`${budgets.length} resultados`}
-                  activeFilterCount={activeFilterCount}
-                  onSearchChange={(q) => {
-                    const next = { ...filters, q };
-                    setFilters(next);
-                  }}
-                  onOpenSort={() => setSortOpen(true)}
-                  onOpenFilters={() => setFiltersVisible((visible) => !visible)}
-                />
 
-                {filtersVisible ? (
-                  <div className={styles.filterPanel}>
-                    <section className={styles.filterComposer}>
-                      <div className={styles.filterComposerHeader}>
-                        <span className={styles.filterComposerLabel}>Categoría</span>
-                        <span className={styles.filterComposerHint}>Filtra el plan por la categoría que quieres revisar.</span>
-                      </div>
+              {/* ── Tab: Historial ── */}
+              {detailTab === 'history' ? (
+                <section className={styles.panel}>
+                  {planHistory.length ? (
+                    <div className={styles.list}>
+                      {planHistory.map((plan) => {
+                        const plannedIncome = Number(plan.base_budget_income ?? 0) + Number(plan.expected_variable_income ?? 0);
+                        const actualIncome = Number(plan.execution_snapshot?.income_actual ?? plan.income_actual ?? 0);
+                        const plannedExpense = plannedExpenseTotal(plan);
+                        const actualExpense = Number(plan.execution_snapshot?.expense_actual ?? plan.expense_actual ?? 0);
+                        const closed = Boolean(plan.closed_at);
+                        const pendingInherited = plan.status === 'draft' && Boolean(plan.assumptions?.inherited_from);
 
-                      <div className={styles.categoryRail}>
-                        {categoryFilters.map((category) => {
-                          const active = category.id === selectedCategoryId;
-                          return (
-                            <button
-                              key={category.id}
-                              type="button"
-                              className={[styles.categoryToken, active ? styles.categoryTokenActive : ''].filter(Boolean).join(' ')}
-                              style={{ '--category-accent': category.color } as CSSProperties}
-                              onClick={() =>
-                                setFilters((current) => ({
-                                  ...current,
-                                  category_id: active ? '' : category.id,
-                                }))
-                              }
-                            >
-                              <span className={styles.categorySwatch} />
-                              <span className={styles.categoryTokenText}>{category.name}</span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </section>
-                  </div>
-                ) : null}
-
-                <AppliedFiltersBar
-                  chips={chips}
-                  onRemove={(key) => {
-                    const next = { ...filters, [key]: '' };
-                    setFilters(next);
-                  }}
-                  onClearAll={() => {
-                    setFilters(initialFilters);
-                  }}
-                />
-              </div> : null}
-            </div>
-          ) : null}
-
-          {detailsOpen && !currentPlan ? (
-            <>
-              {loading ? <Spinner size="lg" /> : null}
-              {error ? <ErrorState message={error} onRetry={() => void load()} /> : null}
-              {!loading && !error && !budgets.length ? (
-                <EmptyState message="No hay presupuestos definidos para el período actual." />
-              ) : null}
-
-              {!loading && !error && budgets.length ? (
-                <div className={styles.tableWrap}>
-                  <table className={styles.table}>
-                    <thead>
-                      <tr>
-                        <th>Categoría</th>
-                        <th className={styles.numeric}>Límite</th>
-                        <th className={styles.numeric}>Gastado</th>
-                        <th className={styles.numeric}>Proyectado</th>
-                        <th>Estado</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {budgets.map((budget) => {
-                        const burnRate = summary?.burn_rate?.categories.find(
-                          (item) => item.category_id === budget.attributes.category_id,
-                        );
                         return (
-                          <tr key={budget.id}>
-                            <td>
-                              {budget.attributes.category_name ??
-                                `Categoría ${budget.attributes.category_id}`}
-                            </td>
-                            <td className={styles.numeric}>
-                              {formatCurrencyCompact(budget.attributes.amount_limit)}
-                            </td>
-                            <td className={styles.numeric}>{formatCurrencyCompact(burnRate?.spent ?? 0)}</td>
-                            <td className={styles.numeric}>
-                              {formatCurrencyCompact(burnRate?.projected ?? 0)}
-                            </td>
-                            <td
-                              className={
-                                burnRate?.on_track === false ? styles.statusWarn : styles.statusGood
-                              }
-                            >
-                              {burnRate?.on_track === false ? 'Fuera de rango' : 'En rango'}
-                            </td>
-                          </tr>
+                          <article key={plan.id} className={styles.listItem}>
+                            <div className={styles.listPrimary}>
+                              <span className={styles.listLabel}>{formatPlanPeriod(plan)}</span>
+                              <span className={styles.listMeta}>
+                                Ingreso planeado {formatCurrencyCompact(plannedIncome)}
+                                {closed ? ` vs real ${formatCurrencyCompact(actualIncome)}` : ''}
+                              </span>
+                              <span className={styles.listMeta}>
+                                Gasto planeado {formatCurrencyCompact(plannedExpense)}
+                                {closed ? ` vs real ${formatCurrencyCompact(actualExpense)}` : ''}
+                              </span>
+                            </div>
+                            <div className={styles.listSecondary}>
+                              <span className={styles.pill}>{planStatusLabel(plan)}</span>
+                              {pendingInherited ? <span className={styles.listMeta}>Heredado del mes anterior</span> : null}
+                              {plan.status === 'confirmed' && !plan.closed_at ? (
+                                <Button
+                                  label={closingPlanId === plan.id ? 'Cerrando…' : 'Cerrar mes'}
+                                  variant="ghost"
+                                  size="sm"
+                                  disabled={closingPlanId === plan.id}
+                                  onClick={() => void handleCloseMonth(plan.id)}
+                                />
+                              ) : null}
+                            </div>
+                          </article>
                         );
                       })}
-                    </tbody>
-                  </table>
-                </div>
+                    </div>
+                  ) : (
+                    <EmptyState message="Todavía no hay planes mensuales en el historial." />
+                  )}
+                </section>
               ) : null}
-            </>
-          ) : null}
-
-          {detailsOpen && !loading && !error ? (
-            <section className={styles.panel}>
-              <div className={styles.detailStageHeader}>
-                <div className={styles.detailStageCopy}>
-                  <h3 className={styles.detailStageTitle}>Historial de planes</h3>
-                  <p className={styles.detailStageText}>
-                    Revisa planes anteriores, cierres mensuales y borradores heredados pendientes de confirmar.
-                  </p>
-                </div>
-              </div>
-
-              {planHistory.length ? (
-                <div className={styles.list}>
-                  {planHistory.map((plan) => {
-                    const plannedIncome = Number(plan.base_budget_income ?? 0) + Number(plan.expected_variable_income ?? 0);
-                    const actualIncome = Number(plan.execution_snapshot?.income_actual ?? plan.income_actual ?? 0);
-                    const plannedExpense = plannedExpenseTotal(plan);
-                    const actualExpense = Number(plan.execution_snapshot?.expense_actual ?? plan.expense_actual ?? 0);
-                    const closed = Boolean(plan.closed_at);
-                    const pendingInherited = plan.status === 'draft' && Boolean(plan.assumptions?.inherited_from);
-
-                    return (
-                      <article key={plan.id} className={styles.listItem}>
-                        <div className={styles.listPrimary}>
-                          <span className={styles.listLabel}>{formatPlanPeriod(plan)}</span>
-                          <span className={styles.listMeta}>
-                            Ingreso planeado {formatCurrencyCompact(plannedIncome)}
-                            {closed ? ` vs real ${formatCurrencyCompact(actualIncome)}` : ''}
-                          </span>
-                          <span className={styles.listMeta}>
-                            Gasto planeado {formatCurrencyCompact(plannedExpense)}
-                            {closed ? ` vs real ${formatCurrencyCompact(actualExpense)}` : ''}
-                          </span>
-                        </div>
-                        <div className={styles.listSecondary}>
-                          <span className={styles.pill}>{planStatusLabel(plan)}</span>
-                          {pendingInherited ? <span className={styles.listMeta}>Heredado del mes anterior</span> : null}
-                          {plan.status === 'confirmed' && !plan.closed_at ? (
-                            <Button
-                              label={closingPlanId === plan.id ? 'Cerrando…' : 'Cerrar mes'}
-                              variant="ghost"
-                              size="sm"
-                              disabled={closingPlanId === plan.id}
-                              onClick={() => void handleCloseMonth(plan.id)}
-                            />
-                          ) : null}
-                        </div>
-                      </article>
-                    );
-                  })}
-                </div>
-              ) : (
-                <EmptyState message="Todavía no hay planes mensuales en el historial." />
-              )}
-            </section>
+            </div>
           ) : null}
         </section>
 
