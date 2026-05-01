@@ -14,7 +14,7 @@ import { AppliedFiltersBar } from '../../molecules/AppliedFiltersBar';
 import { SortSheet } from '../../molecules/SortSheet';
 import { TransactionComposer } from '../../organisms/TransactionComposer';
 import { TransactionSlidingCard } from '../../organisms/TransactionSlidingCard';
-import type { IncomeSource, RecurringObligation, Transaction, TransactionCreatePayload, TransactionUpdatePayload } from '../../../types/finance.types';
+import type { IncomeSource, RecurringObligation, SinkingFund, Transaction, TransactionCreatePayload, TransactionUpdatePayload } from '../../../types/finance.types';
 import { resolveTransactionCategory } from '../../../utils/financeBehavior';
 import { initialTransactionFilters, useTransactionsPage } from '../../../hooks/useTransactionsPage';
 import { formatCurrencyCompact, formatCurrencyFull } from '../../../utils/formatCurrency';
@@ -87,6 +87,8 @@ const periodOptionsFor = (transaction: Transaction | null) => {
   });
 };
 
+type ExpenseLinkKind = 'recurring_obligation' | 'sinking_fund';
+
 export const TransactionsContent = () => {
   const [composerOpen, setComposerOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
@@ -96,6 +98,8 @@ export const TransactionsContent = () => {
   const [linkingTransaction, setLinkingTransaction] = useState<Transaction | null>(null);
   const [incomeSources, setIncomeSources] = useState<IncomeSource[]>([]);
   const [obligations, setObligations] = useState<RecurringObligation[]>([]);
+  const [sinkingFunds, setSinkingFunds] = useState<SinkingFund[]>([]);
+  const [expenseLinkKind, setExpenseLinkKind] = useState<ExpenseLinkKind>('recurring_obligation');
   const [selectedLinkId, setSelectedLinkId] = useState('');
   const [selectedLinkPeriod, setSelectedLinkPeriod] = useState('');
   const [linkError, setLinkError] = useState<string | null>(null);
@@ -134,12 +138,14 @@ export const TransactionsContent = () => {
   const loadLinkOptions = useCallback(async () => {
     setLinkOptionsLoading(true);
     try {
-      const [srcRes, obRes] = await Promise.all([
+      const [srcRes, obRes, fundsRes] = await Promise.all([
         financeService.fetchIncomeSources({ active: 'all' }),
         financeService.fetchRecurringObligations({ active: 'all', sort_by: 'due_day', sort_dir: 'asc' }),
+        financeService.getSinkingFunds(),
       ]);
       setIncomeSources(srcRes.data);
       setObligations(obRes.data);
+      setSinkingFunds(fundsRes);
     } catch (err) {
       setLinkError(err instanceof Error ? err.message : 'No fue posible cargar las relaciones disponibles.');
     } finally {
@@ -301,14 +307,23 @@ export const TransactionsContent = () => {
 
   const handleOpenLink = (transaction: Transaction) => {
     const isIncome = transaction.attributes.transaction_type === 'income';
+    const nextExpenseLinkKind: ExpenseLinkKind = transaction.attributes.sinking_fund_id
+      ? 'sinking_fund'
+      : 'recurring_obligation';
     const currentId = isIncome
       ? transaction.attributes.income_source_id
-      : transaction.attributes.recurring_obligation_id;
+      : nextExpenseLinkKind === 'sinking_fund'
+        ? transaction.attributes.sinking_fund_id
+        : transaction.attributes.recurring_obligation_id;
     setLinkingTransaction(transaction);
+    setExpenseLinkKind(nextExpenseLinkKind);
     setSelectedLinkId(currentId ? String(currentId) : '');
     setSelectedLinkPeriod(appliedPeriodFor(transaction));
     setLinkError(null);
-    if ((isIncome && incomeSources.length === 0) || (!isIncome && obligations.length === 0)) {
+    if (
+      (isIncome && incomeSources.length === 0) ||
+      (!isIncome && (obligations.length === 0 || sinkingFunds.length === 0))
+    ) {
       void loadLinkOptions();
     }
   };
@@ -341,10 +356,20 @@ export const TransactionsContent = () => {
     }
 
     try {
-      await financeService.linkTransaction(linkingTransaction.id, isIncome
+      const payload = isIncome
         ? { income_source_id: selectedLinkId ? Number(selectedLinkId) : null, metadata }
-        : { recurring_obligation_id: selectedLinkId ? Number(selectedLinkId) : null, metadata },
-      );
+        : expenseLinkKind === 'sinking_fund'
+          ? {
+              sinking_fund_id: selectedLinkId ? Number(selectedLinkId) : null,
+              recurring_obligation_id: null,
+              metadata,
+            }
+          : {
+              recurring_obligation_id: selectedLinkId ? Number(selectedLinkId) : null,
+              sinking_fund_id: null,
+              metadata,
+            };
+      await financeService.linkTransaction(linkingTransaction.id, payload);
       handleCloseLinkModal();
       void reload();
     } catch (err) {
@@ -694,7 +719,9 @@ export const TransactionsContent = () => {
                 linkedLabel={
                   transaction.attributes.transaction_type === 'income'
                     ? (incomeSources.find((s) => String(s.id) === String(transaction.attributes.income_source_id))?.attributes.name ?? null)
-                    : (obligations.find((o) => String(o.id) === String(transaction.attributes.recurring_obligation_id))?.attributes.name ?? null)
+                    : transaction.attributes.sinking_fund_id
+                      ? (sinkingFunds.find((f) => String(f.id) === String(transaction.attributes.sinking_fund_id))?.name ?? null)
+                      : (obligations.find((o) => String(o.id) === String(transaction.attributes.recurring_obligation_id))?.attributes.name ?? null)
                 }
                 onEdit={(nextTransaction) => {
                   setEditingTransaction(nextTransaction);
@@ -772,7 +799,7 @@ export const TransactionsContent = () => {
         subtitle={
           linkingTransaction?.attributes.transaction_type === 'income'
             ? 'Asocia este ingreso a una fuente para que el seguimiento del mes refleje la entrega.'
-            : 'Asocia este gasto a una obligación recurrente para que el seguimiento del mes refleje el cubrimiento.'
+            : 'Asocia este gasto a una obligación o a un bolsillo para que el seguimiento del mes refleje el destino real.'
         }
         onClose={handleCloseLinkModal}
       >
@@ -784,7 +811,9 @@ export const TransactionsContent = () => {
                 <h3 className={formStyles.sectionTitle}>
                   {linkingTransaction?.attributes.transaction_type === 'income'
                     ? 'Fuente de ingreso asociada'
-                    : 'Obligación recurrente asociada'}
+                    : expenseLinkKind === 'sinking_fund'
+                      ? 'Bolsillo asociado'
+                      : 'Obligación recurrente asociada'}
                 </h3>
               </div>
             </div>
@@ -803,18 +832,48 @@ export const TransactionsContent = () => {
                 hint={linkOptionsLoading ? 'Cargando fuentes...' : 'Solo aparecen las fuentes de ingreso registradas.'}
               />
             ) : (
-              <SelectInput
-                name="tx-link-obligation"
-                label="Obligación recurrente"
-                value={selectedLinkId}
-                onChange={(value) => setSelectedLinkId(String(value))}
-                options={obligations.map((ob) => ({
-                  label: `${ob.attributes.name} · ${formatCurrencyCompact(ob.attributes.amount)}${ob.attributes.due_day ? ` · Día ${ob.attributes.due_day}` : ''}`,
-                  value: ob.id,
-                }))}
-                placeholder="Sin obligación vinculada"
-                hint={linkOptionsLoading ? 'Cargando obligaciones...' : 'Solo aparecen las obligaciones recurrentes activas.'}
-              />
+              <>
+                <SelectInput
+                  name="tx-link-kind"
+                  label="Tipo de vínculo"
+                  value={expenseLinkKind}
+                  onChange={(value) => {
+                    setExpenseLinkKind(String(value) as ExpenseLinkKind);
+                    setSelectedLinkId('');
+                  }}
+                  options={[
+                    { label: 'Obligación recurrente', value: 'recurring_obligation' },
+                    { label: 'Bolsillo', value: 'sinking_fund' },
+                  ]}
+                />
+                {expenseLinkKind === 'sinking_fund' ? (
+                  <SelectInput
+                    name="tx-link-sinking-fund"
+                    label="Bolsillo"
+                    value={selectedLinkId}
+                    onChange={(value) => setSelectedLinkId(String(value))}
+                    options={sinkingFunds.map((fund) => ({
+                      label: `${fund.name} · ${formatCurrencyCompact(fund.monthly_contribution)}/mes`,
+                      value: fund.id,
+                    }))}
+                    placeholder="Sin bolsillo vinculado"
+                    hint={linkOptionsLoading ? 'Cargando bolsillos...' : 'Solo aparecen los bolsillos activos.'}
+                  />
+                ) : (
+                  <SelectInput
+                    name="tx-link-obligation"
+                    label="Obligación recurrente"
+                    value={selectedLinkId}
+                    onChange={(value) => setSelectedLinkId(String(value))}
+                    options={obligations.map((ob) => ({
+                      label: `${ob.attributes.name} · ${formatCurrencyCompact(ob.attributes.amount)}${ob.attributes.due_day ? ` · Día ${ob.attributes.due_day}` : ''}`,
+                      value: ob.id,
+                    }))}
+                    placeholder="Sin obligación vinculada"
+                    hint={linkOptionsLoading ? 'Cargando obligaciones...' : 'Solo aparecen las obligaciones recurrentes activas.'}
+                  />
+                )}
+              </>
             )}
 
             {linkingTransaction ? (

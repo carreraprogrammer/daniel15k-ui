@@ -287,8 +287,10 @@ export interface Transaction {
     year?: number;
     payment_source?: PaymentSource | null;
     credit_card_status?: CreditCardStatus | null;
+    debt_id?: number | null;
     recurring_obligation_id?: number | null;
     income_source_id?: number | null;
+    sinking_fund_id?: number | null;
     metadata?: Record<string, unknown> | null;
   };
   relationships?: {
@@ -299,6 +301,30 @@ export interface Transaction {
       } | null;
     };
     subcategory?: {
+      data?: {
+        id: string;
+        type?: string;
+      } | null;
+    };
+    debt?: {
+      data?: {
+        id: string;
+        type?: string;
+      } | null;
+    };
+    recurring_obligation?: {
+      data?: {
+        id: string;
+        type?: string;
+      } | null;
+    };
+    income_source?: {
+      data?: {
+        id: string;
+        type?: string;
+      } | null;
+    };
+    sinking_fund?: {
       data?: {
         id: string;
         type?: string;
@@ -353,6 +379,7 @@ export interface TransactionCreatePayload {
   subcategory_id?: number | null;
   source?: 'manual';
   payment_source?: PaymentSource | null;
+  sinking_fund_id?: number | null;
 }
 
 export interface TransactionUpdatePayload {
@@ -367,11 +394,13 @@ export interface TransactionUpdatePayload {
   payment_source?: PaymentSource | null;
   recurring_obligation_id?: number | null;
   income_source_id?: number | null;
+  sinking_fund_id?: number | null;
 }
 
 export interface TransactionLinkPayload {
   recurring_obligation_id?: number | null;
   income_source_id?: number | null;
+  sinking_fund_id?: number | null;
   metadata?: Record<string, unknown>;
 }
 
