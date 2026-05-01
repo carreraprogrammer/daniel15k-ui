@@ -23,6 +23,8 @@ export const initialTransactionFilters: TransactionQueryParams = {
 
 const PAGE_SIZE = 20;
 
+const now = new Date();
+
 export const useTransactionsPage = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [summary, setSummary] = useState<SummaryResponse | null>(null);
@@ -32,6 +34,8 @@ export const useTransactionsPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<TransactionQueryParams>(initialTransactionFilters);
+  const [period, setPeriodState] = useState({ month: now.getMonth() + 1, year: now.getFullYear() });
+  const periodRef = useRef(period);
   const [page, setPage] = useState(1);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [totalResults, setTotalResults] = useState(0);
@@ -39,9 +43,14 @@ export const useTransactionsPage = () => {
   const [creditCardPending, setCreditCardPending] = useState<Transaction[]>([]);
   const pendingPageRef = useRef<number | null>(null);
 
-  const load = async (nextPage = 1, options?: { append?: boolean; withSummary?: boolean }) => {
+  const load = async (
+    nextPage = 1,
+    options?: { append?: boolean; withSummary?: boolean },
+    overridePeriod?: { month: number; year: number },
+  ) => {
     const append = options?.append ?? false;
     const withSummary = options?.withSummary ?? nextPage === 1;
+    const activePeriod = overridePeriod ?? period;
 
     if (append) {
       setLoadingMore(true);
@@ -51,8 +60,16 @@ export const useTransactionsPage = () => {
     setError(null);
     try {
       const [transactionsResponse, summaryResponse, pendingResponse] = await Promise.all([
-        financeService.fetchTransactions({ ...filters, page: nextPage, per_page: PAGE_SIZE }),
-        withSummary ? financeService.fetchSummary() : Promise.resolve(null),
+        financeService.fetchTransactions({
+          ...filters,
+          month: activePeriod.month,
+          year: activePeriod.year,
+          page: nextPage,
+          per_page: PAGE_SIZE,
+        }),
+        withSummary
+          ? financeService.fetchSummary(activePeriod.month, activePeriod.year)
+          : Promise.resolve(null),
         withSummary ? financeService.fetchPendingTransactions() : Promise.resolve(null),
       ]);
 
@@ -84,7 +101,8 @@ export const useTransactionsPage = () => {
 
   useEffect(() => {
     void load();
-  }, [filters]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters, period]);
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -98,6 +116,11 @@ export const useTransactionsPage = () => {
 
     void loadCategories();
   }, []);
+
+  const setPeriod = (next: { month: number; year: number }) => {
+    periodRef.current = next;
+    setPeriodState(next);
+  };
 
   const loadMore = async () => {
     if (loadingMore || !hasNextPage) return;
@@ -203,6 +226,8 @@ export const useTransactionsPage = () => {
     behaviorSignals,
     appliedChips,
     hasNextPage,
+    period,
+    setPeriod,
     loadMore,
     setError,
     setFilters,

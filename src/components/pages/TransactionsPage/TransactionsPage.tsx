@@ -120,6 +120,8 @@ export const TransactionsContent = () => {
     behaviorSignals,
     appliedChips,
     hasNextPage,
+    period,
+    setPeriod,
     loadMore,
     setError,
     setFilters,
@@ -161,7 +163,9 @@ export const TransactionsContent = () => {
   };
   const TYPE_ORDER = ['committed', 'necessary', 'discretionary', 'investment', 'social'];
   const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-  const monthName = summary?.period ? MESES[summary.period.month - 1] : MESES[new Date().getMonth()];
+  const todayPeriod = { month: new Date().getMonth() + 1, year: new Date().getFullYear() };
+  const monthName = `${MESES[period.month - 1]} ${period.year}`;
+  const isCurrentPeriod = period.month === todayPeriod.month && period.year === todayPeriod.year;
 
   const stackedSegments = useMemo(() => {
     const byType: Record<string, { spent: number; color: string; label: string }> = {};
@@ -369,7 +373,17 @@ export const TransactionsContent = () => {
               {/* Header */}
               <div className={styles.focusGrid}>
                 <div className={styles.focusCopy}>
-                  <span className={styles.eyebrow}>{monthName}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <button
+                      onClick={() => setPeriod(shiftPeriod(period.year, period.month, -1))}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 4px', color: 'inherit', fontSize: '1rem', opacity: 0.7 }}
+                    >‹</button>
+                    <span className={styles.eyebrow}>{monthName}</span>
+                    <button
+                      onClick={() => { if (!isCurrentPeriod) setPeriod(shiftPeriod(period.year, period.month, 1)); }}
+                      style={{ background: 'none', border: 'none', cursor: isCurrentPeriod ? 'default' : 'pointer', padding: '0 4px', color: 'inherit', fontSize: '1rem', opacity: isCurrentPeriod ? 0.2 : 0.7 }}
+                    >›</button>
+                  </div>
                   <div className={styles.monthCompareGrid}>
                     <div className={styles.monthCompareItem}>
                       <span className={styles.monthCompareLabel}>Ingresos</span>
