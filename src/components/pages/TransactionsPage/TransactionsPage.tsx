@@ -530,7 +530,17 @@ export const TransactionsContent = () => {
             <div className={styles.detailStageHeader}>
               <div className={styles.detailStageCopy}>
                 <h3 className={styles.detailStageTitle}>Detalle de transacciones</h3>
-                <p className={styles.detailStageText}>Aquí sí entra búsqueda, filtros y lista completa. Ya no se apila debajo del resumen inicial.</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
+                  <button
+                    onClick={() => setPeriod(shiftPeriod(period.year, period.month, -1))}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 4px', color: 'inherit', fontSize: '1rem', opacity: 0.7 }}
+                  >‹</button>
+                  <span className={styles.detailStageText} style={{ margin: 0 }}>{monthName}</span>
+                  <button
+                    onClick={() => { if (!isCurrentPeriod) setPeriod(shiftPeriod(period.year, period.month, 1)); }}
+                    style={{ background: 'none', border: 'none', cursor: isCurrentPeriod ? 'default' : 'pointer', padding: '0 4px', color: 'inherit', fontSize: '1rem', opacity: isCurrentPeriod ? 0.2 : 0.7 }}
+                  >›</button>
+                </div>
               </div>
               <Button label="Volver al resumen" variant="ghost" onClick={() => setDetailsOpen(false)} />
             </div>
