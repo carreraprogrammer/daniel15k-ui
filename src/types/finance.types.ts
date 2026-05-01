@@ -743,6 +743,7 @@ export interface BudgetPlanDraft {
   month: string;
   total_income: number;
   lines: BudgetLineItem[];
+  mode: 'conservative' | 'expected';
 }
 
 // ── Agent Insights — recomendaciones diarias ─────────────────────────────────

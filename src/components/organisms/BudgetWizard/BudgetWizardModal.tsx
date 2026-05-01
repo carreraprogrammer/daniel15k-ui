@@ -246,6 +246,7 @@ export const BudgetWizardModal = ({
       month,
       total_income: totalIncome,
       lines,
+      mode: includeVariable ? 'expected' : 'conservative',
     };
 
     onComplete(draft);
@@ -353,17 +354,38 @@ export const BudgetWizardModal = ({
 
                   {/* Step 6: Summary — pass merged categories so locally added subs show up */}
                   {currentStep === SUMMARY_STEP && (
-                    <BudgetSummaryStep
-                      categories={categories.map((cat) => ({
-                        ...cat,
-                        subcategories: [
-                          ...cat.subcategories,
-                          ...(localSubcategories[cat.code] ?? []),
-                        ],
-                      }))}
-                      stepData={stepData}
-                      totalIncome={totalIncome}
-                    />
+                    <>
+                      {!incomeNeedsSetup && (
+                        <div className={styles.incomeModeToggle}>
+                          <span className={styles.incomeModeLabel}>Ingreso base del plan</span>
+                          <button
+                            type="button"
+                            className={`${styles.incomeModeBtn} ${!includeVariable ? styles.incomeModeBtnActive : ''}`}
+                            onClick={() => setIncludeVariable(false)}
+                          >
+                            Solo fijo
+                          </button>
+                          <button
+                            type="button"
+                            className={`${styles.incomeModeBtn} ${includeVariable ? styles.incomeModeBtnActive : ''}`}
+                            onClick={() => setIncludeVariable(true)}
+                          >
+                            Fijo + variable
+                          </button>
+                        </div>
+                      )}
+                      <BudgetSummaryStep
+                        categories={categories.map((cat) => ({
+                          ...cat,
+                          subcategories: [
+                            ...cat.subcategories,
+                            ...(localSubcategories[cat.code] ?? []),
+                          ],
+                        }))}
+                        stepData={stepData}
+                        totalIncome={totalIncome}
+                      />
+                    </>
                   )}
                 </div>
 

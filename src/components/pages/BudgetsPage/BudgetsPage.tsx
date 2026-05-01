@@ -136,7 +136,7 @@ export const BudgetsContent = () => {
     setWizardSaving(true);
     setWizardError(null);
     try {
-      const plan = await financeService.generateMonthlyPlanForWizard({ mode: 'conservative' });
+      const plan = await financeService.generateMonthlyPlanForWizard({ mode: draft.mode });
       await financeService.confirmMonthlyPlanWithLines(plan.id, draft.lines);
       setWizardOpen(false);
       setWizardSuccess(true);
