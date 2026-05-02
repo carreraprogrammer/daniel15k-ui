@@ -5,11 +5,9 @@ import { Button } from '../../atoms/Button';
 import { DateInput } from '../../atoms/DateInput';
 import { NumberInput } from '../../atoms/NumberInput';
 import { TextInput } from '../../atoms/TextInput';
-import { Spinner } from '../../atoms/Spinner';
 import { ConfirmModal } from '../../molecules/ConfirmModal';
 import { CrudModal } from '../../molecules/CrudModal';
-import { EmptyState } from '../../molecules/EmptyState';
-import { ErrorState } from '../../molecules/ErrorState';
+import { DataState } from '../../molecules/DataState/DataState';
 import { financeService } from '../../../services/financeService';
 import type { SavingsGoal, SavingsGoalPayload } from '../../../types/finance.types';
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
@@ -151,45 +149,52 @@ export const SavingsGoalsContent = () => {
             </div>
           </div>
 
-          {loading ? <Spinner size="lg" /> : null}
-          {error ? <ErrorState message={error} onRetry={() => void load()} /> : null}
-          {!loading && !error && !goals.length ? <EmptyState message="No hay metas de ahorro registradas." /> : null}
-
-          {!loading && !error && goals.length ? (
-            <div className={pageStyles.list}>
-              {goals.map((goal) => {
-                const progress = goal.target_amount > 0
-                  ? Math.min(Math.round((goal.current_amount / goal.target_amount) * 100), 100)
-                  : 0;
-                return (
-                  <article key={goal.id} className={pageStyles.listItem}>
-                    <div className={pageStyles.listPrimary}>
-                      <span className={pageStyles.listLabel}>{goal.name}</span>
-                      <span className={pageStyles.listMeta}>
-                        {formatCurrencyCompact(goal.current_amount)} de {formatCurrencyCompact(goal.target_amount)}
-                      </span>
-                      <div className={styles.progressTrack}>
-                        <div className={styles.progressFill} style={{ width: `${progress}%` }} />
+          <DataState
+            loading={loading}
+            error={error}
+            data={goals}
+            emptyTitle="No hay metas de ahorro"
+            emptyDescription="Crea tu primera meta para convertir el ahorro en una decisión mensual explícita."
+            emptyActionLabel="Nueva meta"
+            onEmptyAction={openNew}
+            onRetry={() => void load()}
+          >
+            {(goalItems) => (
+              <div className={pageStyles.list}>
+                {goalItems.map((goal) => {
+                  const progress = goal.target_amount > 0
+                    ? Math.min(Math.round((goal.current_amount / goal.target_amount) * 100), 100)
+                    : 0;
+                  return (
+                    <article key={goal.id} className={pageStyles.listItem}>
+                      <div className={pageStyles.listPrimary}>
+                        <span className={pageStyles.listLabel}>{goal.name}</span>
+                        <span className={pageStyles.listMeta}>
+                          {formatCurrencyCompact(goal.current_amount)} de {formatCurrencyCompact(goal.target_amount)}
+                        </span>
+                        <div className={styles.progressTrack}>
+                          <div className={styles.progressFill} style={{ width: `${progress}%` }} />
+                        </div>
+                        <span className={pageStyles.listMeta}>
+                          Aporte necesario: {goal.monthly_contribution_needed === null ? 'sin fecha objetivo' : formatCurrencyCompact(goal.monthly_contribution_needed)}
+                        </span>
                       </div>
-                      <span className={pageStyles.listMeta}>
-                        Aporte necesario: {goal.monthly_contribution_needed === null ? 'sin fecha objetivo' : formatCurrencyCompact(goal.monthly_contribution_needed)}
-                      </span>
-                    </div>
-                    <div className={pageStyles.listSecondary}>
-                      <span className={pageStyles.pill}>{progress}%</span>
-                      <span className={pageStyles.listMeta}>
-                        {goal.target_date ? `Fecha objetivo ${goal.target_date}` : 'Sin fecha objetivo'}
-                      </span>
-                      <div className={styles.actions}>
-                        <Button label="Editar" variant="ghost" size="sm" onClick={() => openEdit(goal)} />
-                        <Button label="Eliminar" variant="danger" size="sm" onClick={() => setDeleteConfirm(goal)} />
+                      <div className={pageStyles.listSecondary}>
+                        <span className={pageStyles.pill}>{progress}%</span>
+                        <span className={pageStyles.listMeta}>
+                          {goal.target_date ? `Fecha objetivo ${goal.target_date}` : 'Sin fecha objetivo'}
+                        </span>
+                        <div className={styles.actions}>
+                          <Button label="Editar" variant="ghost" size="sm" onClick={() => openEdit(goal)} />
+                          <Button label="Eliminar" variant="danger" size="sm" onClick={() => setDeleteConfirm(goal)} />
+                        </div>
                       </div>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          ) : null}
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+          </DataState>
         </section>
 
         <ConfirmModal

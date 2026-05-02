@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import { AuthLayout } from '../../templates/AuthLayout';
+import { FormSection } from '../../molecules/FormSection/FormSection';
+import { ErrorState } from '../../molecules/ErrorState';
 import { Spinner } from '../../atoms/Spinner';
 import { DynamicForm } from '../../organisms/DynamicForm';
 import { GoogleButton } from '../../atoms/GoogleButton';
@@ -25,6 +27,7 @@ const fallbackSchema = {
 export const LoginPage = () => {
   const schema = useFormStore((state) => state.schemas['login-form']);
   const isLoading = useFormStore((state) => state.isLoading);
+  const schemaError = useFormStore((state) => state.error);
   const fetchSchema = useFormStore((state) => state.fetchSchema);
   const hydrateAuth = useAuthStore((state) => state.hydrateAuth);
   const location = useLocation();
@@ -65,17 +68,36 @@ export const LoginPage = () => {
           <span className={styles.line} />
         </div>
 
-        <DynamicForm
-          schema={schema ?? fallbackSchema}
-          submitLabel="Entrar"
-          onSuccess={(response) => {
-            hydrateAuth(response);
-            history.replace(getLastAuthPath());
-          }}
-          onError={(error) => {
-            showError('No se pudo iniciar sesión. Verifica tus credenciales.');
-          }}
-        />
+        <FormSection
+          title="Acceso con email"
+          description="Usa tu correo para entrar. Si el esquema dinámico no carga, el formulario base sigue disponible."
+        >
+          {schemaError && !schema ? (
+            <ErrorState
+              title="No pudimos cargar el formulario dinámico"
+              message={schemaError}
+              onRetry={() => void fetchSchema('login-form')}
+            />
+          ) : null}
+
+          {isLoading && !schema ? (
+            <div style={{ display: 'grid', placeItems: 'center', padding: 'var(--space-4)' }}>
+              <Spinner size="lg" />
+            </div>
+          ) : null}
+
+          <DynamicForm
+            schema={schema ?? fallbackSchema}
+            submitLabel="Entrar"
+            onSuccess={(response) => {
+              hydrateAuth(response);
+              history.replace(getLastAuthPath());
+            }}
+            onError={() => {
+              showError('No se pudo iniciar sesión. Verifica tus credenciales.');
+            }}
+          />
+        </FormSection>
 
         <Link className={styles.link} to="/register">
           ¿No tienes cuenta? Regístrate

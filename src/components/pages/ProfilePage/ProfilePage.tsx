@@ -3,6 +3,7 @@ import { IonContent } from '@ionic/react';
 import { useToast } from '../../../hooks/useToast';
 import { useAuthStore } from '../../../store/authStore';
 import { api } from '../../../services/api';
+import { DataState } from '../../molecules/DataState/DataState';
 import { DynamicForm } from '../../organisms/DynamicForm';
 import { AppLayout } from '../../templates/AppLayout';
 import styles from './ProfilePage.module.css';
@@ -30,14 +31,22 @@ export const ProfileContent = () => {
   const setUser = useAuthStore((state) => state.setUser);
   const { showError, showSuccess, toast } = useToast();
   const [financialContext, setFinancialContext] = useState<FinancialCtx | null>(null);
+  const [contextLoading, setContextLoading] = useState(true);
+  const [contextError, setContextError] = useState<string | null>(null);
 
   useEffect(() => {
+    setContextLoading(true);
+    setContextError(null);
     api.get('/api/v1/financial_context')
       .then(({ data }) => {
         const attrs = (data as { data?: { attributes?: FinancialCtx } })?.data?.attributes ?? null;
         setFinancialContext(attrs);
+        setContextLoading(false);
       })
-      .catch(() => { /* silencioso — sección simplemente no se muestra */ });
+      .catch((error) => {
+        setContextError(error instanceof Error ? error.message : 'No fue posible cargar el contexto financiero.');
+        setContextLoading(false);
+      });
   }, []);
 
   const profileSchema = useMemo(
@@ -87,27 +96,33 @@ export const ProfileContent = () => {
               </div>
             </div>
 
-            {financialContext && (
-              <>
-                <span className={styles.eyebrow} style={{ marginTop: '8px' }}>Contexto financiero</span>
+            <span className={styles.eyebrow} style={{ marginTop: '8px' }}>Contexto financiero</span>
+            <DataState
+              loading={contextLoading}
+              error={contextError}
+              data={financialContext ? [financialContext] : []}
+              emptyTitle="Sin contexto financiero"
+              emptyDescription="Todavía no hay fase, estrategia o notas guardadas para esta cuenta."
+            >
+              {([context]) => (
                 <div className={styles.userMeta}>
                   <div>
                     <span className={styles.metaLabel}>Fase actual</span>
-                    <strong>{PHASE_LABEL[financialContext.phase ?? ''] ?? financialContext.phase ?? '—'}</strong>
+                    <strong>{PHASE_LABEL[context.phase ?? ''] ?? context.phase ?? '—'}</strong>
                   </div>
                   <div>
                     <span className={styles.metaLabel}>Estrategia de deuda</span>
-                    <strong>{STRATEGY_LABEL[financialContext.strategy ?? ''] ?? financialContext.strategy ?? '—'}</strong>
+                    <strong>{STRATEGY_LABEL[context.strategy ?? ''] ?? context.strategy ?? '—'}</strong>
                   </div>
-                  {financialContext.notes && (
+                  {context.notes ? (
                     <div>
                       <span className={styles.metaLabel}>Notas / objetivo</span>
-                      <strong>{financialContext.notes}</strong>
+                      <strong>{context.notes}</strong>
                     </div>
-                  )}
+                  ) : null}
                 </div>
-              </>
-            )}
+              )}
+            </DataState>
           </aside>
 
           {/* ── Right: edit form ── */}

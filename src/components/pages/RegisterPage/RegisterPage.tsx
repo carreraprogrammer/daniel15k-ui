@@ -1,5 +1,6 @@
 import { Link, useHistory } from 'react-router-dom';
 import { AuthLayout } from '../../templates/AuthLayout';
+import { FormSection } from '../../molecules/FormSection/FormSection';
 import { DynamicForm } from '../../organisms/DynamicForm';
 import { GoogleButton } from '../../atoms/GoogleButton';
 import { startGoogleOAuth } from '../../../services/authService';
@@ -41,17 +42,22 @@ export const RegisterPage = () => {
           <span className={styles.line} />
         </div>
 
-        <DynamicForm
-          schema={schema}
-          submitLabel="Crear cuenta"
-          onSuccess={(response) => {
-            hydrateAuth(response);
-            history.replace(getLastAuthPath());
-          }}
-          onError={(error) => {
-            showError('No se pudo completar el registro.');
-          }}
-        />
+        <FormSection
+          title="Registro con email"
+          description="Crea tu acceso y entra directo al tablero financiero una vez se complete el alta."
+        >
+          <DynamicForm
+            schema={schema}
+            submitLabel="Crear cuenta"
+            onSuccess={(response) => {
+              hydrateAuth(response);
+              history.replace(getLastAuthPath());
+            }}
+            onError={() => {
+              showError('No se pudo completar el registro.');
+            }}
+          />
+        </FormSection>
 
         <Link className={styles.link} to="/login">
           ¿Ya tienes cuenta? Inicia sesión

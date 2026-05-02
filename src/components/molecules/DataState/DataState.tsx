@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { EmptyState } from '../EmptyState';
 import { ErrorNotice } from '../ErrorNotice/ErrorNotice';
-import { LoadingOverlay } from '../LoadingOverlay/LoadingOverlay';
+import { Spinner } from '../../atoms/Spinner';
 
 interface DataStateProps<T> {
   loading: boolean;
@@ -27,7 +27,22 @@ export const DataState = <T,>({
   children,
 }: DataStateProps<T>) => {
   if (loading) {
-    return <LoadingOverlay isOpen message="Cargando datos..." zIndex="var(--z-raised)" />;
+    return (
+      <div
+        aria-busy="true"
+        style={{
+          display: 'grid',
+          placeItems: 'center',
+          gap: 'var(--space-3)',
+          padding: 'var(--space-6)',
+        }}
+      >
+        <Spinner size="lg" />
+        <span style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--text-sm)' }}>
+          Cargando datos...
+        </span>
+      </div>
+    );
   }
 
   if (error) {
