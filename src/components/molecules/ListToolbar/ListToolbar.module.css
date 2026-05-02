@@ -121,6 +121,45 @@
   font-size: 0.84rem;
 }
 
+.compact {
+  gap: 0.55rem;
+  padding: 0.72rem;
+  border-radius: 18px;
+}
+
+.compact .mainRow {
+  gap: 0.55rem;
+}
+
+.compact .searchShell {
+  width: 2.45rem;
+  min-width: 2.45rem;
+  height: 2.45rem;
+}
+
+.compact .searchShellOpen {
+  width: min(100%, 24rem);
+}
+
+.compact .searchToggle {
+  width: 2.45rem;
+  height: 2.45rem;
+  flex-basis: 2.45rem;
+}
+
+.compact .searchInput {
+  padding-right: 0.75rem;
+  font-size: 0.92rem;
+}
+
+.compact .actions {
+  gap: 0.45rem;
+}
+
+.compact .resultLabel {
+  font-size: 0.78rem;
+}
+
 @media (min-width: 768px) {
   .resultLabel {
     padding-left: 0.1rem;
@@ -137,6 +176,23 @@
   }
 
   .searchShellOpen {
+    width: 100%;
+  }
+
+  .compact .mainRow {
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+
+  .compact .searchDock {
+    flex: 1 1 0;
+  }
+
+  .compact .actions {
+    width: auto;
+  }
+
+  .compact .searchShellOpen {
     width: 100%;
   }
 }

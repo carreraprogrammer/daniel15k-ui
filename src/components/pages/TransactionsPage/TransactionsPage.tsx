@@ -587,6 +587,7 @@ export const TransactionsContent = () => {
             </div>
             <div className={styles.detailPanel}>
             <ListToolbar
+              density="compact"
               searchPlaceholder="Concepto o producto"
               searchValue={filters.q ?? ''}
               resultLabel={`${metrics.count} resultados`}

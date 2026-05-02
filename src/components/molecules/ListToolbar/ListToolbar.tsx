@@ -9,6 +9,7 @@ export interface ListToolbarProps {
   searchPlaceholder?: string;
   searchValue: string;
   resultLabel: string;
+  density?: 'default' | 'compact';
   activeFilterCount?: number;
   onSearchChange: (value: string) => void;
   onOpenSort: () => void;
@@ -19,6 +20,7 @@ export const ListToolbar = ({
   searchPlaceholder,
   searchValue,
   resultLabel,
+  density = 'default',
   activeFilterCount = 0,
   onSearchChange,
   onOpenSort,
@@ -54,7 +56,7 @@ export const ListToolbar = ({
   };
 
   return (
-    <section className={styles.toolbar}>
+    <section className={[styles.toolbar, density === 'compact' ? styles.compact : ''].filter(Boolean).join(' ')}>
       <div className={styles.mainRow}>
         <div className={styles.searchDock}>
           <div
