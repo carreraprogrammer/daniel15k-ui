@@ -13,6 +13,13 @@ const STATUS_ICON: Record<MonthExecutionStatus, string> = {
   unplanned: '?',
 };
 
+const STATUS_LABEL: Record<MonthExecutionStatus, string> = {
+  covered:   'Cubierto',
+  partial:   'Parcial',
+  pending:   'Pendiente',
+  unplanned: 'No planeado',
+};
+
 export const ExecutionPanel = ({ monthExecution }: Props) => {
   const { income, recurring_obligations } = monthExecution;
 
@@ -31,9 +38,10 @@ export const ExecutionPanel = ({ monthExecution }: Props) => {
         </div>
         {income.sources.map((src) => (
           <div key={src.id} className={[styles.row, styles[`row_${src.status}`]].join(' ')}>
-            <span className={styles.rowIcon}>{STATUS_ICON[src.status]}</span>
+            <span className={styles.rowIcon} aria-hidden="true">{STATUS_ICON[src.status]}</span>
             <div className={styles.rowInfo}>
               <span className={styles.rowName}>{src.name}</span>
+              <span className={styles.rowStatus}>{STATUS_LABEL[src.status]}</span>
               {src.expected_day_from != null && src.expected_day_to != null ? (
                 <span className={styles.rowMeta}>días {src.expected_day_from}–{src.expected_day_to}</span>
               ) : null}
@@ -60,9 +68,10 @@ export const ExecutionPanel = ({ monthExecution }: Props) => {
         </div>
         {recurring_obligations.items.map((item) => (
           <div key={item.id} className={[styles.row, styles[`row_${item.status}`]].join(' ')}>
-            <span className={styles.rowIcon}>{STATUS_ICON[item.status]}</span>
+            <span className={styles.rowIcon} aria-hidden="true">{STATUS_ICON[item.status]}</span>
             <div className={styles.rowInfo}>
               <span className={styles.rowName}>{item.name}</span>
+              <span className={styles.rowStatus}>{STATUS_LABEL[item.status]}</span>
               {item.due_day != null ? (
                 <span className={styles.rowMeta}>día {item.due_day}</span>
               ) : null}

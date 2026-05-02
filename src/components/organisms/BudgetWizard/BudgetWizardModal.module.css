@@ -49,7 +49,7 @@
   margin: 0 auto;
   min-height: 100%;
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto auto 1fr auto;
   gap: clamp(0.6rem, 1.2vw, 0.9rem);
 }
 
@@ -124,6 +124,30 @@
   align-items: center;
   gap: var(--space-3);
   flex-shrink: 0;
+}
+
+.progressTrack {
+  display: flex;
+  gap: 3px;
+  padding: 0 clamp(1rem, 1.8vw, 1.4rem);
+  align-self: start;
+}
+
+.progressSegment {
+  flex: 1;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.09);
+  transition: background 0.3s ease;
+}
+
+.progressSegmentDone {
+  background: rgba(243, 210, 122, 0.45);
+}
+
+.progressSegmentCurrent {
+  background: var(--color-accent, #f3d27a);
+  box-shadow: 0 0 6px rgba(243, 210, 122, 0.5);
 }
 
 .stage {

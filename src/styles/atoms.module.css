@@ -22,6 +22,7 @@
 /* Button */
 .button { border-radius:var(--radius-md); font-weight:var(--font-semibold); letter-spacing:var(--tracking-wide); text-transform:uppercase; cursor:pointer; transition:background var(--transition-fast), box-shadow var(--transition-fast); display:inline-flex; align-items:center; justify-content:center; gap:var(--space-2); border:1px solid transparent; padding:var(--space-3) var(--space-4); }
 .button:focus-visible { box-shadow:var(--shadow-brand); outline:none; }
+.button:active:not(:disabled) { opacity:.88; transform:scale(0.97); }
 .button:disabled { opacity:.4; cursor:not-allowed; }
 .primary { background:var(--color-brand); color:var(--color-text-inverse); }
 .secondary { background:transparent; color:var(--color-brand); border-color:var(--color-brand); }

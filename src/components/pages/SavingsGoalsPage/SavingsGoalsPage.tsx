@@ -6,6 +6,7 @@ import { DateInput } from '../../atoms/DateInput';
 import { NumberInput } from '../../atoms/NumberInput';
 import { TextInput } from '../../atoms/TextInput';
 import { Spinner } from '../../atoms/Spinner';
+import { ConfirmModal } from '../../molecules/ConfirmModal';
 import { CrudModal } from '../../molecules/CrudModal';
 import { EmptyState } from '../../molecules/EmptyState';
 import { ErrorState } from '../../molecules/ErrorState';
@@ -54,6 +55,7 @@ export const SavingsGoalsContent = () => {
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingGoal, setEditingGoal] = useState<SavingsGoal | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<SavingsGoal | null>(null);
   const [form, setForm] = useState<GoalForm>(emptyForm);
 
   const load = async () => {
@@ -180,7 +182,7 @@ export const SavingsGoalsContent = () => {
                       </span>
                       <div className={styles.actions}>
                         <Button label="Editar" variant="ghost" size="sm" onClick={() => openEdit(goal)} />
-                        <Button label="Eliminar" variant="danger" size="sm" onClick={() => void deleteGoal(goal)} />
+                        <Button label="Eliminar" variant="danger" size="sm" onClick={() => setDeleteConfirm(goal)} />
                       </div>
                     </div>
                   </article>
@@ -189,6 +191,19 @@ export const SavingsGoalsContent = () => {
             </div>
           ) : null}
         </section>
+
+        <ConfirmModal
+          isOpen={deleteConfirm !== null}
+          title="Eliminar meta"
+          message={`¿Seguro que quieres eliminar "${deleteConfirm?.name}"? Esta acción no se puede deshacer.`}
+          confirmLabel="Eliminar"
+          danger
+          onConfirm={() => {
+            if (deleteConfirm) void deleteGoal(deleteConfirm);
+            setDeleteConfirm(null);
+          }}
+          onCancel={() => setDeleteConfirm(null)}
+        />
 
         <CrudModal
           isOpen={modalOpen}

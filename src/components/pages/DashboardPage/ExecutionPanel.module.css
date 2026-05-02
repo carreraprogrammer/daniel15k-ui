@@ -85,6 +85,17 @@
   color: rgba(231, 236, 244, 0.55);
 }
 
+.rowStatus {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(231, 236, 244, 0.35);
+}
+
+.row_covered .rowStatus  { color: #1A9E4A; }
+.row_partial .rowStatus  { color: #D4732A; }
+
 .rowMeta {
   font-size: 11px;
   color: rgba(231, 236, 244, 0.35);

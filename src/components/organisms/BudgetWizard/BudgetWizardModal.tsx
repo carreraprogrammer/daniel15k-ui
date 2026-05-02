@@ -309,6 +309,32 @@ export const BudgetWizardModal = ({
                   </div>
                 </div>
 
+                {/* ── Step progress track ── */}
+                <div
+                  className={styles.progressTrack}
+                  role="progressbar"
+                  aria-valuenow={currentStepNumber}
+                  aria-valuemin={1}
+                  aria-valuemax={visibleStepCount}
+                  aria-label={`Paso ${currentStepNumber} de ${visibleStepCount}`}
+                >
+                  {Array.from({ length: visibleStepCount }, (_, i) => {
+                    const stepIndex = firstStep + i;
+                    const isCompleted = stepIndex < currentStep;
+                    const isCurrent = stepIndex === currentStep;
+                    return (
+                      <div
+                        key={i}
+                        className={[
+                          styles.progressSegment,
+                          isCompleted ? styles.progressSegmentDone : '',
+                          isCurrent ? styles.progressSegmentCurrent : '',
+                        ].filter(Boolean).join(' ')}
+                      />
+                    );
+                  })}
+                </div>
+
                 <div className={styles.stage}>
                   {/* Step 0: Income setup — only when sources are not yet configured */}
                   {currentStep === 0 && incomeNeedsSetup && (
