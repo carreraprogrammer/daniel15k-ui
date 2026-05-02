@@ -1,6 +1,13 @@
-import { IonRouterOutlet } from '@ionic/react';
+import { IonIcon, IonLabel, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs } from '@ionic/react';
 import type { ComponentType } from 'react';
-import { Redirect, Route } from 'react-router-dom';
+import { Redirect, Route, useLocation } from 'react-router-dom';
+import {
+  cardOutline,
+  homeOutline,
+  pieChartOutline,
+  swapHorizontalOutline,
+  trophyOutline,
+} from 'ionicons/icons';
 import { useAuthStore } from '../store/authStore';
 import { LoginPage } from '../components/pages/LoginPage/LoginPage';
 import { RegisterPage } from '../components/pages/RegisterPage/RegisterPage';
@@ -16,6 +23,7 @@ import { BudgetsPage } from '../components/pages/BudgetsPage';
 import { SavingsGoalsPage } from '../components/pages/SavingsGoalsPage';
 import { QuickCapturePage } from '../components/pages/QuickCapturePage';
 import { getLastAuthPath } from '../utils/navigation';
+import styles from './AppRouter.module.css';
 
 const ProtectedRoute = ({
   component: Component,
@@ -59,23 +67,63 @@ const RootRedirect = () => {
   return <Redirect to={isAuthenticated ? getLastAuthPath() : '/login'} />;
 };
 
+const TAB_ITEMS = [
+  { tab: 'dashboard', to: '/dashboard', label: 'Dashboard', icon: homeOutline },
+  { tab: 'transactions', to: '/transactions', label: 'Movimientos', icon: swapHorizontalOutline },
+  { tab: 'budgets', to: '/budgets', label: 'Presupuesto', icon: pieChartOutline },
+  { tab: 'debts', to: '/debts', label: 'Deudas', icon: cardOutline },
+  { tab: 'goals', to: '/savings-goals', label: 'Metas', icon: trophyOutline },
+];
+
+const TAB_PATHS = TAB_ITEMS.map((item) => item.to);
+const AUTH_PATHS = [
+  ...TAB_PATHS,
+  '/planned-expenses',
+  '/recurring',
+  '/profile',
+  '/quick',
+];
+
 export const AppRouter = () => {
+  const location = useLocation();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const showTabs = isAuthenticated && AUTH_PATHS.includes(location.pathname);
+
   return (
-    <IonRouterOutlet animated={false}>
-      <Route exact path="/" component={RootRedirect} />
-      <GuestRoute exact path="/login" component={LoginPage} />
-      <GuestRoute exact path="/register" component={RegisterPage} />
-      <Route exact path="/auth/callback" component={OAuthCallbackPage} />
-      <ProtectedRoute exact path="/dashboard" component={DashboardPage} />
-      <ProtectedRoute exact path="/transactions" component={TransactionsPage} />
-      <ProtectedRoute exact path="/debts" component={DebtsPage} />
-      <ProtectedRoute exact path="/planned-expenses" component={PlannedExpensesPage} />
-      <ProtectedRoute exact path="/recurring" component={RecurringObligationsPage} />
-      <ProtectedRoute exact path="/budgets" component={BudgetsPage} />
-      <ProtectedRoute exact path="/savings-goals" component={SavingsGoalsPage} />
-      <ProtectedRoute exact path="/profile" component={ProfilePage} />
-      <ProtectedRoute exact path="/quick" component={QuickCapturePage} />
-      <Route component={NotFoundPage} />
-    </IonRouterOutlet>
+    <IonTabs className={styles.tabsRoot}>
+      <IonRouterOutlet animated={false}>
+        <Route exact path="/" component={RootRedirect} />
+        <GuestRoute exact path="/login" component={LoginPage} />
+        <GuestRoute exact path="/register" component={RegisterPage} />
+        <Route exact path="/auth/callback" component={OAuthCallbackPage} />
+        <ProtectedRoute exact path="/dashboard" component={DashboardPage} />
+        <ProtectedRoute exact path="/transactions" component={TransactionsPage} />
+        <ProtectedRoute exact path="/debts" component={DebtsPage} />
+        <ProtectedRoute exact path="/planned-expenses" component={PlannedExpensesPage} />
+        <ProtectedRoute exact path="/recurring" component={RecurringObligationsPage} />
+        <ProtectedRoute exact path="/budgets" component={BudgetsPage} />
+        <ProtectedRoute exact path="/savings-goals" component={SavingsGoalsPage} />
+        <ProtectedRoute exact path="/profile" component={ProfilePage} />
+        <ProtectedRoute exact path="/quick" component={QuickCapturePage} />
+        <Route component={NotFoundPage} />
+      </IonRouterOutlet>
+
+      {showTabs ? (
+        <IonTabBar slot="bottom" className={styles.tabBar}>
+          {TAB_ITEMS.map((item) => (
+            <IonTabButton
+              key={item.tab}
+              tab={item.tab}
+              href={item.to}
+              className={location.pathname === item.to ? styles.tabButtonActive : undefined}
+              aria-label={item.label}
+            >
+              <IonIcon aria-hidden="true" icon={item.icon} />
+              <IonLabel>{item.label}</IonLabel>
+            </IonTabButton>
+          ))}
+        </IonTabBar>
+      ) : null}
+    </IonTabs>
   );
 };

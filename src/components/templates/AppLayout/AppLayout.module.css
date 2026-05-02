@@ -187,7 +187,8 @@
     --app-shell-padding: 12px;
     --app-shell-gap: 12px;
     --app-content-pad-top: 18px;
-    --app-content-pad-bottom: 24px;
+    --app-tabbar-height: 72px;
+    --app-content-pad-bottom: calc(24px + var(--app-tabbar-height) + env(safe-area-inset-bottom));
     --app-content-pad-inline: 16px;
     min-height: 100dvh;
     height: 100dvh;
@@ -197,6 +198,7 @@
   .grid {
     grid-template-columns: 1fr;
     gap: 0;
+    height: 100%;
   }
 
   .sidebar {

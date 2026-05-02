@@ -124,7 +124,11 @@
   color: #fff;
 }
 
-@media (max-width: 840px) {
+.mobileProfileLink {
+  display: none;
+}
+
+@media (max-width: 1023px) {
   .header {
     min-height: 60px;
     align-items: center;
@@ -146,7 +150,7 @@
   }
 
   .menuButton {
-    display: inline-flex;
+    display: none;
     margin-bottom: 0;
     flex: 0 0 auto;
     width: 40px;
@@ -157,8 +161,31 @@
   .kicker,
   .brand,
   .nav,
-  .actions {
+  .actions :global(button) {
     display: none;
+  }
+
+  .actions {
+    display: flex;
+  }
+
+  .mobileProfileLink {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    color: #fff8e7;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
+      rgba(255, 255, 255, 0.03);
+    box-shadow: 0 12px 22px rgba(2, 6, 23, 0.15);
+  }
+
+  .mobileProfileLink :global(ion-icon) {
+    font-size: 1.35rem;
   }
 
   .section {

@@ -1,13 +1,9 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { IonIcon, IonPage } from '@ionic/react';
-import { closeOutline, logOutOutline, personCircleOutline } from 'ionicons/icons';
+import { useEffect, useRef, type ReactNode } from 'react';
+import { IonPage } from '@ionic/react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { Header } from '../../organisms/Header';
-import { BrandMark } from '../../atoms/BrandMark';
-import { Button } from '../../atoms/Button';
 import { CompletenessIndicator } from '../../molecules/CompletenessIndicator';
 import { AgentEventRenderer } from '../../molecules/AgentEventRenderer';
-import { useAuthStore } from '../../../store/authStore';
 import { rememberAuthPath } from '../../../utils/navigation';
 import styles from './AppLayout.module.css';
 
@@ -23,20 +19,13 @@ const NAV_ITEMS = [
 ];
 
 export const AppLayout = ({ title, children }: { title: string; children: ReactNode }) => {
-  const logout = useAuthStore((state) => state.logout);
   const location = useLocation();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const shellRef = useRef<HTMLDivElement | null>(null);
   const headerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     rememberAuthPath(location.pathname);
   }, [location.pathname]);
-
-  useEffect(() => {
-    document.body.classList.toggle('menu-open', mobileMenuOpen);
-    return () => document.body.classList.remove('menu-open');
-  }, [mobileMenuOpen]);
 
   useEffect(() => {
     const shell = shellRef.current;
@@ -60,9 +49,7 @@ export const AppLayout = ({ title, children }: { title: string; children: ReactN
     return () => observer.disconnect();
   }, []);
 
-  const closeMenu = () => setMobileMenuOpen(false);
-
-  const renderNav = (onNavigate?: () => void) => (
+  const renderNav = () => (
     <nav className={styles.nav}>
       {NAV_ITEMS.map((item) => (
         <NavLink
@@ -70,7 +57,6 @@ export const AppLayout = ({ title, children }: { title: string; children: ReactN
           to={item.to}
           className={styles.navLink}
           activeClassName={styles.navLinkActive}
-          onClick={onNavigate}
           exact
         >
           {item.label}
@@ -84,7 +70,7 @@ export const AppLayout = ({ title, children }: { title: string; children: ReactN
       <div ref={shellRef} className={styles.shell}>
         <div className={styles.backdrop} aria-hidden="true" />
         <div ref={headerRef} className={styles.headerSlot}>
-          <Header currentSection={title} onMenuToggle={() => setMobileMenuOpen((open) => !open)} menuOpen={mobileMenuOpen} />
+          <Header currentSection={title} />
         </div>
         <div className={styles.grid}>
           <aside className={styles.sidebar}>
@@ -100,53 +86,9 @@ export const AppLayout = ({ title, children }: { title: string; children: ReactN
           </main>
         </div>
 
-          <div
-            className={[styles.mobileMenuBackdrop, mobileMenuOpen ? styles.mobileMenuBackdropVisible : ''].filter(Boolean).join(' ')}
-            aria-hidden={mobileMenuOpen ? 'false' : 'true'}
-            onClick={closeMenu}
-          />
-
-          <aside className={[styles.mobileMenu, mobileMenuOpen ? styles.mobileMenuOpen : ''].filter(Boolean).join(' ')}>
-            <div className={styles.mobileMenuHeader}>
-              <div className={styles.mobileMenuBrand}>
-                <BrandMark variant="monoline" size="md" />
-                <div>
-                  <span className={styles.mobileMenuKicker}>Daniel 15K</span>
-                  <h2 className={styles.mobileMenuTitle}>Ascent Finance</h2>
-                </div>
-              </div>
-              <button type="button" className={styles.mobileMenuClose} aria-label="Cerrar menú" onClick={closeMenu}>
-                <IonIcon icon={closeOutline} />
-              </button>
-            </div>
-
-            <section className={styles.mobileMenuSection}>
-              <p className={styles.mobileMenuLabel}>Finanzas</p>
-              {renderNav(closeMenu)}
-            </section>
-
-            <section className={styles.mobileMenuSection}>
-              <p className={styles.mobileMenuLabel}>Cuenta</p>
-              <NavLink to="/profile" className={styles.utilityLink} onClick={closeMenu} exact>
-                <IonIcon icon={personCircleOutline} />
-                <span>Mi perfil</span>
-              </NavLink>
-              <Button
-                label="Cerrar sesión"
-                variant="ghost"
-                iconLeft={<IonIcon icon={logOutOutline} />}
-                onClick={() => {
-                  closeMenu();
-                  void logout();
-                }}
-                fullWidth
-              />
-            </section>
-          </aside>
-
-          <AgentEventRenderer />
-          <CompletenessIndicator />
-        </div>
+        <AgentEventRenderer />
+        <CompletenessIndicator />
+      </div>
     </IonPage>
   );
 };

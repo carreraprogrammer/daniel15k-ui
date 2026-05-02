@@ -1,5 +1,5 @@
 import { IonIcon } from '@ionic/react';
-import { menuOutline } from 'ionicons/icons';
+import { menuOutline, personCircleOutline } from 'ionicons/icons';
 import { Link } from 'react-router-dom';
 import { Button } from '../../atoms/Button';
 import { BrandMark } from '../../atoms/BrandMark';
@@ -39,6 +39,9 @@ export const Header = ({
         </div>
       </div>
       <div className={styles.actions}>
+        <Link to="/profile" className={styles.mobileProfileLink} aria-label="Mi perfil">
+          <IonIcon aria-hidden="true" icon={personCircleOutline} />
+        </Link>
         <nav className={styles.nav}>
           <Link to="/profile" className={styles.link}>
             Mi perfil
