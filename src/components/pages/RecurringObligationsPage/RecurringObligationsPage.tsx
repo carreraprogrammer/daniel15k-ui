@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { IonContent, IonIcon, IonLabel, IonSegment, IonSegmentButton } from '@ionic/react';
 import { addOutline } from 'ionicons/icons';
 import { AppLayout } from '../../templates/AppLayout';
-import { IconButton } from '../../atoms/IconButton';
 import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
 import { SelectInput } from '../../atoms/SelectInput';
@@ -298,8 +297,12 @@ export const RecurringObligationsContent = () => {
                   </h2>
                   <p className={styles.focusText}>
                     {activeView === 'income'
-                      ? 'Aquí deberías poder ver rápido si tu perfil de ingresos base ya está claro, sin entrar de inmediato a filtros o formularios.'
-                      : 'Antes de editar nada, esta vista debería decirte cuánto cuesta sostener el sistema actual cada mes.'}
+                      ? incomeSources.length > 0
+                        ? `${incomeSources.filter((s) => s.attributes.classification === 'base').length} fuentes base confiables de ${incomeSources.length} registradas.`
+                        : 'Agrega tus fuentes de ingreso para que el plan mensual sepa con qué contar cada mes.'
+                      : obligations.length > 0
+                        ? `${metrics.obligationsCount} obligaciones activas que pesan todos los meses. Cámbialas solo si cambió la realidad.`
+                        : 'Registra tus obligaciones recurrentes para ver su impacto en el flujo mensual.'}
                   </p>
                 </div>
                 <div>
@@ -318,7 +321,14 @@ export const RecurringObligationsContent = () => {
                     <h3 className={styles.focusSupportTitle}>Cobertura mensual</h3>
                     <span className={styles.focusSupportValue}>{coveragePct}%</span>
                   </div>
-                  <div className={styles.focusRail}>
+                  <div
+                    className={styles.focusRail}
+                    role="progressbar"
+                    aria-valuenow={Math.min(coveragePct, 100)}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-label={`Cobertura mensual: ${coveragePct}%`}
+                  >
                     <div
                       className={`${styles.focusRailFill} ${coveragePct < 100 ? styles.focusRailFillWarn : ''}`}
                       style={{ width: `${Math.min(coveragePct, 100)}%` }}
@@ -338,7 +348,14 @@ export const RecurringObligationsContent = () => {
                         <span className={styles.executionLabel}>Ingresos entregados</span>
                         <strong className={styles.executionPct}>{incomeExecution.pct}%</strong>
                       </div>
-                      <div className={styles.executionTrack}>
+                      <div
+                        className={styles.executionTrack}
+                        role="progressbar"
+                        aria-valuenow={Math.min(incomeExecution.pct, 100)}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-label={`Ingresos entregados: ${incomeExecution.pct}%`}
+                      >
                         <div
                           className={styles.executionFill}
                           style={{ width: `${Math.min(incomeExecution.pct, 100)}%` }}
@@ -359,7 +376,14 @@ export const RecurringObligationsContent = () => {
                         <span className={styles.executionLabel}>Recurrentes cubiertos</span>
                         <strong className={styles.executionPct}>{recurringExecution.pct}%</strong>
                       </div>
-                      <div className={styles.executionTrack}>
+                      <div
+                        className={styles.executionTrack}
+                        role="progressbar"
+                        aria-valuenow={Math.min(recurringExecution.pct, 100)}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-label={`Recurrentes cubiertos: ${recurringExecution.pct}%`}
+                      >
                         <div
                           className={styles.executionFill}
                           style={{ width: `${Math.min(recurringExecution.pct, 100)}%` }}
@@ -389,17 +413,17 @@ export const RecurringObligationsContent = () => {
 
               <div className={styles.focusActions}>
                 {activeView === 'income' ? (
-                  <IconButton
+                  <Button
                     label="Agregar ingreso"
                     variant="primary"
-                    icon={<IonIcon icon={addOutline} />}
+                    iconLeft={<IonIcon icon={addOutline} />}
                     onClick={() => { setEditingIncome(null); setIncomeComposerOpen(true); }}
                   />
                 ) : (
-                  <IconButton
+                  <Button
                     label="Nuevo recurrente"
                     variant="primary"
-                    icon={<IonIcon icon={addOutline} />}
+                    iconLeft={<IonIcon icon={addOutline} />}
                     onClick={() => { setEditingObligation(null); setComposerOpen(true); }}
                   />
                 )}

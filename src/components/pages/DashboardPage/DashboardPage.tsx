@@ -232,7 +232,14 @@ export const DashboardContent = () => {
                       </span>
                       <span className={styles.pressurePct}>{coveragePct}%</span>
                     </div>
-                    <div className={styles.pressureTrack}>
+                    <div
+                      className={styles.pressureTrack}
+                      role="progressbar"
+                      aria-valuenow={Math.min(coveragePct, 100)}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-label={`Cobertura del próximo ciclo: ${coveragePct}%`}
+                    >
                       <div
                         className={[
                           styles.pressureFill,

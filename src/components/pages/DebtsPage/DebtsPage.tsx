@@ -3,7 +3,6 @@ import axios from 'axios';
 import { IonContent, IonIcon } from '@ionic/react';
 import { addOutline } from 'ionicons/icons';
 import { AppLayout } from '../../templates/AppLayout';
-import { IconButton } from '../../atoms/IconButton';
 import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
 import { SelectInput } from '../../atoms/SelectInput';
@@ -287,7 +286,11 @@ export const DebtsContent = () => {
                     {metrics.activeCount ? `${metrics.activeCount} deudas activas` : 'No hay deudas activas'}
                   </h2>
                   <p className={styles.focusText}>
-                    Esta vista debería dejar claro cuánto debes y cuánto te exige al mes antes de abrir filtros, tablas o edición.
+                    {metrics.totalCount === 0
+                      ? 'Registra tus deudas para saber cuánta presión financiera cargas cada mes.'
+                      : metrics.activeCount === 0
+                        ? 'Todas tus deudas están cerradas. Sin carga activa en el flujo mensual.'
+                        : `${formatCurrencyCompact(metrics.totalMonthly)} de carga mensual fija en ${metrics.activeCount} deudas activas.`}
                   </p>
                 </div>
                 <div>
@@ -302,7 +305,14 @@ export const DebtsContent = () => {
                     <h3 className={styles.focusSupportTitle}>Deuda ya resuelta</h3>
                     <span className={styles.focusSupportValue}>{settledPct}% cerrada</span>
                   </div>
-                  <div className={styles.focusRail}>
+                  <div
+                    className={styles.focusRail}
+                    role="progressbar"
+                    aria-valuenow={settledPct}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-label={`Deuda ya resuelta: ${settledPct}%`}
+                  >
                     <div className={styles.focusRailFill} style={{ width: `${settledPct}%` }} />
                   </div>
                   <p className={styles.focusSupportText}>
@@ -317,10 +327,10 @@ export const DebtsContent = () => {
               </div>
 
               <div className={styles.focusActions}>
-                <IconButton
+                <Button
                   label="Nueva deuda"
                   variant="primary"
-                  icon={<IonIcon icon={addOutline} />}
+                  iconLeft={<IonIcon icon={addOutline} />}
                   onClick={() => {
                     setEditingDebt(null);
                     setComposerOpen(true);

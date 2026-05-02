@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'r
 import { IonContent, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, useIonAlert, useIonToast } from '@ionic/react';
 import { addOutline, cardOutline } from 'ionicons/icons';
 import { AppLayout } from '../../templates/AppLayout';
-import { IconButton } from '../../atoms/IconButton';
 import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
 import { SelectInput } from '../../atoms/SelectInput';
@@ -487,7 +486,14 @@ export const TransactionsContent = () => {
                   </div>
                   {spotlight.budget > 0 ? (
                     <>
-                      <div className={styles.focusRail}>
+                      <div
+                        className={styles.focusRail}
+                        role="progressbar"
+                        aria-valuenow={Math.min(spotlight.pct, 100)}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-label={`${spotlight.category}: ${spotlight.pct}% del presupuesto`}
+                      >
                         <div
                           className={`${styles.focusRailFill} ${!spotlight.on_track ? styles.focusRailFillWarn : ''}`}
                           style={{ width: `${Math.min(spotlight.pct, 100)}%` }}
@@ -540,10 +546,10 @@ export const TransactionsContent = () => {
 
               {/* Actions */}
               <div className={styles.focusActions}>
-                <IconButton
+                <Button
                   label="Nueva transacción"
                   variant="primary"
-                  icon={<IonIcon icon={addOutline} />}
+                  iconLeft={<IonIcon icon={addOutline} />}
                   onClick={() => {
                     setEditingTransaction(null);
                     setComposerOpen(true);

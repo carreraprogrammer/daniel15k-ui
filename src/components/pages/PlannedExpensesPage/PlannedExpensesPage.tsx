@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { IonContent, IonIcon } from '@ionic/react';
 import { addOutline } from 'ionicons/icons';
 import { AppLayout } from '../../templates/AppLayout';
-import { IconButton } from '../../atoms/IconButton';
 import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
 import { SelectInput } from '../../atoms/SelectInput';
@@ -193,10 +192,10 @@ export const PlannedExpensesContent = () => {
                 </div>
 
                 <div className={styles.focusActions}>
-                  <IconButton
+                  <Button
                     label="Nuevo gasto planeado"
                     variant="primary"
-                    icon={<IonIcon icon={addOutline} />}
+                    iconLeft={<IonIcon icon={addOutline} />}
                     onClick={() => {
                       setEditingExpense(null);
                       setComposerOpen(true);

@@ -255,7 +255,7 @@ export const BudgetsContent = () => {
                         <p className={styles.focusText}>
                           {topRisk
                             ? `${topRisk.category} es la señal más útil para empezar. No necesitas leer toda la tabla antes de saber dónde mirar.`
-                            : 'Cuando existan presupuestos, esta tarjeta te dirá primero si el plan sigue sano o no.'}
+                            : 'Armá el plan mensual para que esta tarjeta muestre si el presupuesto sigue en rango.'}
                         </p>
                       </div>
                       <div>
@@ -277,7 +277,14 @@ export const BudgetsContent = () => {
                         <h3 className={styles.focusSupportTitle}>Riesgo principal</h3>
                         <span className={styles.focusSupportValue}>{Math.round(topRisk.pct)}%</span>
                       </div>
-                      <div className={styles.focusRail}>
+                      <div
+                        className={styles.focusRail}
+                        role="progressbar"
+                        aria-valuenow={Math.min(Math.round(topRisk.pct), 100)}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-label={`${topRisk.category}: ${Math.round(topRisk.pct)}% del presupuesto`}
+                      >
                         <div
                           className={`${styles.focusRailFill} ${topRisk.on_track ? '' : styles.focusRailFillWarn}`}
                           style={{ width: `${Math.min(Math.round(topRisk.pct), 100)}%` }}
