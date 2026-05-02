@@ -340,7 +340,7 @@ export const BudgetsContent = () => {
                     Historial
                   </button>
                 </div>
-                <Button label="← Volver" variant="ghost" onClick={() => setDetailsOpen(false)} />
+                <Button label="← Volver" variant="link" size="sm" onClick={() => setDetailsOpen(false)} />
               </div>
 
               {/* ── Tab: Detalle ── */}

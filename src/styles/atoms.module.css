@@ -29,6 +29,8 @@
 .ghost { background:transparent; color:var(--color-text-primary); border-color:var(--color-border); }
 .danger { background:var(--color-error); color:var(--color-text-inverse); }
 .success { background:var(--color-success); color:var(--color-text-inverse); }
+.link { background:transparent; color:rgba(231,236,244,0.55); border-color:transparent; text-transform:none; letter-spacing:0; font-weight:var(--font-medium); }
+.link:hover:not(:disabled) { color:rgba(231,236,244,0.9); background:rgba(255,255,255,0.05); border-color:rgba(255,255,255,0.07); }
 .sm { padding:var(--space-2) var(--space-3); }
 .md { padding:var(--space-3) var(--space-4); }
 .lg { padding:var(--space-4) var(--space-5); }

@@ -577,7 +577,7 @@ export const TransactionsContent = () => {
                   >›</button>
                 </div>
               </div>
-              <Button label="Volver al resumen" variant="ghost" onClick={() => setDetailsOpen(false)} />
+              <Button label="← Volver" variant="link" size="sm" onClick={() => setDetailsOpen(false)} />
             </div>
             <div className={styles.detailPanel}>
             <ListToolbar

@@ -232,7 +232,7 @@ export const PlannedExpensesContent = () => {
                       Bolsillos
                     </button>
                   </div>
-                  <Button label="Volver al resumen" variant="ghost" onClick={() => setDetailsOpen(false)} />
+                  <Button label="← Volver" variant="link" size="sm" onClick={() => setDetailsOpen(false)} />
                 </div>
               </div>
               {activeTab === 'planned' ? (

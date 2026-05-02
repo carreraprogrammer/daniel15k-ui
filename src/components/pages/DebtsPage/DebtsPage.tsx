@@ -343,7 +343,7 @@ export const DebtsContent = () => {
                 <h3 className={styles.detailStageTitle}>Detalle de deudas</h3>
                 <p className={styles.detailStageText}>La edición, los filtros y el listado completo viven aquí, no debajo del resumen inicial.</p>
               </div>
-              <Button label="Volver al resumen" variant="ghost" onClick={() => setDetailsOpen(false)} />
+              <Button label="← Volver" variant="link" size="sm" onClick={() => setDetailsOpen(false)} />
             </div>
             <div className={styles.detailPanel}>
             <ListToolbar
