@@ -112,6 +112,12 @@ export const DashboardContent = () => {
     : 'Las obligaciones del próximo ciclo necesitan cubrirse antes de mover cualquier dinero.';
 
   const isWarn = liquidity?.buffer_status !== 'comfortable';
+  const realAvailable = liquidity?.confirmed_balance ?? summary?.balance.net_balance ?? summary?.balance.balance_confirmed ?? 0;
+  const realAvailableCaption = liquidity
+    ? 'caja actual: saldo anterior + ingresos − gastos'
+    : (summary?.balance.carryover_from_previous_month ?? 0) > 0
+    ? 'saldo acumulado (incluye excedente anterior)'
+    : 'ingresos − gastos confirmados';
 
   const coveragePct =
     liquidity && liquidity.next_cycle_obligations > 0
@@ -195,15 +201,11 @@ export const DashboardContent = () => {
 
                   {/* Balance operable hoy — el número más útil del día a día */}
                   <div className={styles.heroMetric}>
-                    <span className={styles.metricLabel}>Balance hoy</span>
+                    <span className={styles.metricLabel}>Disponible real</span>
                     <span className={[styles.metricValue, isWarn ? styles.metricWarn : ''].filter(Boolean).join(' ')}>
-                      {formatCurrencyCompact(summary.balance.net_balance ?? summary.balance.balance_confirmed)}
+                      {formatCurrencyCompact(realAvailable)}
                     </span>
-                    <span className={styles.metricCaption}>
-                      {(summary.balance.carryover_from_previous_month ?? 0) > 0
-                        ? 'saldo acumulado (incluye excedente anterior)'
-                        : 'ingresos − gastos confirmados'}
-                    </span>
+                    <span className={styles.metricCaption}>{realAvailableCaption}</span>
                   </div>
                 </div>
 

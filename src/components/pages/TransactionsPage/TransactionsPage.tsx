@@ -232,6 +232,7 @@ export const TransactionsContent = () => {
     [appliedChips],
   );
   const monthBalance = metrics.incomeTotal - metrics.expenseTotal;
+  const realAvailable = summary?.liquidity?.confirmed_balance ?? summary?.balance.net_balance ?? monthBalance;
   const linkPeriodOptions = useMemo(() => periodOptionsFor(linkingTransaction), [linkingTransaction]);
 
   const handleCreate = async (payload: TransactionCreatePayload) => {
@@ -424,22 +425,20 @@ export const TransactionsContent = () => {
                     </div>
                   </div>
                   <p className={styles.focusCaption}>
+                    Disponible real:{' '}
+                    <span className={realAvailable < 0 ? styles.statusWarn : styles.statusGood}>
+                      {formatCurrencyCompact(realAvailable)}
+                    </span>
+                    <span style={{ opacity: 0.5, fontSize: '0.75em', marginLeft: '4px' }}>
+                      (incluye saldo anterior)
+                    </span>
+                  </p>
+                  <p className={styles.focusCaption} style={{ marginTop: '4px' }}>
                     Balance del mes:{' '}
                     <span className={monthBalance < 0 ? styles.statusWarn : styles.statusGood}>
                       {formatCurrencyCompact(monthBalance)}
                     </span>
                   </p>
-                  {(summary?.balance.carryover_from_previous_month ?? 0) !== 0 && (
-                    <p className={styles.focusCaption} style={{ marginTop: '4px' }}>
-                      Disponible:{' '}
-                      <span className={styles.statusGood}>
-                        {formatCurrencyCompact(summary!.balance.net_balance)}
-                      </span>
-                      <span style={{ opacity: 0.5, fontSize: '0.75em', marginLeft: '4px' }}>
-                        (incl. excedente anterior)
-                      </span>
-                    </p>
-                  )}
                 </div>
                 <div className={styles.focusMeta} style={{ alignSelf: 'start', justifyContent: 'flex-end' }}>
                   {metrics.pendingCount > 0 ? (
