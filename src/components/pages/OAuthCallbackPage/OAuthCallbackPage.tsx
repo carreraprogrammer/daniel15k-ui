@@ -3,6 +3,7 @@ import { IonContent, IonPage } from '@ionic/react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Spinner } from '../../atoms/Spinner';
 import { useAuthStore } from '../../../store/authStore';
+import { getLastAuthPath } from '../../../utils/navigation';
 
 export const OAuthCallbackPage = () => {
   const history = useHistory();
@@ -38,7 +39,7 @@ export const OAuthCallbackPage = () => {
       },
     });
 
-    history.replace('/dashboard');
+    history.replace(getLastAuthPath());
   }, [history, hydrateAuth, location.search]);
 
   return (

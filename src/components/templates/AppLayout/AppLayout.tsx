@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { IonIcon, IonPage } from '@ionic/react';
 import { closeOutline, logOutOutline, personCircleOutline } from 'ionicons/icons';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { Header } from '../../organisms/Header';
 import { BrandMark } from '../../atoms/BrandMark';
 import { Button } from '../../atoms/Button';
 import { CompletenessIndicator } from '../../molecules/CompletenessIndicator';
 import { AgentEventRenderer } from '../../molecules/AgentEventRenderer';
 import { useAuthStore } from '../../../store/authStore';
+import { rememberAuthPath } from '../../../utils/navigation';
 import styles from './AppLayout.module.css';
 
 const NAV_ITEMS = [
@@ -23,9 +24,14 @@ const NAV_ITEMS = [
 
 export const AppLayout = ({ title, children }: { title: string; children: ReactNode }) => {
   const logout = useAuthStore((state) => state.logout);
+  const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const shellRef = useRef<HTMLDivElement | null>(null);
   const headerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    rememberAuthPath(location.pathname);
+  }, [location.pathname]);
 
   useEffect(() => {
     document.body.classList.toggle('menu-open', mobileMenuOpen);

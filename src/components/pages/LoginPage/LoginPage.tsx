@@ -8,6 +8,7 @@ import { useAuthStore } from '../../../store/authStore';
 import { useFormStore } from '../../../store/formStore';
 import { useToast } from '../../../hooks/useToast';
 import { startGoogleOAuth } from '../../../services/authService';
+import { getLastAuthPath } from '../../../utils/navigation';
 import styles from '../AuthPage.module.css';
 
 const fallbackSchema = {
@@ -69,7 +70,7 @@ export const LoginPage = () => {
           submitLabel="Entrar"
           onSuccess={(response) => {
             hydrateAuth(response);
-            history.replace('/dashboard');
+            history.replace(getLastAuthPath());
           }}
           onError={(error) => {
             showError('No se pudo iniciar sesión. Verifica tus credenciales.');

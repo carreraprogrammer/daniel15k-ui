@@ -4,7 +4,6 @@ import { Redirect, Route } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { LoginPage } from '../components/pages/LoginPage/LoginPage';
 import { RegisterPage } from '../components/pages/RegisterPage/RegisterPage';
-import { LandingPage } from '../components/pages/LandingPage';
 import { DashboardPage } from '../components/pages/DashboardPage/DashboardPage';
 import { ProfilePage } from '../components/pages/ProfilePage/ProfilePage';
 import { NotFoundPage } from '../components/pages/NotFoundPage/NotFoundPage';
@@ -16,6 +15,7 @@ import { RecurringObligationsPage } from '../components/pages/RecurringObligatio
 import { BudgetsPage } from '../components/pages/BudgetsPage';
 import { SavingsGoalsPage } from '../components/pages/SavingsGoalsPage';
 import { QuickCapturePage } from '../components/pages/QuickCapturePage';
+import { getLastAuthPath } from '../utils/navigation';
 
 const ProtectedRoute = ({
   component: Component,
@@ -48,15 +48,21 @@ const GuestRoute = ({
   return (
     <Route
       {...rest}
-      render={() => (isAuthenticated ? <Redirect to="/dashboard" /> : <Component />)}
+      render={() => (isAuthenticated ? <Redirect to={getLastAuthPath()} /> : <Component />)}
     />
   );
+};
+
+const RootRedirect = () => {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
+  return <Redirect to={isAuthenticated ? getLastAuthPath() : '/login'} />;
 };
 
 export const AppRouter = () => {
   return (
     <IonRouterOutlet animated={false}>
-      <Route exact path="/" component={LandingPage} />
+      <Route exact path="/" component={RootRedirect} />
       <GuestRoute exact path="/login" component={LoginPage} />
       <GuestRoute exact path="/register" component={RegisterPage} />
       <Route exact path="/auth/callback" component={OAuthCallbackPage} />

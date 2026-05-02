@@ -5,6 +5,7 @@ import { GoogleButton } from '../../atoms/GoogleButton';
 import { startGoogleOAuth } from '../../../services/authService';
 import { useAuthStore } from '../../../store/authStore';
 import { useToast } from '../../../hooks/useToast';
+import { getLastAuthPath } from '../../../utils/navigation';
 import styles from '../AuthPage.module.css';
 
 const schema = {
@@ -45,7 +46,7 @@ export const RegisterPage = () => {
           submitLabel="Crear cuenta"
           onSuccess={(response) => {
             hydrateAuth(response);
-            history.replace('/dashboard');
+            history.replace(getLastAuthPath());
           }}
           onError={(error) => {
             showError('No se pudo completar el registro.');
