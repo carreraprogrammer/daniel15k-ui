@@ -1,5 +1,6 @@
 import { IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding } from '@ionic/react';
 import { checkmarkDoneOutline, closeOutline, createOutline } from 'ionicons/icons';
+import { Badge, type BadgeStatus } from '../../atoms/Badge';
 import type { PlannedExpense } from '../../../types/finance.types';
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import styles from './PlannedExpenseSlidingCard.module.css';
@@ -18,6 +19,12 @@ const statusLabels: Record<PlannedExpense['attributes']['status'], string> = {
   planned: 'Planeado',
   executed: 'Ejecutado',
   cancelled: 'Cancelado',
+};
+
+const statusTone: Record<PlannedExpense['attributes']['status'], BadgeStatus> = {
+  planned: 'info',
+  executed: 'success',
+  cancelled: 'warning',
 };
 
 export interface PlannedExpenseSlidingCardProps {
@@ -41,9 +48,7 @@ export const PlannedExpenseSlidingCard = ({
           <div className={styles.primary}>
             <div className={styles.header}>
               <span className={styles.type}>{planningTypeLabels[attrs.planning_type] ?? attrs.planning_type}</span>
-              <span className={`${styles.status} ${styles[`status_${attrs.status}`] ?? ''}`}>
-                {statusLabels[attrs.status] ?? attrs.status}
-              </span>
+              <Badge label={statusLabels[attrs.status] ?? attrs.status} status={statusTone[attrs.status]} size="sm" />
             </div>
             <strong className={styles.name}>{attrs.name}</strong>
             <div className={styles.chipRow}>

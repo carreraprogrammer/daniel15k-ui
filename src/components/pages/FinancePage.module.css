@@ -78,7 +78,7 @@
   background: rgba(124, 224, 211, 0.08);
   border: 1px solid rgba(124, 224, 211, 0.18);
   color: rgba(223, 249, 244, 0.92);
-  font-size: 0.86rem;
+  font-size: var(--type-body-small-size);
   font-weight: 600;
   letter-spacing: 0.01em;
 }
@@ -246,7 +246,7 @@
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.05);
   color: rgba(255, 255, 255, 0.86);
-  font-size: 0.82rem;
+  font-size: var(--type-label-size);
   font-weight: 600;
 }
 
@@ -332,13 +332,13 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   color: rgba(231, 236, 244, 0.68);
-  font-size: 0.8rem;
+  font-size: var(--type-label-size);
 }
 
 .spendLegendAmount {
   flex-shrink: 0;
   color: rgba(255, 255, 255, 0.88);
-  font-size: 0.8rem;
+  font-size: var(--type-label-size);
   font-weight: 600;
 }
 
@@ -352,7 +352,7 @@
 .focusSupportTitle {
   margin: 0;
   color: rgba(231, 236, 244, 0.82);
-  font-size: 0.84rem;
+  font-size: var(--type-label-size);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -360,14 +360,14 @@
 
 .focusSupportValue {
   color: #fff;
-  font-size: 1rem;
+  font-size: var(--type-body-size);
   font-weight: 700;
 }
 
 .focusSupportText {
   margin: 0;
   color: rgba(231, 236, 244, 0.64);
-  font-size: 0.92rem;
+  font-size: var(--type-body-small-size);
   line-height: 1.55;
 }
 
@@ -400,7 +400,7 @@
 .executionLabel {
   min-width: 0;
   color: rgba(231, 236, 244, 0.76);
-  font-size: 0.78rem;
+  font-size: var(--type-caption-size);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -409,7 +409,7 @@
 .executionPct {
   flex: 0 0 auto;
   color: #fff;
-  font-size: 1.05rem;
+  font-size: var(--type-card-title-size);
   font-weight: 760;
 }
 
@@ -429,7 +429,7 @@
 .executionAmount {
   margin: 0;
   color: rgba(255, 255, 255, 0.9);
-  font-size: 0.95rem;
+  font-size: var(--type-body-size);
   font-weight: 700;
   line-height: 1.35;
 }
@@ -437,7 +437,7 @@
 .executionHint {
   margin: 0;
   color: rgba(231, 236, 244, 0.58);
-  font-size: 0.82rem;
+  font-size: var(--type-label-size);
   line-height: 1.45;
 }
 
@@ -481,7 +481,7 @@
 .creditPoolTitle {
   margin: 0;
   color: #fff;
-  font-size: 0.92rem;
+  font-size: var(--type-body-small-size);
   font-weight: 760;
   letter-spacing: 0;
 }
@@ -489,13 +489,13 @@
 .creditPoolText {
   margin: 0.2rem 0 0;
   color: rgba(231, 236, 244, 0.62);
-  font-size: 0.82rem;
+  font-size: var(--type-label-size);
   line-height: 1.4;
 }
 
 .creditPoolTotal {
   color: #7ce0d3;
-  font-size: 1.25rem;
+  font-size: var(--type-section-title-size);
   font-weight: 800;
   letter-spacing: -0.03em;
   white-space: nowrap;
@@ -523,20 +523,20 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   color: rgba(231, 236, 244, 0.78);
-  font-size: 0.84rem;
+  font-size: var(--type-label-size);
 }
 
 .creditPoolAmount {
   flex: 0 0 auto;
   color: rgba(255, 255, 255, 0.9);
-  font-size: 0.84rem;
+  font-size: var(--type-label-size);
   font-weight: 700;
 }
 
 .creditPoolMore {
   justify-content: flex-start;
   color: rgba(231, 236, 244, 0.5);
-  font-size: 0.8rem;
+  font-size: var(--type-label-size);
 }
 
 .focusRail {
@@ -596,7 +596,7 @@
   background: transparent;
   color: rgba(231, 236, 244, 0.55);
   font-family: var(--font-sans);
-  font-size: var(--text-sm, 0.875rem);
+  font-size: var(--type-body-small-size);
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
   white-space: nowrap;
@@ -616,14 +616,14 @@
 .detailStageTitle {
   margin: 0;
   color: #fff;
-  font-size: 1.2rem;
+  font-size: var(--type-section-title-size);
   letter-spacing: -0.03em;
 }
 
 .detailStageText {
   margin: 0;
   color: rgba(231, 236, 244, 0.68);
-  font-size: 0.94rem;
+  font-size: var(--type-body-size);
   line-height: 1.55;
 }
 
@@ -661,7 +661,7 @@
 
 .filterComposerLabel {
   color: rgba(231, 236, 244, 0.8);
-  font-size: 0.76rem;
+  font-size: var(--type-caption-size);
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -669,7 +669,7 @@
 
 .filterComposerHint {
   color: rgba(231, 236, 244, 0.54);
-  font-size: 0.88rem;
+  font-size: var(--type-body-small-size);
 }
 
 .categoryRail,
@@ -726,7 +726,7 @@
 
 .categoryTokenText,
 .subcategoryTokenText {
-  font-size: 0.9rem;
+  font-size: var(--type-body-small-size);
   font-weight: 600;
   line-height: 1.1;
 }
@@ -777,7 +777,7 @@
 .sectionTitle {
   margin: 0;
   color: #fff;
-  font-size: 0.96rem;
+  font-size: var(--type-body-size);
 }
 
 .sheetSection {
@@ -788,7 +788,7 @@
 .sheetSectionTitle {
   margin: 0;
   color: rgba(231, 236, 244, 0.7);
-  font-size: 0.82rem;
+  font-size: var(--type-label-size);
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -837,7 +837,7 @@
 .headline {
   margin: 0;
   color: #fff;
-  font-size: clamp(1.6rem, 2.4vw, 2.2rem);
+  font-size: var(--type-amount-medium-size);
   letter-spacing: -0.04em;
 }
 
@@ -850,7 +850,7 @@
 
 .eyebrow {
   color: var(--color-accent);
-  font-size: 0.74rem;
+  font-size: var(--type-caption-size);
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -909,13 +909,13 @@
   display: block;
   margin-bottom: 0.45rem;
   color: rgba(231, 236, 244, 0.64);
-  font-size: 0.82rem;
+  font-size: var(--type-label-size);
 }
 
 .metricValue {
   display: block;
   color: #fff;
-  font-size: 1.7rem;
+  font-size: var(--type-page-title-size);
   font-weight: 700;
   letter-spacing: -0.04em;
 }
@@ -947,7 +947,7 @@
 .panelTitle {
   margin: 0;
   color: #fff;
-  font-size: 1.05rem;
+  font-size: var(--type-card-title-size);
 }
 
 .list {
@@ -967,7 +967,7 @@
   gap: 0.75rem;
   padding: 0.85rem 1rem 0.25rem;
   color: rgba(231, 236, 244, 0.62);
-  font-size: 0.88rem;
+  font-size: var(--type-body-small-size);
 }
 
 .listItem {
@@ -1017,7 +1017,7 @@
 
 .listMeta {
   color: rgba(231, 236, 244, 0.64);
-  font-size: 0.85rem;
+  font-size: var(--type-body-small-size);
 }
 
 .progressTrack {
@@ -1042,7 +1042,7 @@
   border-radius: 999px;
   background: rgba(243, 210, 122, 0.14);
   color: var(--color-accent);
-  font-size: 0.78rem;
+  font-size: var(--type-caption-size);
   font-weight: 700;
   letter-spacing: 0.02em;
 }
@@ -1092,7 +1092,7 @@
 
 .table th {
   color: rgba(231, 236, 244, 0.6);
-  font-size: 0.78rem;
+  font-size: var(--type-caption-size);
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -1158,7 +1158,7 @@
   }
 
   .headline {
-    font-size: clamp(1.3rem, 6vw, 1.7rem);
+    font-size: var(--type-page-title-size);
   }
 
   .description {
@@ -1176,19 +1176,19 @@
   }
 
   .focusTitle {
-    font-size: clamp(1.25rem, 6vw, 1.6rem);
+    font-size: var(--type-page-title-size);
   }
 
   .focusValue {
-    font-size: clamp(1.8rem, 9vw, 2.4rem);
+    font-size: var(--type-amount-large-size);
   }
 
   .monthCompareValue {
-    font-size: 1.85rem;
+    font-size: var(--type-page-title-size);
   }
 
   .focusText {
-    font-size: 0.95rem;
+    font-size: var(--type-body-size);
   }
 
   .focusActions {
@@ -1218,7 +1218,7 @@
   }
 
   .eyebrow {
-    font-size: 0.68rem;
+    font-size: var(--type-caption-size);
     letter-spacing: 0.14em;
   }
 
@@ -1271,7 +1271,7 @@
   .table th,
   .table td {
     padding: 0.8rem 0.75rem;
-    font-size: 0.88rem;
+    font-size: var(--type-body-small-size);
   }
 
   .secondaryActions {

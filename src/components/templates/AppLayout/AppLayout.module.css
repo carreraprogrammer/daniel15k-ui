@@ -276,7 +276,7 @@
   .mobileMenuKicker,
   .mobileMenuLabel {
     color: var(--color-accent);
-    font-size: 0.75rem;
+    font-size: var(--type-caption-size);
     font-weight: 700;
     letter-spacing: 0.16em;
     text-transform: uppercase;
@@ -285,7 +285,7 @@
   .mobileMenuTitle {
     margin-top: 0.3rem;
     color: #fff8e7;
-    font-size: clamp(1.55rem, 6vw, 2rem);
+    font-size: var(--type-amount-medium-size);
     letter-spacing: -0.04em;
   }
 
@@ -306,7 +306,7 @@
 
   .mobileMenuClose :global(svg),
   .mobileMenuClose :global(ion-icon) {
-    font-size: 22px;
+    font-size: var(--text-2xl);
   }
 
   .mobileMenuSection {
@@ -321,7 +321,7 @@
 
   .mobileMenu .navLink {
     padding: 1.05rem 1rem;
-    font-size: 1.05rem;
+    font-size: var(--type-card-title-size);
     border-radius: 18px;
   }
 
@@ -340,6 +340,6 @@
   }
 
   .utilityLink :global(ion-icon) {
-    font-size: 1.3rem;
+    font-size: var(--type-section-title-size);
   }
 }

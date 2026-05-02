@@ -74,7 +74,7 @@
   color: #fff;
   opacity: 0;
   padding: 0 1rem 0 0.1rem;
-  font-size: 1rem;
+  font-size: var(--type-body-size);
   transition: opacity 160ms ease;
 }
 
@@ -111,14 +111,14 @@
   border-radius: 999px;
   background: var(--color-accent);
   color: var(--color-text-inverse);
-  font-size: 0.7rem;
+  font-size: var(--type-caption-size);
   font-weight: 800;
 }
 
 .resultLabel {
   margin: 0;
   color: rgba(231, 236, 244, 0.62);
-  font-size: 0.84rem;
+  font-size: var(--type-label-size);
 }
 
 .compact {
@@ -149,7 +149,7 @@
 
 .compact .searchInput {
   padding-right: 0.75rem;
-  font-size: 0.92rem;
+  font-size: var(--type-body-small-size);
 }
 
 .compact .actions {
@@ -157,7 +157,7 @@
 }
 
 .compact .resultLabel {
-  font-size: 0.78rem;
+  font-size: var(--type-caption-size);
 }
 
 @media (min-width: 768px) {

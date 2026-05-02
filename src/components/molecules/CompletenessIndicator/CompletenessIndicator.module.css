@@ -41,7 +41,7 @@
 }
 
 .bubbleIcon {
-  font-size: 0.9rem;
+  font-size: var(--type-body-small-size);
   line-height: 1;
 }
 
@@ -101,14 +101,14 @@
 }
 
 .panelIcon {
-  font-size: 0.9rem;
+  font-size: var(--type-body-small-size);
   line-height: 1;
 }
 
 .panelTitle {
   margin: 0;
   color: rgba(231, 236, 244, 0.9);
-  font-size: 0.82rem;
+  font-size: var(--type-label-size);
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -154,7 +154,7 @@
 
 .itemLabel {
   color: rgba(231, 236, 244, 0.85);
-  font-size: 0.875rem;
+  font-size: var(--type-body-small-size);
   font-weight: 500;
 }
 
@@ -182,7 +182,7 @@
   border: 1px solid rgba(214, 168, 74, 0.24);
   background: rgba(214, 168, 74, 0.08);
   color: var(--color-accent);
-  font-size: 0.78rem;
+  font-size: var(--type-caption-size);
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
@@ -201,7 +201,7 @@
   flex-shrink: 0;
   padding: 2px 8px;
   border-radius: var(--radius-full);
-  font-size: 0.65rem;
+  font-size: var(--type-caption-size);
   font-weight: var(--font-semibold);
   letter-spacing: 0.04em;
   text-transform: uppercase;

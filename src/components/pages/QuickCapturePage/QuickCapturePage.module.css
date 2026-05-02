@@ -19,7 +19,7 @@
 }
 
 .successBadge {
-  font-size: 13px;
+  font-size: var(--type-label-size);
   font-weight: 600;
   color: var(--color-investment, #1A9E4A);
   background: rgba(26, 158, 74, 0.12);

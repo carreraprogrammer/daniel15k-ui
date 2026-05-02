@@ -151,7 +151,7 @@
   background: rgba(255, 255, 255, 0.04);
   color: var(--color-text-secondary);
   font-family: var(--font-sans);
-  font-size: 0.68rem;
+  font-size: var(--type-caption-size);
   font-weight: var(--font-semibold);
   letter-spacing: 0.02em;
 }

@@ -43,7 +43,7 @@
 .title {
   margin: 0;
   color: #fff;
-  font-size: clamp(1.6rem, 2.6vw, 2.4rem);
+  font-size: var(--type-amount-large-size);
   letter-spacing: -0.04em;
 }
 
@@ -61,7 +61,7 @@
 .formTitle {
   margin: 0;
   color: #fff;
-  font-size: clamp(1.3rem, 2vw, 1.8rem);
+  font-size: var(--type-page-title-size);
   letter-spacing: -0.03em;
 }
 

@@ -71,12 +71,12 @@
   }
 
   .contentEyebrow {
-    font-size: 0.68rem;
+    font-size: var(--type-caption-size);
     letter-spacing: 0.14em;
   }
 
   .contentText {
-    font-size: 0.92rem;
+    font-size: var(--type-body-small-size);
     line-height: 1.45;
     color: rgba(240, 240, 248, 0.66);
   }
@@ -86,7 +86,7 @@
   }
 
   .dividerText {
-    font-size: 0.68rem;
+    font-size: var(--type-caption-size);
     letter-spacing: 0.08em;
   }
 }

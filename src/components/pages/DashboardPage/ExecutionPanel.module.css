@@ -26,7 +26,7 @@
 }
 
 .sectionTitle {
-  font-size: 12px;
+  font-size: var(--type-caption-size);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -34,7 +34,7 @@
 }
 
 .sectionMeta {
-  font-size: 12px;
+  font-size: var(--type-caption-size);
   color: rgba(231, 236, 244, 0.55);
 }
 
@@ -55,7 +55,7 @@
 }
 
 .rowIcon {
-  font-size: 13px;
+  font-size: var(--type-label-size);
   font-weight: 700;
   text-align: center;
   line-height: 1;
@@ -74,7 +74,7 @@
 }
 
 .rowName {
-  font-size: 13px;
+  font-size: var(--type-label-size);
   color: rgba(231, 236, 244, 0.9);
   white-space: nowrap;
   overflow: hidden;
@@ -86,7 +86,7 @@
 }
 
 .rowStatus {
-  font-size: 10px;
+  font-size: var(--type-caption-size);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -97,7 +97,7 @@
 .row_partial .rowStatus  { color: #D4732A; }
 
 .rowMeta {
-  font-size: 11px;
+  font-size: var(--type-caption-size);
   color: rgba(231, 236, 244, 0.35);
 }
 
@@ -109,7 +109,7 @@
 }
 
 .rowDelivered {
-  font-size: 13px;
+  font-size: var(--type-label-size);
   font-weight: 600;
   color: rgba(231, 236, 244, 0.85);
 }
@@ -119,12 +119,12 @@
 }
 
 .rowExpected {
-  font-size: 11px;
+  font-size: var(--type-caption-size);
   color: rgba(231, 236, 244, 0.35);
 }
 
 .linkBtn {
-  font-size: 11px;
+  font-size: var(--type-caption-size);
   font-weight: 500;
   color: rgba(100, 160, 255, 0.85);
   background: none;
@@ -168,7 +168,7 @@
 }
 
 .modalTitle {
-  font-size: 15px;
+  font-size: var(--type-body-small-size);
   color: rgba(231, 236, 244, 0.9);
   margin: 0;
 }
@@ -178,13 +178,13 @@
 }
 
 .modalHint {
-  font-size: 12px;
+  font-size: var(--type-caption-size);
   color: rgba(231, 236, 244, 0.45);
   margin: 0;
 }
 
 .modalEmpty {
-  font-size: 13px;
+  font-size: var(--type-label-size);
   color: rgba(231, 236, 244, 0.45);
   text-align: center;
   padding: 24px 0;
@@ -232,7 +232,7 @@
 }
 
 .modalRowConcept {
-  font-size: 13px;
+  font-size: var(--type-label-size);
   color: rgba(231, 236, 244, 0.9);
   white-space: nowrap;
   overflow: hidden;
@@ -240,19 +240,19 @@
 }
 
 .modalRowMeta {
-  font-size: 11px;
+  font-size: var(--type-caption-size);
   color: rgba(231, 236, 244, 0.4);
 }
 
 .modalRowAmount {
-  font-size: 13px;
+  font-size: var(--type-label-size);
   font-weight: 600;
   color: rgba(231, 236, 244, 0.75);
   white-space: nowrap;
 }
 
 .modalCancel {
-  font-size: 13px;
+  font-size: var(--type-label-size);
   font-weight: 500;
   color: rgba(231, 236, 244, 0.5);
   background: none;

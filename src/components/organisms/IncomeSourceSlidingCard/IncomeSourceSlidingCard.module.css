@@ -60,7 +60,7 @@
 .meta,
 .label {
   color: rgba(231, 236, 244, 0.64);
-  font-size: 0.85rem;
+  font-size: var(--type-body-small-size);
 }
 
 .name,
@@ -73,7 +73,7 @@
   width: fit-content;
   padding: 0.28rem 0.62rem;
   border-radius: 999px;
-  font-size: 0.78rem;
+  font-size: var(--type-caption-size);
   font-weight: 700;
 }
 

@@ -1,5 +1,6 @@
 import { IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding } from '@ionic/react';
 import { createOutline, linkOutline, trashOutline } from 'ionicons/icons';
+import { Badge, type BadgeStatus } from '../../atoms/Badge';
 import type { Debt } from '../../../types/finance.types';
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import styles from './DebtSlidingCard.module.css';
@@ -9,6 +10,13 @@ const statusLabels: Record<string, string> = {
   paid_off: 'Pagada',
   paused: 'Pausada',
   disputed: 'Disputa',
+};
+
+const statusTone: Record<string, BadgeStatus> = {
+  active: 'success',
+  paid_off: 'success',
+  paused: 'warning',
+  disputed: 'warning',
 };
 
 export interface DebtSlidingCardProps {
@@ -26,9 +34,11 @@ export const DebtSlidingCard = ({ debt, linkedObligationLabel, onManageLink, onE
         <div className={styles.primary}>
           <div className={styles.header}>
             <span className={styles.type}>{debt.attributes.debt_type}</span>
-            <span className={`${styles.status} ${styles[`status_${debt.attributes.status}`] ?? ''}`}>
-              {statusLabels[debt.attributes.status] ?? debt.attributes.status}
-            </span>
+            <Badge
+              label={statusLabels[debt.attributes.status] ?? debt.attributes.status}
+              status={statusTone[debt.attributes.status] ?? 'neutral'}
+              size="sm"
+            />
           </div>
           <strong className={styles.name}>{debt.attributes.name}</strong>
           <span className={styles.meta}>Pago mensual {formatCurrencyCompact(debt.attributes.monthly_payment)}</span>

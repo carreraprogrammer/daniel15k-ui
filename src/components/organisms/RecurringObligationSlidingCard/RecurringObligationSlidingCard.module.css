@@ -51,7 +51,7 @@
 }
 
 .iconGlyph {
-  font-size: 1.25rem;
+  font-size: var(--type-section-title-size);
   color: var(--cat-color);
 }
 
@@ -92,7 +92,7 @@
   background: color-mix(in srgb, var(--cat-color) 12%, transparent);
   border: 1px solid color-mix(in srgb, var(--cat-color) 22%, transparent);
   font-family: var(--font-sans);
-  font-size: 0.72rem;
+  font-size: var(--type-caption-size);
   font-weight: var(--font-semibold);
   color: var(--cat-color);
   white-space: nowrap;
@@ -113,7 +113,7 @@
   border-radius: var(--radius-full);
   border: 1px solid rgba(255, 255, 255, 0.1);
   font-family: var(--font-sans);
-  font-size: 0.72rem;
+  font-size: var(--type-caption-size);
   font-weight: var(--font-medium);
   color: var(--color-text-secondary);
   white-space: nowrap;
@@ -127,7 +127,7 @@
   border: 1px solid rgba(143, 233, 221, 0.22);
   background: rgba(143, 233, 221, 0.08);
   font-family: var(--font-sans);
-  font-size: 0.72rem;
+  font-size: var(--type-caption-size);
   font-weight: var(--font-medium);
   color: #8fe9dd;
   white-space: nowrap;
@@ -135,7 +135,7 @@
 
 .meta {
   font-family: var(--font-sans);
-  font-size: 0.78rem;
+  font-size: var(--type-caption-size);
   color: var(--color-text-disabled);
 }
 
@@ -151,25 +151,12 @@
 
 .amount {
   font-family: var(--font-mono);
-  font-size: 1.05rem;
+  font-size: var(--type-card-title-size);
   font-weight: var(--font-bold);
   color: var(--color-text-primary);
   letter-spacing: var(--tracking-tight);
   white-space: nowrap;
 }
-
-.badge {
-  display: inline-flex;
-  width: fit-content;
-  padding: 0.22rem 0.55rem;
-  border-radius: var(--radius-full);
-  font-family: var(--font-sans);
-  font-size: 0.72rem;
-  font-weight: var(--font-medium);
-}
-
-.badgeActive   { background: rgba(143, 233, 221, 0.1); color: #8fe9dd; }
-.badgeInactive { background: rgba(255, 178, 138, 0.1); color: #ffb28a; }
 
 /* ── Responsive ─────────────────────────────────────────────────────────── */
 

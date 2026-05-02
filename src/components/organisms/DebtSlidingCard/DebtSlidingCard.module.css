@@ -67,7 +67,7 @@
 .label,
 .linked {
   color: rgba(231, 236, 244, 0.64);
-  font-size: 0.85rem;
+  font-size: var(--type-body-small-size);
 }
 
 .linked {
@@ -77,31 +77,6 @@
 .name,
 .amount {
   color: #fff;
-}
-
-.status {
-  display: inline-flex;
-  width: fit-content;
-  padding: 0.28rem 0.62rem;
-  border-radius: 999px;
-  font-size: 0.78rem;
-  font-weight: 700;
-}
-
-.status_active {
-  background: rgba(143, 233, 221, 0.14);
-  color: #8fe9dd;
-}
-
-.status_paid_off {
-  background: rgba(124, 224, 211, 0.14);
-  color: #7ce0d3;
-}
-
-.status_paused,
-.status_disputed {
-  background: rgba(255, 178, 138, 0.14);
-  color: #ffb28a;
 }
 
 @media (max-width: 640px) {

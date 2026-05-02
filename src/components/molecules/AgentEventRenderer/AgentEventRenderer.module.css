@@ -7,14 +7,14 @@
 }
 
 .toolbarTitle {
-  font-size: 1rem;
+  font-size: var(--type-body-size);
   font-weight: 600;
   color: #fff;
 }
 
 .closeBtn {
   --color: rgba(231, 236, 244, 0.55);
-  font-size: 1.1rem;
+  font-size: var(--type-card-title-size);
   margin-right: 0.25rem;
 }
 
@@ -75,7 +75,7 @@
 }
 
 .stepLabel {
-  font-size: 0.65rem;
+  font-size: var(--type-caption-size);
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -117,14 +117,14 @@
 .loadingTitle {
   margin: 0;
   color: #fff;
-  font-size: 1.15rem;
+  font-size: var(--type-card-title-size);
   font-weight: 600;
 }
 
 .loadingSubtitle {
   margin: 0;
   color: rgba(231, 236, 244, 0.45);
-  font-size: 0.9rem;
+  font-size: var(--type-body-small-size);
   line-height: 1.6;
 }
 
@@ -169,22 +169,22 @@
 
 .summaryLabel {
   color: rgba(231, 236, 244, 0.65);
-  font-size: 0.9rem;
+  font-size: var(--type-body-small-size);
 }
 
 .summaryValue {
   color: #fff;
-  font-size: 0.95rem;
+  font-size: var(--type-body-size);
 }
 
 .summaryValueMuted {
   color: rgba(231, 236, 244, 0.45);
-  font-size: 0.88rem;
+  font-size: var(--type-body-small-size);
 }
 
 .summaryValueAccent {
   color: #68d391;
-  font-size: 1.05rem;
+  font-size: var(--type-card-title-size);
   font-weight: 700;
 }
 
@@ -202,7 +202,7 @@
 .sectionLabel {
   margin: 0;
   color: rgba(231, 236, 244, 0.4);
-  font-size: 0.72rem;
+  font-size: var(--type-caption-size);
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -225,12 +225,12 @@
 
 .distributionLabel {
   color: rgba(231, 236, 244, 0.65);
-  font-size: 0.82rem;
+  font-size: var(--type-label-size);
 }
 
 .distributionAmount {
   color: #fff;
-  font-size: 0.85rem;
+  font-size: var(--type-body-small-size);
   font-weight: 600;
 }
 
@@ -253,13 +253,13 @@
 
 .warningIcon {
   flex-shrink: 0;
-  font-size: 0.9rem;
+  font-size: var(--type-body-small-size);
 }
 
 .warningText {
   margin: 0;
   color: #f6ad55;
-  font-size: 0.85rem;
+  font-size: var(--type-body-small-size);
   line-height: 1.5;
 }
 
@@ -280,14 +280,14 @@
 .infoBody {
   margin: 0;
   color: rgba(231, 236, 244, 0.85);
-  font-size: 1rem;
+  font-size: var(--type-body-size);
   line-height: 1.65;
 }
 
 .infoContext {
   margin: 0;
   color: rgba(231, 236, 244, 0.5);
-  font-size: 0.88rem;
+  font-size: var(--type-body-small-size);
   line-height: 1.6;
   font-style: italic;
 }
@@ -297,7 +297,7 @@
 .selectorSubtitle {
   margin: 0;
   color: rgba(231, 236, 244, 0.5);
-  font-size: 0.9rem;
+  font-size: var(--type-body-small-size);
   line-height: 1.6;
 }
 
@@ -313,7 +313,7 @@
 
 .categoryGroupLabel {
   color: rgba(231, 236, 244, 0.35);
-  font-size: 0.68rem;
+  font-size: var(--type-caption-size);
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -345,12 +345,12 @@
 
 .categoryName {
   color: rgba(231, 236, 244, 0.85);
-  font-size: 0.95rem;
+  font-size: var(--type-body-size);
 }
 
 .selectionCount {
   color: rgba(231, 236, 244, 0.45);
-  font-size: 0.85rem;
+  font-size: var(--type-body-small-size);
   align-self: center;
   margin-right: auto;
 }
@@ -371,7 +371,7 @@
 
 .amountLabel {
   color: rgba(231, 236, 244, 0.75);
-  font-size: 0.92rem;
+  font-size: var(--type-body-small-size);
   flex: 1;
 }
 
@@ -382,7 +382,7 @@
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.05);
   color: #fff;
-  font-size: 0.92rem;
+  font-size: var(--type-body-small-size);
   text-align: right;
   outline: none;
   transition: border-color 0.15s;
@@ -394,7 +394,7 @@
 
 .amountFixed {
   color: rgba(231, 236, 244, 0.4);
-  font-size: 0.9rem;
+  font-size: var(--type-body-small-size);
 }
 
 .amountTotalRow {

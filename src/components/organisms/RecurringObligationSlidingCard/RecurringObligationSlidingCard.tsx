@@ -1,5 +1,6 @@
 import { IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding } from '@ionic/react';
 import { closeCircleOutline, createOutline, trashOutline } from 'ionicons/icons';
+import { Badge } from '../../atoms/Badge';
 import type { RecurringObligation } from '../../../types/finance.types';
 import { resolveNamedIcon } from '../BudgetWizard/iconRegistry';
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
@@ -68,9 +69,7 @@ export const RecurringObligationSlidingCard = ({
           {/* ── Secondary info ── */}
           <div className={styles.secondary}>
             <strong className={styles.amount}>{formatCurrencyCompact(attrs.amount)}</strong>
-            <span className={[styles.badge, isActive ? styles.badgeActive : styles.badgeInactive].join(' ')}>
-              {isActive ? 'Activa' : 'Inactiva'}
-            </span>
+            <Badge label={isActive ? 'Activa' : 'Inactiva'} status={isActive ? 'success' : 'warning'} size="sm" />
           </div>
         </div>
       </IonItem>

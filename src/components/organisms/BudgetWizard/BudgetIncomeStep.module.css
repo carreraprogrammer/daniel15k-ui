@@ -43,14 +43,14 @@
 }
 
 .icon {
-  font-size: 1.35rem;
+  font-size: var(--type-section-title-size);
   color: var(--color-accent);
 }
 
 .title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(1.5rem, 2vw, 2rem);
+  font-size: var(--type-amount-medium-size);
   font-weight: var(--font-semibold);
   color: var(--color-text-primary);
   letter-spacing: var(--tracking-tight);
@@ -102,7 +102,7 @@
 
 .sourceName {
   font-family: var(--font-sans);
-  font-size: 1.05rem;
+  font-size: var(--type-card-title-size);
   color: var(--color-text-primary);
   font-weight: var(--font-semibold);
   overflow: hidden;
@@ -159,7 +159,7 @@
 
 .amountText {
   font-family: var(--font-mono);
-  font-size: clamp(1.15rem, 1.8vw, 1.4rem);
+  font-size: var(--type-card-title-size);
   color: var(--color-text-primary);
   font-weight: var(--font-semibold);
 }
@@ -276,7 +276,7 @@
 
 .totalAmount {
   font-family: var(--font-mono);
-  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  font-size: var(--type-amount-large-size);
   font-weight: var(--font-bold);
   color: var(--color-accent);
   letter-spacing: var(--tracking-tight);

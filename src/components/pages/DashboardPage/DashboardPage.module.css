@@ -18,7 +18,7 @@
 .planBannerText {
   margin: 0;
   color: rgba(255, 255, 255, 0.9);
-  font-size: 0.94rem;
+  font-size: var(--type-body-size);
   font-weight: 650;
   line-height: 1.45;
 }
@@ -30,7 +30,7 @@
   border-radius: 999px;
   background: rgba(243, 210, 122, 0.92);
   color: #121016;
-  font-size: 0.84rem;
+  font-size: var(--type-label-size);
   font-weight: 800;
   cursor: pointer;
 }
@@ -130,7 +130,7 @@
 .insightStale {
   margin: 0;
   color: rgba(231, 236, 244, 0.42);
-  font-size: 0.84rem;
+  font-size: var(--type-label-size);
   font-style: italic;
 }
 
@@ -221,13 +221,13 @@
 
 .pressureLabel {
   color: rgba(231, 236, 244, 0.68);
-  font-size: 0.82rem;
+  font-size: var(--type-label-size);
   font-weight: 600;
 }
 
 .pressurePct {
   color: #fff;
-  font-size: 0.88rem;
+  font-size: var(--type-body-small-size);
   font-weight: 700;
 }
 
@@ -252,7 +252,7 @@
 .pressureCaption {
   margin: 0;
   color: rgba(231, 236, 244, 0.52);
-  font-size: 0.8rem;
+  font-size: var(--type-label-size);
 }
 
 /* ── Badges ───────────────────────────────────────────────────────────────── */
@@ -271,7 +271,7 @@
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.08);
   color: rgba(231, 236, 244, 0.82);
-  font-size: 0.8rem;
+  font-size: var(--type-label-size);
   font-weight: 600;
 }
 
@@ -333,7 +333,7 @@
 
 .kpiLabel {
   color: rgba(231, 236, 244, 0.58);
-  font-size: 0.76rem;
+  font-size: var(--type-caption-size);
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -341,7 +341,7 @@
 
 .kpiValue {
   color: #fff;
-  font-size: clamp(1.1rem, 2.2vw, 1.5rem);
+  font-size: var(--type-section-title-size);
   font-weight: 700;
   letter-spacing: -0.03em;
   overflow-wrap: anywhere;
@@ -357,7 +357,7 @@
 
 .kpiHint {
   color: rgba(231, 236, 244, 0.52);
-  font-size: 0.76rem;
+  font-size: var(--type-caption-size);
   line-height: 1.4;
 }
 
@@ -383,7 +383,7 @@
 .chartTitle {
   margin: 0;
   color: rgba(231, 236, 244, 0.82);
-  font-size: 0.82rem;
+  font-size: var(--type-label-size);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -411,7 +411,7 @@
 
 .legendLabel {
   color: rgba(231, 236, 244, 0.68);
-  font-size: 0.78rem;
+  font-size: var(--type-caption-size);
 }
 
 /* ── Detail zone ──────────────────────────────────────────────────────────── */
@@ -429,7 +429,7 @@
 .detailTitle {
   margin: 0;
   color: rgba(231, 236, 244, 0.72);
-  font-size: 0.8rem;
+  font-size: var(--type-label-size);
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -459,7 +459,7 @@
 
 .listPrimary {
   color: #fff;
-  font-size: 0.9rem;
+  font-size: var(--type-body-small-size);
   font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -468,12 +468,12 @@
 
 .listSecondary {
   color: rgba(231, 236, 244, 0.56);
-  font-size: 0.78rem;
+  font-size: var(--type-caption-size);
 }
 
 .listAmount {
   color: #fff;
-  font-size: 0.9rem;
+  font-size: var(--type-body-small-size);
   font-weight: 700;
   letter-spacing: -0.02em;
   white-space: nowrap;

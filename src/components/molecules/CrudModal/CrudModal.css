@@ -61,7 +61,7 @@
 
 .crud-modal__eyebrow {
   color: var(--color-accent);
-  font-size: 0.72rem;
+  font-size: var(--type-caption-size);
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -71,14 +71,14 @@
   margin: 0;
   color: var(--color-text-primary);
   font-family: var(--font-display);
-  font-size: clamp(1.25rem, 2vw, 1.65rem);
+  font-size: var(--type-section-title-size);
   letter-spacing: -0.03em;
 }
 
 .crud-modal__subtitle {
   margin: 0;
   color: rgba(231, 236, 244, 0.66);
-  font-size: 0.94rem;
+  font-size: var(--type-body-size);
   line-height: 1.55;
 }
 

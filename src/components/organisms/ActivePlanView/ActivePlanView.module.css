@@ -68,7 +68,7 @@
   margin: 0;
   color: var(--color-text-primary);
   font-family: var(--font-display);
-  font-size: clamp(2rem, 3.2vw, 3.2rem);
+  font-size: var(--type-page-title-size);
   line-height: 0.96;
   letter-spacing: -0.05em;
 }
@@ -78,7 +78,7 @@
   max-width: 58ch;
   color: rgba(231, 236, 244, 0.72);
   font-family: var(--font-sans);
-  font-size: 0.98rem;
+  font-size: var(--type-body-size);
   line-height: 1.65;
 }
 
@@ -174,11 +174,11 @@
 }
 
 .metricValue {
-  font-size: clamp(2rem, 3vw, 3rem);
+  font-size: var(--type-amount-large-size);
 }
 
 .metricValueCompact {
-  font-size: clamp(1.5rem, 2vw, 2rem);
+  font-size: var(--type-amount-medium-size);
 }
 
 .heroActions {
@@ -266,7 +266,7 @@
 }
 
 .categoryIcon {
-  font-size: 1.25rem;
+  font-size: var(--type-section-title-size);
   color: var(--cat-color);
 }
 
@@ -287,7 +287,7 @@
   margin: 0;
   color: var(--color-text-primary);
   font-family: var(--font-display);
-  font-size: clamp(1.2rem, 1.5vw, 1.5rem);
+  font-size: var(--type-section-title-size);
   letter-spacing: -0.03em;
 }
 
@@ -303,7 +303,7 @@
   margin: 0;
   color: rgba(231, 236, 244, 0.58);
   font-family: var(--font-sans);
-  font-size: 0.82rem;
+  font-size: var(--type-label-size);
   line-height: 1.5;
 }
 
@@ -315,7 +315,7 @@
   background: rgba(255, 255, 255, 0.04);
   color: rgba(231, 236, 244, 0.72);
   font-family: var(--font-sans);
-  font-size: 0.74rem;
+  font-size: var(--type-caption-size);
   font-weight: var(--font-semibold);
 }
 
@@ -349,13 +349,13 @@
 .categoryPct {
   color: var(--color-text-primary);
   font-family: var(--font-display);
-  font-size: clamp(1.4rem, 2vw, 1.85rem);
+  font-size: var(--type-amount-medium-size);
   font-weight: var(--font-semibold);
   letter-spacing: -0.04em;
 }
 
 .categoryChevron {
-  font-size: 1rem;
+  font-size: var(--type-body-size);
   color: rgba(231, 236, 244, 0.54);
 }
 
@@ -420,7 +420,7 @@
   margin: 0;
   color: var(--color-text-primary);
   font-family: var(--font-sans);
-  font-size: 0.95rem;
+  font-size: var(--type-body-size);
   font-variant-numeric: tabular-nums;
   line-height: 1.2;
 }
@@ -466,7 +466,7 @@
 }
 
 .subcategoryIcon {
-  font-size: 1rem;
+  font-size: var(--type-body-size);
   color: var(--subcategory-accent);
 }
 
@@ -500,7 +500,7 @@
   background: rgba(255, 255, 255, 0.04);
   color: rgba(231, 236, 244, 0.72);
   font-family: var(--font-sans);
-  font-size: 0.72rem;
+  font-size: var(--type-caption-size);
   font-weight: var(--font-semibold);
   white-space: nowrap;
 }
@@ -560,7 +560,7 @@
   margin: 0;
   color: var(--color-text-primary);
   font-family: var(--font-display);
-  font-size: clamp(1.5rem, 2vw, 2rem);
+  font-size: var(--type-amount-medium-size);
 }
 
 .emptyText {

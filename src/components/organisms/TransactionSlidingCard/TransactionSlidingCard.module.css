@@ -30,7 +30,7 @@
 }
 
 .buttonIcon {
-  font-size: 24px;
+  font-size: var(--text-2xl);
 }
 
 .linkIcon   { color: #8fe9dd; }
@@ -76,7 +76,7 @@
 }
 
 .iconGlyph {
-  font-size: 1.25rem;
+  font-size: var(--type-section-title-size);
   color: var(--cat-color);
 }
 

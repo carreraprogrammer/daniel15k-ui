@@ -78,7 +78,7 @@
 
 .topbarEyebrow {
   font-family: var(--font-display);
-  font-size: 0.7rem;
+  font-size: var(--type-caption-size);
   font-weight: var(--font-semibold);
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -95,7 +95,7 @@
 .topbarTitle {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(1.15rem, 1.7vw, 1.35rem);
+  font-size: var(--type-card-title-size);
   font-weight: var(--font-semibold);
   color: var(--color-text-primary);
   letter-spacing: var(--tracking-tight);
