@@ -25,3 +25,76 @@
 
 .uppercase { text-transform: uppercase; }
 .truncate  { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.type-display,
+.type-page-title,
+.type-section-title,
+.type-card-title,
+.type-amount-large,
+.type-amount-medium {
+  font-family: var(--font-sans);
+  color: var(--color-text-primary);
+  letter-spacing: var(--tracking-normal);
+}
+
+.type-display {
+  font-size: var(--type-display-size);
+  font-weight: var(--type-display-weight);
+  line-height: 1.12;
+}
+
+.type-page-title {
+  font-size: var(--type-page-title-size);
+  font-weight: var(--type-page-title-weight);
+  line-height: var(--leading-heading);
+}
+
+.type-section-title {
+  font-size: var(--type-section-title-size);
+  font-weight: var(--type-section-title-weight);
+  line-height: var(--leading-heading);
+}
+
+.type-card-title {
+  font-size: var(--type-card-title-size);
+  font-weight: var(--type-card-title-weight);
+  line-height: var(--leading-tight);
+}
+
+.type-body {
+  font-size: var(--type-body-size);
+  font-weight: var(--type-body-weight);
+  line-height: var(--leading-normal);
+}
+
+.type-body-small {
+  font-size: var(--type-body-small-size);
+  font-weight: var(--type-body-weight);
+  line-height: var(--leading-normal);
+}
+
+.type-label {
+  font-size: var(--type-label-size);
+  font-weight: var(--type-label-weight);
+  line-height: var(--leading-label);
+}
+
+.type-caption {
+  font-size: var(--type-caption-size);
+  font-weight: var(--font-medium);
+  line-height: var(--leading-label);
+}
+
+.type-amount-large {
+  font-size: var(--type-amount-large-size);
+  font-weight: var(--type-amount-weight);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.05;
+}
+
+.type-amount-medium {
+  font-size: var(--type-amount-medium-size);
+  font-weight: var(--type-amount-weight);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}

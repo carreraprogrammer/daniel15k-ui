@@ -11,7 +11,7 @@
 .errorInput { border-color:var(--color-border-error); }
 
 /* Labels */
-.label { display:block; font-size:var(--text-sm); font-weight:var(--font-medium); color:var(--color-text-secondary); letter-spacing:var(--tracking-wide); text-transform:uppercase; }
+.label { display:block; font-size:var(--type-label-size); font-weight:var(--type-label-weight); line-height:var(--leading-label); color:var(--color-text-secondary); letter-spacing:var(--tracking-normal); text-transform:none; }
 .required::after { content:' *'; color:var(--color-error); }
 .checkboxLabel { display:flex; align-items:center; gap:var(--space-2); }
 
@@ -20,7 +20,7 @@
 .hint { font-size:var(--text-xs); color:var(--color-text-disabled); }
 
 /* Button */
-.button { border-radius:var(--radius-md); font-weight:var(--font-semibold); letter-spacing:var(--tracking-wide); text-transform:uppercase; cursor:pointer; transition:background var(--transition-fast), box-shadow var(--transition-fast); display:inline-flex; align-items:center; justify-content:center; gap:var(--space-2); border:1px solid transparent; padding:var(--space-3) var(--space-4); }
+.button { border-radius:var(--radius-md); font-size:var(--type-label-size); line-height:var(--leading-label); font-weight:var(--font-semibold); letter-spacing:var(--tracking-normal); text-transform:none; cursor:pointer; transition:background var(--transition-fast), box-shadow var(--transition-fast); display:inline-flex; align-items:center; justify-content:center; gap:var(--space-2); border:1px solid transparent; padding:var(--space-3) var(--space-4); }
 .button:focus-visible { box-shadow:var(--shadow-brand); outline:none; }
 .button:active:not(:disabled) { opacity:.88; transform:scale(0.97); }
 .button:disabled { opacity:.4; cursor:not-allowed; }
@@ -37,7 +37,7 @@
 .fullWidth { width:100%; }
 
 /* Badge */
-.badge { display:inline-flex; align-items:center; gap:var(--space-2); border-radius:var(--radius-full); padding:var(--space-1) var(--space-3); font-size:var(--text-xs); }
+.badge { display:inline-flex; align-items:center; gap:var(--space-2); border-radius:var(--radius-full); padding:0.28rem 0.62rem; font-size:var(--type-caption-size); line-height:var(--leading-label); font-weight:var(--font-semibold); letter-spacing:var(--tracking-normal); }
 .brand { background:var(--color-brand-subtle); color:var(--color-brand); }
 .warning { background:var(--color-warning-subtle); color:var(--color-warning); }
 .neutral { background:var(--color-bg-elevated); color:var(--color-text-secondary); }

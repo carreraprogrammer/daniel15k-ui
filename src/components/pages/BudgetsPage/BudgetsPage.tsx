@@ -5,6 +5,8 @@ import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
 import { ErrorState } from '../../molecules/ErrorState';
 import { EmptyState } from '../../molecules/EmptyState';
+import { ErrorNotice } from '../../molecules/ErrorNotice/ErrorNotice';
+import { LoadingOverlay } from '../../molecules/LoadingOverlay/LoadingOverlay';
 import { ListToolbar } from '../../molecules/ListToolbar';
 import { AppliedFiltersBar } from '../../molecules/AppliedFiltersBar';
 import { SortSheet } from '../../molecules/SortSheet';
@@ -519,33 +521,10 @@ export const BudgetsContent = () => {
         />
 
         {/* Loading overlay shown inside wizard when fetching wizard data */}
-        {wizardOpen && wizardDataLoading && !wizardData ? (
-          <div
-            style={{
-              position: 'fixed',
-              inset: 0,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 'var(--space-4)',
-              background: 'rgba(5, 7, 12, 0.72)',
-              zIndex: 'calc(var(--z-modal) + 1)',
-            }}
-          >
-            <Spinner size="lg" />
-            <p
-              style={{
-                margin: 0,
-                color: 'var(--color-text-secondary)',
-                fontFamily: 'var(--font-sans)',
-                fontSize: 'var(--text-sm)',
-              }}
-            >
-              Cargando datos del asistente...
-            </p>
-          </div>
-        ) : null}
+        <LoadingOverlay
+          isOpen={wizardOpen && wizardDataLoading && !wizardData}
+          message="Cargando datos del asistente..."
+        />
 
         {/* Wizard-level error (fetch failure) */}
         {wizardOpen && wizardDataError && !wizardData ? (
@@ -553,27 +532,19 @@ export const BudgetsContent = () => {
             style={{
               position: 'fixed',
               inset: 0,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 'var(--space-4)',
+              display: 'grid',
+              placeItems: 'center',
+              padding: 'var(--space-6)',
               background: 'rgba(5, 7, 12, 0.72)',
               zIndex: 'calc(var(--z-modal) + 1)',
             }}
           >
-            <p
-              style={{
-                margin: 0,
-                color: 'var(--color-error)',
-                fontFamily: 'var(--font-sans)',
-                fontSize: 'var(--text-sm)',
-              }}
-            >
-              {wizardDataError}
-            </p>
-            <Button label="Reintentar" onClick={reloadWizardData} />
-            <Button label="Cerrar" variant="ghost" onClick={handleCloseWizard} />
+            <ErrorNotice
+              title="No pudimos abrir el asistente"
+              message={wizardDataError}
+              onRetry={reloadWizardData}
+              secondaryAction={<Button label="Cerrar" variant="ghost" onClick={handleCloseWizard} />}
+            />
           </div>
         ) : null}
 
@@ -603,34 +574,11 @@ export const BudgetsContent = () => {
         ) : null}
 
         {/* Wizard saving overlay */}
-        {wizardSaving ? (
-          <div
-            aria-busy="true"
-            style={{
-              position: 'fixed',
-              inset: 0,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 'var(--space-4)',
-              background: 'rgba(5, 7, 12, 0.72)',
-              zIndex: 'calc(var(--z-modal) + 3)',
-            }}
-          >
-            <Spinner size="lg" />
-            <p
-              style={{
-                margin: 0,
-                color: 'var(--color-text-secondary)',
-                fontFamily: 'var(--font-sans)',
-                fontSize: 'var(--text-sm)',
-              }}
-            >
-              Guardando plan...
-            </p>
-          </div>
-        ) : null}
+        <LoadingOverlay
+          isOpen={wizardSaving}
+          message="Guardando plan..."
+          zIndex="calc(var(--z-modal) + 3)"
+        />
 
         {/* Legacy BudgetPlanModal — kept for backward compatibility */}
         <BudgetPlanModal

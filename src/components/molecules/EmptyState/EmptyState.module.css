@@ -8,6 +8,17 @@
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
 }
 
+.stateError {
+  border-style: solid;
+  border-color: rgba(239, 68, 68, 0.22);
+  background: linear-gradient(180deg, rgba(239, 68, 68, 0.08), rgba(255, 255, 255, 0.02));
+}
+
+.copy {
+  display: grid;
+  gap: var(--space-2);
+}
+
 .badge {
   padding: 0.35rem 0.7rem;
   border-radius: var(--radius-full);
@@ -19,8 +30,25 @@
   text-transform: uppercase;
 }
 
+.badgeError {
+  background: rgba(239, 68, 68, 0.14);
+  color: var(--color-error);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--text-lg);
+  color: var(--color-text-primary);
+}
+
 .message {
   margin: 0;
   color: rgba(240, 240, 248, 0.76);
   line-height: 1.7;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
 }

@@ -44,9 +44,9 @@
   --color-border-subtle:  #162033;
 
   /* ── TIPOGRAFÍA ── */
-  --font-sans:    'DM Sans', 'SF Pro Display', system-ui, sans-serif;
-  --font-display: 'Sora', 'DM Sans', system-ui, sans-serif;
-  --font-mono:    'DM Mono', 'JetBrains Mono', monospace;
+  --font-sans:    'Manrope', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-display: var(--font-sans);
+  --font-mono:    var(--font-sans);
 
   --text-xs:      0.75rem;    /* 12px */
   --text-sm:      0.875rem;   /* 14px */
@@ -62,14 +62,35 @@
   --font-semibold: 600;
   --font-bold:     700;
 
+  --leading-heading: 1.2;
   --leading-tight:  1.25;
-  --leading-normal: 1.5;
-  --leading-loose:  1.75;
+  --leading-label:  1.25;
+  --leading-normal: 1.52;
+  --leading-loose:  1.6;
 
-  --tracking-tight:  -0.025em;
+  --tracking-tight:   0em;
   --tracking-normal:  0em;
   --tracking-wide:    0.05em;
   --tracking-widest:  0.1em;
+
+  --type-display-size:       clamp(2rem, 8vw, 3rem);
+  --type-page-title-size:    clamp(1.5rem, 6vw, 1.75rem);
+  --type-section-title-size: 1.125rem;
+  --type-card-title-size:    1rem;
+  --type-body-size:          1rem;
+  --type-body-small-size:    0.875rem;
+  --type-label-size:         0.8125rem;
+  --type-caption-size:       0.75rem;
+  --type-amount-large-size:  clamp(1.75rem, 9vw, 2.25rem);
+  --type-amount-medium-size: clamp(1.125rem, 5vw, 1.35rem);
+
+  --type-display-weight:       800;
+  --type-page-title-weight:    750;
+  --type-section-title-weight: 700;
+  --type-card-title-weight:    700;
+  --type-body-weight:          500;
+  --type-label-weight:         700;
+  --type-amount-weight:        800;
 
   /* ── ESPACIADO (escala 4px) ── */
   --space-1:   0.25rem;   /* 4px */
@@ -142,4 +163,15 @@
   --ion-item-background:        var(--color-bg-secondary);
   --ion-card-background:        var(--color-bg-secondary);
   --ion-border-color:           var(--color-border);
+}
+
+@media (min-width: 768px) {
+  :root {
+    --type-display-size:       clamp(2.5rem, 5vw, 4rem);
+    --type-page-title-size:    clamp(1.75rem, 3vw, 2.25rem);
+    --type-section-title-size: 1.25rem;
+    --type-card-title-size:    1.0625rem;
+    --type-amount-large-size:  clamp(2.25rem, 5vw, 3rem);
+    --type-amount-medium-size: clamp(1.25rem, 2.4vw, 1.6rem);
+  }
 }

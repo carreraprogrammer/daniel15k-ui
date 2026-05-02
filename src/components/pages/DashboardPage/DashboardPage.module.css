@@ -82,26 +82,27 @@
 
 .eyebrow {
   color: var(--color-accent);
-  font-size: 0.72rem;
+  font-size: var(--type-caption-size);
   font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+  letter-spacing: var(--tracking-normal);
+  text-transform: none;
 }
 
 .heroTitle {
   margin: 0;
   color: #fff;
-  font-size: clamp(1.4rem, 2.6vw, 2rem);
-  letter-spacing: -0.04em;
-  line-height: 1.1;
+  font-size: var(--type-page-title-size);
+  font-weight: var(--type-page-title-weight);
+  letter-spacing: var(--tracking-normal);
+  line-height: var(--leading-heading);
 }
 
 .heroDesc {
   margin: 0;
   max-width: 54ch;
   color: rgba(231, 236, 244, 0.7);
-  font-size: 0.96rem;
-  line-height: 1.58;
+  font-size: var(--type-body-size);
+  line-height: var(--leading-normal);
 }
 
 .heroAction {
@@ -109,8 +110,8 @@
   padding: 0.65rem 0.85rem;
   border-left: 2px solid rgba(243, 210, 122, 0.5);
   color: rgba(243, 210, 122, 0.9);
-  font-size: 0.9rem;
-  line-height: 1.5;
+  font-size: var(--type-body-small-size);
+  line-height: var(--leading-normal);
   background: rgba(243, 210, 122, 0.04);
   border-radius: 0 8px 8px 0;
 }
@@ -122,8 +123,8 @@
 
 .insightMeta {
   color: rgba(231, 236, 244, 0.42);
-  font-size: 0.72rem;
-  letter-spacing: 0.04em;
+  font-size: var(--type-caption-size);
+  letter-spacing: var(--tracking-normal);
 }
 
 .insightStale {
@@ -143,18 +144,19 @@
 
 .metricLabel {
   color: rgba(231, 236, 244, 0.62);
-  font-size: 0.78rem;
+  font-size: var(--type-caption-size);
   font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  letter-spacing: var(--tracking-normal);
+  text-transform: none;
 }
 
 .metricValue {
   color: #fff;
-  font-size: clamp(2rem, 5vw, 3rem);
-  font-weight: 700;
-  letter-spacing: -0.05em;
-  line-height: 0.92;
+  font-size: var(--type-amount-large-size);
+  font-weight: var(--type-amount-weight);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--tracking-normal);
+  line-height: 1.05;
   overflow-wrap: anywhere;
 }
 
@@ -164,7 +166,8 @@
 
 .metricCaption {
   color: rgba(231, 236, 244, 0.52);
-  font-size: 0.82rem;
+  font-size: var(--type-caption-size);
+  line-height: var(--leading-label);
 }
 
 .availableBand {
@@ -180,25 +183,26 @@
 
 .availableBandLabel {
   color: rgba(231, 236, 244, 0.62);
-  font-size: 0.78rem;
+  font-size: var(--type-caption-size);
   font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: var(--tracking-normal);
+  text-transform: none;
 }
 
 .availableBandValue {
   color: #fff;
-  font-size: clamp(2.6rem, 9vw, 5.4rem);
-  font-weight: 800;
-  letter-spacing: -0.05em;
-  line-height: 0.9;
+  font-size: var(--type-amount-large-size);
+  font-weight: var(--type-amount-weight);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--tracking-normal);
+  line-height: 1.05;
   overflow-wrap: anywhere;
 }
 
 .availableBandHint {
   color: rgba(231, 236, 244, 0.54);
-  font-size: 0.82rem;
-  line-height: 1.45;
+  font-size: var(--type-caption-size);
+  line-height: var(--leading-normal);
 }
 
 /* ── Pressure / coverage bar ──────────────────────────────────────────────── */

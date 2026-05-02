@@ -13,10 +13,11 @@ html {
 body {
   min-height: 100%;
   font-family: var(--font-sans);
-  font-size: var(--text-base);
+  font-size: var(--type-body-size);
   color: var(--color-text-primary);
   background-color: var(--color-bg-primary);
   line-height: var(--leading-normal);
+  font-variant-numeric: tabular-nums;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-y: auto;

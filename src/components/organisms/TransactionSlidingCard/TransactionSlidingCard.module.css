@@ -116,8 +116,8 @@
   border-radius: var(--radius-full);
   background: color-mix(in srgb, var(--cat-color) 12%, transparent);
   border: 1px solid color-mix(in srgb, var(--cat-color) 22%, transparent);
-  font-family: var(--font-sans);
-  font-size: 0.72rem;
+  font-size: var(--type-caption-size);
+  line-height: var(--leading-label);
   font-weight: var(--font-semibold);
   color: var(--cat-color);
   white-space: nowrap;
@@ -137,16 +137,16 @@
   padding: 0.22rem 0.55rem;
   border-radius: var(--radius-full);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  font-family: var(--font-sans);
-  font-size: 0.72rem;
+  font-size: var(--type-caption-size);
+  line-height: var(--leading-label);
   font-weight: var(--font-medium);
   color: var(--color-text-secondary);
   white-space: nowrap;
 }
 
 .meta {
-  font-family: var(--font-sans);
-  font-size: 0.78rem;
+  font-size: var(--type-caption-size);
+  line-height: var(--leading-label);
   color: var(--color-text-disabled);
   white-space: nowrap;
   overflow: hidden;
@@ -154,8 +154,8 @@
 }
 
 .linked {
-  font-family: var(--font-sans);
-  font-size: 0.72rem;
+  font-size: var(--type-caption-size);
+  line-height: var(--leading-label);
   color: #8fe9dd;
   white-space: nowrap;
   overflow: hidden;
@@ -173,11 +173,12 @@
 }
 
 .amount {
-  font-family: var(--font-mono);
-  font-size: 1.05rem;
-  font-weight: var(--font-bold);
+  font-family: var(--font-sans);
+  font-size: var(--type-amount-medium-size);
+  font-weight: var(--type-amount-weight);
+  font-variant-numeric: tabular-nums;
   color: var(--color-text-primary);
-  letter-spacing: var(--tracking-tight);
+  letter-spacing: var(--tracking-normal);
   white-space: nowrap;
 }
 
@@ -190,8 +191,8 @@
   width: fit-content;
   padding: 0.22rem 0.55rem;
   border-radius: var(--radius-full);
-  font-family: var(--font-sans);
-  font-size: 0.72rem;
+  font-size: var(--type-caption-size);
+  line-height: var(--leading-label);
   font-weight: var(--font-medium);
 }
 

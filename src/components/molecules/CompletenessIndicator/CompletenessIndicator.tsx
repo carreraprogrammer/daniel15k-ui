@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
+import { IonIcon } from '@ionic/react';
+import { warningOutline } from 'ionicons/icons';
 import { Link } from 'react-router-dom';
 import { IncomeSetupWizard } from '../../organisms/IncomeSetupWizard';
 import { financeService } from '../../../services/financeService';
@@ -72,7 +74,7 @@ export const CompletenessIndicator = () => {
         {open && (
           <div className={styles.panel}>
             <div className={styles.panelHeader}>
-              <span className={styles.panelIcon}>⚠</span>
+              <IonIcon className={styles.panelIcon} icon={warningOutline} aria-hidden="true" />
               <p className={styles.panelTitle}>Información incompleta</p>
             </div>
             <ul className={styles.list}>
@@ -115,7 +117,7 @@ export const CompletenessIndicator = () => {
           aria-label={`${gaps.length} datos incompletos`}
         >
           <span className={styles.pulseRing} />
-          <span className={styles.bubbleIcon}>⚠</span>
+          <IonIcon className={styles.bubbleIcon} icon={warningOutline} aria-hidden="true" />
           <span className={styles.bubbleCount}>{gaps.length}</span>
         </button>
       </div>

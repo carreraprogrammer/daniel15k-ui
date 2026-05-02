@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { IonContent } from '@ionic/react';
+import { IonContent, IonIcon } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
+import { flagOutline, shieldCheckmarkOutline, trophyOutline } from 'ionicons/icons';
 import {
   PieChart, Pie, Cell,
   BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip,
 } from 'recharts';
 import { AppLayout } from '../../templates/AppLayout';
+import { Badge } from '../../atoms/Badge';
 import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
 import { ErrorState } from '../../molecules/ErrorState';
@@ -40,20 +42,26 @@ const formatRelativeTime = (iso: string): string => {
 };
 
 const MILESTONE_LABELS: Record<string, string> = {
-  debt_paid_off: '🎉 Deuda liquidada',
-  first_debt_paid_off: '🎉 Primera deuda liquidada',
-  debt_free: '🏆 Sin deudas',
-  emergency_fund_reached: '🛡️ Fondo de emergencia listo',
-  first_monthly_plan: '📋 Primer plan mensual',
-  three_months_planned: '📅 3 meses planificados',
-  investment_started: '📈 Inversión iniciada',
-  month_positive_balance: '✅ Mes en positivo',
-  discretionary_under_budget: '💪 Discrecional bajo presupuesto',
-  overflow_deployed: '⚡ Overflow desplegado',
+  debt_paid_off: 'Deuda liquidada',
+  first_debt_paid_off: 'Primera deuda liquidada',
+  debt_free: 'Sin deudas',
+  emergency_fund_reached: 'Fondo de emergencia listo',
+  first_monthly_plan: 'Primer plan mensual',
+  three_months_planned: '3 meses planificados',
+  investment_started: 'Inversión iniciada',
+  month_positive_balance: 'Mes en positivo',
+  discretionary_under_budget: 'Discrecional bajo presupuesto',
+  overflow_deployed: 'Overflow desplegado',
 };
 
 const formatMilestoneLabel = (code: string): string =>
-  MILESTONE_LABELS[code] ?? `🏅 ${code.replace(/_/g, ' ')}`;
+  MILESTONE_LABELS[code] ?? code.replace(/_/g, ' ');
+
+const liquidityLabels: Record<string, string> = {
+  comfortable: 'Liquidez cómoda',
+  tight: 'Liquidez ajustada',
+  critical: 'Liquidez crítica',
+};
 
 export const DashboardContent = () => {
   const { summary, insight, debts, pending, creditCardPending, obligations, completeness, milestones, loading, error, reload } =
@@ -258,53 +266,62 @@ export const DashboardContent = () => {
                 ) : null}
 
                 <div className={styles.heroBadges}>
-                  <span className={styles.badge}>{pending.length} pendientes</span>
+                  <Badge label={`${pending.length} pendientes`} variant="neutral" />
                   {summary.debts ? (
-                    <span className={styles.badge}>
-                      {formatCurrencyCompact(summary.debts.total_balance)} en deuda
-                    </span>
+                    <Badge label={`${formatCurrencyCompact(summary.debts.total_balance)} en deuda`} variant="neutral" />
                   ) : null}
                   {liquidity ? (
-                    <span
-                      className={[
-                        styles.badge,
-                        styles[`badge_${liquidity.buffer_status}`],
-                      ].join(' ')}
-                    >
-                      {liquidity.buffer_status}
-                    </span>
+                    <Badge
+                      label={liquidityLabels[liquidity.buffer_status] ?? liquidity.buffer_status}
+                      status={
+                        liquidity.buffer_status === 'comfortable'
+                          ? 'success'
+                          : liquidity.buffer_status === 'tight'
+                          ? 'warning'
+                          : 'danger'
+                      }
+                      icon={<IonIcon icon={shieldCheckmarkOutline} />}
+                    />
                   ) : null}
                   {lastMilestone ? (
-                    <span
-                      className={[styles.badge, styles.badge_milestone].join(' ')}
+                    <Badge
+                      label={formatMilestoneLabel(lastMilestone.code)}
+                      variant="brand"
+                      icon={<IonIcon icon={trophyOutline} />}
                       title={`Logrado ${formatRelativeTime(lastMilestone.achieved_at)}`}
-                    >
-                      {formatMilestoneLabel(lastMilestone.code)}
-                    </span>
+                    />
                   ) : null}
                   {activeSavingsGoals.length > 0 ? (
-                    <span className={styles.badge}>
-                      🎯 {activeSavingsGoals.length} {activeSavingsGoals.length === 1 ? 'meta' : 'metas'} activa{activeSavingsGoals.length === 1 ? '' : 's'}
-                    </span>
+                    <Badge
+                      label={`${activeSavingsGoals.length} ${activeSavingsGoals.length === 1 ? 'meta' : 'metas'} activa${activeSavingsGoals.length === 1 ? '' : 's'}`}
+                      variant="neutral"
+                      icon={<IonIcon icon={flagOutline} />}
+                    />
                   ) : null}
                 </div>
 
                 <div className={styles.heroActions}>
                   <Button
-                    label={snapshotOpen ? 'Ocultar análisis' : 'Ver análisis'}
-                    variant="ghost"
-                    onClick={() => setSnapshotOpen((v) => !v)}
-                  />
-                  <Button
                     label={detailOpen ? 'Ocultar detalle' : 'Ver detalle'}
                     variant="ghost"
                     onClick={() => setDetailOpen((v) => !v)}
                   />
-                  {AGENTS_URL && SERVICE_TOKEN ? (
+                  {detailOpen ? (
+                    <Button
+                      label={snapshotOpen ? 'Ocultar análisis' : 'Ver análisis'}
+                      variant="link"
+                      size="sm"
+                      onClick={() => setSnapshotOpen((v) => !v)}
+                    />
+                  ) : null}
+                  {detailOpen && AGENTS_URL && SERVICE_TOKEN ? (
                     <Button
                       label={refreshing ? 'Actualizando…' : 'Actualizar análisis'}
-                      variant="ghost"
+                      variant="link"
+                      size="sm"
                       onClick={() => void handleRefreshInsight()}
+                      loading={refreshing}
+                      disabled={refreshing}
                     />
                   ) : null}
                 </div>

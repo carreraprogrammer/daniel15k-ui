@@ -15,6 +15,7 @@ import { AppliedFiltersBar } from '../../molecules/AppliedFiltersBar';
 import { SortSheet } from '../../molecules/SortSheet';
 import { DebtComposer } from '../../organisms/DebtComposer';
 import { DebtSlidingCard } from '../../organisms/DebtSlidingCard';
+import { useToast } from '../../../hooks/useToast';
 import { financeService } from '../../../services/financeService';
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import type { Debt, DebtPayload, DebtQueryParams, RecurringObligation } from '../../../types/finance.types';
@@ -45,6 +46,7 @@ export const DebtsContent = () => {
   const [selectedObligationId, setSelectedObligationId] = useState('');
   const [linkError, setLinkError] = useState<string | null>(null);
   const [filters, setFilters] = useState<DebtQueryParams>(initialFilters);
+  const { showError, showSuccess, toast } = useToast();
 
   const load = async () => {
     setLoading(true);
@@ -84,6 +86,10 @@ export const DebtsContent = () => {
       await financeService.createDebt(payload);
       setComposerOpen(false);
       await load();
+      showSuccess('Deuda guardada.');
+    } catch (nextError) {
+      showError(nextError instanceof Error ? nextError.message : 'No fue posible guardar la deuda.');
+      throw nextError;
     } finally {
       setSubmitting(false);
     }
@@ -96,6 +102,10 @@ export const DebtsContent = () => {
       setEditingDebt(null);
       setComposerOpen(false);
       await load();
+      showSuccess('Deuda actualizada.');
+    } catch (nextError) {
+      showError(nextError instanceof Error ? nextError.message : 'No fue posible actualizar la deuda.');
+      throw nextError;
     } finally {
       setSubmitting(false);
     }
@@ -114,8 +124,10 @@ export const DebtsContent = () => {
         setEditingDebt(null);
       }
       await load();
+      showSuccess('Deuda borrada.');
     } catch (deleteError) {
       setError(deleteError instanceof Error ? deleteError.message : 'No fue posible borrar la deuda.');
+      showError(deleteError instanceof Error ? deleteError.message : 'No fue posible borrar la deuda.');
     } finally {
       setSubmitting(false);
     }
@@ -260,8 +272,11 @@ export const DebtsContent = () => {
 
       handleCloseLinkModal();
       await load();
+      showSuccess(selectedObligation ? 'Vínculo guardado.' : 'Vínculo eliminado.');
     } catch (nextError) {
-      setLinkError(getRequestErrorMessage(nextError, 'No fue posible actualizar el vínculo con la obligación.'));
+      const message = getRequestErrorMessage(nextError, 'No fue posible actualizar el vínculo con la obligación.');
+      setLinkError(message);
+      showError(message);
     } finally {
       setSubmitting(false);
     }
@@ -414,7 +429,17 @@ export const DebtsContent = () => {
 
         {loading ? <Spinner size="lg" /> : null}
         {error ? <ErrorState message={error} onRetry={() => void load()} /> : null}
-        {!loading && !error && !debts.length ? <EmptyState message="No hay deudas registradas." /> : null}
+        {!loading && !error && !debts.length ? (
+          <EmptyState
+            title="No hay deudas registradas"
+            description="Empieza con tu primera deuda para ver presión mensual, saldo activo y relación con obligaciones." 
+            actionLabel="Nueva deuda"
+            onAction={() => {
+              setEditingDebt(null);
+              setComposerOpen(true);
+            }}
+          />
+        ) : null}
 
         {!loading && !error && debts.length && detailsOpen ? (
           <div className={styles.list}>
@@ -536,6 +561,7 @@ export const DebtsContent = () => {
           </div>
         </section>
       </CrudModal>
+      {toast}
     </IonContent>
   );
 };

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { IonContent, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, useIonAlert, useIonToast } from '@ionic/react';
-import { addOutline, cardOutline } from 'ionicons/icons';
+import { addOutline, cardOutline, warningOutline } from 'ionicons/icons';
 import { AppLayout } from '../../templates/AppLayout';
 import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
@@ -235,14 +235,46 @@ export const TransactionsContent = () => {
   const linkPeriodOptions = useMemo(() => periodOptionsFor(linkingTransaction), [linkingTransaction]);
 
   const handleCreate = async (payload: TransactionCreatePayload) => {
-    await createTransaction(payload);
-    setComposerOpen(false);
+    try {
+      await createTransaction(payload);
+      setComposerOpen(false);
+      await presentToast({
+        message: 'Transacción guardada con éxito',
+        duration: 2200,
+        color: 'success',
+        position: 'top',
+      });
+    } catch (nextError) {
+      await presentToast({
+        message: nextError instanceof Error ? nextError.message : 'No se pudo guardar la transacción',
+        duration: 2600,
+        color: 'danger',
+        position: 'top',
+      });
+      throw nextError;
+    }
   };
 
   const handleUpdate = async (id: string, payload: TransactionUpdatePayload) => {
-    await updateTransaction(id, payload);
-    setEditingTransaction(null);
-    setComposerOpen(false);
+    try {
+      await updateTransaction(id, payload);
+      setEditingTransaction(null);
+      setComposerOpen(false);
+      await presentToast({
+        message: 'Transacción actualizada con éxito',
+        duration: 2200,
+        color: 'success',
+        position: 'top',
+      });
+    } catch (nextError) {
+      await presentToast({
+        message: nextError instanceof Error ? nextError.message : 'No se pudo actualizar la transacción',
+        duration: 2600,
+        color: 'danger',
+        position: 'top',
+      });
+      throw nextError;
+    }
   };
 
   const handleDelete = async (transaction: Transaction) => {
@@ -372,8 +404,21 @@ export const TransactionsContent = () => {
       await financeService.linkTransaction(linkingTransaction.id, payload);
       handleCloseLinkModal();
       void reload();
+      await presentToast({
+        message: selectedLinkId ? 'Vínculo guardado con éxito' : 'Vínculo eliminado',
+        duration: 2200,
+        color: 'success',
+        position: 'top',
+      });
     } catch (err) {
-      setLinkError(err instanceof Error ? err.message : 'No fue posible guardar el vínculo.');
+      const message = err instanceof Error ? err.message : 'No fue posible guardar el vínculo.';
+      setLinkError(message);
+      await presentToast({
+        message,
+        duration: 2600,
+        color: 'danger',
+        position: 'top',
+      });
     } finally {
       setLinkSubmitting(false);
     }
@@ -480,7 +525,8 @@ export const TransactionsContent = () => {
                 <div className={`${styles.focusSupport} ${!spotlight.on_track ? styles.focusSupportWarn : ''}`}>
                   <div className={styles.focusSupportHeader}>
                     <h3 className={styles.focusSupportTitle}>
-                      {!spotlight.on_track ? '⚠ ' : ''}{spotlight.category}
+                      {!spotlight.on_track ? <IonIcon icon={warningOutline} aria-hidden="true" /> : null}
+                      {spotlight.category}
                     </h3>
                     <span className={styles.focusSupportValue}>{formatCurrencyCompact(spotlight.spent)}</span>
                   </div>
@@ -713,7 +759,21 @@ export const TransactionsContent = () => {
 
         {loading ? <Spinner size="lg" /> : null}
         {error ? <ErrorState message={error} onRetry={() => void reload()} /> : null}
-        {!loading && !error && !transactions.length ? <EmptyState message="No hay transacciones para el período actual." /> : null}
+        {!loading && !error && !transactions.length ? (
+          <EmptyState
+            title="No hay transacciones en este período"
+            description={activeFilterCount || filters.q ? 'No encontramos movimientos con esos filtros. Limpia criterios o registra una transacción nueva.' : 'Empieza registrando el primer movimiento del período para ver progreso y lectura conductual.'}
+            actionLabel={activeFilterCount || filters.q ? 'Limpiar filtros' : 'Nueva transacción'}
+            onAction={() => {
+              if (activeFilterCount || filters.q) {
+                setFilters(initialTransactionFilters);
+                return;
+              }
+              setEditingTransaction(null);
+              setComposerOpen(true);
+            }}
+          />
+        ) : null}
 
         {!loading && !error && transactions.length && detailsOpen ? (
           <div className={styles.list}>

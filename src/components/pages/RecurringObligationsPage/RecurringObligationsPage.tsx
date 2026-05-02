@@ -16,6 +16,7 @@ import { RecurringObligationComposer } from '../../organisms/RecurringObligation
 import { RecurringObligationSlidingCard } from '../../organisms/RecurringObligationSlidingCard';
 import { IncomeSourceComposer } from '../../organisms/IncomeSourceComposer';
 import { IncomeSourceSlidingCard } from '../../organisms/IncomeSourceSlidingCard';
+import { useToast } from '../../../hooks/useToast';
 import { financeService } from '../../../services/financeService';
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import type {
@@ -71,6 +72,7 @@ export const RecurringObligationsContent = () => {
   const [incomeComposerOpen, setIncomeComposerOpen] = useState(false);
   const [editingIncome, setEditingIncome] = useState<IncomeSource | null>(null);
   const [deletingIncome, setDeletingIncome] = useState<IncomeSource | null>(null);
+  const { showError, showSuccess, toast } = useToast();
 
   const load = async () => {
     setLoading(true);
@@ -121,6 +123,10 @@ export const RecurringObligationsContent = () => {
       await financeService.createRecurringObligation(payload);
       setComposerOpen(false);
       await load();
+      showSuccess('Recurrente guardado.');
+    } catch (nextError) {
+      showError(nextError instanceof Error ? nextError.message : 'No fue posible guardar el recurrente.');
+      throw nextError;
     } finally {
       setSubmitting(false);
     }
@@ -133,6 +139,10 @@ export const RecurringObligationsContent = () => {
       setEditingObligation(null);
       setComposerOpen(false);
       await load();
+      showSuccess('Recurrente actualizado.');
+    } catch (nextError) {
+      showError(nextError instanceof Error ? nextError.message : 'No fue posible actualizar el recurrente.');
+      throw nextError;
     } finally {
       setSubmitting(false);
     }
@@ -151,8 +161,10 @@ export const RecurringObligationsContent = () => {
         setEditingObligation(null);
       }
       await load();
+      showSuccess('Recurrente borrado.');
     } catch (deleteError) {
       setError(deleteError instanceof Error ? deleteError.message : 'No fue posible borrar el recurrente.');
+      showError(deleteError instanceof Error ? deleteError.message : 'No fue posible borrar el recurrente.');
     } finally {
       setSubmitting(false);
     }
@@ -164,6 +176,10 @@ export const RecurringObligationsContent = () => {
       await financeService.createIncomeSource(payload);
       setIncomeComposerOpen(false);
       await load();
+      showSuccess('Ingreso guardado.');
+    } catch (nextError) {
+      showError(nextError instanceof Error ? nextError.message : 'No fue posible guardar el ingreso.');
+      throw nextError;
     } finally {
       setSubmitting(false);
     }
@@ -176,6 +192,10 @@ export const RecurringObligationsContent = () => {
       setEditingIncome(null);
       setIncomeComposerOpen(false);
       await load();
+      showSuccess('Ingreso actualizado.');
+    } catch (nextError) {
+      showError(nextError instanceof Error ? nextError.message : 'No fue posible actualizar el ingreso.');
+      throw nextError;
     } finally {
       setSubmitting(false);
     }
@@ -189,8 +209,10 @@ export const RecurringObligationsContent = () => {
       setDeletingIncome(null);
       if (editingIncome?.id === deletingIncome.id) setEditingIncome(null);
       await load();
+      showSuccess('Ingreso borrado.');
     } catch (deleteError) {
       setError(deleteError instanceof Error ? deleteError.message : 'No fue posible borrar el ingreso.');
+      showError(deleteError instanceof Error ? deleteError.message : 'No fue posible borrar el ingreso.');
     } finally {
       setSubmitting(false);
     }
@@ -269,8 +291,10 @@ export const RecurringObligationsContent = () => {
       });
       setUnlinkingObligation(null);
       await load();
+      showSuccess('Vínculo de deuda quitado.');
     } catch (unlinkError) {
       setError(unlinkError instanceof Error ? unlinkError.message : 'No fue posible quitar el vínculo de deuda.');
+      showError(unlinkError instanceof Error ? unlinkError.message : 'No fue posible quitar el vínculo de deuda.');
     } finally {
       setSubmitting(false);
     }
@@ -509,7 +533,12 @@ export const RecurringObligationsContent = () => {
                 />
               </div>
               {!incomeSources.length ? (
-                <EmptyState message="No hay fuentes de ingreso cargadas." />
+                <EmptyState
+                  title="No hay fuentes de ingreso"
+                  description="Registra tus ingresos para que el plan mensual sepa con qué puede contar antes de proponer decisiones." 
+                  actionLabel="Agregar ingreso"
+                  onAction={() => { setEditingIncome(null); setIncomeComposerOpen(true); }}
+                />
               ) : (
                 <div className={styles.list}>
                   {incomeSources.map((source) => (
@@ -608,7 +637,12 @@ export const RecurringObligationsContent = () => {
                 />
               </div>
               {!obligations.length ? (
-                <EmptyState message="No hay obligaciones recurrentes registradas." />
+                <EmptyState
+                  title="No hay obligaciones recurrentes"
+                  description="Carga tus obligaciones fijas para que la app pueda calcular presión mensual y cobertura real." 
+                  actionLabel="Nuevo recurrente"
+                  onAction={() => { setEditingObligation(null); setComposerOpen(true); }}
+                />
               ) : (
                 <div className={styles.list}>
                   {obligations.map((obligation) => (
@@ -735,6 +769,7 @@ export const RecurringObligationsContent = () => {
         onCancel={() => setDeletingIncome(null)}
         onConfirm={() => void handleDeleteIncome()}
       />
+      {toast}
     </IonContent>
   );
 };

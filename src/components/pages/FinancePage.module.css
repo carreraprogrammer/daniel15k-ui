@@ -158,41 +158,43 @@
 .focusQuestion {
   margin: 0;
   color: rgba(231, 236, 244, 0.72);
-  font-size: 0.9rem;
+  font-size: var(--type-body-small-size);
   font-weight: 600;
-  letter-spacing: 0.01em;
-  line-height: 1.4;
+  letter-spacing: var(--tracking-normal);
+  line-height: var(--leading-normal);
 }
 
 .focusTitle {
   margin: 0;
   color: #fff;
-  font-size: clamp(1.7rem, 2.8vw, 2.5rem);
-  letter-spacing: -0.04em;
-  line-height: 0.98;
+  font-size: var(--type-page-title-size);
+  font-weight: var(--type-page-title-weight);
+  letter-spacing: var(--tracking-normal);
+  line-height: var(--leading-heading);
 }
 
 .focusText {
   margin: 0;
   max-width: 58ch;
   color: rgba(231, 236, 244, 0.72);
-  font-size: 0.98rem;
-  line-height: 1.58;
+  font-size: var(--type-body-size);
+  line-height: var(--leading-normal);
 }
 
 .focusValue {
   color: #fff;
-  font-size: clamp(2.4rem, 6vw, 4.1rem);
-  font-weight: 700;
-  letter-spacing: -0.05em;
-  line-height: 0.88;
+  font-size: var(--type-amount-large-size);
+  font-weight: var(--type-amount-weight);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--tracking-normal);
+  line-height: 1.05;
 }
 
 .focusCaption {
   margin: 0.35rem 0 0;
   color: rgba(231, 236, 244, 0.62);
-  font-size: 0.94rem;
-  line-height: 1.45;
+  font-size: var(--type-body-small-size);
+  line-height: var(--leading-normal);
 }
 
 .monthCompareGrid {
@@ -210,18 +212,19 @@
 
 .monthCompareLabel {
   color: rgba(231, 236, 244, 0.62);
-  font-size: 0.78rem;
+  font-size: var(--type-caption-size);
   font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: var(--tracking-normal);
+  text-transform: none;
 }
 
 .monthCompareValue {
   color: #fff;
-  font-size: 2.45rem;
-  font-weight: 760;
-  letter-spacing: 0;
-  line-height: 0.95;
+  font-size: var(--type-amount-large-size);
+  font-weight: var(--type-amount-weight);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--tracking-normal);
+  line-height: 1.05;
   overflow-wrap: anywhere;
 }
 

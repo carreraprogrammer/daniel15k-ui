@@ -178,7 +178,7 @@ export const BudgetCategoryStep = ({
                         onClick={() => startEdit(sub.code, amount)}
                         aria-label={`Editar monto de ${sub.name}`}
                       >
-                        ✎
+                        Editar
                       </button>
                     )}
                   </>

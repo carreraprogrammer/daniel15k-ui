@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { IonButton, IonButtons, IonContent, IonHeader, IonModal, IonTitle, IonToolbar } from '@ionic/react';
+import { IonButton, IonButtons, IonContent, IonHeader, IonIcon, IonModal, IonTitle, IonToolbar } from '@ionic/react';
+import { checkmarkCircleOutline } from 'ionicons/icons';
 import { Button } from '../../atoms/Button';
 import { NumberInput } from '../../atoms/NumberInput';
 import { SelectInput } from '../../atoms/SelectInput';
@@ -322,7 +323,7 @@ export const IncomeSetupWizard = ({ isOpen, onClose, onComplete }: IncomeSetupWi
         {step === 'ask_variable' && (
           <div className={styles.panel}>
             <p className={styles.intro}>
-              ✅ Ingreso base guardado.
+              Ingreso base guardado.
               <br /><br />
               ¿Tenés algún ingreso variable además? (freelance, comisiones, arriendo recibido…)
             </p>
@@ -438,7 +439,9 @@ export const IncomeSetupWizard = ({ isOpen, onClose, onComplete }: IncomeSetupWi
         {/* ── Step: Done ── */}
         {step === 'done' && (
           <div className={styles.panel}>
-            <div className={styles.successIcon}>✅</div>
+            <div className={styles.successIcon} aria-hidden="true">
+              <IonIcon icon={checkmarkCircleOutline} />
+            </div>
             <p className={styles.successTitle}>¡Perfil de ingresos guardado!</p>
             <p className={styles.successBody}>
               El sistema ya puede calcular tu presupuesto mensual real. Podés ajustar o agregar más ingresos en cualquier momento desde tu perfil.

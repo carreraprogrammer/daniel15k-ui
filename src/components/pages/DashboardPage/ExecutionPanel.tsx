@@ -1,3 +1,5 @@
+import { IonIcon } from '@ionic/react';
+import { checkmarkCircleOutline, ellipseOutline, helpCircleOutline, removeCircleOutline } from 'ionicons/icons';
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import type { SummaryMonthExecution, MonthExecutionStatus } from '../../../types/finance.types';
 import styles from './ExecutionPanel.module.css';
@@ -7,10 +9,10 @@ interface Props {
 }
 
 const STATUS_ICON: Record<MonthExecutionStatus, string> = {
-  covered:   '✓',
-  partial:   '~',
-  pending:   '○',
-  unplanned: '?',
+  covered:   checkmarkCircleOutline,
+  partial:   removeCircleOutline,
+  pending:   ellipseOutline,
+  unplanned: helpCircleOutline,
 };
 
 const STATUS_LABEL: Record<MonthExecutionStatus, string> = {
@@ -38,7 +40,7 @@ export const ExecutionPanel = ({ monthExecution }: Props) => {
         </div>
         {income.sources.map((src) => (
           <div key={src.id} className={[styles.row, styles[`row_${src.status}`]].join(' ')}>
-            <span className={styles.rowIcon} aria-hidden="true">{STATUS_ICON[src.status]}</span>
+            <IonIcon className={styles.rowIcon} icon={STATUS_ICON[src.status]} aria-hidden="true" />
             <div className={styles.rowInfo}>
               <span className={styles.rowName}>{src.name}</span>
               <span className={styles.rowStatus}>{STATUS_LABEL[src.status]}</span>
@@ -68,7 +70,7 @@ export const ExecutionPanel = ({ monthExecution }: Props) => {
         </div>
         {recurring_obligations.items.map((item) => (
           <div key={item.id} className={[styles.row, styles[`row_${item.status}`]].join(' ')}>
-            <span className={styles.rowIcon} aria-hidden="true">{STATUS_ICON[item.status]}</span>
+            <IonIcon className={styles.rowIcon} icon={STATUS_ICON[item.status]} aria-hidden="true" />
             <div className={styles.rowInfo}>
               <span className={styles.rowName}>{item.name}</span>
               <span className={styles.rowStatus}>{STATUS_LABEL[item.status]}</span>

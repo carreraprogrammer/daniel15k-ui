@@ -13,6 +13,7 @@ import { AppliedFiltersBar } from '../../molecules/AppliedFiltersBar';
 import { SortSheet } from '../../molecules/SortSheet';
 import { PlannedExpenseComposer } from '../../organisms/PlannedExpenseComposer';
 import { PlannedExpenseSlidingCard } from '../../organisms/PlannedExpenseSlidingCard';
+import { useToast } from '../../../hooks/useToast';
 import { financeService } from '../../../services/financeService';
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import type {
@@ -61,6 +62,7 @@ export const PlannedExpensesContent = () => {
   const [editingExpense, setEditingExpense] = useState<PlannedExpense | null>(null);
   const [filters, setFilters] = useState<PlannedExpenseQueryParams>(initialFilters);
   const [activeTab, setActiveTab] = useState<DetailTab>('planned');
+  const { showError, showSuccess, toast } = useToast();
 
   const load = async () => {
     setLoading(true);
@@ -118,6 +120,10 @@ export const PlannedExpensesContent = () => {
       await financeService.createPlannedExpense(payload);
       setComposerOpen(false);
       await load();
+      showSuccess('Gasto planeado guardado.');
+    } catch (nextError) {
+      showError(nextError instanceof Error ? nextError.message : 'No fue posible guardar el gasto planeado.');
+      throw nextError;
     } finally {
       setSubmitting(false);
     }
@@ -130,6 +136,10 @@ export const PlannedExpensesContent = () => {
       setEditingExpense(null);
       setComposerOpen(false);
       await load();
+      showSuccess('Gasto planeado actualizado.');
+    } catch (nextError) {
+      showError(nextError instanceof Error ? nextError.message : 'No fue posible actualizar el gasto planeado.');
+      throw nextError;
     } finally {
       setSubmitting(false);
     }
@@ -311,15 +321,30 @@ export const PlannedExpensesContent = () => {
           {error ? <ErrorState message={error} onRetry={() => void load()} /> : null}
           {!loading && !error && activeTab === 'planned' && !plannedExpenses.length ? (
             <EmptyState
-              message={
+              title={activeFilterCount || filters.q ? 'No hubo resultados' : 'No hay gastos planeados'}
+              description={
                 activeFilterCount || filters.q
-                  ? 'No hay gastos planeados que coincidan con esos filtros.'
-                  : 'No hay gastos planeados registrados.'
+                  ? 'Prueba limpiando filtros o cambia el criterio de búsqueda para recuperar resultados.'
+                  : 'Registra el próximo gasto previsible antes de que entre al flujo mensual o a transacciones.'
               }
+              actionLabel={activeFilterCount || filters.q ? 'Limpiar filtros' : 'Nuevo gasto planeado'}
+              onAction={() => {
+                if (activeFilterCount || filters.q) {
+                  setFilters(initialFilters);
+                  return;
+                }
+                setEditingExpense(null);
+                setComposerOpen(true);
+              }}
             />
           ) : null}
           {!loading && !error && activeTab === 'pockets' && !sinkingFunds.length ? (
-            <EmptyState message="No hay bolsillos activos para gastos planeados." />
+            <EmptyState
+              title="No hay bolsillos activos"
+              description="Todavía no existen bolsillos vinculados a gastos planeados. Revisa los planeados abiertos para empezar a fondearlos." 
+              actionLabel="Ver planeados"
+              onAction={() => setActiveTab('planned')}
+            />
           ) : null}
 
           {!loading && !error && activeTab === 'planned' && plannedExpenses.length && detailsOpen ? (
@@ -410,6 +435,7 @@ export const PlannedExpensesContent = () => {
             }}
           />
         </CrudModal>
+        {toast}
     </IonContent>
   );
 };

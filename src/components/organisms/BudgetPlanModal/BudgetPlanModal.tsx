@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import {
   IonContent,
+  IonIcon,
   IonModal,
 } from '@ionic/react';
+import { warningOutline } from 'ionicons/icons';
 import { BrandMark } from '../../atoms/BrandMark';
 import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
@@ -293,7 +295,9 @@ export const BudgetPlanModal = ({ isOpen, onClose, onSaved }: Props) => {
             {proposal.warnings.length > 0 && (
               <div className={styles.warnings}>
                 {proposal.warnings.map((w, i) => (
-                  <p key={i} className={styles.warningItem}>⚠️ {w}</p>
+                  <p key={i} className={styles.warningItem}>
+                    <IonIcon icon={warningOutline} aria-hidden="true" /> {w}
+                  </p>
                 ))}
               </div>
             )}

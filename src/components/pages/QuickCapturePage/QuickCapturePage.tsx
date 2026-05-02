@@ -1,19 +1,36 @@
 import { useEffect, useRef, useState } from 'react';
-import { IonContent, IonPage } from '@ionic/react';
+import { IonContent, IonIcon, IonPage } from '@ionic/react';
+import { checkmarkCircleOutline } from 'ionicons/icons';
 import { TransactionComposer } from '../../organisms/TransactionComposer/TransactionComposer';
 import { BrandMark } from '../../atoms/BrandMark/BrandMark';
+import { ErrorState } from '../../molecules/ErrorState';
+import { useToast } from '../../../hooks/useToast';
 import { financeService } from '../../../services/financeService';
 import type { CategoryResource, TransactionCreatePayload, TransactionUpdatePayload } from '../../../types/finance.types';
 import styles from './QuickCapturePage.module.css';
 
 export const QuickCapturePage = () => {
   const [categories, setCategories] = useState<CategoryResource[]>([]);
+  const [categoryError, setCategoryError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [successCount, setSuccessCount] = useState(0);
   const inputRef = useRef<HTMLDivElement>(null);
 
+  const { showError, showSuccess, toast } = useToast();
+
+  const loadCategories = async () => {
+    setCategoryError(null);
+
+    try {
+      const res = await financeService.fetchCategories();
+      setCategories(res.data);
+    } catch (nextError) {
+      setCategoryError(nextError instanceof Error ? nextError.message : 'No fue posible cargar las categorías.');
+    }
+  };
+
   useEffect(() => {
-    financeService.fetchCategories().then((res) => setCategories(res.data)).catch(() => null);
+    void loadCategories();
   }, []);
 
   useEffect(() => {
@@ -28,7 +45,11 @@ export const QuickCapturePage = () => {
     try {
       await financeService.createTransaction({ ...payload, source: 'manual' });
       setSuccessCount((n) => n + 1);
+      showSuccess('Transacción guardada.');
       inputRef.current?.querySelector('input')?.focus();
+    } catch (nextError) {
+      showError(nextError instanceof Error ? nextError.message : 'No fue posible guardar la transacción.');
+      throw nextError;
     } finally {
       setSaving(false);
     }
@@ -38,6 +59,10 @@ export const QuickCapturePage = () => {
     setSaving(true);
     try {
       await financeService.updateTransaction(id, payload);
+      showSuccess('Transacción actualizada.');
+    } catch (nextError) {
+      showError(nextError instanceof Error ? nextError.message : 'No fue posible actualizar la transacción.');
+      throw nextError;
     } finally {
       setSaving(false);
     }
@@ -51,10 +76,19 @@ export const QuickCapturePage = () => {
             <BrandMark />
             {successCount > 0 && (
               <span className={styles.successBadge}>
-                ✓ Guardado
+                <IonIcon icon={checkmarkCircleOutline} aria-hidden="true" />
+                Guardado
               </span>
             )}
           </header>
+
+          {categoryError ? (
+            <ErrorState
+              title="No pudimos preparar la captura"
+              message={categoryError}
+              onRetry={() => void loadCategories()}
+            />
+          ) : null}
 
           <div ref={inputRef} className={styles.composerWrap}>
             <TransactionComposer
@@ -64,6 +98,7 @@ export const QuickCapturePage = () => {
               onUpdate={handleUpdate}
             />
           </div>
+          {toast}
         </div>
       </IonContent>
     </IonPage>

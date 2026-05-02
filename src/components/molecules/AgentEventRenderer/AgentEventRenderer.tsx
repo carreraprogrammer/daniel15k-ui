@@ -4,10 +4,12 @@ import {
   IonButtons,
   IonContent,
   IonHeader,
+  IonIcon,
   IonModal,
   IonTitle,
   IonToolbar,
 } from '@ionic/react';
+import { closeOutline, warningOutline } from 'ionicons/icons';
 import { useAgentUI } from '../../../contexts/AgentUIContext';
 import type {
   AgentUiEvent,
@@ -146,7 +148,7 @@ const PlanProposalCard = ({ event }: { event: AgentUiEvent }) => {
         <div className={styles.warningsList}>
           {warnings.map((w, i) => (
             <div key={i} className={styles.warningItem}>
-              <span className={styles.warningIcon}>⚠️</span>
+              <IonIcon className={styles.warningIcon} icon={warningOutline} aria-hidden="true" />
               <p className={styles.warningText}>{w}</p>
             </div>
           ))}
@@ -350,7 +352,9 @@ export const AgentEventRenderer = () => {
         <IonToolbar className={styles.toolbar}>
           <IonTitle className={styles.toolbarTitle}>{titleFor(currentEvent, isLoading)}</IonTitle>
           <IonButtons slot="end">
-            <IonButton fill="clear" onClick={reset} className={styles.closeBtn}>✕</IonButton>
+            <IonButton fill="clear" onClick={reset} className={styles.closeBtn} aria-label="Cerrar">
+              <IonIcon icon={closeOutline} aria-hidden="true" />
+            </IonButton>
           </IonButtons>
         </IonToolbar>
       </IonHeader>

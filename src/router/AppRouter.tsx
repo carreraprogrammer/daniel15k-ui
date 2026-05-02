@@ -2,11 +2,11 @@ import { IonIcon, IonLabel, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs } 
 import type { ComponentType } from 'react';
 import { Redirect, Route, useLocation } from 'react-router-dom';
 import {
+  calendarOutline,
   cardOutline,
   homeOutline,
   pieChartOutline,
   swapHorizontalOutline,
-  trophyOutline,
 } from 'ionicons/icons';
 import { useAuthStore } from '../store/authStore';
 import { LoginPage } from '../components/pages/LoginPage/LoginPage';
@@ -72,7 +72,7 @@ const TAB_ITEMS = [
   { tab: 'transactions', to: '/transactions', label: 'Movimientos', icon: swapHorizontalOutline },
   { tab: 'budgets', to: '/budgets', label: 'Presupuesto', icon: pieChartOutline },
   { tab: 'debts', to: '/debts', label: 'Deudas', icon: cardOutline },
-  { tab: 'goals', to: '/savings-goals', label: 'Metas', icon: trophyOutline },
+  { tab: 'plans', to: '/planned-expenses', label: 'Planes', icon: calendarOutline },
 ];
 
 const TAB_PATHS = TAB_ITEMS.map((item) => item.to);
