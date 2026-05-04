@@ -470,7 +470,7 @@ export const RecurringObligationsContent = () => {
                 <h3 className={styles.detailStageTitle}>Detalle recurrente</h3>
                 <p className={styles.detailStageText}>Aquí vives entre filtros, segmentación y cards. La vista inicial ya respondió la pregunta principal.</p>
               </div>
-              <Button label="← Volver" variant="link" size="sm" onClick={() => setDetailsOpen(false)} />
+              <Button label="Volver" variant="link" size="sm" onClick={() => setDetailsOpen(false)} />
             </div>
             <section className={styles.segmentWrap}>
               <IonSegment value={activeView} onIonChange={(event) => setActiveView((event.detail.value as 'income' | 'obligations') ?? 'obligations')}>
