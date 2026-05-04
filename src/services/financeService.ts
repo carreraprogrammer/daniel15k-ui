@@ -401,9 +401,9 @@ export const financeService = {
   },
 
   /** GET /api/v1/monthly_plans/current — returns null when no plan is active */
-  async fetchCurrentPlan(): Promise<CurrentPlan | null> {
+  async fetchCurrentPlan(params?: { month?: number; year?: number }): Promise<CurrentPlan | null> {
     try {
-      const { data } = await api.get('/api/v1/monthly_plans/current');
+      const { data } = await api.get('/api/v1/monthly_plans/current', { params });
       if (!data || (!data.data && !data.id)) return null;
       return (data.data ?? data) as CurrentPlan;
     } catch (err: unknown) {

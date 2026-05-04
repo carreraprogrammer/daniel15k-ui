@@ -87,7 +87,7 @@ const AUTH_PATHS = [
 export const AppRouter = () => {
   const location = useLocation();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const showTabs = isAuthenticated && AUTH_PATHS.includes(location.pathname);
+  const showTabs = isAuthenticated && (AUTH_PATHS.includes(location.pathname) || location.pathname.startsWith('/budgets/'));
 
   return (
     <IonTabs className={styles.tabsRoot}>
@@ -102,6 +102,7 @@ export const AppRouter = () => {
         <ProtectedRoute exact path="/planned-expenses" component={PlannedExpensesPage} />
         <ProtectedRoute exact path="/recurring" component={RecurringObligationsPage} />
         <ProtectedRoute exact path="/budgets" component={BudgetsPage} />
+        <ProtectedRoute exact path="/budgets/:year/:month" component={BudgetsPage} />
         <ProtectedRoute exact path="/savings-goals" component={SavingsGoalsPage} />
         <ProtectedRoute exact path="/profile" component={ProfilePage} />
         <ProtectedRoute exact path="/quick" component={QuickCapturePage} />

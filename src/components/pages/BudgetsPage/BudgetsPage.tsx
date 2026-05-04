@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { IonContent } from '@ionic/react';
+import { useHistory, useParams } from 'react-router-dom';
 import { AppLayout } from '../../templates/AppLayout';
 import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
@@ -27,12 +28,17 @@ import type {
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import styles from '../FinancePage.module.css';
 
-/** Derive the current month string, e.g. "2026-05" */
-const currentMonthString = (): string => {
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, '0');
-  return `${y}-${m}`;
+const padMonth = (month: number): string => String(month).padStart(2, '0');
+
+const parsePeriodParam = (yearParam?: string, monthParam?: string) => {
+  const year = Number(yearParam);
+  const month = Number(monthParam);
+
+  if (!Number.isInteger(year) || !Number.isInteger(month) || month < 1 || month > 12) {
+    return null;
+  }
+
+  return { year, month };
 };
 
 const formatPlanPeriod = (plan: MonthlyPlanHistory): string =>
@@ -51,7 +57,10 @@ const plannedExpenseTotal = (plan: MonthlyPlanHistory): number => {
 };
 
 const planStatusLabel = (plan: MonthlyPlanHistory): string => {
+  if (plan.closed_at) return 'Cerrado';
   if (plan.status === 'draft' && plan.assumptions?.inherited_from) return 'Pendiente confirmar';
+  if (plan.status === 'confirmed') return 'Confirmado';
+  if (plan.status === 'draft') return 'Borrador';
   return plan.status;
 };
 
@@ -67,6 +76,8 @@ const initialFilters: BudgetQueryParams = {
 // ── Component ──────────────────────────────────────────────────────────────────
 
 export const BudgetsContent = () => {
+  const history = useHistory();
+  const routeParams = useParams<{ year?: string; month?: string }>();
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [summary, setSummary] = useState<SummaryResponse | null>(null);
   const [currentPlan, setCurrentPlan] = useState<CurrentPlan | null>(null);
@@ -91,7 +102,17 @@ export const BudgetsContent = () => {
 
   const [filters, setFilters] = useState<BudgetQueryParams>(initialFilters);
 
-  const month = currentMonthString();
+  const routePeriod = useMemo(
+    () => parsePeriodParam(routeParams.year, routeParams.month),
+    [routeParams.month, routeParams.year],
+  );
+  const currentPeriod = useMemo(() => {
+    const now = new Date();
+    return { year: now.getFullYear(), month: now.getMonth() + 1 };
+  }, []);
+  const selectedPeriod = routePeriod ?? currentPeriod;
+  const month = `${selectedPeriod.year}-${padMonth(selectedPeriod.month)}`;
+  const isHistoricalRoute = Boolean(routePeriod);
 
   // ── Wizard data hook ───────────────────────────────────────────────────────
   const {
@@ -109,10 +130,14 @@ export const BudgetsContent = () => {
     try {
       const [budgetsResponse, summaryResponse, categoriesResponse, currentPlanResponse, monthlyPlansResponse] =
         await Promise.all([
-          financeService.fetchBudgets(filters),
+          financeService.fetchBudgets({
+            ...filters,
+            month: selectedPeriod.month,
+            year: selectedPeriod.year,
+          }),
           financeService.fetchSummary(),
           financeService.fetchCategories(),
-          financeService.fetchCurrentPlan(),
+          financeService.fetchCurrentPlan(selectedPeriod),
           financeService.getMonthlyPlans(),
         ]);
       setBudgets(budgetsResponse.data);
@@ -131,7 +156,14 @@ export const BudgetsContent = () => {
 
   useEffect(() => {
     void load();
-  }, [filters]);
+  }, [filters, selectedPeriod.month, selectedPeriod.year]);
+
+  useEffect(() => {
+    if (isHistoricalRoute) {
+      setDetailsOpen(true);
+      setDetailTab('detail');
+    }
+  }, [isHistoricalRoute, selectedPeriod.month, selectedPeriod.year]);
 
   // ── Wizard completion handler ───────────────────────────────────────────────
 
@@ -178,6 +210,17 @@ export const BudgetsContent = () => {
     } finally {
       setClosingPlanId(null);
     }
+  };
+
+  const handleOpenPlanDetail = (plan: MonthlyPlanHistory) => {
+    setDetailTab('detail');
+    setDetailsOpen(true);
+    history.push(`/budgets/${plan.year}/${padMonth(plan.month)}`);
+  };
+
+  const handleCloseDetail = () => {
+    setDetailsOpen(false);
+    if (isHistoricalRoute) history.push('/budgets');
   };
 
   // ── Derived state ───────────────────────────────────────────────────────────
@@ -349,7 +392,7 @@ export const BudgetsContent = () => {
                     Historial
                   </button>
                 </div>
-                <Button label="Volver" variant="link" size="sm" onClick={() => setDetailsOpen(false)} />
+                <Button label="Volver" variant="link" size="sm" onClick={handleCloseDetail} />
               </div>
 
               {/* ── Tab: Detalle ── */}
@@ -473,30 +516,52 @@ export const BudgetsContent = () => {
                         const pendingInherited = plan.status === 'draft' && Boolean(plan.assumptions?.inherited_from);
 
                         return (
-                          <article key={plan.id} className={styles.listItem}>
-                            <div className={styles.listPrimary}>
-                              <span className={styles.listLabel}>{formatPlanPeriod(plan)}</span>
-                              <span className={styles.listMeta}>
-                                Ingreso planeado {formatCurrencyCompact(plannedIncome)}
-                                {closed ? ` vs real ${formatCurrencyCompact(actualIncome)}` : ''}
-                              </span>
-                              <span className={styles.listMeta}>
-                                Gasto planeado {formatCurrencyCompact(plannedExpense)}
-                                {closed ? ` vs real ${formatCurrencyCompact(actualExpense)}` : ''}
-                              </span>
+                          <article
+                            key={plan.id}
+                            className={`${styles.historyItem} ${routePeriod?.year === plan.year && routePeriod?.month === plan.month ? styles.historyItemActive : ''}`}
+                            role="button"
+                            tabIndex={0}
+                            onClick={() => handleOpenPlanDetail(plan)}
+                            onKeyDown={(event) => {
+                              if (event.key === 'Enter' || event.key === ' ') {
+                                event.preventDefault();
+                                handleOpenPlanDetail(plan);
+                              }
+                            }}
+                            aria-label={`Ver detalle de ${formatPlanPeriod(plan)}`}
+                          >
+                            <div className={styles.historyPrimary}>
+                              <div className={styles.historyTitleRow}>
+                                <span className={styles.historyPeriod}>{formatPlanPeriod(plan)}</span>
+                                {pendingInherited ? <span className={styles.historyNote}>Heredado</span> : null}
+                              </div>
+                              <div className={styles.historyMetrics}>
+                                <span className={styles.historyMetric}>
+                                  <span>Ingreso planeado</span>
+                                  <strong>{formatCurrencyCompact(plannedIncome)}</strong>
+                                  {closed ? <small>Real {formatCurrencyCompact(actualIncome)}</small> : null}
+                                </span>
+                                <span className={styles.historyMetric}>
+                                  <span>Gasto planeado</span>
+                                  <strong>{formatCurrencyCompact(plannedExpense)}</strong>
+                                  {closed ? <small>Real {formatCurrencyCompact(actualExpense)}</small> : null}
+                                </span>
+                              </div>
                             </div>
-                            <div className={styles.listSecondary}>
-                              <span className={styles.pill}>{planStatusLabel(plan)}</span>
-                              {pendingInherited ? <span className={styles.listMeta}>Heredado del mes anterior</span> : null}
+                            <div className={styles.historyActions}>
+                              <span className={styles.historyStatus}>{planStatusLabel(plan)}</span>
                               {plan.status === 'confirmed' && !plan.closed_at ? (
-                                <Button
-                                  label={closingPlanId === plan.id ? 'Cerrando…' : 'Cerrar mes'}
-                                  variant="ghost"
-                                  size="sm"
-                                  disabled={closingPlanId === plan.id}
-                                  onClick={() => void handleCloseMonth(plan.id)}
-                                />
+                                <span onClick={(event) => event.stopPropagation()}>
+                                  <Button
+                                    label={closingPlanId === plan.id ? 'Cerrando…' : 'Cerrar mes'}
+                                    variant="ghost"
+                                    size="sm"
+                                    disabled={closingPlanId === plan.id}
+                                    onClick={() => void handleCloseMonth(plan.id)}
+                                  />
+                                </span>
                               ) : null}
+                              <span className={styles.historyDetailHint}>Ver detalle</span>
                             </div>
                           </article>
                         );
