@@ -368,22 +368,31 @@ export const PlannedExpensesContent = () => {
             <div className={styles.list}>
               {sinkingFunds.map((fund) => {
                 const target = fund.target_amount ?? 0;
-                const progress = target > 0 ? Math.min(Math.round((fund.current_balance / target) * 100), 100) : 0;
+                const hasTarget = target > 0;
+                const progress = hasTarget ? Math.min(Math.round((fund.current_balance / target) * 100), 100) : null;
                 return (
                   <article key={fund.id} className={styles.listItem}>
                     <div className={styles.listPrimary}>
                       <span className={styles.listLabel}>{fund.name}</span>
                       <span className={styles.listMeta}>
-                        {formatCurrencyCompact(fund.current_balance)} de {target > 0 ? formatCurrencyCompact(target) : 'objetivo abierto'}
+                        {formatCurrencyCompact(fund.current_balance)} {hasTarget ? `de ${formatCurrencyCompact(target)}` : 'acumulado'}
                       </span>
-                      <div className={styles.progressTrack}>
-                        <div className={styles.progressFill} style={{ width: `${progress}%` }} />
-                      </div>
+                      {hasTarget ? (
+                        <div className={styles.progressTrack}>
+                          <div className={styles.progressFill} style={{ width: `${progress}%` }} />
+                        </div>
+                      ) : null}
                       <span className={styles.listMeta}>Aporte mensual {formatCurrencyCompact(fund.monthly_contribution)}</span>
                     </div>
                     <div className={styles.listSecondary}>
-                      <span className={styles.pill}>{progress}%</span>
-                      <span className={styles.listMeta}>Objetivo {formatDate(fund.target_date)}</span>
+                      {progress !== null ? (
+                        <span className={styles.pill}>{progress}%</span>
+                      ) : (
+                        <span className={styles.pill}>Sin meta</span>
+                      )}
+                      {fund.target_date ? (
+                        <span className={styles.listMeta}>Objetivo {formatDate(fund.target_date)}</span>
+                      ) : null}
                       {fund.planned_expense_id && plannedById.get(fund.planned_expense_id) ? (
                         <span className={styles.listMeta}>
                           Vinculado a {plannedById.get(fund.planned_expense_id)?.attributes.name}
