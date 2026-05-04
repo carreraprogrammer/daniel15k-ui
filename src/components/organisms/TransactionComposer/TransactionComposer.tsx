@@ -75,6 +75,13 @@ const toApiDate = (value: string) => {
 const valuesFromTransaction = (transaction: Transaction | null): TransactionComposerValues => {
   if (!transaction) return emptyValues;
 
+  const categoryId =
+    transaction.relationships?.category?.data?.id ??
+    (transaction.attributes.category_id != null ? String(transaction.attributes.category_id) : '');
+  const subcategoryId =
+    transaction.relationships?.subcategory?.data?.id ??
+    (transaction.attributes.subcategory_id != null ? String(transaction.attributes.subcategory_id) : '');
+
   return {
     date: toInputDate(transaction.attributes.date),
     concept: transaction.attributes.concept,
@@ -82,8 +89,8 @@ const valuesFromTransaction = (transaction: Transaction | null): TransactionComp
     amount: transaction.attributes.amount,
     transactionType: transaction.attributes.transaction_type ?? 'expense',
     status: transaction.attributes.status ?? 'confirmed',
-    categoryId: transaction.attributes.category_id ? String(transaction.attributes.category_id) : '',
-    subcategoryId: transaction.attributes.subcategory_id ? String(transaction.attributes.subcategory_id) : '',
+    categoryId,
+    subcategoryId,
     paymentSource: (transaction.attributes.payment_source as PaymentSource | null) ?? null,
   };
 };
