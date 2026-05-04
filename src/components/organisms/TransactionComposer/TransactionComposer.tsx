@@ -152,6 +152,7 @@ export const TransactionComposer = ({
       subcategory_id: values.subcategoryId ? Number(values.subcategoryId) : null,
       source: 'manual' as const,
       payment_source: values.paymentSource ?? undefined,
+      credit_card_status: values.paymentSource === 'credit_card' ? 'pending' as const : null,
     };
 
     try {

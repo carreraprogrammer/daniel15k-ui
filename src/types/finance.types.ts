@@ -379,6 +379,7 @@ export interface TransactionCreatePayload {
   subcategory_id?: number | null;
   source?: 'manual';
   payment_source?: PaymentSource | null;
+  credit_card_status?: CreditCardStatus | null;
   sinking_fund_id?: number | null;
 }
 
@@ -392,6 +393,7 @@ export interface TransactionUpdatePayload {
   subcategory_id?: number | null;
   source?: 'manual';
   payment_source?: PaymentSource | null;
+  credit_card_status?: CreditCardStatus | null;
   recurring_obligation_id?: number | null;
   income_source_id?: number | null;
   sinking_fund_id?: number | null;
