@@ -960,6 +960,91 @@
   height: 1px;
 }
 
+/* ── Pocket / sinking-fund card ──────────────────────── */
+.pocketCard {
+  display: grid;
+  gap: var(--finance-space-sm);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: 1.15rem 1.25rem;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.018)),
+    rgba(255, 255, 255, 0.022);
+  box-shadow: 0 8px 18px rgba(2, 6, 23, 0.16);
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease;
+}
+
+.pocketCard::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 20%);
+}
+
+.pocketCard > * {
+  position: relative;
+  z-index: 1;
+}
+
+.pocketHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--finance-space-md);
+}
+
+.pocketName {
+  color: rgba(231, 236, 244, 0.78);
+  font-size: var(--type-body-small-size);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.pocketBalance {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4em;
+}
+
+.pocketAmount {
+  color: #fff;
+  font-size: var(--type-section-title-size);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.pocketAmountSub {
+  color: rgba(231, 236, 244, 0.45);
+  font-size: var(--type-body-small-size);
+}
+
+.pocketFooter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.85rem;
+}
+
+.pocketFooterItem {
+  color: rgba(231, 236, 244, 0.5);
+  font-size: var(--type-body-small-size);
+}
+
+.pillMuted {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(231, 236, 244, 0.45);
+  font-weight: 500;
+}
+
 .infiniteStatus {
   display: flex;
   align-items: center;

@@ -370,33 +370,37 @@ export const PlannedExpensesContent = () => {
                 const target = fund.target_amount ?? 0;
                 const hasTarget = target > 0;
                 const progress = hasTarget ? Math.min(Math.round((fund.current_balance / target) * 100), 100) : null;
+                const linkedExpense = fund.planned_expense_id ? plannedById.get(fund.planned_expense_id) : null;
                 return (
-                  <article key={fund.id} className={styles.listItem}>
-                    <div className={styles.listPrimary}>
-                      <span className={styles.listLabel}>{fund.name}</span>
-                      <span className={styles.listMeta}>
-                        {formatCurrencyCompact(fund.current_balance)} {hasTarget ? `de ${formatCurrencyCompact(target)}` : 'acumulado'}
-                      </span>
-                      {hasTarget ? (
-                        <div className={styles.progressTrack}>
-                          <div className={styles.progressFill} style={{ width: `${progress}%` }} />
-                        </div>
-                      ) : null}
-                      <span className={styles.listMeta}>Aporte mensual {formatCurrencyCompact(fund.monthly_contribution)}</span>
-                    </div>
-                    <div className={styles.listSecondary}>
+                  <article key={fund.id} className={styles.pocketCard}>
+                    <div className={styles.pocketHeader}>
+                      <span className={styles.pocketName}>{fund.name}</span>
                       {progress !== null ? (
                         <span className={styles.pill}>{progress}%</span>
                       ) : (
-                        <span className={styles.pill}>Sin meta</span>
+                        <span className={`${styles.pill} ${styles.pillMuted}`}>Sin meta</span>
                       )}
+                    </div>
+                    <div className={styles.pocketBalance}>
+                      <span className={styles.pocketAmount}>{formatCurrencyCompact(fund.current_balance)}</span>
+                      <span className={styles.pocketAmountSub}>
+                        {hasTarget ? `de ${formatCurrencyCompact(target)}` : 'acumulado'}
+                      </span>
+                    </div>
+                    {hasTarget ? (
+                      <div className={styles.progressTrack}>
+                        <div className={styles.progressFill} style={{ width: `${progress}%` }} />
+                      </div>
+                    ) : null}
+                    <div className={styles.pocketFooter}>
+                      <span className={styles.pocketFooterItem}>
+                        {formatCurrencyCompact(fund.monthly_contribution)} / mes
+                      </span>
                       {fund.target_date ? (
-                        <span className={styles.listMeta}>Objetivo {formatDate(fund.target_date)}</span>
+                        <span className={styles.pocketFooterItem}>· Objetivo {formatDate(fund.target_date)}</span>
                       ) : null}
-                      {fund.planned_expense_id && plannedById.get(fund.planned_expense_id) ? (
-                        <span className={styles.listMeta}>
-                          Vinculado a {plannedById.get(fund.planned_expense_id)?.attributes.name}
-                        </span>
+                      {linkedExpense ? (
+                        <span className={styles.pocketFooterItem}>· {linkedExpense.attributes.name}</span>
                       ) : null}
                     </div>
                   </article>
