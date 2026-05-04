@@ -29,5 +29,5 @@ test('renders profile title', () => {
     </MemoryRouter>,
   );
 
-  expect(view.getByRole('heading', { name: 'Gestiona tu información' })).toBeInTheDocument();
+  expect(view.getByRole('heading', { name: 'Tu cuenta' })).toBeInTheDocument();
 });
