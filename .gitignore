@@ -1,3 +1,18 @@
 node_modules
 dist
 *.tsbuildinfo
+
+# Credenciales Google descargadas
+*.apps.googleusercontent.com.plist
+ios/App/App/GoogleService-Info.plist
+
+# iOS — CocoaPods y archivos generados
+ios/App/Pods/
+ios/App/.xcode.env.local
+ios-spm-backup/
+
+# Xcode
+*.xcuserstate
+xcuserdata/
+DerivedData/
+*.xcworkspace/xcuserdata/

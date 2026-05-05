@@ -1,5 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useHistory, useLocation } from 'react-router-dom';
+import { isPlatform } from '@ionic/react';
 import { AuthLayout } from '../../templates/AuthLayout';
 import { FormSection } from '../../molecules/FormSection/FormSection';
 import { ErrorState } from '../../molecules/ErrorState';
@@ -9,7 +10,7 @@ import { GoogleButton } from '../../atoms/GoogleButton';
 import { useAuthStore } from '../../../store/authStore';
 import { useFormStore } from '../../../store/formStore';
 import { useToast } from '../../../hooks/useToast';
-import { startGoogleOAuth } from '../../../services/authService';
+import { startGoogleOAuth, loginWithGoogleMobile } from '../../../services/authService';
 import { getLastAuthPath } from '../../../utils/navigation';
 import styles from '../AuthPage.module.css';
 
@@ -34,19 +35,55 @@ export const LoginPage = () => {
   const history = useHistory();
   const { showError, toast } = useToast();
   const oauthError = (location.state as { oauthError?: string } | null)?.oauthError;
+  const [mobileLoading, setMobileLoading] = useState(false);
+  const isNative = isPlatform('capacitor');
 
   useEffect(() => {
+    if (isNative) return;
     void fetchSchema('login-form').catch(() => undefined);
-  }, [fetchSchema]);
+  }, [fetchSchema, isNative]);
 
   useEffect(() => {
-    if (!oauthError) {
-      return;
-    }
-
+    if (!oauthError) return;
     showError(oauthError);
     history.replace(location.pathname, {});
   }, [history, location.pathname, oauthError, showError]);
+
+  const handleMobileGoogleLogin = async () => {
+    setMobileLoading(true);
+    try {
+      const response = await loginWithGoogleMobile();
+      hydrateAuth(response);
+      history.replace(getLastAuthPath());
+    } catch {
+      showError('No se pudo iniciar sesión con Google.');
+    } finally {
+      setMobileLoading(false);
+    }
+  };
+
+  if (isNative) {
+    return (
+      <AuthLayout title="Daniel 15K">
+        <div className={styles.stack} style={{ justifyContent: 'center', flex: 1, gap: 'var(--space-8)' }}>
+          <div className={styles.contentHeader} style={{ textAlign: 'center' }}>
+            <p className={styles.contentText}>Inicia sesión para continuar</p>
+          </div>
+
+          {mobileLoading ? (
+            <Spinner />
+          ) : (
+            <GoogleButton onClick={() => void handleMobileGoogleLogin()} />
+          )}
+
+          <Link className={styles.link} to="/register" style={{ textAlign: 'center' }}>
+            ¿No tienes cuenta? Regístrate
+          </Link>
+        </div>
+        {toast}
+      </AuthLayout>
+    );
+  }
 
   if (isLoading && !schema) {
     return <Spinner />;

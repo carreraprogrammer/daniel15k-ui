@@ -1,0 +1,7 @@
+{
+  "name": "Daniel 15K",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react"
+}
