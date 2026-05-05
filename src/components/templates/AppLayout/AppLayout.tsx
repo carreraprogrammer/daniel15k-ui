@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { IonPage } from '@ionic/react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { IonIcon, IonPage } from '@ionic/react';
+import { closeOutline, logOutOutline, personCircleOutline } from 'ionicons/icons';
+import { NavLink, Link, useLocation } from 'react-router-dom';
 import { Header } from '../../organisms/Header';
+import { BrandMark } from '../../atoms/BrandMark';
 import { BreadcrumbTrail, type BreadcrumbItem } from '../../organisms/BreadcrumbTrail';
 import { CompletenessIndicator } from '../../molecules/CompletenessIndicator';
 import { AgentEventRenderer } from '../../molecules/AgentEventRenderer';
 import { rememberAuthPath } from '../../../utils/navigation';
+import { useAuthStore } from '../../../store/authStore';
 import { AppLayoutContext } from './AppLayoutContext';
 import styles from './AppLayout.module.css';
 
@@ -24,6 +27,8 @@ export const AppLayout = ({ title, children }: { title: string; children: ReactN
   const shellRef = useRef<HTMLDivElement | null>(null);
   const headerRef = useRef<HTMLDivElement | null>(null);
   const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbItem[]>([]);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const logout = useAuthStore((state) => state.logout);
   const layoutContext = useMemo(() => ({ setBreadcrumbs }), []);
 
   useEffect(() => {

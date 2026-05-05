@@ -139,16 +139,26 @@ export const DashboardContent = () => {
       : 0;
 
   // ── Chart data ─────────────────────────────────────────────────────────────
-  const subcategoryItems = burnCategories.flatMap((c, ci) =>
-    (c.subcategories ?? [])
-      .filter((s) => s.subcategory)
-      .map((s, si) => ({
-        name: s.subcategory,
-        spent: s.spent,
-        budget: s.budget,
-        color: COLORS[(ci * 3 + si) % COLORS.length],
-      }))
-  );
+  const subcategoryItems = (() => {
+    const merged: Record<string, { name: string; spent: number; budget: number }> = {};
+    burnCategories.forEach((c) => {
+      (c.subcategories ?? [])
+        .filter((s) => s.subcategory)
+        .forEach((s) => {
+          const key = s.subcategory;
+          if (merged[key]) {
+            merged[key].spent += s.spent;
+            merged[key].budget += s.budget;
+          } else {
+            merged[key] = { name: key, spent: s.spent, budget: s.budget };
+          }
+        });
+    });
+    return Object.values(merged).map((item, i) => ({
+      ...item,
+      color: COLORS[i % COLORS.length],
+    }));
+  })();
 
   const chartItems = chartGroupBy === 'subcategory' && subcategoryItems.length > 0
     ? subcategoryItems
