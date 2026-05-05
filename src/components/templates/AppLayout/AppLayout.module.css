@@ -19,11 +19,7 @@
   gap: var(--app-shell-gap);
   overflow: visible;
   overflow-x: clip;
-  background:
-    radial-gradient(circle at 12% 8%, rgba(243, 210, 122, 0.08), transparent 18%),
-    radial-gradient(circle at top left, rgba(214, 168, 74, 0.07), transparent 22%),
-    radial-gradient(circle at right 18%, rgba(107, 78, 25, 0.1), transparent 24%),
-    linear-gradient(180deg, #020202 0%, #070707 48%, #030303 100%);
+  background: var(--surface-shell-bg);
 }
 
 .headerSlot {
@@ -38,8 +34,8 @@
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+    linear-gradient(var(--surface-grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--surface-grid-line) 1px, transparent 1px);
   background-size: 40px 40px;
   mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.55), transparent 95%);
   pointer-events: none;
@@ -67,12 +63,12 @@
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-bottom-color: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--surface-border);
+  border-bottom-color: var(--surface-border-soft);
   background:
     var(--surface-highlight),
     var(--surface-glow),
-    rgba(9, 9, 9, 0.88);
+    var(--surface-overlay);
   box-shadow: var(--shadow-float);
   backdrop-filter: blur(18px) saturate(122%);
 }
@@ -84,8 +80,8 @@
   border-radius: inherit;
   pointer-events: none;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 16%),
-    radial-gradient(circle at top center, rgba(255, 255, 255, 0.05), transparent 42%);
+    linear-gradient(180deg, color-mix(in srgb, var(--text-on-surface) 8%, transparent), transparent 16%),
+    radial-gradient(circle at top center, color-mix(in srgb, var(--text-on-surface) 5%, transparent), transparent 42%);
 }
 
 .contentShell::after {
@@ -96,8 +92,8 @@
   pointer-events: none;
   z-index: 10;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0px, transparent 48px),
-    radial-gradient(circle at top center, rgba(255, 255, 255, 0.04), transparent 40%);
+    linear-gradient(180deg, color-mix(in srgb, var(--text-on-surface) 7%, transparent) 0px, transparent 48px),
+    radial-gradient(circle at top center, color-mix(in srgb, var(--text-on-surface) 4%, transparent), transparent 40%);
 }
 
 .sidebarPanel > * {
@@ -127,12 +123,12 @@
 .navLink {
   display: block;
   padding: 0.95rem 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--surface-border-soft);
   border-radius: 16px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.015)),
-    rgba(255, 255, 255, 0.012);
-  color: rgba(240, 240, 248, 0.7);
+    linear-gradient(180deg, color-mix(in srgb, var(--text-on-surface) 3%, transparent), color-mix(in srgb, var(--text-on-surface) 1.5%, transparent)),
+    var(--surface-control);
+  color: var(--text-on-surface-soft);
   text-decoration: none;
   transition:
     border-color var(--transition-base),
@@ -143,11 +139,11 @@
 }
 
 .navLink:hover {
-  border-color: rgba(255, 255, 255, 0.12);
+  border-color: var(--surface-border);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
-    rgba(255, 255, 255, 0.025);
-  color: #fff;
+    linear-gradient(180deg, color-mix(in srgb, var(--text-on-surface) 5%, transparent), color-mix(in srgb, var(--text-on-surface) 2%, transparent)),
+    var(--surface-control-hover);
+  color: var(--text-on-surface);
   transform: translateX(2px);
   box-shadow: 0 12px 24px rgba(2, 6, 23, 0.16);
 }
@@ -156,8 +152,8 @@
   border-color: rgba(214, 168, 74, 0.28);
   background:
     linear-gradient(135deg, rgba(243, 210, 122, 0.14), rgba(214, 168, 74, 0.18)),
-    rgba(255, 255, 255, 0.025);
-  color: #fff;
+    var(--surface-control);
+  color: var(--text-on-surface);
   box-shadow: 0 14px 28px rgba(2, 6, 23, 0.18);
 }
 

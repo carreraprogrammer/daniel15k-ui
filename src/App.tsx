@@ -14,8 +14,15 @@ import { isPlatform } from '@ionic/react';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { AppRouter } from './router/AppRouter';
 import { AgentUIProvider } from './contexts/AgentUIContext';
+import { applyThemeMode, useThemeStore } from './store/themeStore';
 
 export default function App() {
+  const themeMode = useThemeStore((state) => state.mode);
+
+  useEffect(() => {
+    applyThemeMode(themeMode);
+  }, [themeMode]);
+
   useEffect(() => {
     if (isPlatform('capacitor')) {
       void SplashScreen.hide({ fadeOutDuration: 400 });

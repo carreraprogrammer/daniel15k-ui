@@ -133,6 +133,27 @@
   --surface-highlight: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0) 24%);
   --surface-glow: radial-gradient(circle at top left, rgba(243, 210, 122, 0.1), transparent 34%),
                   radial-gradient(circle at 82% 14%, rgba(214, 168, 74, 0.08), transparent 30%);
+  --surface-shell-bg:
+    radial-gradient(circle at 12% 8%, rgba(243, 210, 122, 0.08), transparent 18%),
+    radial-gradient(circle at top left, rgba(214, 168, 74, 0.07), transparent 22%),
+    radial-gradient(circle at right 18%, rgba(107, 78, 25, 0.1), transparent 24%),
+    linear-gradient(180deg, #020202 0%, #070707 48%, #030303 100%);
+  --surface-grid-line: rgba(255, 255, 255, 0.018);
+  --surface-overlay: rgba(9, 9, 9, 0.88);
+  --surface-header: rgba(8, 8, 8, 0.86);
+  --surface-header-mobile: rgba(7, 7, 7, 0.9);
+  --surface-tabbar: rgba(6, 6, 6, 0.96);
+  --surface-control: rgba(255, 255, 255, 0.03);
+  --surface-control-hover: rgba(255, 255, 255, 0.05);
+  --surface-border: rgba(255, 255, 255, 0.08);
+  --surface-border-soft: rgba(255, 255, 255, 0.025);
+  --surface-border-muted: rgba(255, 255, 255, 0.06);
+  --text-on-surface: #fff;
+  --text-on-surface-soft: rgba(240, 240, 248, 0.76);
+  --text-on-surface-muted: rgba(240, 240, 248, 0.62);
+  --text-on-accent: #10141b;
+  --tabbar-text: rgba(240, 240, 248, 0.58);
+  --tabbar-text-active: #fff8e7;
 
   /* ── TRANSICIONES ── */
   --transition-fast:   100ms ease;
@@ -164,6 +185,92 @@
   --color-unknown-subtle:      #141E2D;
 
   /* ── IONIC OVERRIDES ── */
+  --ion-background-color:       var(--color-bg-primary);
+  --ion-text-color:             var(--color-text-primary);
+  --ion-color-primary:          var(--color-brand);
+  --ion-color-primary-contrast: var(--color-text-inverse);
+  --ion-toolbar-background:     var(--color-bg-secondary);
+  --ion-item-background:        var(--color-bg-secondary);
+  --ion-card-background:        var(--color-bg-secondary);
+  --ion-border-color:           var(--color-border);
+}
+
+:root[data-theme='light'] {
+  --color-bg-primary:     #F7F3EA;
+  --color-bg-secondary:   #FFFDF7;
+  --color-bg-elevated:    #FFFFFF;
+  --color-bg-input:       #F3EDE1;
+
+  --color-brand:          #9A6A18;
+  --color-brand-rgb:      154, 106, 24;
+  --color-brand-hover:    #7B520F;
+  --color-brand-active:   #68460D;
+  --color-brand-subtle:   #F3E5C6;
+
+  --color-accent:         #B8841F;
+  --color-accent-rgb:     184, 132, 31;
+  --color-accent-subtle:  #F6E8C7;
+
+  --color-success:        #147A3A;
+  --color-success-subtle: #DDF6E7;
+  --color-warning:        #A76400;
+  --color-warning-subtle: #F9E7C4;
+  --color-error:          #B42318;
+  --color-error-subtle:   #FCE3E0;
+
+  --color-text-primary:   #171512;
+  --color-text-secondary: #5E584F;
+  --color-text-disabled:  #958E83;
+  --color-text-inverse:   #FFFDF7;
+
+  --color-border:         #D8CEC0;
+  --color-border-focus:   var(--color-brand);
+  --color-border-error:   var(--color-error);
+  --color-border-subtle:  #E9E0D2;
+
+  --shadow-sm:  0 1px 2px rgba(55, 43, 25, 0.08);
+  --shadow-md:  0 4px 12px rgba(55, 43, 25, 0.12);
+  --shadow-lg:  0 8px 32px rgba(55, 43, 25, 0.16);
+  --shadow-brand: 0 0 0 3px rgba(154, 106, 24, 0.2);
+  --shadow-float: 0 18px 48px rgba(55, 43, 25, 0.16), 0 4px 14px rgba(55, 43, 25, 0.08);
+  --shadow-float-hover: 0 26px 64px rgba(55, 43, 25, 0.2), 0 8px 18px rgba(55, 43, 25, 0.1);
+  --shadow-surface: 0 12px 26px rgba(55, 43, 25, 0.1);
+  --surface-panel: rgba(255, 253, 247, 0.92);
+  --surface-panel-strong: rgba(255, 255, 255, 0.96);
+  --surface-panel-soft: rgba(55, 43, 25, 0.035);
+  --surface-highlight: linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(255, 255, 255, 0) 30%);
+  --surface-glow: radial-gradient(circle at top left, rgba(214, 168, 74, 0.16), transparent 34%),
+                  radial-gradient(circle at 82% 14%, rgba(154, 106, 24, 0.08), transparent 30%);
+  --surface-shell-bg:
+    radial-gradient(circle at 12% 8%, rgba(214, 168, 74, 0.16), transparent 18%),
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.72), transparent 25%),
+    radial-gradient(circle at right 18%, rgba(154, 106, 24, 0.1), transparent 24%),
+    linear-gradient(180deg, #FAF6ED 0%, #F2E9DA 48%, #EFE3D0 100%);
+  --surface-grid-line: rgba(55, 43, 25, 0.045);
+  --surface-overlay: rgba(255, 253, 247, 0.88);
+  --surface-header: rgba(255, 253, 247, 0.88);
+  --surface-header-mobile: rgba(255, 253, 247, 0.92);
+  --surface-tabbar: rgba(255, 253, 247, 0.96);
+  --surface-control: rgba(55, 43, 25, 0.045);
+  --surface-control-hover: rgba(55, 43, 25, 0.075);
+  --surface-border: rgba(55, 43, 25, 0.12);
+  --surface-border-soft: rgba(55, 43, 25, 0.04);
+  --surface-border-muted: rgba(55, 43, 25, 0.08);
+  --text-on-surface: #171512;
+  --text-on-surface-soft: rgba(23, 21, 18, 0.76);
+  --text-on-surface-muted: rgba(23, 21, 18, 0.58);
+  --text-on-accent: #FFFDF7;
+  --tabbar-text: rgba(23, 21, 18, 0.58);
+  --tabbar-text-active: #171512;
+
+  --color-committed-subtle:    #FCE3E0;
+  --color-necessary-subtle:    #F8E5D3;
+  --color-discretionary-subtle: #F6E8C7;
+  --color-investment-subtle:   #DDF6E7;
+  --color-social-subtle:       #EEE5FA;
+  --color-income-subtle:       #DDF3F6;
+  --color-unknown-subtle:      #E8EDF0;
+
   --ion-background-color:       var(--color-bg-primary);
   --ion-text-color:             var(--color-text-primary);
   --ion-color-primary:          var(--color-brand);
