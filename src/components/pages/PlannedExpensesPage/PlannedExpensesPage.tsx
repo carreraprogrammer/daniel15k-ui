@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { IonContent, IonIcon } from '@ionic/react';
-import { addOutline, chevronBackOutline } from 'ionicons/icons';
-import { AppLayout, useAppBreadcrumbs } from '../../templates/AppLayout';
+import { addOutline } from 'ionicons/icons';
+import { AppLayout } from '../../templates/AppLayout';
+import { BreadcrumbTrail } from '../../organisms/BreadcrumbTrail';
 import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
 import { SelectInput } from '../../atoms/SelectInput';
@@ -167,15 +168,6 @@ export const PlannedExpensesContent = () => {
     () => appliedChips.filter((chip) => chip.key !== 'q').length,
     [appliedChips],
   );
-  const detailBreadcrumbs = useMemo(
-    () => (detailsOpen ? [
-      { label: 'Planeados', onClick: () => setDetailsOpen(false) },
-      { label: activeTab === 'pockets' ? 'Bolsillos' : 'Detalle' },
-    ] : []),
-    [activeTab, detailsOpen],
-  );
-  useAppBreadcrumbs(detailBreadcrumbs);
-
   const removeChip = (key: string) => {
     setFilters((current) => ({ ...current, [key]: '' }));
   };
@@ -227,15 +219,11 @@ export const PlannedExpensesContent = () => {
 
           {detailsOpen ? (
             <div className={styles.detailStage}>
+              <BreadcrumbTrail items={[
+                { label: 'Planes', onClick: () => setDetailsOpen(false) },
+                { label: activeTab === 'pockets' ? 'Bolsillos' : 'Detalle' },
+              ]} />
               <div className={styles.detailStageHeader}>
-                <button
-                  type="button"
-                  className={styles.detailBackBtn}
-                  onClick={() => setDetailsOpen(false)}
-                >
-                  <IonIcon icon={chevronBackOutline} aria-hidden="true" />
-                  Planes
-                </button>
                 <div className={styles.detailStageCopy}>
                   <h3 className={styles.detailStageTitle}>Detalle de planeados</h3>
                   <p className={styles.detailStageText}>Aquí viven los gastos futuros y los bolsillos que los fondean mes a mes.</p>

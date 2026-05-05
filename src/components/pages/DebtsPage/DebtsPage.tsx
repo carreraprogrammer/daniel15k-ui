@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { IonContent, IonIcon } from '@ionic/react';
-import { addOutline, chevronBackOutline } from 'ionicons/icons';
-import { AppLayout, useAppBreadcrumbs } from '../../templates/AppLayout';
+import { addOutline } from 'ionicons/icons';
+import { AppLayout } from '../../templates/AppLayout';
+import { BreadcrumbTrail } from '../../organisms/BreadcrumbTrail';
 import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
 import { SelectInput } from '../../atoms/SelectInput';
@@ -47,15 +48,6 @@ export const DebtsContent = () => {
   const [linkError, setLinkError] = useState<string | null>(null);
   const [filters, setFilters] = useState<DebtQueryParams>(initialFilters);
   const { showError, showSuccess, toast } = useToast();
-  const detailBreadcrumbs = useMemo(
-    () => (detailsOpen ? [
-      { label: 'Deudas', onClick: () => setDetailsOpen(false) },
-      { label: 'Detalle' },
-    ] : []),
-    [detailsOpen],
-  );
-  useAppBreadcrumbs(detailBreadcrumbs);
-
   const load = async () => {
     setLoading(true);
     setError(null);
@@ -371,15 +363,11 @@ export const DebtsContent = () => {
 
         {detailsOpen ? (
           <div className={styles.detailStage}>
+            <BreadcrumbTrail items={[
+              { label: 'Deudas', onClick: () => setDetailsOpen(false) },
+              { label: 'Detalle' },
+            ]} />
             <div className={styles.detailStageHeader}>
-              <button
-                type="button"
-                className={styles.detailBackBtn}
-                onClick={() => setDetailsOpen(false)}
-              >
-                <IonIcon icon={chevronBackOutline} aria-hidden="true" />
-                Deudas
-              </button>
               <div className={styles.detailStageCopy}>
                 <h3 className={styles.detailStageTitle}>Detalle de deudas</h3>
                 <p className={styles.detailStageText}>La edición, los filtros y el listado completo viven aquí, no debajo del resumen inicial.</p>

@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
-import { IonContent, IonIcon } from '@ionic/react';
-import { chevronBackOutline } from 'ionicons/icons';
+import { IonContent } from '@ionic/react';
 import { useHistory, useParams } from 'react-router-dom';
-import { AppLayout, useAppBreadcrumbs } from '../../templates/AppLayout';
+import { AppLayout } from '../../templates/AppLayout';
+import { BreadcrumbTrail } from '../../organisms/BreadcrumbTrail';
 import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
 import { ErrorState } from '../../molecules/ErrorState';
@@ -255,15 +255,6 @@ export const BudgetsContent = () => {
     () => chips.filter((chip) => chip.key !== 'q').length,
     [chips],
   );
-  const detailBreadcrumbs = useMemo(
-    () => (detailsOpen ? [
-      { label: 'Presupuestos', onClick: handleCloseDetail },
-      { label: detailTab === 'history' ? 'Historial' : 'Detalle' },
-    ] : []),
-    [detailTab, detailsOpen],
-  );
-  useAppBreadcrumbs(detailBreadcrumbs);
-
   const burnCategories = summary?.burn_rate?.categories ?? [];
   const outOfRange = burnCategories.filter((item) => item.on_track === false);
   const topRisk = outOfRange[0] ?? burnCategories[0] ?? null;
@@ -383,15 +374,11 @@ export const BudgetsContent = () => {
           {/* ── Detail view with tabs ── */}
           {detailsOpen ? (
             <div className={styles.detailStage}>
+              <BreadcrumbTrail items={[
+                { label: 'Presupuestos', onClick: handleCloseDetail },
+                { label: detailTab === 'history' ? 'Historial' : 'Detalle' },
+              ]} />
               <div className={styles.detailStageHeader}>
-                <button
-                  type="button"
-                  className={styles.detailBackBtn}
-                  onClick={() => setDetailsOpen(false)}
-                >
-                  <IonIcon icon={chevronBackOutline} aria-hidden="true" />
-                  Presupuesto
-                </button>
                 <div className={styles.detailTabBar}>
                   <button
                     type="button"

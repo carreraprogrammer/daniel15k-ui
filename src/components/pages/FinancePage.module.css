@@ -580,33 +580,6 @@
   padding-top: var(--finance-space-xs);
 }
 
-.detailBackBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 14px 7px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.05);
-  color: rgba(231, 236, 244, 0.8);
-  font-family: var(--font-sans);
-  font-size: var(--type-body-small-size);
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
-}
-
-.detailBackBtn:hover,
-.detailBackBtn:active {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.18);
-  color: #fff;
-}
-
-.detailBackBtn :global(ion-icon) {
-  font-size: 1.1em;
-}
-
 .detailHeaderActions {
   display: flex;
   flex-wrap: wrap;

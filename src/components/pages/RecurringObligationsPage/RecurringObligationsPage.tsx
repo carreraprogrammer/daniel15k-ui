@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { IonContent, IonIcon, IonLabel, IonSegment, IonSegmentButton } from '@ionic/react';
-import { addOutline, chevronBackOutline } from 'ionicons/icons';
-import { AppLayout, useAppBreadcrumbs } from '../../templates/AppLayout';
+import { addOutline } from 'ionicons/icons';
+import { AppLayout } from '../../templates/AppLayout';
+import { BreadcrumbTrail } from '../../organisms/BreadcrumbTrail';
 import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
 import { SelectInput } from '../../atoms/SelectInput';
@@ -73,15 +74,6 @@ export const RecurringObligationsContent = () => {
   const [editingIncome, setEditingIncome] = useState<IncomeSource | null>(null);
   const [deletingIncome, setDeletingIncome] = useState<IncomeSource | null>(null);
   const { showError, showSuccess, toast } = useToast();
-  const detailBreadcrumbs = useMemo(
-    () => (detailsOpen ? [
-      { label: 'Recurrentes', onClick: () => setDetailsOpen(false) },
-      { label: activeView === 'income' ? 'Ingresos' : 'Detalle' },
-    ] : []),
-    [activeView, detailsOpen],
-  );
-  useAppBreadcrumbs(detailBreadcrumbs);
-
   const load = async () => {
     setLoading(true);
     setError(null);
@@ -473,15 +465,11 @@ export const RecurringObligationsContent = () => {
           <>
             {loading ? <Spinner size="lg" /> : null}
             {error ? <ErrorState message={error} onRetry={() => void load()} /> : null}
+            <BreadcrumbTrail items={[
+              { label: 'Recurrentes', onClick: () => setDetailsOpen(false) },
+              { label: activeView === 'income' ? 'Ingresos' : 'Obligaciones' },
+            ]} />
             <div className={styles.detailStageHeader}>
-              <button
-                type="button"
-                className={styles.detailBackBtn}
-                onClick={() => setDetailsOpen(false)}
-              >
-                <IonIcon icon={chevronBackOutline} aria-hidden="true" />
-                Recurrentes
-              </button>
               <div className={styles.detailStageCopy}>
                 <h3 className={styles.detailStageTitle}>Detalle recurrente</h3>
                 <p className={styles.detailStageText}>Aquí vives entre filtros, segmentación y cards. La vista inicial ya respondió la pregunta principal.</p>
