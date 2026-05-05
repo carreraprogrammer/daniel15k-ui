@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { IonContent, IonIcon } from '@ionic/react';
-import { addOutline } from 'ionicons/icons';
+import { addOutline, chevronBackOutline } from 'ionicons/icons';
 import { AppLayout, useAppBreadcrumbs } from '../../templates/AppLayout';
 import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
@@ -228,6 +228,14 @@ export const PlannedExpensesContent = () => {
           {detailsOpen ? (
             <div className={styles.detailStage}>
               <div className={styles.detailStageHeader}>
+                <button
+                  type="button"
+                  className={styles.detailBackBtn}
+                  onClick={() => setDetailsOpen(false)}
+                >
+                  <IonIcon icon={chevronBackOutline} aria-hidden="true" />
+                  Planes
+                </button>
                 <div className={styles.detailStageCopy}>
                   <h3 className={styles.detailStageTitle}>Detalle de planeados</h3>
                   <p className={styles.detailStageText}>Aquí viven los gastos futuros y los bolsillos que los fondean mes a mes.</p>

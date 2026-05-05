@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
-import { IonContent } from '@ionic/react';
+import { IonContent, IonIcon } from '@ionic/react';
+import { chevronBackOutline } from 'ionicons/icons';
 import { useHistory, useParams } from 'react-router-dom';
 import { AppLayout, useAppBreadcrumbs } from '../../templates/AppLayout';
 import { Button } from '../../atoms/Button';
@@ -383,6 +384,14 @@ export const BudgetsContent = () => {
           {detailsOpen ? (
             <div className={styles.detailStage}>
               <div className={styles.detailStageHeader}>
+                <button
+                  type="button"
+                  className={styles.detailBackBtn}
+                  onClick={() => setDetailsOpen(false)}
+                >
+                  <IonIcon icon={chevronBackOutline} aria-hidden="true" />
+                  Presupuesto
+                </button>
                 <div className={styles.detailTabBar}>
                   <button
                     type="button"

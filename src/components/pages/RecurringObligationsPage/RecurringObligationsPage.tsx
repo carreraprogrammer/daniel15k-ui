@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { IonContent, IonIcon, IonLabel, IonSegment, IonSegmentButton } from '@ionic/react';
-import { addOutline } from 'ionicons/icons';
+import { addOutline, chevronBackOutline } from 'ionicons/icons';
 import { AppLayout, useAppBreadcrumbs } from '../../templates/AppLayout';
 import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
@@ -474,6 +474,14 @@ export const RecurringObligationsContent = () => {
             {loading ? <Spinner size="lg" /> : null}
             {error ? <ErrorState message={error} onRetry={() => void load()} /> : null}
             <div className={styles.detailStageHeader}>
+              <button
+                type="button"
+                className={styles.detailBackBtn}
+                onClick={() => setDetailsOpen(false)}
+              >
+                <IonIcon icon={chevronBackOutline} aria-hidden="true" />
+                Recurrentes
+              </button>
               <div className={styles.detailStageCopy}>
                 <h3 className={styles.detailStageTitle}>Detalle recurrente</h3>
                 <p className={styles.detailStageText}>Aquí vives entre filtros, segmentación y cards. La vista inicial ya respondió la pregunta principal.</p>

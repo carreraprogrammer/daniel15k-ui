@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { IonContent, IonIcon } from '@ionic/react';
-import { addOutline } from 'ionicons/icons';
+import { addOutline, chevronBackOutline } from 'ionicons/icons';
 import { AppLayout, useAppBreadcrumbs } from '../../templates/AppLayout';
 import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
@@ -372,6 +372,14 @@ export const DebtsContent = () => {
         {detailsOpen ? (
           <div className={styles.detailStage}>
             <div className={styles.detailStageHeader}>
+              <button
+                type="button"
+                className={styles.detailBackBtn}
+                onClick={() => setDetailsOpen(false)}
+              >
+                <IonIcon icon={chevronBackOutline} aria-hidden="true" />
+                Deudas
+              </button>
               <div className={styles.detailStageCopy}>
                 <h3 className={styles.detailStageTitle}>Detalle de deudas</h3>
                 <p className={styles.detailStageText}>La edición, los filtros y el listado completo viven aquí, no debajo del resumen inicial.</p>
