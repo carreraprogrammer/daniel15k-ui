@@ -6,16 +6,15 @@
 
 .crud-modal::part(backdrop) {
   background:
-    radial-gradient(circle at top left, rgba(243, 210, 122, 0.15), transparent 28%),
-    radial-gradient(circle at right 20%, rgba(214, 168, 74, 0.12), transparent 24%),
-    rgba(5, 7, 12, 0.9);
+    var(--surface-glow),
+    color-mix(in srgb, var(--color-bg-primary) 90%, transparent);
   backdrop-filter: blur(14px);
 }
 
 .crud-modal::part(content) {
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--surface-border);
   border-radius: 28px;
-  background: linear-gradient(180deg, rgba(14, 12, 11, 0.98), rgba(11, 10, 10, 0.96));
+  background: var(--surface-panel-strong);
   box-shadow: 0 28px 72px rgba(0, 0, 0, 0.4), var(--shadow-surface);
   backdrop-filter: blur(20px) saturate(126%);
   overflow: hidden;
@@ -47,10 +46,10 @@
   gap: 1rem;
   padding: clamp(0.95rem, 1.5vw, 1.2rem);
   border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--surface-border-muted);
   background:
-    linear-gradient(180deg, rgba(21, 18, 15, 0.92), rgba(14, 12, 11, 0.94)),
-    radial-gradient(circle at top left, rgba(243, 210, 122, 0.08), transparent 30%);
+    var(--surface-highlight),
+    var(--surface-panel);
 }
 
 .crud-modal__copy {
@@ -77,7 +76,7 @@
 
 .crud-modal__subtitle {
   margin: 0;
-  color: rgba(231, 236, 244, 0.66);
+  color: var(--text-on-surface-muted);
   font-size: var(--type-body-size);
   line-height: 1.55;
 }
@@ -85,8 +84,8 @@
 .crud-modal__close {
   padding: 0.72rem 1rem;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--surface-border);
+  background: var(--surface-control);
   color: var(--color-text-secondary);
   font: inherit;
   cursor: pointer;
@@ -94,16 +93,16 @@
 }
 
 .crud-modal__close:hover {
-  border-color: rgba(255, 255, 255, 0.14);
+  border-color: var(--surface-border);
   color: var(--color-text-primary);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--surface-control-hover);
 }
 
 .crud-modal__body {
   min-height: 0;
   border-radius: 26px;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  background: linear-gradient(180deg, rgba(17, 15, 14, 0.92), rgba(11, 10, 10, 0.96));
+  border: 1px solid var(--surface-border-muted);
+  background: var(--surface-panel);
   overflow: auto;
 }
 

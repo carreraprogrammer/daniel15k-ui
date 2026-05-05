@@ -15,14 +15,14 @@
   gap: 0.22rem;
   padding: 0.95rem 1rem;
   border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--surface-border-muted);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.02)),
-    rgba(255, 255, 255, 0.025);
+    var(--surface-highlight),
+    var(--surface-control);
 }
 
 .snapshotLabel {
-  color: rgba(231, 236, 244, 0.58);
+  color: var(--text-on-surface-muted);
   font-size: var(--type-caption-size);
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -40,15 +40,15 @@
   gap: 0.75rem;
   padding: 1rem;
   border-radius: 22px;
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--surface-border-muted);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.018)),
-    rgba(255, 255, 255, 0.022);
+    var(--surface-highlight),
+    var(--surface-control);
 }
 
 .heading {
   margin: 0;
-  color: rgba(231, 236, 244, 0.7);
+  color: var(--text-on-surface-soft);
   font-size: var(--type-label-size);
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -63,16 +63,16 @@
 
 .option {
   padding: 0.72rem 0.95rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--surface-border);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.035);
-  color: #fff;
+  background: var(--surface-control);
+  color: var(--color-text-primary);
   font: inherit;
 }
 
 .optionActive {
-  border-color: rgba(214, 168, 74, 0.3);
-  background: linear-gradient(135deg, rgba(243, 210, 122, 0.12), rgba(214, 168, 74, 0.15));
+  border-color: rgba(var(--color-brand-rgb), 0.3);
+  background: linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.12), rgba(var(--color-brand-rgb), 0.15));
   color: var(--color-accent);
 }
 

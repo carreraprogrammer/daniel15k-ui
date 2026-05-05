@@ -10,11 +10,11 @@
 }
 
 .optionEdit {
-  --background: linear-gradient(135deg, rgba(243, 210, 122, 0.16), rgba(214, 168, 74, 0.18));
+  --background: linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.16), rgba(var(--color-brand-rgb), 0.18));
 }
 
 .optionDelete {
-  --background: rgba(239, 68, 68, 0.16);
+  --background: color-mix(in srgb, var(--color-error) 16%, transparent);
 }
 
 .item {
@@ -26,9 +26,9 @@
 
 .item::part(native) {
   border-radius: 22px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.035);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--surface-border);
+  background: var(--surface-control);
+  box-shadow: var(--shadow-surface);
 }
 
 .card {
@@ -59,13 +59,13 @@
 
 .meta,
 .label {
-  color: rgba(231, 236, 244, 0.64);
+  color: var(--text-on-surface-muted);
   font-size: var(--type-body-small-size);
 }
 
 .name,
 .amount {
-  color: #fff;
+  color: var(--color-text-primary);
 }
 
 .classification {
@@ -78,22 +78,22 @@
 }
 
 .cls_base {
-  background: rgba(143, 233, 221, 0.14);
-  color: #8fe9dd;
+  background: color-mix(in srgb, var(--color-success) 14%, transparent);
+  color: var(--color-success);
 }
 
 .cls_variable {
-  background: rgba(251, 191, 36, 0.14);
-  color: #fbbf24;
+  background: color-mix(in srgb, var(--color-warning) 14%, transparent);
+  color: var(--color-warning);
 }
 
 .cls_seasonal {
-  background: rgba(167, 139, 250, 0.14);
-  color: #a78bfa;
+  background: rgba(var(--color-brand-rgb), 0.14);
+  color: var(--color-accent);
 }
 
 .cls_one_time {
-  background: rgba(148, 163, 184, 0.12);
+  background: var(--surface-control);
   color: var(--color-text-secondary);
 }
 

@@ -4,14 +4,13 @@
 
 .sheet-modal::part(backdrop) {
   background:
-    radial-gradient(circle at top left, rgba(243, 210, 122, 0.14), transparent 28%),
-    radial-gradient(circle at right 20%, rgba(214, 168, 74, 0.1), transparent 22%),
-    rgba(5, 7, 12, 0.88);
+    var(--surface-glow),
+    color-mix(in srgb, var(--color-bg-primary) 88%, transparent);
   backdrop-filter: blur(12px);
 }
 
 .sheet-modal::part(content) {
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--surface-border);
   border-radius: 28px 28px 0 0;
   background:
     var(--surface-highlight),
@@ -24,7 +23,7 @@
 
 .sheet-modal ion-toolbar {
   --background: var(--surface-panel-strong);
-  --border-color: rgba(255, 255, 255, 0.06);
+  --border-color: var(--surface-border-muted);
   --color: var(--color-text-primary);
 }
 
@@ -55,10 +54,10 @@
   gap: 1rem;
   padding: 0.9rem 1rem;
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--surface-border-muted);
   background:
-    linear-gradient(180deg, rgba(21, 18, 15, 0.9), rgba(14, 12, 11, 0.92)),
-    radial-gradient(circle at top left, rgba(243, 210, 122, 0.08), transparent 30%);
+    var(--surface-highlight),
+    var(--surface-panel);
 }
 
 .sheet-modal__copy {
@@ -85,8 +84,8 @@
 .sheet-modal__close {
   padding: 0.64rem 0.95rem;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--surface-border);
+  background: var(--surface-control);
   color: var(--color-text-secondary);
   font: inherit;
   cursor: pointer;

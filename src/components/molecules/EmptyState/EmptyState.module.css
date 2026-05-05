@@ -3,15 +3,15 @@
   justify-items: start;
   gap: var(--space-3);
   padding: var(--space-6);
-  border: 1px dashed rgba(255, 255, 255, 0.16);
+  border: 1px dashed var(--surface-border);
   border-radius: 24px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+  background: var(--surface-control);
 }
 
 .stateError {
   border-style: solid;
-  border-color: rgba(239, 68, 68, 0.22);
-  background: linear-gradient(180deg, rgba(239, 68, 68, 0.08), rgba(255, 255, 255, 0.02));
+  border-color: color-mix(in srgb, var(--color-error) 22%, transparent);
+  background: color-mix(in srgb, var(--color-error) 8%, var(--surface-control));
 }
 
 .copy {
@@ -22,7 +22,7 @@
 .badge {
   padding: 0.35rem 0.7rem;
   border-radius: var(--radius-full);
-  background: rgba(243, 210, 122, 0.12);
+  background: rgba(var(--color-brand-rgb), 0.12);
   color: var(--color-accent);
   font-size: var(--text-xs);
   font-weight: var(--font-semibold);
@@ -31,7 +31,7 @@
 }
 
 .badgeError {
-  background: rgba(239, 68, 68, 0.14);
+  background: color-mix(in srgb, var(--color-error) 14%, transparent);
   color: var(--color-error);
 }
 
@@ -43,7 +43,7 @@
 
 .message {
   margin: 0;
-  color: rgba(240, 240, 248, 0.76);
+  color: var(--text-on-surface-soft);
   line-height: 1.7;
 }
 

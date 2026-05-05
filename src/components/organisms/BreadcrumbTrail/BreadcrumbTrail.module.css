@@ -10,7 +10,7 @@
   margin: 0;
   padding: 0;
   list-style: none;
-  color: rgba(231, 236, 244, 0.62);
+  color: var(--text-on-surface-muted);
   font-size: var(--type-body-small-size);
   line-height: var(--leading-normal);
 }
@@ -43,7 +43,7 @@
   padding: 0;
   border: 0;
   background: transparent;
-  color: rgba(231, 236, 244, 0.7);
+  color: var(--text-on-surface-soft);
   font: inherit;
   font-weight: 650;
   letter-spacing: var(--tracking-normal);
@@ -53,11 +53,11 @@
 }
 
 .action:hover {
-  color: #fff;
+  color: var(--text-on-surface);
 }
 
 .current {
-  color: #fff;
+  color: var(--text-on-surface);
   font-weight: 720;
 }
 

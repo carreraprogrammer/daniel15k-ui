@@ -11,15 +11,15 @@
 }
 
 .optionDone {
-  --background: linear-gradient(135deg, rgba(143, 233, 221, 0.16), rgba(71, 180, 162, 0.2));
+  --background: color-mix(in srgb, var(--color-success) 16%, transparent);
 }
 
 .optionCancel {
-  --background: rgba(255, 178, 138, 0.16);
+  --background: color-mix(in srgb, var(--color-error) 16%, transparent);
 }
 
 .optionEdit {
-  --background: linear-gradient(135deg, rgba(243, 210, 122, 0.16), rgba(214, 168, 74, 0.18));
+  --background: linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.16), rgba(var(--color-brand-rgb), 0.18));
 }
 
 .item {
@@ -31,9 +31,9 @@
 
 .item::part(native) {
   border-radius: 22px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.035);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--surface-border);
+  background: var(--surface-control);
+  box-shadow: var(--shadow-surface);
 }
 
 .card {
@@ -66,13 +66,13 @@
 .type,
 .meta,
 .label {
-  color: rgba(231, 236, 244, 0.64);
+  color: var(--text-on-surface-muted);
   font-size: var(--type-body-small-size);
 }
 
 .name,
 .amount {
-  color: #fff;
+  color: var(--color-text-primary);
 }
 
 .catChip,
@@ -91,8 +91,8 @@
 }
 
 .subChip {
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(231, 236, 244, 0.78);
+  border: 1px solid var(--surface-border);
+  color: var(--text-on-surface-soft);
 }
 
 @media (max-width: 640px) {

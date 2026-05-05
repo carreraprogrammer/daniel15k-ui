@@ -33,9 +33,9 @@
   font-size: var(--text-2xl);
 }
 
-.linkIcon   { color: #8fe9dd; }
+.linkIcon   { color: var(--color-success); }
 .editIcon   { color: var(--color-accent); }
-.deleteIcon { color: #ff8f8f; }
+.deleteIcon { color: var(--color-error); }
 
 /* ── Card shell ─────────────────────────────────────────────────────────── */
 
@@ -48,9 +48,9 @@
 
 .item::part(native) {
   border-radius: 22px;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  background: rgba(255, 255, 255, 0.03);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--surface-border-muted);
+  background: var(--surface-control);
+  box-shadow: var(--shadow-surface);
 }
 
 .card {
@@ -136,7 +136,7 @@
   align-items: center;
   padding: 0.22rem 0.55rem;
   border-radius: var(--radius-full);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--surface-border);
   font-size: var(--type-caption-size);
   line-height: var(--leading-label);
   font-weight: var(--font-medium);
@@ -156,7 +156,7 @@
 .linked {
   font-size: var(--type-caption-size);
   line-height: var(--leading-label);
-  color: #8fe9dd;
+  color: var(--color-success);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -197,18 +197,18 @@
 }
 
 .status_confirmed {
-  background: rgba(143, 233, 221, 0.1);
-  color: #8fe9dd;
+  background: color-mix(in srgb, var(--color-success) 10%, transparent);
+  color: var(--color-success);
 }
 
 .status_pending {
-  background: rgba(255, 226, 145, 0.1);
-  color: #ffe291;
+  background: color-mix(in srgb, var(--color-warning) 10%, transparent);
+  color: var(--color-warning);
 }
 
 .status_projected {
-  background: rgba(124, 140, 255, 0.12);
-  color: #aab4ff;
+  background: rgba(var(--color-brand-rgb), 0.12);
+  color: var(--color-accent);
 }
 
 /* ── Responsive ─────────────────────────────────────────────────────────── */

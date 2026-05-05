@@ -8,12 +8,12 @@
   display: grid;
   gap: 1.15rem;
   padding: 1.3rem;
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--surface-border-muted);
   border-radius: 26px;
   background:
-    linear-gradient(180deg, rgba(22, 19, 16, 0.88), rgba(13, 11, 10, 0.94)),
-    radial-gradient(circle at top left, rgba(243, 210, 122, 0.07), transparent 32%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    var(--surface-highlight),
+    var(--surface-panel);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text-on-surface) 3%, transparent);
 }
 
 .sectionHeader {
@@ -71,8 +71,8 @@
   min-height: 3rem;
   padding: 0.78rem 1rem;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--surface-border);
+  background: var(--surface-control);
   color: var(--color-text-secondary);
   cursor: pointer;
   transition:
@@ -91,8 +91,8 @@
 
 .categoryTokenActive,
 .subcategoryTokenActive {
-  border-color: color-mix(in srgb, var(--category-accent, var(--color-accent)) 56%, rgba(255, 255, 255, 0.12));
-  background: color-mix(in srgb, var(--category-accent, var(--color-accent)) 16%, rgba(255, 255, 255, 0.02));
+  border-color: color-mix(in srgb, var(--category-accent, var(--color-accent)) 56%, var(--surface-border));
+  background: color-mix(in srgb, var(--category-accent, var(--color-accent)) 16%, var(--surface-control));
   color: var(--color-text-primary);
   box-shadow: 0 14px 36px rgba(0, 0, 0, 0.24);
 }
@@ -118,9 +118,10 @@
   gap: 0.95rem;
   padding: 1rem;
   border-radius: 22px;
-  border: 1px solid color-mix(in srgb, var(--category-accent, var(--color-accent)) 18%, rgba(255, 255, 255, 0.06));
+  border: 1px solid color-mix(in srgb, var(--category-accent, var(--color-accent)) 18%, var(--surface-border-muted));
   background:
-    linear-gradient(180deg, rgba(17, 14, 12, 0.88), rgba(11, 10, 9, 0.92)),
+    var(--surface-highlight),
+    var(--surface-panel),
     radial-gradient(circle at top left, color-mix(in srgb, var(--category-accent, var(--color-accent)) 12%, transparent), transparent 34%);
 }
 
@@ -143,8 +144,8 @@
   min-height: 2.75rem;
   padding: 0.72rem 1rem;
   border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--category-accent, var(--color-accent)) 30%, rgba(255, 255, 255, 0.08));
-  background: color-mix(in srgb, var(--category-accent, var(--color-accent)) 10%, rgba(255, 255, 255, 0.02));
+  border: 1px solid color-mix(in srgb, var(--category-accent, var(--color-accent)) 30%, var(--surface-border));
+  background: color-mix(in srgb, var(--category-accent, var(--color-accent)) 10%, var(--surface-control));
   color: var(--color-text-primary);
   font: inherit;
   font-weight: 600;
@@ -162,7 +163,7 @@
   width: 2.15rem;
   height: 2.15rem;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--category-accent, var(--color-accent)) 14%, rgba(255, 255, 255, 0.03));
+  background: color-mix(in srgb, var(--category-accent, var(--color-accent)) 14%, var(--surface-control));
   color: var(--category-accent, var(--color-accent));
   flex-shrink: 0;
 }
@@ -175,8 +176,8 @@
   margin: 0;
   padding: 0.92rem 1rem;
   border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--surface-border-muted);
+  background: var(--surface-control);
   color: var(--color-text-secondary);
   font-size: var(--type-body-small-size);
   line-height: 1.55;
@@ -184,7 +185,7 @@
 
 .fieldLabel {
   margin: 0 0 0.5rem;
-  color: rgba(231, 236, 244, 0.62);
+  color: var(--text-on-surface-muted);
   font-size: var(--type-label-size);
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -201,9 +202,9 @@
   min-width: 0;
   padding: 0.6rem 0.85rem;
   border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.04);
-  color: rgba(231, 236, 244, 0.72);
+  border: 1px solid var(--surface-border);
+  background: var(--surface-control);
+  color: var(--text-on-surface-soft);
   font-size: var(--type-label-size);
   font-weight: 600;
   cursor: pointer;
@@ -212,14 +213,14 @@
 }
 
 .paymentSourceBtn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.18);
+  background: var(--surface-control-hover);
+  border-color: var(--surface-border);
 }
 
 .paymentSourceBtnActive {
-  background: rgba(243, 210, 122, 0.12);
-  border-color: rgba(243, 210, 122, 0.45);
-  color: rgba(243, 210, 122, 0.95);
+  background: rgba(var(--color-brand-rgb), 0.12);
+  border-color: rgba(var(--color-brand-rgb), 0.45);
+  color: var(--color-accent);
 }
 
 .actions {
@@ -232,9 +233,9 @@
   margin: 0;
   padding: 0.95rem 1rem;
   border-radius: 18px;
-  border: 1px solid color-mix(in srgb, var(--color-error) 28%, rgba(255, 255, 255, 0.04));
-  background: color-mix(in srgb, var(--color-error) 10%, rgba(255, 255, 255, 0.02));
-  color: #ffb28a;
+  border: 1px solid color-mix(in srgb, var(--color-error) 28%, var(--surface-border-soft));
+  background: color-mix(in srgb, var(--color-error) 10%, var(--surface-control));
+  color: var(--color-error);
   font-size: var(--type-body-size);
   line-height: 1.55;
 }
