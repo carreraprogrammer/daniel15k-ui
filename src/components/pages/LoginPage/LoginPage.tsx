@@ -73,6 +73,8 @@ export const LoginPage = () => {
               <BrandMark variant="monoline" size="lg" />
             </div>
 
+            <span className={nativeStyles.tagline}>Tu coach de finanzas personal</span>
+
             <div className={nativeStyles.divider}>
               <span className={nativeStyles.dividerLine} />
               <span className={nativeStyles.dividerText}>Iniciar sesión</span>
