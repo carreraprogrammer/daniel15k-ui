@@ -97,13 +97,13 @@
   isolation: isolate;
   overflow: hidden;
   padding: 1.3rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-bottom-color: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--surface-border-strong);
+  border-bottom-color: var(--surface-border-muted);
   border-radius: 28px;
   background:
     var(--surface-highlight),
     var(--surface-glow),
-    linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.018) 56%),
+    color-mix(in srgb, var(--text-on-surface) 3%, transparent),
     var(--surface-panel);
   box-shadow: var(--shadow-float);
   backdrop-filter: blur(16px) saturate(120%);
@@ -121,8 +121,8 @@
   border-radius: inherit;
   pointer-events: none;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 18%),
-    radial-gradient(circle at top center, rgba(255, 255, 255, 0.06), transparent 42%);
+    linear-gradient(180deg, color-mix(in srgb, var(--text-on-surface) 8%, transparent), transparent 18%),
+    radial-gradient(circle at top center, color-mix(in srgb, var(--text-on-surface) 6%, transparent), transparent 42%);
   opacity: 0.95;
 }
 
@@ -591,8 +591,8 @@
 .detailTabBar {
   display: flex;
   gap: var(--space-1, 4px);
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: var(--surface-control);
+  border: 1px solid var(--surface-border);
   border-radius: var(--radius-full, 999px);
   padding: 3px;
 }
@@ -611,7 +611,7 @@
 }
 
 .detailTabBtnActive {
-  background: rgba(255, 255, 255, 0.09);
+  background: var(--surface-control-hover);
   color: var(--color-text-primary);
 }
 
@@ -650,11 +650,11 @@
   display: grid;
   gap: var(--finance-space-md);
   padding: var(--finance-space-md);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--surface-border);
   border-radius: 22px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.015)),
-    rgba(255, 255, 255, 0.018);
+    var(--surface-highlight),
+    var(--surface-panel-soft);
 }
 
 .filterComposer {
@@ -694,11 +694,11 @@
   gap: var(--finance-space-xs);
   min-height: 2.85rem;
   padding: 0.65rem 0.9rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--surface-border);
   border-radius: 999px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015)),
-    rgba(7, 12, 21, 0.45);
+    var(--surface-highlight),
+    var(--surface-panel-soft);
   color: var(--color-text-primary);
   cursor: pointer;
   transition:
@@ -711,14 +711,14 @@
 .categoryToken:hover,
 .subcategoryToken:hover {
   transform: translateY(-1px);
-  border-color: rgba(255, 255, 255, 0.16);
+  border-color: var(--surface-border-strong);
 }
 
 .categoryTokenActive,
 .subcategoryTokenActive {
-  border-color: color-mix(in srgb, var(--category-accent) 48%, rgba(255, 255, 255, 0.12));
+  border-color: color-mix(in srgb, var(--category-accent) 48%, var(--surface-border));
   background:
-    linear-gradient(135deg, color-mix(in srgb, var(--category-accent) 18%, transparent), rgba(255, 255, 255, 0.04)),
+    linear-gradient(135deg, color-mix(in srgb, var(--category-accent) 18%, transparent), var(--surface-panel-soft)),
     var(--surface-panel);
   box-shadow: var(--shadow-surface);
 }
@@ -766,9 +766,9 @@
   display: grid;
   gap: var(--finance-space-md);
   padding: var(--finance-space-md);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--surface-border);
   border-radius: 24px;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--surface-panel-soft);
 }
 
 .filtersGrid {
@@ -816,9 +816,9 @@
 .segmentWrap {
   display: grid;
   padding: var(--finance-space-xs);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--surface-border);
   border-radius: 24px;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--surface-panel-soft);
 }
 
 .segmentWrap ion-segment {
@@ -876,11 +876,11 @@
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--surface-border-strong);
   border-radius: 24px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
-    rgba(255, 255, 255, 0.028);
+    var(--surface-highlight),
+    var(--surface-panel-soft);
   box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
   backdrop-filter: blur(14px) saturate(118%);
   transition:
@@ -977,10 +977,10 @@
   overflow: hidden;
   padding: 1.15rem 1.25rem;
   border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--surface-border);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.018)),
-    rgba(255, 255, 255, 0.022);
+    var(--surface-highlight),
+    var(--surface-panel-soft);
   box-shadow: var(--shadow-surface);
   transition:
     transform 160ms ease,
@@ -994,7 +994,7 @@
   inset: 1px;
   border-radius: inherit;
   pointer-events: none;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 20%);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--text-on-surface) 5%, transparent), transparent 20%);
 }
 
 .pocketCard > * {
@@ -1072,10 +1072,10 @@
   overflow: hidden;
   padding: var(--finance-space-md);
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--surface-border-muted);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.018)),
-    rgba(255, 255, 255, 0.022);
+    var(--surface-highlight),
+    var(--surface-panel-soft);
   box-shadow: var(--shadow-surface);
   transition:
     transform 160ms ease,
@@ -1089,7 +1089,7 @@
   inset: 1px;
   border-radius: inherit;
   pointer-events: none;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 18%);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--text-on-surface) 5%, transparent), transparent 18%);
 }
 
 .listItem > * {
@@ -1123,7 +1123,7 @@
   overflow: hidden;
   min-height: 8.25rem;
   padding: 1.2rem 1.35rem;
-  border: 1px solid rgba(255, 255, 255, 0.075);
+  border: 1px solid var(--surface-border);
   border-radius: 18px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.016)),
@@ -1227,10 +1227,18 @@
 }
 
 .historyActions {
-  display: grid;
-  gap: 0.65rem;
-  justify-items: end;
-  align-content: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  align-items: flex-end;
+}
+
+.historyActionsPrimary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
 }
 
 .historyStatus {
@@ -1290,19 +1298,19 @@
   .tableWrap:hover,
   .metricCard:hover {
     transform: translateY(-3px);
-    border-color: rgba(255, 255, 255, 0.12);
+    border-color: var(--surface-border-strong);
     box-shadow: var(--shadow-float-hover);
   }
 
   .listItem:hover {
     transform: translateY(-2px);
-    border-color: rgba(255, 255, 255, 0.1);
+    border-color: var(--surface-border);
     box-shadow: 0 16px 28px rgba(0, 0, 0, 0.28);
   }
 
   .historyItem:hover {
     transform: translateY(-2px);
-    border-color: rgba(255, 255, 255, 0.14);
+    border-color: var(--surface-border-strong);
     box-shadow: 0 18px 32px rgba(0, 0, 0, 0.3);
   }
 }
@@ -1326,7 +1334,7 @@
 .table th,
 .table td {
   padding: 0.95rem 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid var(--surface-border-muted);
   text-align: left;
 }
 
@@ -1524,13 +1532,13 @@
 
   .historyActions {
     width: 100%;
-    grid-template-columns: 1fr auto;
+    flex-direction: row;
     align-items: center;
-    justify-items: start;
+    justify-content: space-between;
   }
 
-  .historyDetailHint {
-    justify-self: end;
+  .historyActionsPrimary {
+    justify-content: flex-start;
   }
 
   .pill {
