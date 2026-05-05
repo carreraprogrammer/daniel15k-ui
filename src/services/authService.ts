@@ -4,6 +4,9 @@ import { api, apiBaseUrl } from './api';
 import type { AuthResponse, LoginCredentials, RegisterPayload } from '../types/auth.types';
 import type { AuthUser } from '../types/authorization.types';
 
+const GOOGLE_IOS_CLIENT_ID = '224259448673-ec625g235gj916acod4i7u0suql0a5eh.apps.googleusercontent.com';
+const GOOGLE_SERVER_CLIENT_ID = '224259448673-i6p90gblvcj46j179r6vi0l13vkoqvod.apps.googleusercontent.com';
+
 type MeAttributes = {
   email?: string;
   name?: string;
@@ -54,17 +57,23 @@ export const startGoogleOAuth = (): void => {
 
 export const initGoogleAuth = (): void => {
   void GoogleAuth.initialize({
-    clientId: '224259448673-ec625g235gj916acod4i7u0suql0a5eh.apps.googleusercontent.com',
+    clientId: GOOGLE_IOS_CLIENT_ID,
     scopes: ['profile', 'email'],
+    grantOfflineAccess: true,
   });
 };
 
 export const loginWithGoogleMobile = async (): Promise<AuthResponse> => {
   const user = await GoogleAuth.signIn({
     scopes: ['profile', 'email'],
-    serverClientId: '224259448673-ec625g235gj916acod4i7u0suql0a5eh.apps.googleusercontent.com',
+    serverClientId: GOOGLE_SERVER_CLIENT_ID,
+    grantOfflineAccess: true,
   });
-  const { data } = await api.post('/api/v1/auth/google/mobile', { access_token: user.authentication.accessToken });
+  const { data } = await api.post('/api/v1/auth/google/mobile', {
+    access_token: user.authentication?.accessToken,
+    idToken: user.authentication?.idToken,
+    serverAuthCode: user.serverAuthCode,
+  });
   return mapAuthResponse(data as Parameters<typeof mapAuthResponse>[0]);
 };
 
