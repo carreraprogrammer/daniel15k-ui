@@ -14,6 +14,13 @@ export type TransactionStatus = 'confirmed' | 'pending';
 export type PaymentSource = 'credit_card' | 'debit' | 'cash';
 export type CreditCardStatus = 'pending' | 'settled';
 
+export interface BurnRateSubcategory {
+  subcategory: string;
+  subcategory_id: number;
+  budget: number;
+  spent: number;
+}
+
 export interface BurnRateCategory {
   category: string;
   category_id: number;
@@ -23,6 +30,7 @@ export interface BurnRateCategory {
   pct: number;
   on_track: boolean;
   alert: string | null;
+  subcategories?: BurnRateSubcategory[];
 }
 
 export interface SummaryBurnRate {

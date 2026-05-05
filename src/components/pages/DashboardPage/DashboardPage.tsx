@@ -71,6 +71,7 @@ export const DashboardContent = () => {
   const [detailOpen, setDetailOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [refreshMsg, setRefreshMsg] = useState<string | null>(null);
+  const [chartGroupBy, setChartGroupBy] = useState<'category' | 'subcategory'>('category');
 
   const handleRefreshInsight = async () => {
     if (!AGENTS_URL || !SERVICE_TOKEN) return;
@@ -138,19 +139,33 @@ export const DashboardContent = () => {
       : 0;
 
   // ── Chart data ─────────────────────────────────────────────────────────────
-  const donutData = burnCategories
-    .filter((c) => c.spent > 0)
-    .map((c, i) => ({
-      name: c.category,
-      value: c.spent,
-      color: COLORS[i % COLORS.length],
-    }));
+  const subcategoryItems = burnCategories.flatMap((c, ci) =>
+    (c.subcategories ?? []).map((s, si) => ({
+      name: s.subcategory,
+      spent: s.spent,
+      budget: s.budget,
+      color: COLORS[(ci * 3 + si) % COLORS.length],
+    }))
+  );
 
-  const barData = burnCategories.map((c, i) => ({
-    name: c.category.length > 13 ? c.category.slice(0, 12) + '…' : c.category,
+  const chartItems = chartGroupBy === 'subcategory' && subcategoryItems.length > 0
+    ? subcategoryItems
+    : burnCategories.map((c, i) => ({
+        name: c.category,
+        spent: c.spent,
+        budget: c.budget,
+        color: COLORS[i % COLORS.length],
+      }));
+
+  const donutData = chartItems
+    .filter((c) => c.spent > 0)
+    .map((c) => ({ name: c.name, value: c.spent, color: c.color }));
+
+  const barData = chartItems.map((c) => ({
+    name: c.name.length > 13 ? c.name.slice(0, 12) + '…' : c.name,
     gastado: c.spent,
     presupuesto: c.budget,
-    color: COLORS[i % COLORS.length],
+    color: c.color,
   }));
 
   return (
@@ -162,6 +177,98 @@ export const DashboardContent = () => {
 
           {!loading && !error && summary ? (
             <>
+              {/* ── ZONA 0 — Gráficas (siempre visible, primero) ─────────────── */}
+              {burnCategories.length > 0 ? (
+                <div className={styles.charts}>
+                  <div className={styles.chartHeader}>
+                    <h3 className={styles.chartTitle}>Distribución de gastos</h3>
+                    {subcategoryItems.length > 0 ? (
+                      <div className={styles.chartToggle}>
+                        <button
+                          className={[styles.chartToggleBtn, chartGroupBy === 'category' ? styles.chartToggleBtnActive : ''].join(' ')}
+                          onClick={() => setChartGroupBy('category')}
+                        >
+                          Categorías
+                        </button>
+                        <button
+                          className={[styles.chartToggleBtn, chartGroupBy === 'subcategory' ? styles.chartToggleBtnActive : ''].join(' ')}
+                          onClick={() => setChartGroupBy('subcategory')}
+                        >
+                          Subcategorías
+                        </button>
+                      </div>
+                    ) : null}
+                  </div>
+
+                  <div className={styles.chartCard}>
+                    <ResponsiveContainer width="100%" height={190}>
+                      <PieChart>
+                        <Pie
+                          data={donutData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={52}
+                          outerRadius={82}
+                          paddingAngle={2}
+                          dataKey="value"
+                        >
+                          {donutData.map((entry) => (
+                            <Cell key={entry.name} fill={entry.color} opacity={0.88} />
+                          ))}
+                        </Pie>
+                        <Tooltip
+                          formatter={(value) => formatCurrencyCompact(Number(value ?? 0))}
+                          {...TOOLTIP_STYLE}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div className={styles.legend}>
+                      {donutData.map((entry) => (
+                        <div key={entry.name} className={styles.legendItem}>
+                          <span className={styles.legendDot} style={{ background: entry.color }} />
+                          <span className={styles.legendLabel}>{entry.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className={styles.chartCard}>
+                    <h3 className={styles.chartTitle}>Burn rate</h3>
+                    <ResponsiveContainer width="100%" height={barData.length > 6 ? barData.length * 28 : 190}>
+                      <BarChart
+                        data={barData}
+                        layout="vertical"
+                        barCategoryGap="28%"
+                        margin={{ left: 0, right: 12, top: 4, bottom: 4 }}
+                      >
+                        <XAxis type="number" hide />
+                        <YAxis
+                          type="category"
+                          dataKey="name"
+                          width={90}
+                          tick={{ fill: 'rgba(231,236,244,0.68)', fontSize: 11, fontFamily: 'var(--font-sans)' }}
+                          tickLine={false}
+                          axisLine={false}
+                        />
+                        <Tooltip
+                          formatter={(value, name) => [
+                            formatCurrencyCompact(Number(value ?? 0)),
+                            name === 'gastado' ? 'Gastado' : 'Presupuesto',
+                          ]}
+                          {...TOOLTIP_STYLE}
+                        />
+                        <Bar dataKey="presupuesto" fill="rgba(255,255,255,0.08)" radius={[0, 4, 4, 0]} barSize={7} />
+                        <Bar dataKey="gastado" radius={[0, 4, 4, 0]} barSize={7}>
+                          {barData.map((entry) => (
+                            <Cell key={entry.name} fill={entry.color} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              ) : null}
+
               {hasPlanPendingConfirmation ? (
                 <div className={styles.planBanner}>
                   <p className={styles.planBannerText}>
@@ -383,99 +490,6 @@ export const DashboardContent = () => {
                     ) : null}
                   </div>
 
-                  {burnCategories.length > 0 ? (
-                    <div className={styles.charts}>
-                      {/* Donut — distribución de gastos */}
-                      <div className={styles.chartCard}>
-                        <h3 className={styles.chartTitle}>Distribución de gastos</h3>
-                        <ResponsiveContainer width="100%" height={190}>
-                          <PieChart>
-                            <Pie
-                              data={donutData}
-                              cx="50%"
-                              cy="50%"
-                              innerRadius={52}
-                              outerRadius={82}
-                              paddingAngle={2}
-                              dataKey="value"
-                            >
-                              {donutData.map((entry) => (
-                                <Cell
-                                  key={entry.name}
-                                  fill={entry.color}
-                                  opacity={0.88}
-                                />
-                              ))}
-                            </Pie>
-                            <Tooltip
-                              formatter={(value) => formatCurrencyCompact(Number(value ?? 0))}
-                              {...TOOLTIP_STYLE}
-                            />
-                          </PieChart>
-                        </ResponsiveContainer>
-                        <div className={styles.legend}>
-                          {donutData.map((entry) => (
-                            <div key={entry.name} className={styles.legendItem}>
-                              <span
-                                className={styles.legendDot}
-                                style={{ background: entry.color }}
-                              />
-                              <span className={styles.legendLabel}>{entry.name}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Horizontal bars — burn rate */}
-                      <div className={styles.chartCard}>
-                        <h3 className={styles.chartTitle}>Burn rate por categoría</h3>
-                        <ResponsiveContainer width="100%" height={190}>
-                          <BarChart
-                            data={barData}
-                            layout="vertical"
-                            barCategoryGap="28%"
-                            margin={{ left: 0, right: 12, top: 4, bottom: 4 }}
-                          >
-                            <XAxis type="number" hide />
-                            <YAxis
-                              type="category"
-                              dataKey="name"
-                              width={90}
-                              tick={{
-                                fill: 'rgba(231,236,244,0.68)',
-                                fontSize: 11,
-                                fontFamily: 'var(--font-sans)',
-                              }}
-                              tickLine={false}
-                              axisLine={false}
-                            />
-                            <Tooltip
-                              formatter={(value, name) => [
-                                formatCurrencyCompact(Number(value ?? 0)),
-                                name === 'gastado' ? 'Gastado' : 'Presupuesto',
-                              ]}
-                              {...TOOLTIP_STYLE}
-                            />
-                            <Bar
-                              dataKey="presupuesto"
-                              fill="rgba(255,255,255,0.08)"
-                              radius={[0, 4, 4, 0]}
-                              barSize={7}
-                            />
-                            <Bar
-                              dataKey="gastado"
-                              radius={[0, 4, 4, 0]}
-                              barSize={7}
-                            >
-                              {barData.map((entry) => (
-                                <Cell key={entry.name} fill={entry.color} />
-                              ))}
-                            </Bar>
-                          </BarChart>
-                        </ResponsiveContainer>
-                      </div>
-                    </div>
-                  ) : null}
                 </div>
               ) : null}
 

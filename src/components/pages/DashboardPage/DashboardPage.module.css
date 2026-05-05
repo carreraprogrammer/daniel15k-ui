@@ -370,6 +370,40 @@
   gap: 0.85rem;
 }
 
+.chartHeader {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.chartToggle {
+  display: flex;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 999px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.chartToggleBtn {
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  color: rgba(231, 236, 244, 0.5);
+  font-size: 11px;
+  font-family: var(--font-sans);
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.chartToggleBtnActive {
+  background: rgba(255, 255, 255, 0.10);
+  color: rgba(231, 236, 244, 0.92);
+}
+
 .chartCard {
   display: grid;
   gap: 0.75rem;
