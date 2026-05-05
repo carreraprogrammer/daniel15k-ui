@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { IonContent, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, useIonAlert, useIonToast } from '@ionic/react';
-import { addOutline, cardOutline, warningOutline } from 'ionicons/icons';
+import { addOutline, cardOutline, chevronBackOutline, warningOutline } from 'ionicons/icons';
 import { AppLayout, useAppBreadcrumbs } from '../../templates/AppLayout';
 import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
@@ -623,6 +623,14 @@ export const TransactionsContent = () => {
         {detailsOpen ? (
           <div className={styles.detailStage}>
             <div className={styles.detailStageHeader}>
+              <button
+                type="button"
+                className={styles.detailBackBtn}
+                onClick={() => setDetailsOpen(false)}
+              >
+                <IonIcon icon={chevronBackOutline} aria-hidden="true" />
+                Transacciones
+              </button>
               <div className={styles.detailStageCopy}>
                 <h3 className={styles.detailStageTitle}>Detalle de transacciones</h3>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
