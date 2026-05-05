@@ -6,10 +6,10 @@
 
 :root {
   /* ── COLORES BASE ── */
-  --color-bg-primary:     #05070C;   /* fondo principal */
-  --color-bg-secondary:   #0F172A;   /* fondo de cards, sidebars */
-  --color-bg-elevated:    #111827;   /* fondo de modales, dropdowns */
-  --color-bg-input:       #161E31;   /* fondo de inputs */
+  --color-bg-primary:     #030303;   /* fondo principal */
+  --color-bg-secondary:   #090909;   /* fondo de cards, sidebars */
+  --color-bg-elevated:    #111111;   /* fondo de modales, dropdowns */
+  --color-bg-input:       #151515;   /* fondo de inputs */
 
   /* ── COLORES DE MARCA (cambiar por cliente) ── */
   --color-brand:          #D6A84A;   /* primario — dorado sobrio */
@@ -33,15 +33,15 @@
 
   /* ── TEXTO ── */
   --color-text-primary:   #F8FAFC;   /* texto principal */
-  --color-text-secondary: #94A3B8;   /* texto secundario, labels */
-  --color-text-disabled:  #475569;   /* texto deshabilitado */
-  --color-text-inverse:   #0B0F19;   /* texto sobre fondos claros */
+  --color-text-secondary: #A6A6A6;   /* texto secundario, labels */
+  --color-text-disabled:  #5C5C5C;   /* texto deshabilitado */
+  --color-text-inverse:   #050505;   /* texto sobre fondos claros */
 
   /* ── BORDES ── */
-  --color-border:         #243147;   /* borde por defecto */
+  --color-border:         #282828;   /* borde por defecto */
   --color-border-focus:   #FB923C;   /* borde en foco (= brand) */
   --color-border-error:   #EF4444;
-  --color-border-subtle:  #162033;
+  --color-border-subtle:  #1A1A1A;
 
   /* ── TIPOGRAFÍA ── */
   --font-sans:    'Manrope', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -119,8 +119,8 @@
   --shadow-md:  0 4px 12px rgba(0, 0, 0, 0.5);
   --shadow-lg:  0 8px 32px rgba(0, 0, 0, 0.6);
   --shadow-brand: 0 0 0 3px rgba(214, 168, 74, 0.24);  /* glow en foco */
-  --shadow-float: 0 18px 48px rgba(2, 6, 23, 0.34), 0 4px 14px rgba(2, 6, 23, 0.18);
-  --shadow-float-hover: 0 26px 64px rgba(2, 6, 23, 0.38), 0 8px 18px rgba(2, 6, 23, 0.24);
+  --shadow-float: 0 18px 48px rgba(0, 0, 0, 0.46), 0 4px 14px rgba(0, 0, 0, 0.28);
+  --shadow-float-hover: 0 26px 64px rgba(0, 0, 0, 0.52), 0 8px 18px rgba(0, 0, 0, 0.32);
   --surface-highlight: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0) 24%);
   --surface-glow: radial-gradient(circle at top left, rgba(243, 210, 122, 0.1), transparent 34%),
                   radial-gradient(circle at 82% 14%, rgba(214, 168, 74, 0.08), transparent 30%);

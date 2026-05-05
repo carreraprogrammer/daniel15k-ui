@@ -13,7 +13,7 @@
   background:
     var(--surface-highlight),
     var(--surface-glow),
-    rgba(8, 12, 20, 0.82);
+    rgba(8, 8, 8, 0.86);
   box-shadow: var(--shadow-float);
   backdrop-filter: blur(18px) saturate(122%);
 }
@@ -135,6 +135,9 @@
     gap: 0.75rem;
     padding: 12px 14px;
     border-radius: 18px;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02)),
+      rgba(7, 7, 7, 0.9);
   }
 
   .brandBlock {
