@@ -187,8 +187,8 @@
     --app-shell-padding: 12px;
     --app-shell-gap: 12px;
     --app-content-pad-top: 18px;
-    --app-tabbar-height: calc(50px + max(0px, env(safe-area-inset-bottom)));
-    --app-content-pad-bottom: calc(8px + var(--app-tabbar-height));
+    --app-tabbar-height: 0px;
+    --app-content-pad-bottom: 12px;
     --app-content-pad-inline: 16px;
     padding:
       calc(12px + env(safe-area-inset-top))

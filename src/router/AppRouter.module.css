@@ -11,30 +11,19 @@
   .tabBar {
     --background: rgba(6, 6, 6, 0.96);
     --border: 1px solid rgba(255, 255, 255, 0.08);
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: calc(var(--z-sticky) + 1);
     display: flex;
     align-items: stretch;
     justify-content: space-between;
-    height: calc(50px + max(0px, env(safe-area-inset-bottom)));
-    min-height: 0;
-    border: 0;
+    min-height: 50px;
     border-top: var(--border);
-    border-radius: 22px 22px 0 0;
+    border-radius: 0;
     overflow: hidden;
     background:
       linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02)),
       var(--background);
-    box-shadow: 0 -12px 28px rgba(0, 0, 0, 0.38);
+    box-shadow: 0 -8px 20px rgba(0, 0, 0, 0.32);
     backdrop-filter: blur(18px) saturate(135%);
-    padding:
-      3px
-      max(12px, env(safe-area-inset-right))
-      max(3px, env(safe-area-inset-bottom))
-      max(12px, env(safe-area-inset-left));
+    padding: 0 max(8px, env(safe-area-inset-right)) 0 max(8px, env(safe-area-inset-left));
   }
 
   .tabBar :global(ion-tab-button) {
@@ -46,8 +35,8 @@
     --color-selected: #fff8e7;
     flex: 1 1 0;
     min-width: 0;
-    min-height: 42px;
-    border-radius: 14px;
+    min-height: 50px;
+    border-radius: 0;
     font-size: 0.64rem;
     font-weight: 700;
     letter-spacing: 0;
