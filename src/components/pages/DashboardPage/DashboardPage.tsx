@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { IonContent, IonIcon } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
-import { flagOutline, shieldCheckmarkOutline, trophyOutline } from 'ionicons/icons';
+import { flagOutline, layersOutline, shieldCheckmarkOutline, trophyOutline, appsOutline } from 'ionicons/icons';
 import {
   PieChart, Pie, Cell,
   BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip,
@@ -140,12 +140,14 @@ export const DashboardContent = () => {
 
   // ── Chart data ─────────────────────────────────────────────────────────────
   const subcategoryItems = burnCategories.flatMap((c, ci) =>
-    (c.subcategories ?? []).map((s, si) => ({
-      name: s.subcategory,
-      spent: s.spent,
-      budget: s.budget,
-      color: COLORS[(ci * 3 + si) % COLORS.length],
-    }))
+    (c.subcategories ?? [])
+      .filter((s) => s.subcategory)
+      .map((s, si) => ({
+        name: s.subcategory,
+        spent: s.spent,
+        budget: s.budget,
+        color: COLORS[(ci * 3 + si) % COLORS.length],
+      }))
   );
 
   const chartItems = chartGroupBy === 'subcategory' && subcategoryItems.length > 0
@@ -161,12 +163,15 @@ export const DashboardContent = () => {
     .filter((c) => c.spent > 0)
     .map((c) => ({ name: c.name, value: c.spent, color: c.color }));
 
-  const barData = chartItems.map((c) => ({
-    name: c.name.length > 13 ? c.name.slice(0, 12) + '…' : c.name,
-    gastado: c.spent,
-    presupuesto: c.budget,
-    color: c.color,
-  }));
+  const barData = chartItems.map((c) => {
+    const label = c.name ?? '';
+    return {
+      name: label.length > 13 ? label.slice(0, 12) + '…' : label,
+      gastado: c.spent,
+      presupuesto: c.budget,
+      color: c.color,
+    };
+  });
 
   return (
     <IonContent className={pageStyles.pageContent}>
@@ -187,14 +192,18 @@ export const DashboardContent = () => {
                         <button
                           className={[styles.chartToggleBtn, chartGroupBy === 'category' ? styles.chartToggleBtnActive : ''].join(' ')}
                           onClick={() => setChartGroupBy('category')}
+                          aria-label="Ver por categoría"
+                          title="Categorías"
                         >
-                          Categorías
+                          <IonIcon icon={layersOutline} />
                         </button>
                         <button
                           className={[styles.chartToggleBtn, chartGroupBy === 'subcategory' ? styles.chartToggleBtnActive : ''].join(' ')}
                           onClick={() => setChartGroupBy('subcategory')}
+                          aria-label="Ver por subcategoría"
+                          title="Subcategorías"
                         >
-                          Subcategorías
+                          <IonIcon icon={appsOutline} />
                         </button>
                       </div>
                     ) : null}
