@@ -1380,14 +1380,13 @@
 
   .stack {
     gap: 1rem;
-    min-height: auto;
   }
 
-  .stackFill,
-  .focusStage,
-  .focusStage > *,
-  .budgetHeroSurface,
-  .focusCardFull {
+  .stack:not(.stackFill),
+  .stack:not(.stackFill) .focusStage,
+  .stack:not(.stackFill) .focusStage > *,
+  .stack:not(.stackFill) .budgetHeroSurface,
+  .stack:not(.stackFill) .focusCardFull {
     min-height: auto;
   }
 
