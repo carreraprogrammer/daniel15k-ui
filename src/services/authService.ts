@@ -60,7 +60,10 @@ export const initGoogleAuth = (): void => {
 };
 
 export const loginWithGoogleMobile = async (): Promise<AuthResponse> => {
-  const user = await GoogleAuth.signIn({ scopes: ['profile', 'email'] });
+  const user = await GoogleAuth.signIn({
+    scopes: ['profile', 'email'],
+    serverClientId: '224259448673-ec625g235gj916acod4i7u0suql0a5eh.apps.googleusercontent.com',
+  });
   const { data } = await api.post('/api/v1/auth/google/mobile', { access_token: user.authentication.accessToken });
   return mapAuthResponse(data as Parameters<typeof mapAuthResponse>[0]);
 };
