@@ -61,8 +61,8 @@
   line-height: 1;
 }
 
-.row_covered .rowIcon  { color: #1A9E4A; }
-.row_partial .rowIcon  { color: #D4732A; }
+.row_covered .rowIcon  { color: var(--color-investment); }
+.row_partial .rowIcon  { color: var(--color-necessary); }
 .row_pending .rowIcon  { color: var(--text-on-surface-muted); }
 .row_unplanned .rowIcon { color: var(--text-on-surface-muted); }
 
@@ -93,8 +93,8 @@
   color: var(--text-on-surface-muted);
 }
 
-.row_covered .rowStatus  { color: #1A9E4A; }
-.row_partial .rowStatus  { color: #D4732A; }
+.row_covered .rowStatus  { color: var(--color-investment); }
+.row_partial .rowStatus  { color: var(--color-necessary); }
 
 .rowMeta {
   font-size: var(--type-caption-size);
@@ -115,7 +115,7 @@
 }
 
 .row_covered .rowDelivered {
-  color: #1A9E4A;
+  color: var(--color-investment);
 }
 
 .rowExpected {
@@ -126,7 +126,7 @@
 .linkBtn {
   font-size: var(--type-caption-size);
   font-weight: 500;
-  color: rgba(100, 160, 255, 0.85);
+  color: var(--color-info);
   background: none;
   border: 1px solid rgba(100, 160, 255, 0.25);
   border-radius: 6px;

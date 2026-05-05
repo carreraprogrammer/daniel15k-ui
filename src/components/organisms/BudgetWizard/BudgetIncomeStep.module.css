@@ -271,7 +271,7 @@
   font-family: var(--font-sans);
   font-size: var(--text-sm);
   font-weight: var(--font-medium);
-  color: rgba(243, 232, 205, 0.74);
+  color: var(--text-on-surface-soft);
 }
 
 .totalAmount {

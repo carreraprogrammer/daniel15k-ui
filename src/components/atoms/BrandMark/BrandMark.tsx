@@ -10,10 +10,10 @@ const principalSvg = (
   <svg viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <defs>
       <linearGradient id="brandmark-bg" x1="512" y1="64" x2="512" y2="960" gradientUnits="userSpaceOnUse">
-        <stop offset="0" stopColor="#060606" />
-        <stop offset="0.48" stopColor="#111111" />
-        <stop offset="0.78" stopColor="#7C2D12" />
-        <stop offset="1" stopColor="#F59E0B" />
+        <stop offset="0" stopColor="var(--brandmark-bg-start)" />
+        <stop offset="0.48" stopColor="var(--brandmark-bg-mid)" />
+        <stop offset="0.78" stopColor="var(--brandmark-bg-warm)" />
+        <stop offset="1" stopColor="var(--brandmark-bg-end)" />
       </linearGradient>
 
       <radialGradient
@@ -24,24 +24,24 @@ const principalSvg = (
         gradientUnits="userSpaceOnUse"
         gradientTransform="translate(512 370) rotate(90) scale(220)"
       >
-        <stop offset="0" stopColor="#FFF7D6" />
-        <stop offset="0.55" stopColor="#FDBA74" />
-        <stop offset="1" stopColor="#FDBA74" stopOpacity="0" />
+        <stop offset="0" stopColor="var(--brandmark-glow-start)" />
+        <stop offset="0.55" stopColor="var(--brandmark-glow-mid)" />
+        <stop offset="1" stopColor="var(--brandmark-glow-mid)" stopOpacity="0" />
       </radialGradient>
 
       <linearGradient id="brandmark-sunDisc" x1="512" y1="250" x2="512" y2="470" gradientUnits="userSpaceOnUse">
-        <stop offset="0" stopColor="#FFF8DB" />
-        <stop offset="1" stopColor="#FED7AA" />
+        <stop offset="0" stopColor="var(--brandmark-sun-start)" />
+        <stop offset="1" stopColor="var(--brandmark-sun-end)" />
       </linearGradient>
 
       <linearGradient id="brandmark-mountainBack" x1="256" y1="540" x2="820" y2="760" gradientUnits="userSpaceOnUse">
-        <stop offset="0" stopColor="#312E81" />
-        <stop offset="1" stopColor="#18120A" />
+        <stop offset="0" stopColor="var(--brandmark-mountain-back-start)" />
+        <stop offset="1" stopColor="var(--brandmark-mountain-back-end)" />
       </linearGradient>
 
       <linearGradient id="brandmark-mountainFront" x1="360" y1="520" x2="760" y2="920" gradientUnits="userSpaceOnUse">
-        <stop offset="0" stopColor="#101010" />
-        <stop offset="1" stopColor="#030712" />
+        <stop offset="0" stopColor="var(--brandmark-mountain-front-start)" />
+        <stop offset="1" stopColor="var(--brandmark-mountain-front-end)" />
       </linearGradient>
 
       <clipPath id="brandmark-clip">
@@ -65,13 +65,13 @@ const principalSvg = (
       />
       <path
         d="M470 630L554 630L620 699L690 699L806 575L732 724L620 830L526 736L470 630Z"
-        fill="#18120A"
+        fill="var(--brandmark-shadow)"
         opacity="0.32"
       />
-      <circle cx="806" cy="575" r="18" fill="#F8FAFC" />
+      <circle cx="806" cy="575" r="18" fill="var(--brandmark-highlight)" />
       <path
         d="M180 640C292 600 390 570 512 570C642 570 746 603 860 650"
-        stroke="#FFFFFF"
+        stroke="var(--brandmark-orbit)"
         strokeOpacity="0.10"
         strokeWidth="8"
         strokeLinecap="round"
@@ -82,17 +82,17 @@ const principalSvg = (
 
 const monolineSvg = (
   <svg viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <rect x="64" y="64" width="896" height="896" rx="220" fill="#050505" />
-    <circle cx="512" cy="360" r="110" stroke="#FCD34D" strokeWidth="6" fill="none" opacity="0.9" />
+    <rect x="64" y="64" width="896" height="896" rx="220" fill="var(--brandmark-mono-bg)" />
+    <circle cx="512" cy="360" r="110" stroke="var(--brandmark-mono-sun)" strokeWidth="6" fill="none" opacity="0.9" />
     <path
       d="M200 720L420 520L600 680L780 500"
-      stroke="#E5E7EB"
+      stroke="var(--brandmark-mono-line)"
       strokeWidth="10"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
-    <path d="M200 720H820" stroke="#9CA3AF" strokeWidth="6" strokeLinecap="round" opacity="0.6" />
-    <circle cx="780" cy="500" r="16" fill="#F9FAFB" />
+    <path d="M200 720H820" stroke="var(--brandmark-mono-base)" strokeWidth="6" strokeLinecap="round" opacity="0.6" />
+    <circle cx="780" cy="500" r="16" fill="var(--brandmark-mono-dot)" />
   </svg>
 );
 

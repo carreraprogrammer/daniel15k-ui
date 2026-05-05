@@ -25,7 +25,7 @@
   content: '/';
   flex: 0 0 auto;
   margin: 0 0.55rem;
-  color: rgba(var(--color-brand-rgb), 0.58);
+  color: color-mix(in srgb, var(--color-brand) 58%, transparent);
 }
 
 .action,

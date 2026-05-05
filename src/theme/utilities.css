@@ -45,5 +45,5 @@
 
 .brand-alert .alert-button.alert-button-role-destructive,
 .brand-alert .alert-button.role-destructive {
-  color: #ff8f8f;
+  color: var(--color-error);
 }

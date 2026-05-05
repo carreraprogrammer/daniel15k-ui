@@ -21,13 +21,13 @@ const COLORS = ['#C0392B', '#C9980A', '#1A9E4A', '#D4732A', '#8A4FD8'];
 
 const TOOLTIP_STYLE = {
   contentStyle: {
-    background: 'rgba(11,15,21,0.96)',
-    border: '1px solid rgba(255,255,255,0.08)',
+    background: 'var(--surface-panel-strong)',
+    border: '1px solid var(--surface-border)',
     borderRadius: 12,
     fontSize: 12,
   },
-  labelStyle: { color: 'rgba(231,236,244,0.8)', fontSize: 12 },
-  itemStyle: { color: '#fff', fontSize: 12 },
+  labelStyle: { color: 'var(--text-on-surface-soft)', fontSize: 12 },
+  itemStyle: { color: 'var(--color-text-primary)', fontSize: 12 },
 };
 
 const AGENTS_URL = import.meta.env.VITE_AGENTS_URL as string | undefined;

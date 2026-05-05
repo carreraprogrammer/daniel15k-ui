@@ -194,7 +194,7 @@
 .heroText {
   max-width: 38rem;
   margin: 0;
-  color: #c7d2df;
+  color: var(--text-on-surface-soft);
   font-size: var(--type-body-size);
   line-height: 1.55;
 }
@@ -368,7 +368,7 @@
 }
 
 .coreSignal small {
-  color: #c7d2df;
+  color: var(--text-on-surface-soft);
   line-height: var(--leading-normal);
 }
 

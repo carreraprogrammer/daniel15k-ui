@@ -29,7 +29,7 @@
   border: 0;
   border-radius: 999px;
   background: rgba(243, 210, 122, 0.92);
-  color: #121016;
+  color: var(--color-text-inverse);
   font-size: var(--type-label-size);
   font-weight: 800;
   cursor: pointer;
@@ -110,7 +110,7 @@
   margin: 0;
   padding: 0.65rem 0.85rem;
   border-left: 2px solid rgba(243, 210, 122, 0.5);
-  color: rgba(243, 210, 122, 0.9);
+  color: var(--color-accent);
   font-size: var(--type-body-small-size);
   line-height: var(--leading-normal);
   background: rgba(243, 210, 122, 0.04);
@@ -162,7 +162,7 @@
 }
 
 .metricWarn {
-  color: #ffb28a;
+  color: var(--color-error);
 }
 
 .metricCaption {
@@ -279,25 +279,25 @@
 .badge_comfortable {
   background: rgba(26, 158, 74, 0.14);
   border-color: rgba(26, 158, 74, 0.3);
-  color: #6ee79a;
+  color: var(--color-success);
 }
 
 .badge_tight {
   background: rgba(201, 152, 10, 0.14);
   border-color: rgba(201, 152, 10, 0.3);
-  color: #f5c842;
+  color: var(--color-warning);
 }
 
 .badge_critical {
   background: rgba(192, 57, 43, 0.14);
   border-color: rgba(192, 57, 43, 0.3);
-  color: #ff8a7a;
+  color: var(--color-error);
 }
 
 .badge_milestone {
   background: rgba(243, 210, 122, 0.12);
   border-color: rgba(243, 210, 122, 0.28);
-  color: #f5d87a;
+  color: var(--color-warning);
 }
 
 /* ── Hero actions ─────────────────────────────────────────────────────────── */
@@ -349,11 +349,11 @@
 }
 
 .kpiValueWarn {
-  color: #ffb28a;
+  color: var(--color-error);
 }
 
 .kpiValueOk {
-  color: #4ade80;
+  color: var(--color-success);
 }
 
 .kpiHint {

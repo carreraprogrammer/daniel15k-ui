@@ -1,8 +1,52 @@
 .brandMark {
+  --brandmark-bg-start: #060606;
+  --brandmark-bg-mid: #111111;
+  --brandmark-bg-warm: #7c2d12;
+  --brandmark-bg-end: #f59e0b;
+  --brandmark-glow-start: #fff7d6;
+  --brandmark-glow-mid: #fdba74;
+  --brandmark-sun-start: #fff8db;
+  --brandmark-sun-end: #fed7aa;
+  --brandmark-mountain-back-start: #312e81;
+  --brandmark-mountain-back-end: #18120a;
+  --brandmark-mountain-front-start: #101010;
+  --brandmark-mountain-front-end: #030712;
+  --brandmark-shadow: #18120a;
+  --brandmark-highlight: #f8fafc;
+  --brandmark-orbit: #ffffff;
+  --brandmark-mono-bg: #050505;
+  --brandmark-mono-sun: var(--color-accent);
+  --brandmark-mono-line: #e5e7eb;
+  --brandmark-mono-base: #9ca3af;
+  --brandmark-mono-dot: #f9fafb;
+
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
+}
+
+:global(:root[data-theme='light']) .brandMark {
+  --brandmark-bg-start: #fffdf7;
+  --brandmark-bg-mid: #f7f3ea;
+  --brandmark-bg-warm: #ead7b2;
+  --brandmark-bg-end: #d6a84a;
+  --brandmark-glow-start: #fff8db;
+  --brandmark-glow-mid: #e7c36d;
+  --brandmark-sun-start: #f7dda0;
+  --brandmark-sun-end: #d6a84a;
+  --brandmark-mountain-back-start: #d8cec0;
+  --brandmark-mountain-back-end: #9a6a18;
+  --brandmark-mountain-front-start: #3a342b;
+  --brandmark-mountain-front-end: #171512;
+  --brandmark-shadow: #5e584f;
+  --brandmark-highlight: #171512;
+  --brandmark-orbit: #171512;
+  --brandmark-mono-bg: #fffdf7;
+  --brandmark-mono-sun: var(--color-brand);
+  --brandmark-mono-line: #171512;
+  --brandmark-mono-base: #5e584f;
+  --brandmark-mono-dot: #171512;
 }
 
 .brandMark svg {

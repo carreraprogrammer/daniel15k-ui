@@ -121,7 +121,7 @@
 
 .errorText {
   margin: 0;
-  color: #fc8181;
+  color: var(--color-error);
   font-size: var(--type-body-small-size);
 }
 
@@ -330,7 +330,7 @@
 
 .removeBtn:hover {
   background: rgba(252, 129, 129, 0.12);
-  color: #fc8181;
+  color: var(--color-error);
   border-color: rgba(252, 129, 129, 0.3);
 }
 

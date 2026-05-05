@@ -36,5 +36,5 @@
 .danger {
   border-color: rgba(255, 110, 110, 0.28);
   background: rgba(255, 110, 110, 0.12);
-  color: #ffb3b3;
+  color: var(--color-error);
 }

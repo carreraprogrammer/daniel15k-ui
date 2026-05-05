@@ -82,7 +82,7 @@
   font-weight: var(--font-semibold);
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: rgba(243, 210, 122, 0.86);
+  color: var(--color-accent);
 }
 
 .topbarTitleRow {
