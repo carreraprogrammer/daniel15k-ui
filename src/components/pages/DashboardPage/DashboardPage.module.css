@@ -174,10 +174,10 @@
   display: grid;
   gap: 0.35rem;
   padding: 1.05rem 1.15rem;
-  border: 1px solid rgba(124, 224, 211, 0.16);
+  border: 1px solid rgba(var(--color-brand-rgb), 0.18);
   border-radius: 20px;
   background:
-    linear-gradient(135deg, rgba(124, 224, 211, 0.1), rgba(255, 255, 255, 0.025)),
+    linear-gradient(135deg, rgba(var(--color-brand-rgb), 0.1), rgba(255, 255, 255, 0.025)),
     rgba(255, 255, 255, 0.02);
 }
 

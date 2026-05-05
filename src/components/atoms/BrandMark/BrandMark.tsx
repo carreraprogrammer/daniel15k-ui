@@ -10,8 +10,8 @@ const principalSvg = (
   <svg viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <defs>
       <linearGradient id="brandmark-bg" x1="512" y1="64" x2="512" y2="960" gradientUnits="userSpaceOnUse">
-        <stop offset="0" stopColor="#0F172A" />
-        <stop offset="0.48" stopColor="#1E1B4B" />
+        <stop offset="0" stopColor="#060606" />
+        <stop offset="0.48" stopColor="#111111" />
         <stop offset="0.78" stopColor="#7C2D12" />
         <stop offset="1" stopColor="#F59E0B" />
       </linearGradient>
@@ -36,11 +36,11 @@ const principalSvg = (
 
       <linearGradient id="brandmark-mountainBack" x1="256" y1="540" x2="820" y2="760" gradientUnits="userSpaceOnUse">
         <stop offset="0" stopColor="#312E81" />
-        <stop offset="1" stopColor="#1F2937" />
+        <stop offset="1" stopColor="#18120A" />
       </linearGradient>
 
       <linearGradient id="brandmark-mountainFront" x1="360" y1="520" x2="760" y2="920" gradientUnits="userSpaceOnUse">
-        <stop offset="0" stopColor="#111827" />
+        <stop offset="0" stopColor="#101010" />
         <stop offset="1" stopColor="#030712" />
       </linearGradient>
 
@@ -65,7 +65,7 @@ const principalSvg = (
       />
       <path
         d="M470 630L554 630L620 699L690 699L806 575L732 724L620 830L526 736L470 630Z"
-        fill="#1F2937"
+        fill="#18120A"
         opacity="0.32"
       />
       <circle cx="806" cy="575" r="18" fill="#F8FAFC" />
@@ -82,7 +82,7 @@ const principalSvg = (
 
 const monolineSvg = (
   <svg viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <rect x="64" y="64" width="896" height="896" rx="220" fill="#0B0F19" />
+    <rect x="64" y="64" width="896" height="896" rx="220" fill="#050505" />
     <circle cx="512" cy="360" r="110" stroke="#FCD34D" strokeWidth="6" fill="none" opacity="0.9" />
     <path
       d="M200 720L420 520L600 680L780 500"

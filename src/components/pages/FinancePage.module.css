@@ -75,9 +75,9 @@
   align-self: flex-start;
   padding: 0.72rem 1rem;
   border-radius: 999px;
-  background: rgba(124, 224, 211, 0.08);
-  border: 1px solid rgba(124, 224, 211, 0.18);
-  color: rgba(223, 249, 244, 0.92);
+  background: rgba(var(--color-brand-rgb), 0.09);
+  border: 1px solid rgba(var(--color-brand-rgb), 0.2);
+  color: rgba(255, 248, 231, 0.92);
   font-size: var(--type-body-small-size);
   font-weight: 600;
   letter-spacing: 0.01em;
@@ -96,7 +96,7 @@
     var(--surface-highlight),
     var(--surface-glow),
     linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.018) 56%),
-    rgba(9, 9, 9, 0.92);
+    var(--surface-panel);
   box-shadow: var(--shadow-float);
   backdrop-filter: blur(16px) saturate(120%);
   transition:
@@ -273,7 +273,7 @@
     rgba(255, 255, 255, 0.03);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 10px 24px rgba(2, 6, 23, 0.16);
+    var(--shadow-surface);
 }
 
 .focusSupportWarn {
@@ -282,7 +282,7 @@
     rgba(255, 255, 255, 0.03);
   box-shadow:
     inset 0 1px 0 rgba(245, 158, 11, 0.14),
-    0 10px 24px rgba(2, 6, 23, 0.16);
+    var(--shadow-surface);
 }
 
 .spendWrap {
@@ -382,11 +382,11 @@
   gap: var(--finance-space-sm);
   min-width: 0;
   padding: var(--finance-space-md);
-  border: 1px solid rgba(124, 224, 211, 0.14);
+  border: 1px solid rgba(var(--color-brand-rgb), 0.16);
   border-radius: 18px;
   background:
-    linear-gradient(135deg, rgba(124, 224, 211, 0.07), rgba(255, 255, 255, 0.022)),
-    rgba(7, 12, 21, 0.36);
+    linear-gradient(135deg, rgba(var(--color-brand-rgb), 0.07), rgba(255, 255, 255, 0.022)),
+    rgba(10, 10, 10, 0.42);
 }
 
 .executionHeader {
@@ -423,7 +423,7 @@
 .executionFill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, rgba(124, 224, 211, 0.82), rgba(243, 210, 122, 0.82));
+  background: linear-gradient(90deg, rgba(var(--color-brand-rgb), 0.9), rgba(var(--color-accent-rgb), 0.86));
 }
 
 .executionAmount {
@@ -445,11 +445,11 @@
   display: grid;
   gap: var(--finance-space-md);
   padding: var(--finance-space-md);
-  border: 1px solid rgba(124, 224, 211, 0.18);
+  border: 1px solid rgba(var(--color-brand-rgb), 0.2);
   border-radius: 18px;
   background:
-    linear-gradient(135deg, rgba(124, 224, 211, 0.09), rgba(255, 255, 255, 0.025)),
-    rgba(7, 12, 21, 0.42);
+    linear-gradient(135deg, rgba(var(--color-brand-rgb), 0.09), rgba(255, 255, 255, 0.025)),
+    rgba(10, 10, 10, 0.46);
 }
 
 .creditPoolHeader {
@@ -474,8 +474,8 @@
   height: 2.1rem;
   flex: 0 0 2.1rem;
   border-radius: 10px;
-  background: rgba(124, 224, 211, 0.12);
-  color: #7ce0d3;
+  background: rgba(var(--color-brand-rgb), 0.12);
+  color: var(--color-accent);
 }
 
 .creditPoolTitle {
@@ -711,8 +711,8 @@
   border-color: color-mix(in srgb, var(--category-accent) 48%, rgba(255, 255, 255, 0.12));
   background:
     linear-gradient(135deg, color-mix(in srgb, var(--category-accent) 18%, transparent), rgba(255, 255, 255, 0.04)),
-    rgba(10, 15, 25, 0.88);
-  box-shadow: 0 12px 24px rgba(2, 6, 23, 0.18);
+    var(--surface-panel);
+  box-shadow: var(--shadow-surface);
 }
 
 .categorySwatch {
@@ -873,7 +873,7 @@
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
     rgba(255, 255, 255, 0.028);
-  box-shadow: 0 14px 34px rgba(2, 6, 23, 0.22);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
   backdrop-filter: blur(14px) saturate(118%);
   transition:
     transform 180ms ease,
@@ -973,7 +973,7 @@
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.018)),
     rgba(255, 255, 255, 0.022);
-  box-shadow: 0 8px 18px rgba(2, 6, 23, 0.16);
+  box-shadow: var(--shadow-surface);
   transition:
     transform 160ms ease,
     box-shadow 160ms ease,
@@ -1068,7 +1068,7 @@
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.018)),
     rgba(255, 255, 255, 0.022);
-  box-shadow: 0 8px 18px rgba(2, 6, 23, 0.16);
+  box-shadow: var(--shadow-surface);
   transition:
     transform 160ms ease,
     box-shadow 160ms ease,
@@ -1119,8 +1119,8 @@
   border-radius: 18px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.016)),
-    rgba(10, 15, 25, 0.58);
-  box-shadow: 0 10px 22px rgba(2, 6, 23, 0.18);
+    rgba(12, 12, 12, 0.68);
+  box-shadow: var(--shadow-surface);
   cursor: pointer;
   outline: none;
   transition:
@@ -1145,17 +1145,17 @@
 }
 
 .historyItem:focus-visible {
-  border-color: rgba(124, 224, 211, 0.42);
+  border-color: rgba(var(--color-brand-rgb), 0.42);
   box-shadow:
-    0 0 0 3px rgba(124, 224, 211, 0.14),
-    0 16px 30px rgba(2, 6, 23, 0.24);
+    0 0 0 3px rgba(var(--color-brand-rgb), 0.14),
+    0 16px 30px rgba(0, 0, 0, 0.28);
 }
 
 .historyItemActive {
   border-color: rgba(243, 210, 122, 0.28);
   background:
     linear-gradient(135deg, rgba(243, 210, 122, 0.08), rgba(255, 255, 255, 0.02)),
-    rgba(10, 15, 25, 0.68);
+    rgba(12, 12, 12, 0.72);
 }
 
 .historyPrimary {
@@ -1184,8 +1184,8 @@
   min-height: 1.55rem;
   padding: 0.25rem 0.55rem;
   border-radius: 999px;
-  background: rgba(124, 224, 211, 0.1);
-  color: rgba(174, 245, 235, 0.92);
+  background: rgba(var(--color-brand-rgb), 0.1);
+  color: rgba(255, 248, 231, 0.92);
   font-size: var(--type-caption-size);
   font-weight: 700;
   line-height: 1.2;
@@ -1256,7 +1256,7 @@
 .progressFill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, rgba(124, 224, 211, 0.95), rgba(243, 210, 122, 0.9));
+  background: linear-gradient(90deg, rgba(var(--color-brand-rgb), 0.95), rgba(var(--color-accent-rgb), 0.9));
 }
 
 .pill {
@@ -1289,13 +1289,13 @@
   .listItem:hover {
     transform: translateY(-2px);
     border-color: rgba(255, 255, 255, 0.1);
-    box-shadow: 0 16px 28px rgba(2, 6, 23, 0.2);
+    box-shadow: 0 16px 28px rgba(0, 0, 0, 0.28);
   }
 
   .historyItem:hover {
     transform: translateY(-2px);
     border-color: rgba(255, 255, 255, 0.14);
-    box-shadow: 0 18px 32px rgba(2, 6, 23, 0.24);
+    box-shadow: 0 18px 32px rgba(0, 0, 0, 0.3);
   }
 }
 
@@ -1366,13 +1366,26 @@
 }
 
 @media (max-width: 640px) {
+  .pageContent,
+  .pageContent::part(scroll) {
+    min-height: 0;
+  }
+
   .stack {
     gap: 1rem;
+    min-height: auto;
+  }
+
+  .stackFill,
+  .focusStage,
+  .focusStage > *,
+  .budgetHeroSurface,
+  .focusCardFull {
+    min-height: auto;
   }
 
   .focusStage {
     --focus-card-inset: 5px;
-    min-height: 100%;
   }
 
   .hero {
@@ -1401,10 +1414,6 @@
     gap: 0.9rem;
     padding: 1rem;
     border-radius: 22px;
-  }
-
-  .focusCardFull {
-    min-height: 100%;
   }
 
   .focusTitle {

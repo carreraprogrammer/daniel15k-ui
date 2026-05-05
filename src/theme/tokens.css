@@ -13,12 +13,14 @@
 
   /* ── COLORES DE MARCA (cambiar por cliente) ── */
   --color-brand:          #D6A84A;   /* primario — dorado sobrio */
+  --color-brand-rgb:      214, 168, 74;
   --color-brand-hover:    #E7C36D;
   --color-brand-active:   #B58527;
   --color-brand-subtle:   #2B1F08;   /* fondo sutil con tono de marca */
 
   /* ── COLORES DE ACENTO ── */
   --color-accent:         #F3D27A;   /* solar */
+  --color-accent-rgb:     243, 210, 122;
   --color-accent-subtle:  #32260B;
 
   /* ── COLORES SEMÁNTICOS ── */
@@ -28,8 +30,11 @@
   --color-warning-subtle: #2D1F00;
   --color-error:          #EF4444;
   --color-error-subtle:   #2D0A0A;
-  --color-info:           #3B82F6;
-  --color-info-subtle:    #0A1628;
+  --color-info:           var(--color-brand);
+  --color-info-subtle:    var(--color-brand-subtle);
+  --color-flow:           var(--color-brand);
+  --color-flow-rgb:       var(--color-brand-rgb);
+  --color-flow-subtle:    rgba(var(--color-brand-rgb), 0.1);
 
   /* ── TEXTO ── */
   --color-text-primary:   #F8FAFC;   /* texto principal */
@@ -121,6 +126,10 @@
   --shadow-brand: 0 0 0 3px rgba(214, 168, 74, 0.24);  /* glow en foco */
   --shadow-float: 0 18px 48px rgba(0, 0, 0, 0.46), 0 4px 14px rgba(0, 0, 0, 0.28);
   --shadow-float-hover: 0 26px 64px rgba(0, 0, 0, 0.52), 0 8px 18px rgba(0, 0, 0, 0.32);
+  --shadow-surface: 0 12px 26px rgba(0, 0, 0, 0.24);
+  --surface-panel: rgba(9, 9, 9, 0.92);
+  --surface-panel-strong: rgba(8, 8, 8, 0.96);
+  --surface-panel-soft: rgba(255, 255, 255, 0.028);
   --surface-highlight: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0) 24%);
   --surface-glow: radial-gradient(circle at top left, rgba(243, 210, 122, 0.1), transparent 34%),
                   radial-gradient(circle at 82% 14%, rgba(214, 168, 74, 0.08), transparent 30%);

@@ -15,7 +15,7 @@
 .brand-alert .alert-wrapper {
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 28px;
-  background: rgba(10, 15, 25, 0.96);
+  background: var(--surface-panel-strong);
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.32);
 }
 

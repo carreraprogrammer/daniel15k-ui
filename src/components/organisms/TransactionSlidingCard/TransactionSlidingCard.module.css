@@ -4,7 +4,7 @@
 }
 
 .options {
-  background: rgba(10, 15, 25, 0.96);
+  background: var(--surface-panel-strong);
   width: auto;
 }
 

@@ -14,7 +14,7 @@
     display: flex;
     align-items: stretch;
     justify-content: space-between;
-    min-height: 50px;
+    min-height: calc(50px + env(safe-area-inset-bottom));
     border-top: var(--border);
     border-radius: 0;
     overflow: hidden;
@@ -23,7 +23,11 @@
       var(--background);
     box-shadow: 0 -8px 20px rgba(0, 0, 0, 0.32);
     backdrop-filter: blur(18px) saturate(135%);
-    padding: 0 max(8px, env(safe-area-inset-right)) 0 max(8px, env(safe-area-inset-left));
+    padding:
+      0
+      max(8px, env(safe-area-inset-right))
+      env(safe-area-inset-bottom)
+      max(8px, env(safe-area-inset-left));
   }
 
   .tabBar :global(ion-tab-button) {
