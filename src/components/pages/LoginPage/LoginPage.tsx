@@ -71,12 +71,12 @@ export const LoginPage = () => {
       <IonPage>
         <IonContent fullscreen style={{ '--background': '#000' }}>
           <div className={nativeStyles.page}>
-            <svg className={nativeStyles.bg} viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <circle cx="150" cy="130" r="100" fill="none" stroke="#FCD34D" strokeWidth="3" opacity="0.14" />
-              <circle cx="150" cy="130" r="78" fill="none" stroke="#FCD34D" strokeWidth="1" opacity="0.07" />
-              <polyline points="30,240 90,170 150,210 220,150 270,165" fill="none" stroke="#E5E7EB" strokeWidth="2" opacity="0.10" strokeLinejoin="round" strokeLinecap="round" />
-              <line x1="30" y1="260" x2="270" y2="260" stroke="#9CA3AF" strokeWidth="1" opacity="0.08" />
-              <circle cx="220" cy="150" r="6" fill="#F9FAFB" opacity="0.18" />
+            <svg className={nativeStyles.bg} viewBox="0 0 390 844" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <circle cx="195" cy="280" r="220" fill="none" stroke="#FCD34D" strokeWidth="2.5" opacity="0.06" />
+              <circle cx="195" cy="280" r="170" fill="none" stroke="#FCD34D" strokeWidth="1" opacity="0.04" />
+              <polyline points="20,680 120,520 210,610 310,470 370,490" fill="none" stroke="#E5E7EB" strokeWidth="1.5" opacity="0.05" strokeLinejoin="round" strokeLinecap="round" />
+              <line x1="20" y1="720" x2="370" y2="720" stroke="#9CA3AF" strokeWidth="1" opacity="0.04" />
+              <circle cx="310" cy="470" r="5" fill="#F9FAFB" opacity="0.08" />
             </svg>
 
             <div className={nativeStyles.top}>
