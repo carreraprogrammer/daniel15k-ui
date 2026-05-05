@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { IonContent } from '@ionic/react';
 import { useToast } from '../../../hooks/useToast';
 import { useAuthStore } from '../../../store/authStore';
-import { useThemeStore, type ThemeMode } from '../../../store/themeStore';
+import { useThemeStore, type ThemePreference } from '../../../store/themeStore';
 import { api } from '../../../services/api';
 import { DataState } from '../../molecules/DataState/DataState';
 import { DynamicForm } from '../../organisms/DynamicForm';
@@ -30,8 +30,8 @@ const STRATEGY_LABEL: Record<string, string> = {
 export const ProfileContent = () => {
   const user    = useAuthStore((state) => state.user);
   const setUser = useAuthStore((state) => state.setUser);
-  const themeMode = useThemeStore((state) => state.mode);
-  const setThemeMode = useThemeStore((state) => state.setMode);
+  const themePreference = useThemeStore((state) => state.preference);
+  const setThemePreference = useThemeStore((state) => state.setPreference);
   const { showError, showSuccess, toast } = useToast();
   const [financialContext, setFinancialContext] = useState<FinancialCtx | null>(null);
   const [contextLoading, setContextLoading] = useState(true);
@@ -105,15 +105,15 @@ export const ProfileContent = () => {
                 <strong>Modo de color</strong>
               </div>
               <div className={styles.themeSwitch} role="group" aria-label="Modo de color">
-                {(['dark', 'light'] as ThemeMode[]).map((mode) => (
+                {(['system', 'dark', 'light'] as ThemePreference[]).map((mode) => (
                   <button
                     key={mode}
                     type="button"
-                    className={`${styles.themeOption} ${themeMode === mode ? styles.themeOptionActive : ''}`}
-                    onClick={() => setThemeMode(mode)}
-                    aria-pressed={themeMode === mode}
+                    className={`${styles.themeOption} ${themePreference === mode ? styles.themeOptionActive : ''}`}
+                    onClick={() => setThemePreference(mode)}
+                    aria-pressed={themePreference === mode}
                   >
-                    {mode === 'dark' ? 'Oscuro' : 'Claro'}
+                    {mode === 'system' ? 'Auto' : mode === 'dark' ? 'Oscuro' : 'Claro'}
                   </button>
                 ))}
               </div>

@@ -14,14 +14,26 @@ import { isPlatform } from '@ionic/react';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { AppRouter } from './router/AppRouter';
 import { AgentUIProvider } from './contexts/AgentUIContext';
-import { applyThemeMode, useThemeStore } from './store/themeStore';
+import { applyThemeMode, getThemeMediaQuery, useThemeStore } from './store/themeStore';
 
 export default function App() {
-  const themeMode = useThemeStore((state) => state.mode);
+  const themePreference = useThemeStore((state) => state.preference);
 
   useEffect(() => {
-    applyThemeMode(themeMode);
-  }, [themeMode]);
+    applyThemeMode(themePreference);
+
+    if (themePreference !== 'system') return undefined;
+
+    const mediaQuery = getThemeMediaQuery();
+    if (!mediaQuery) return undefined;
+
+    const handleSystemThemeChange = () => applyThemeMode('system');
+    mediaQuery.addEventListener('change', handleSystemThemeChange);
+
+    return () => {
+      mediaQuery.removeEventListener('change', handleSystemThemeChange);
+    };
+  }, [themePreference]);
 
   useEffect(() => {
     if (isPlatform('capacitor')) {
