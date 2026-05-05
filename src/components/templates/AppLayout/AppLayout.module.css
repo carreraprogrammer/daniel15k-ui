@@ -182,6 +182,16 @@
   --padding-end: var(--app-content-pad-inline);
 }
 
+.contentShell :global(ion-content)::part(scroll) {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.contentShell :global(ion-content)::part(scroll)::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
 .mobileMenuBackdrop,
 .mobileMenu {
   display: none;
@@ -198,7 +208,7 @@
     padding:
       calc(12px + env(safe-area-inset-top))
       max(12px, env(safe-area-inset-right))
-      0
+      8px
       max(12px, env(safe-area-inset-left));
     min-height: 0;
     height: 100%;
