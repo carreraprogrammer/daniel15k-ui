@@ -11,7 +11,7 @@ import { GoogleButton } from '../../atoms/GoogleButton';
 import { useAuthStore } from '../../../store/authStore';
 import { useFormStore } from '../../../store/formStore';
 import { useToast } from '../../../hooks/useToast';
-import { startGoogleOAuth, loginWithGoogleMobile } from '../../../services/authService';
+import { startGoogleOAuth, loginWithGoogleMobile, initGoogleAuth } from '../../../services/authService';
 import { getLastAuthPath } from '../../../utils/navigation';
 import styles from '../AuthPage.module.css';
 import nativeStyles from './LoginPageNative.module.css';
@@ -41,7 +41,10 @@ export const LoginPage = () => {
   const isNative = isPlatform('capacitor');
 
   useEffect(() => {
-    if (isNative) return;
+    if (isNative) {
+      initGoogleAuth();
+      return;
+    }
     void fetchSchema('login-form').catch(() => undefined);
   }, [fetchSchema, isNative]);
 
