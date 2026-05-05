@@ -73,6 +73,12 @@ export const LoginPage = () => {
               <BrandMark variant="monoline" size="lg" />
             </div>
 
+            <div className={nativeStyles.divider}>
+              <span className={nativeStyles.dividerLine} />
+              <span className={nativeStyles.dividerText}>Iniciar sesión</span>
+              <span className={nativeStyles.dividerLine} />
+            </div>
+
             {mobileLoading ? (
               <Spinner />
             ) : (
