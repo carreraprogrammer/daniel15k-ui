@@ -71,7 +71,7 @@ export const LoginPage = () => {
           <div className={nativeStyles.page}>
             <div className={nativeStyles.top}>
               <div className={nativeStyles.logo}>
-                <BrandMark variant="principal" size="lg" />
+                <BrandMark variant="monoline" size="lg" />
               </div>
               <span className={nativeStyles.appName}>Daniel 15K</span>
               <span className={nativeStyles.tagline}>Presupuesto, burn rate y decisiones{'\n'}con contexto real.</span>
