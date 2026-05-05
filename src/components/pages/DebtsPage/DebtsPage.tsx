@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { IonContent, IonIcon } from '@ionic/react';
 import { addOutline } from 'ionicons/icons';
-import { AppLayout } from '../../templates/AppLayout';
+import { AppLayout, useAppBreadcrumbs } from '../../templates/AppLayout';
 import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
 import { SelectInput } from '../../atoms/SelectInput';
@@ -47,6 +47,14 @@ export const DebtsContent = () => {
   const [linkError, setLinkError] = useState<string | null>(null);
   const [filters, setFilters] = useState<DebtQueryParams>(initialFilters);
   const { showError, showSuccess, toast } = useToast();
+  const detailBreadcrumbs = useMemo(
+    () => (detailsOpen ? [
+      { label: 'Deudas', onClick: () => setDetailsOpen(false) },
+      { label: 'Detalle' },
+    ] : []),
+    [detailsOpen],
+  );
+  useAppBreadcrumbs(detailBreadcrumbs);
 
   const load = async () => {
     setLoading(true);
@@ -368,7 +376,6 @@ export const DebtsContent = () => {
                 <h3 className={styles.detailStageTitle}>Detalle de deudas</h3>
                 <p className={styles.detailStageText}>La edición, los filtros y el listado completo viven aquí, no debajo del resumen inicial.</p>
               </div>
-              <Button label="Volver" variant="link" size="sm" onClick={() => setDetailsOpen(false)} />
             </div>
             <div className={styles.detailPanel}>
             <ListToolbar

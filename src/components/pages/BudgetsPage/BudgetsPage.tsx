@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { IonContent } from '@ionic/react';
 import { useHistory, useParams } from 'react-router-dom';
-import { AppLayout } from '../../templates/AppLayout';
+import { AppLayout, useAppBreadcrumbs } from '../../templates/AppLayout';
 import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
 import { ErrorState } from '../../molecules/ErrorState';
@@ -254,6 +254,14 @@ export const BudgetsContent = () => {
     () => chips.filter((chip) => chip.key !== 'q').length,
     [chips],
   );
+  const detailBreadcrumbs = useMemo(
+    () => (detailsOpen ? [
+      { label: 'Presupuestos', onClick: handleCloseDetail },
+      { label: detailTab === 'history' ? 'Historial' : 'Detalle' },
+    ] : []),
+    [detailTab, detailsOpen],
+  );
+  useAppBreadcrumbs(detailBreadcrumbs);
 
   const burnCategories = summary?.burn_rate?.categories ?? [];
   const outOfRange = burnCategories.filter((item) => item.on_track === false);
@@ -374,7 +382,6 @@ export const BudgetsContent = () => {
           {/* ── Detail view with tabs ── */}
           {detailsOpen ? (
             <div className={styles.detailStage}>
-              {/* Header row: tabs + back button */}
               <div className={styles.detailStageHeader}>
                 <div className={styles.detailTabBar}>
                   <button
@@ -392,7 +399,6 @@ export const BudgetsContent = () => {
                     Historial
                   </button>
                 </div>
-                <Button label="Volver" variant="link" size="sm" onClick={handleCloseDetail} />
               </div>
 
               {/* ── Tab: Detalle ── */}

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { IonContent, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, useIonAlert, useIonToast } from '@ionic/react';
 import { addOutline, cardOutline, warningOutline } from 'ionicons/icons';
-import { AppLayout } from '../../templates/AppLayout';
+import { AppLayout, useAppBreadcrumbs } from '../../templates/AppLayout';
 import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
 import { SelectInput } from '../../atoms/SelectInput';
@@ -230,6 +230,14 @@ export const TransactionsContent = () => {
     () => appliedChips.filter((chip) => chip.key !== 'q').length,
     [appliedChips],
   );
+  const detailBreadcrumbs = useMemo(
+    () => (detailsOpen ? [
+      { label: 'Transacciones', onClick: () => setDetailsOpen(false) },
+      { label: monthName },
+    ] : []),
+    [detailsOpen, monthName],
+  );
+  useAppBreadcrumbs(detailBreadcrumbs);
   const monthBalance = metrics.incomeTotal - metrics.expenseTotal;
   const realAvailable = summary?.liquidity?.confirmed_balance ?? summary?.balance.net_balance ?? monthBalance;
   const linkPeriodOptions = useMemo(() => periodOptionsFor(linkingTransaction), [linkingTransaction]);
@@ -629,7 +637,6 @@ export const TransactionsContent = () => {
                   >›</button>
                 </div>
               </div>
-              <Button label="Volver" variant="link" size="sm" onClick={() => setDetailsOpen(false)} />
             </div>
             <div className={styles.detailPanel}>
             <ListToolbar

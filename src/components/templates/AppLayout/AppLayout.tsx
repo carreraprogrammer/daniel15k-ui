@@ -1,10 +1,12 @@
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { IonPage } from '@ionic/react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { Header } from '../../organisms/Header';
+import { BreadcrumbTrail, type BreadcrumbItem } from '../../organisms/BreadcrumbTrail';
 import { CompletenessIndicator } from '../../molecules/CompletenessIndicator';
 import { AgentEventRenderer } from '../../molecules/AgentEventRenderer';
 import { rememberAuthPath } from '../../../utils/navigation';
+import { AppLayoutContext } from './AppLayoutContext';
 import styles from './AppLayout.module.css';
 
 const NAV_ITEMS = [
@@ -21,9 +23,12 @@ export const AppLayout = ({ title, children }: { title: string; children: ReactN
   const location = useLocation();
   const shellRef = useRef<HTMLDivElement | null>(null);
   const headerRef = useRef<HTMLDivElement | null>(null);
+  const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbItem[]>([]);
+  const layoutContext = useMemo(() => ({ setBreadcrumbs }), []);
 
   useEffect(() => {
     rememberAuthPath(location.pathname);
+    setBreadcrumbs([]);
   }, [location.pathname]);
 
   useEffect(() => {
@@ -65,29 +70,32 @@ export const AppLayout = ({ title, children }: { title: string; children: ReactN
   );
 
   return (
-    <IonPage className={styles.page}>
-      <div ref={shellRef} className={styles.shell}>
-        <div className={styles.backdrop} aria-hidden="true" />
-        <div ref={headerRef} className={styles.headerSlot}>
-          <Header currentSection={title} />
-        </div>
-        <div className={styles.grid}>
-          <aside className={styles.sidebar}>
-            <div className={styles.sidebarPanel}>
-              <p className={styles.sidebarLabel}>Finanzas</p>
-              {renderNav()}
-            </div>
-          </aside>
-          <main className={styles.main}>
-            <div className={styles.contentShell}>
-              {children}
-            </div>
-          </main>
-        </div>
+    <AppLayoutContext.Provider value={layoutContext}>
+      <IonPage className={styles.page}>
+        <div ref={shellRef} className={styles.shell}>
+          <div className={styles.backdrop} aria-hidden="true" />
+          <div ref={headerRef} className={styles.headerSlot}>
+            <Header currentSection={title} />
+            <BreadcrumbTrail items={breadcrumbs} />
+          </div>
+          <div className={styles.grid}>
+            <aside className={styles.sidebar}>
+              <div className={styles.sidebarPanel}>
+                <p className={styles.sidebarLabel}>Finanzas</p>
+                {renderNav()}
+              </div>
+            </aside>
+            <main className={styles.main}>
+              <div className={styles.contentShell}>
+                {children}
+              </div>
+            </main>
+          </div>
 
-        <AgentEventRenderer />
-        <CompletenessIndicator />
-      </div>
-    </IonPage>
+          <AgentEventRenderer />
+          <CompletenessIndicator />
+        </div>
+      </IonPage>
+    </AppLayoutContext.Provider>
   );
 };

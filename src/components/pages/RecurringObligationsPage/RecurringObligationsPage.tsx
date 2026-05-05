@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { IonContent, IonIcon, IonLabel, IonSegment, IonSegmentButton } from '@ionic/react';
 import { addOutline } from 'ionicons/icons';
-import { AppLayout } from '../../templates/AppLayout';
+import { AppLayout, useAppBreadcrumbs } from '../../templates/AppLayout';
 import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
 import { SelectInput } from '../../atoms/SelectInput';
@@ -73,6 +73,14 @@ export const RecurringObligationsContent = () => {
   const [editingIncome, setEditingIncome] = useState<IncomeSource | null>(null);
   const [deletingIncome, setDeletingIncome] = useState<IncomeSource | null>(null);
   const { showError, showSuccess, toast } = useToast();
+  const detailBreadcrumbs = useMemo(
+    () => (detailsOpen ? [
+      { label: 'Recurrentes', onClick: () => setDetailsOpen(false) },
+      { label: activeView === 'income' ? 'Ingresos' : 'Detalle' },
+    ] : []),
+    [activeView, detailsOpen],
+  );
+  useAppBreadcrumbs(detailBreadcrumbs);
 
   const load = async () => {
     setLoading(true);
@@ -470,7 +478,6 @@ export const RecurringObligationsContent = () => {
                 <h3 className={styles.detailStageTitle}>Detalle recurrente</h3>
                 <p className={styles.detailStageText}>Aquí vives entre filtros, segmentación y cards. La vista inicial ya respondió la pregunta principal.</p>
               </div>
-              <Button label="Volver" variant="link" size="sm" onClick={() => setDetailsOpen(false)} />
             </div>
             <section className={styles.segmentWrap}>
               <IonSegment value={activeView} onIonChange={(event) => setActiveView((event.detail.value as 'income' | 'obligations') ?? 'obligations')}>

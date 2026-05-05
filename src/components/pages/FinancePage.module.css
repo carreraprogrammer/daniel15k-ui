@@ -1385,7 +1385,7 @@
   }
 
   .focusStage {
-    --focus-card-inset: 5px;
+    --focus-card-inset: 0px;
   }
 
   .hero {

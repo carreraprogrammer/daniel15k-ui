@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { IonContent, IonIcon } from '@ionic/react';
 import { addOutline } from 'ionicons/icons';
-import { AppLayout } from '../../templates/AppLayout';
+import { AppLayout, useAppBreadcrumbs } from '../../templates/AppLayout';
 import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
 import { SelectInput } from '../../atoms/SelectInput';
@@ -167,6 +167,14 @@ export const PlannedExpensesContent = () => {
     () => appliedChips.filter((chip) => chip.key !== 'q').length,
     [appliedChips],
   );
+  const detailBreadcrumbs = useMemo(
+    () => (detailsOpen ? [
+      { label: 'Planeados', onClick: () => setDetailsOpen(false) },
+      { label: activeTab === 'pockets' ? 'Bolsillos' : 'Detalle' },
+    ] : []),
+    [activeTab, detailsOpen],
+  );
+  useAppBreadcrumbs(detailBreadcrumbs);
 
   const removeChip = (key: string) => {
     setFilters((current) => ({ ...current, [key]: '' }));
@@ -241,7 +249,6 @@ export const PlannedExpensesContent = () => {
                       Bolsillos
                     </button>
                   </div>
-                  <Button label="Volver" variant="link" size="sm" onClick={() => setDetailsOpen(false)} />
                 </div>
               </div>
               {activeTab === 'planned' ? (
