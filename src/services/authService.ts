@@ -1,5 +1,5 @@
 import { isPlatform } from '@ionic/react';
-import { SocialLogin } from '@capgo/capacitor-social-login';
+import { GoogleAuth } from '@southdevs/capacitor-google-auth';
 import { api, apiBaseUrl } from './api';
 import type { AuthResponse, LoginCredentials, RegisterPayload } from '../types/auth.types';
 import type { AuthUser } from '../types/authorization.types';
@@ -53,10 +53,9 @@ export const startGoogleOAuth = (): void => {
 };
 
 export const loginWithGoogleMobile = async (): Promise<AuthResponse> => {
-  await SocialLogin.initialize({ google: { iOSClientId: '224259448673-ec625g235gj916acod4i7u0suql0a5eh.apps.googleusercontent.com' } });
-  const result = await SocialLogin.login({ provider: 'google', options: {} });
-  const accessToken = (result.result as { idToken?: string; accessToken?: { token?: string } })?.accessToken?.token ?? '';
-  const { data } = await api.post('/api/v1/auth/google/mobile', { access_token: accessToken });
+  await GoogleAuth.initialize({ scopes: ['profile', 'email'] });
+  const user = await GoogleAuth.signIn({ scopes: ['profile', 'email'] });
+  const { data } = await api.post('/api/v1/auth/google/mobile', { access_token: user.authentication.accessToken });
   return mapAuthResponse(data as Parameters<typeof mapAuthResponse>[0]);
 };
 
