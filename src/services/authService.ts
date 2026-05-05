@@ -69,12 +69,33 @@ export const loginWithGoogleMobile = async (): Promise<AuthResponse> => {
     serverClientId: GOOGLE_SERVER_CLIENT_ID,
     grantOfflineAccess: true,
   });
-  const { data } = await api.post('/api/v1/auth/google/mobile', {
+  const payload = {
     access_token: user.authentication?.accessToken,
     idToken: user.authentication?.idToken,
     serverAuthCode: user.serverAuthCode,
+  };
+
+  console.info('[GoogleAuth] mobile credentials ready', {
+    apiBaseUrl,
+    hasAccessToken: Boolean(payload.access_token),
+    hasIdToken: Boolean(payload.idToken),
+    hasServerAuthCode: Boolean(payload.serverAuthCode),
   });
-  return mapAuthResponse(data as Parameters<typeof mapAuthResponse>[0]);
+
+  try {
+    const { data } = await api.post('/api/v1/auth/google/mobile', payload);
+    console.info('[GoogleAuth] mobile backend login succeeded');
+    return mapAuthResponse(data as Parameters<typeof mapAuthResponse>[0]);
+  } catch (error) {
+    const details = error as { response?: { status?: number; data?: unknown }; message?: string };
+    console.error('[GoogleAuth] mobile backend login failed', {
+      apiBaseUrl,
+      status: details.response?.status,
+      data: details.response?.data,
+      message: details.message,
+    });
+    throw error;
+  }
 };
 
 export const startGoogleLogin = (): void | Promise<never> => {
