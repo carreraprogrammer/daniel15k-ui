@@ -182,7 +182,7 @@ export const TransactionsContent = () => {
         if (!catId) return;
         const cat = categories.find((c) => String(c.id) === String(catId));
         const type = cat?.attributes.category_type ?? 'other';
-        const color = cat?.attributes.color ?? 'rgba(255,255,255,0.18)';
+        const color = cat?.attributes.color ?? 'var(--surface-control-hover)';
         if (!byType[type]) byType[type] = { spent: 0, color, label: TYPE_LABELS[type] ?? 'Otro' };
         byType[type].spent += t.attributes.amount;
       });

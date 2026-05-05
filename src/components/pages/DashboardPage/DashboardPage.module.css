@@ -11,7 +11,7 @@
   background:
     radial-gradient(circle at top left, rgba(243, 210, 122, 0.14), transparent 34%),
     linear-gradient(135deg, rgba(243, 210, 122, 0.1), rgba(214, 168, 74, 0.04)),
-    rgba(9, 9, 9, 0.92);
+    var(--surface-brand-tint);
   box-shadow: 0 16px 34px rgba(0, 0, 0, 0.26);
 }
 
@@ -46,8 +46,9 @@
   border-bottom-color: rgba(255, 255, 255, 0.025);
   border-radius: 28px;
   background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.018) 56%),
-    rgba(9, 9, 9, 0.92);
+    var(--surface-highlight),
+    var(--surface-glow),
+    var(--surface-brand-tint);
   box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
   backdrop-filter: blur(16px) saturate(120%);
 }
@@ -380,7 +381,7 @@
 
 .chartToggle {
   display: flex;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--surface-control);
   border-radius: 999px;
   padding: 3px;
   gap: 2px;
@@ -402,7 +403,7 @@
 }
 
 .chartToggleBtnActive {
-  background: rgba(255, 255, 255, 0.10);
+  background: var(--surface-control-hover);
   color: var(--color-text-primary);
 }
 
@@ -413,8 +414,8 @@
   border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: 22px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015)),
-    rgba(255, 255, 255, 0.022);
+    var(--surface-highlight),
+    var(--surface-panel-soft);
 }
 
 .chartTitle {

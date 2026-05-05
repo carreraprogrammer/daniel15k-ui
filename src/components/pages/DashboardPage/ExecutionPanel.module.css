@@ -157,7 +157,7 @@
 .modal {
   width: 100%;
   max-width: 520px;
-  background: #121820;
+  background: var(--surface-panel-strong);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 20px 20px 0 0;
   padding: 24px 20px 20px;

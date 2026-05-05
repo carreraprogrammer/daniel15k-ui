@@ -145,6 +145,8 @@
   --surface-tabbar: rgba(6, 6, 6, 0.96);
   --surface-control: rgba(255, 255, 255, 0.03);
   --surface-control-hover: rgba(255, 255, 255, 0.05);
+  --surface-brand-tint: color-mix(in srgb, var(--color-brand) 10%, var(--surface-panel));
+  --surface-brand-tint-strong: color-mix(in srgb, var(--color-brand) 16%, var(--surface-panel-strong));
   --surface-border: rgba(255, 255, 255, 0.08);
   --surface-border-soft: rgba(255, 255, 255, 0.025);
   --surface-border-muted: rgba(255, 255, 255, 0.06);
@@ -253,6 +255,8 @@
   --surface-tabbar: rgba(255, 253, 247, 0.96);
   --surface-control: rgba(55, 43, 25, 0.045);
   --surface-control-hover: rgba(55, 43, 25, 0.075);
+  --surface-brand-tint: color-mix(in srgb, var(--color-brand) 10%, var(--surface-panel));
+  --surface-brand-tint-strong: color-mix(in srgb, var(--color-brand) 16%, var(--surface-panel-strong));
   --surface-border: rgba(55, 43, 25, 0.12);
   --surface-border-soft: rgba(55, 43, 25, 0.04);
   --surface-border-muted: rgba(55, 43, 25, 0.08);

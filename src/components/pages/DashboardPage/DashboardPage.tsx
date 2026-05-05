@@ -265,7 +265,7 @@ export const DashboardContent = () => {
                           type="category"
                           dataKey="name"
                           width={90}
-                          tick={{ fill: 'rgba(231,236,244,0.68)', fontSize: 11, fontFamily: 'var(--font-sans)' }}
+                          tick={{ fill: 'var(--text-on-surface-muted)', fontSize: 11, fontFamily: 'var(--font-sans)' }}
                           tickLine={false}
                           axisLine={false}
                         />
@@ -276,7 +276,7 @@ export const DashboardContent = () => {
                           ]}
                           {...TOOLTIP_STYLE}
                         />
-                        <Bar dataKey="presupuesto" fill="rgba(255,255,255,0.08)" radius={[0, 4, 4, 0]} barSize={7} />
+                        <Bar dataKey="presupuesto" fill="var(--surface-control-hover)" radius={[0, 4, 4, 0]} barSize={7} />
                         <Bar dataKey="gastado" radius={[0, 4, 4, 0]} barSize={7}>
                           {barData.map((entry) => (
                             <Cell key={entry.name} fill={entry.color} />
