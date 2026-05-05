@@ -4,87 +4,52 @@
   align-items: center;
   justify-content: space-between;
   height: 100%;
-  padding: env(safe-area-inset-top, 48px) 32px env(safe-area-inset-bottom, 40px);
-  background: #0b0f19;
-}
-
-.top {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-  padding-top: 48px;
+  padding: env(safe-area-inset-top, 60px) 40px env(safe-area-inset-bottom, 48px);
+  background: #000;
 }
 
 .logo {
-  width: 96px;
-  height: 96px;
-  border-radius: 22px;
+  width: 80px;
+  height: 80px;
+  border-radius: 18px;
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.06);
 }
 
-.appName {
-  font-size: 28px;
-  font-weight: 700;
-  color: #f9fafb;
-  letter-spacing: -0.5px;
-  line-height: 1;
-}
-
-.tagline {
-  font-size: 14px;
-  color: #6b7280;
-  text-align: center;
-  line-height: 1.5;
-}
-
-.bottom {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-  width: 100%;
-}
-
-.googleButton {
-  width: 100%;
-  height: 52px;
+.gButton {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  background: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  border-radius: 14px;
-  border: none;
-  background: #f9fafb;
-  color: #111827;
-  font-size: 16px;
-  font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.15s ease;
+  transition: transform 0.12s ease, opacity 0.12s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.googleButton:active {
+.gButton:active {
+  transform: scale(0.93);
   opacity: 0.85;
 }
 
-.googleButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.gButton:disabled {
+  opacity: 0.4;
 }
 
-.googleIcon {
-  width: 20px;
-  height: 20px;
+.gIcon {
+  width: 26px;
+  height: 26px;
 }
 
 .registerLink {
-  font-size: 14px;
-  color: #6b7280;
+  font-size: 13px;
+  color: #4b5563;
   text-decoration: none;
+  letter-spacing: 0.1px;
 }
 
 .registerLink span {
   color: #fcd34d;
-  font-weight: 500;
 }
