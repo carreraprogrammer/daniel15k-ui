@@ -80,23 +80,22 @@
 }
 
 .gButton {
-  width: 56px;
-  height: 56px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  border: none;
-  background: #fff;
+  border: 1px solid #1f2937;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: transform 0.12s ease, opacity 0.12s ease;
+  transition: transform 0.12s ease, border-color 0.12s ease;
   -webkit-tap-highlight-color: transparent;
-  box-shadow: 0 0 24px rgba(255, 255, 255, 0.08);
 }
 
 .gButton:active {
-  transform: scale(0.92);
-  opacity: 0.85;
+  transform: scale(0.90);
+  border-color: #374151;
 }
 
 .gButton:disabled {
@@ -104,8 +103,8 @@
 }
 
 .gIcon {
-  width: 26px;
-  height: 26px;
+  width: 22px;
+  height: 22px;
 }
 
 /* Footer */
