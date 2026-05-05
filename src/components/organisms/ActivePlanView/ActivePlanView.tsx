@@ -83,6 +83,14 @@ const signalClassFor = (
   return '';
 };
 
+const resolveBudgetAccent = (categoryCode: string): string => {
+  if (categoryCode === 'income' || categoryCode === 'unknown') {
+    return 'var(--color-accent)';
+  }
+
+  return `var(--color-${categoryCode})`;
+};
+
 const SubcategoryCard = ({ sub, accentColor }: { sub: CurrentPlanSubcategory; accentColor: string }) => {
   const budgeted = sub.budgeted ?? 0;
   const spent = sub.spent ?? 0;
@@ -172,14 +180,13 @@ export const CategoryGroup = ({ category, defaultExpanded = false }: CategoryGro
   const spentPct = totalBudgeted > 0 ? clampPct((totalSpent / totalBudgeted) * 100) : 0;
   const remaining = totalBudgeted - totalSpent;
   const statusLabel = buildStatusLabel(category);
-  const colorVar = `var(--color-${categoryCode})`;
-  const subtleVar = `var(--color-${categoryCode}-subtle)`;
+  const colorVar = resolveBudgetAccent(categoryCode);
   const isOverSpent = totalSpent > totalBudgeted;
 
   return (
     <section
       className={[styles.categorySection, expanded ? styles.categorySectionExpanded : ''].filter(Boolean).join(' ')}
-      style={{ '--cat-color': colorVar, '--cat-subtle': subtleVar } as CSSProperties}
+      style={{ '--cat-color': colorVar } as CSSProperties}
     >
       <button
         type="button"

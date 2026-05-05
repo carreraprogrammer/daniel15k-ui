@@ -225,10 +225,10 @@
   gap: var(--space-4);
   padding: var(--space-4);
   border-radius: 28px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--surface-border-muted);
   background:
-    linear-gradient(180deg, rgba(18, 22, 30, 0.92), rgba(10, 13, 19, 0.96)),
-    rgba(255, 255, 255, 0.02);
+    var(--surface-highlight),
+    var(--surface-panel);
 }
 
 .categorySectionExpanded {
@@ -262,8 +262,8 @@
   width: 2.8rem;
   height: 2.8rem;
   border-radius: 18px;
-  background: color-mix(in srgb, var(--cat-color) 6%, rgba(255, 255, 255, 0.015));
-  border: 1px solid color-mix(in srgb, var(--cat-color) 12%, rgba(255, 255, 255, 0.04));
+  background: color-mix(in srgb, var(--cat-color) 8%, var(--surface-control));
+  border: 1px solid color-mix(in srgb, var(--cat-color) 16%, var(--surface-border-muted));
   flex-shrink: 0;
 }
 
@@ -377,7 +377,7 @@
 }
 
 .categoryRailFill {
-  background: color-mix(in srgb, var(--cat-color) 48%, white 4%);
+  background: color-mix(in srgb, var(--cat-color) 76%, var(--color-brand) 24%);
 }
 
 .subcategoryRailFill {
@@ -462,8 +462,8 @@
   width: 2.4rem;
   height: 2.4rem;
   border-radius: 16px;
-  background: color-mix(in srgb, var(--subcategory-accent) 6%, rgba(255, 255, 255, 0.01));
-  border: 1px solid color-mix(in srgb, var(--subcategory-accent) 12%, rgba(255, 255, 255, 0.04));
+  background: color-mix(in srgb, var(--subcategory-accent) 8%, var(--surface-control));
+  border: 1px solid color-mix(in srgb, var(--subcategory-accent) 16%, var(--surface-border-muted));
   flex-shrink: 0;
 }
 
