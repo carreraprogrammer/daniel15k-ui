@@ -148,6 +148,7 @@
   --surface-brand-tint: color-mix(in srgb, var(--color-brand) 10%, var(--surface-panel));
   --surface-brand-tint-strong: color-mix(in srgb, var(--color-brand) 16%, var(--surface-panel-strong));
   --surface-border: rgba(255, 255, 255, 0.08);
+  --surface-border-strong: rgba(255, 255, 255, 0.14);
   --surface-border-soft: rgba(255, 255, 255, 0.025);
   --surface-border-muted: rgba(255, 255, 255, 0.06);
   --text-on-surface: #fff;
@@ -258,6 +259,7 @@
   --surface-brand-tint: color-mix(in srgb, var(--color-brand) 10%, var(--surface-panel));
   --surface-brand-tint-strong: color-mix(in srgb, var(--color-brand) 16%, var(--surface-panel-strong));
   --surface-border: rgba(55, 43, 25, 0.12);
+  --surface-border-strong: rgba(55, 43, 25, 0.2);
   --surface-border-soft: rgba(55, 43, 25, 0.04);
   --surface-border-muted: rgba(55, 43, 25, 0.08);
   --text-on-surface: #171512;
