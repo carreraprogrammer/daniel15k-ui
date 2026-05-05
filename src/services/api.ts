@@ -1,6 +1,12 @@
 import axios from 'axios';
+import { Capacitor } from '@capacitor/core';
 import { useAuthStore } from '../store/authStore';
-export const apiBaseUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
+
+const fallbackApiBaseUrl = Capacitor.isNativePlatform()
+  ? 'https://daniel15k-api-production.up.railway.app'
+  : 'http://localhost:3000';
+
+export const apiBaseUrl = import.meta.env.VITE_API_URL ?? fallbackApiBaseUrl;
 export const api=axios.create({ baseURL: apiBaseUrl });
 api.interceptors.request.use((config)=>{ const token=useAuthStore.getState().accessToken; if(token){ if(!config.headers) config.headers=new axios.AxiosHeaders(); config.headers.set('Authorization',`Bearer ${token}`); } return config; });
 
