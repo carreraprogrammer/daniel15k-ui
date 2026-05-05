@@ -6,6 +6,7 @@ import {
   cardOutline,
   homeOutline,
   pieChartOutline,
+  repeatOutline,
   swapHorizontalOutline,
 } from 'ionicons/icons';
 import { useAuthStore } from '../store/authStore';
@@ -73,6 +74,7 @@ const TAB_ITEMS = [
   { tab: 'budgets', to: '/budgets', label: 'Presupuesto', icon: pieChartOutline },
   { tab: 'debts', to: '/debts', label: 'Deudas', icon: cardOutline },
   { tab: 'plans', to: '/planned-expenses', label: 'Planes', icon: calendarOutline },
+  { tab: 'recurring', to: '/recurring', label: 'Recurrentes', icon: repeatOutline },
 ];
 
 const TAB_PATHS = TAB_ITEMS.map((item) => item.to);
