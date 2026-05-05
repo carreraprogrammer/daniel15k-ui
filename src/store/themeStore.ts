@@ -37,6 +37,7 @@ export const applyThemeMode = (preference: ThemePreference) => {
 type ThemeState = {
   preference: ThemePreference;
   setPreference: (preference: ThemePreference) => void;
+  resetPreference: () => void;
 };
 
 const initialPreference = getStoredTheme();
@@ -48,7 +49,18 @@ export const useThemeStore = create<ThemeState>((set) => ({
     applyThemeMode(preference);
     set({ preference });
   },
+  resetPreference() {
+    localStorage.removeItem(THEME_KEY);
+    applyThemeMode('system');
+    set({ preference: 'system' });
+  },
 }));
+
+export const resetThemePreference = () => {
+  localStorage.removeItem(THEME_KEY);
+  useThemeStore.setState({ preference: 'system' });
+  applyThemeMode('system');
+};
 
 if (typeof document !== 'undefined') {
   applyThemeMode(initialPreference);

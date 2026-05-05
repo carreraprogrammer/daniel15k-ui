@@ -149,7 +149,8 @@
 
 .compact .searchInput {
   padding-right: 0.75rem;
-  font-size: var(--type-body-small-size);
+  font-size: 1rem;
+  line-height: 1.2;
 }
 
 .compact .actions {
