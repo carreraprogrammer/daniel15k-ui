@@ -17,7 +17,7 @@
 
 .planBannerText {
   margin: 0;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--color-text-primary);
   font-size: var(--type-body-size);
   font-weight: 650;
   line-height: 1.45;
@@ -91,7 +91,7 @@
 
 .heroTitle {
   margin: 0;
-  color: #fff;
+  color: var(--color-text-primary);
   font-size: var(--type-page-title-size);
   font-weight: var(--type-page-title-weight);
   letter-spacing: var(--tracking-normal);
@@ -101,7 +101,7 @@
 .heroDesc {
   margin: 0;
   max-width: 54ch;
-  color: rgba(231, 236, 244, 0.7);
+  color: var(--text-on-surface-soft);
   font-size: var(--type-body-size);
   line-height: var(--leading-normal);
 }
@@ -123,14 +123,14 @@
 }
 
 .insightMeta {
-  color: rgba(231, 236, 244, 0.42);
+  color: var(--text-on-surface-muted);
   font-size: var(--type-caption-size);
   letter-spacing: var(--tracking-normal);
 }
 
 .insightStale {
   margin: 0;
-  color: rgba(231, 236, 244, 0.42);
+  color: var(--text-on-surface-muted);
   font-size: var(--type-label-size);
   font-style: italic;
 }
@@ -144,7 +144,7 @@
 }
 
 .metricLabel {
-  color: rgba(231, 236, 244, 0.62);
+  color: var(--text-on-surface-soft);
   font-size: var(--type-caption-size);
   font-weight: 600;
   letter-spacing: var(--tracking-normal);
@@ -152,7 +152,7 @@
 }
 
 .metricValue {
-  color: #fff;
+  color: var(--color-text-primary);
   font-size: var(--type-amount-large-size);
   font-weight: var(--type-amount-weight);
   font-variant-numeric: tabular-nums;
@@ -166,7 +166,7 @@
 }
 
 .metricCaption {
-  color: rgba(231, 236, 244, 0.52);
+  color: var(--text-on-surface-muted);
   font-size: var(--type-caption-size);
   line-height: var(--leading-label);
 }
@@ -183,7 +183,7 @@
 }
 
 .availableBandLabel {
-  color: rgba(231, 236, 244, 0.62);
+  color: var(--text-on-surface-soft);
   font-size: var(--type-caption-size);
   font-weight: 700;
   letter-spacing: var(--tracking-normal);
@@ -191,7 +191,7 @@
 }
 
 .availableBandValue {
-  color: #fff;
+  color: var(--color-text-primary);
   font-size: var(--type-amount-large-size);
   font-weight: var(--type-amount-weight);
   font-variant-numeric: tabular-nums;
@@ -201,7 +201,7 @@
 }
 
 .availableBandHint {
-  color: rgba(231, 236, 244, 0.54);
+  color: var(--text-on-surface-muted);
   font-size: var(--type-caption-size);
   line-height: var(--leading-normal);
 }
@@ -221,13 +221,13 @@
 }
 
 .pressureLabel {
-  color: rgba(231, 236, 244, 0.68);
+  color: var(--text-on-surface-soft);
   font-size: var(--type-label-size);
   font-weight: 600;
 }
 
 .pressurePct {
-  color: #fff;
+  color: var(--color-text-primary);
   font-size: var(--type-body-small-size);
   font-weight: 700;
 }
@@ -252,7 +252,7 @@
 
 .pressureCaption {
   margin: 0;
-  color: rgba(231, 236, 244, 0.52);
+  color: var(--text-on-surface-muted);
   font-size: var(--type-label-size);
 }
 
@@ -271,7 +271,7 @@
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  color: rgba(231, 236, 244, 0.82);
+  color: var(--color-text-primary);
   font-size: var(--type-label-size);
   font-weight: 600;
 }
@@ -333,7 +333,7 @@
 }
 
 .kpiLabel {
-  color: rgba(231, 236, 244, 0.58);
+  color: var(--text-on-surface-muted);
   font-size: var(--type-caption-size);
   font-weight: 600;
   letter-spacing: 0.05em;
@@ -341,7 +341,7 @@
 }
 
 .kpiValue {
-  color: #fff;
+  color: var(--color-text-primary);
   font-size: var(--type-section-title-size);
   font-weight: 700;
   letter-spacing: -0.03em;
@@ -357,7 +357,7 @@
 }
 
 .kpiHint {
-  color: rgba(231, 236, 244, 0.52);
+  color: var(--text-on-surface-muted);
   font-size: var(--type-caption-size);
   line-height: 1.4;
 }
@@ -392,7 +392,7 @@
   border-radius: 999px;
   border: none;
   background: transparent;
-  color: rgba(231, 236, 244, 0.45);
+  color: var(--text-on-surface-muted);
   font-size: 15px;
   display: flex;
   align-items: center;
@@ -403,7 +403,7 @@
 
 .chartToggleBtnActive {
   background: rgba(255, 255, 255, 0.10);
-  color: rgba(231, 236, 244, 0.92);
+  color: var(--color-text-primary);
 }
 
 .chartCard {
@@ -419,7 +419,7 @@
 
 .chartTitle {
   margin: 0;
-  color: rgba(231, 236, 244, 0.82);
+  color: var(--color-text-primary);
   font-size: var(--type-label-size);
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -447,7 +447,7 @@
 }
 
 .legendLabel {
-  color: rgba(231, 236, 244, 0.68);
+  color: var(--text-on-surface-soft);
   font-size: var(--type-caption-size);
 }
 
@@ -465,7 +465,7 @@
 
 .detailTitle {
   margin: 0;
-  color: rgba(231, 236, 244, 0.72);
+  color: var(--text-on-surface-soft);
   font-size: var(--type-label-size);
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -495,7 +495,7 @@
 }
 
 .listPrimary {
-  color: #fff;
+  color: var(--color-text-primary);
   font-size: var(--type-body-small-size);
   font-weight: 600;
   overflow: hidden;
@@ -504,12 +504,12 @@
 }
 
 .listSecondary {
-  color: rgba(231, 236, 244, 0.56);
+  color: var(--text-on-surface-muted);
   font-size: var(--type-caption-size);
 }
 
 .listAmount {
-  color: #fff;
+  color: var(--color-text-primary);
   font-size: var(--type-body-small-size);
   font-weight: 700;
   letter-spacing: -0.02em;

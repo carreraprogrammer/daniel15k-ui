@@ -171,15 +171,15 @@
 }
 
 .confidence[data-level='high'] {
-  color: rgba(231, 236, 244, 0.58);
+  color: var(--text-on-surface-muted);
 }
 
 .confidence[data-level='medium'] {
-  color: rgba(231, 236, 244, 0.58);
+  color: var(--text-on-surface-muted);
 }
 
 .confidence[data-level='low'] {
-  color: rgba(231, 236, 244, 0.42);
+  color: var(--text-on-surface-muted);
 }
 
 /* ── Amount cell ──────────────────────────────────────────────────────────── */

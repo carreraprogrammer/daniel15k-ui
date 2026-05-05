@@ -301,7 +301,7 @@
 
   .mobileMenuTitle {
     margin-top: 0.3rem;
-    color: #fff8e7;
+    color: var(--tabbar-text-active);
     font-size: var(--type-amount-medium-size);
     letter-spacing: -0.04em;
   }
@@ -318,7 +318,7 @@
       linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
       rgba(255, 255, 255, 0.03);
     box-shadow: 0 12px 22px rgba(2, 6, 23, 0.16);
-    color: #fff;
+    color: var(--color-text-primary);
   }
 
   .mobileMenuClose :global(svg),
@@ -349,7 +349,7 @@
     padding: 1rem;
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 18px;
-    color: #fff;
+    color: var(--color-text-primary);
     background:
       linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
       rgba(255, 255, 255, 0.02);

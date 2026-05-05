@@ -91,7 +91,7 @@
 }
 
 .brandTitle {
-  color: #fff8e7;
+  color: var(--tabbar-text-active);
   font-family: var(--font-display);
   font-size: var(--type-card-title-size);
   letter-spacing: -0.03em;
@@ -105,7 +105,7 @@
 .title {
   max-width: 10ch;
   margin: 0;
-  color: #f8fafc;
+  color: var(--color-text-primary);
   font-family: var(--font-display);
   font-size: var(--type-display-size);
   line-height: 0.92;
@@ -115,7 +115,7 @@
 .description {
   max-width: 56ch;
   margin: 0;
-  color: rgba(231, 236, 244, 0.74);
+  color: var(--text-on-surface-soft);
   font-size: var(--type-body-size);
   line-height: 1.65;
 }
@@ -140,14 +140,14 @@
 }
 
 .metricCard strong {
-  color: #f8fafc;
+  color: var(--color-text-primary);
   font-size: var(--text-lg);
   font-weight: var(--font-semibold);
   letter-spacing: -0.02em;
 }
 
 .metricCard span {
-  color: rgba(231, 236, 244, 0.66);
+  color: var(--text-on-surface-soft);
   font-size: var(--text-sm);
   line-height: 1.55;
 }

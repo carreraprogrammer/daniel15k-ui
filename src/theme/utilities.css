@@ -31,7 +31,7 @@
 }
 
 .brand-alert .alert-message {
-  color: rgba(231, 236, 244, 0.76);
+  color: var(--text-on-surface-soft);
   line-height: 1.6;
 }
 

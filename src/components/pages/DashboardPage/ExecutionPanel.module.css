@@ -30,12 +30,12 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: rgba(231, 236, 244, 0.5);
+  color: var(--text-on-surface-muted);
 }
 
 .sectionMeta {
   font-size: var(--type-caption-size);
-  color: rgba(231, 236, 244, 0.55);
+  color: var(--text-on-surface-muted);
 }
 
 /* ── Execution row ── */
@@ -63,8 +63,8 @@
 
 .row_covered .rowIcon  { color: #1A9E4A; }
 .row_partial .rowIcon  { color: #D4732A; }
-.row_pending .rowIcon  { color: rgba(231, 236, 244, 0.35); }
-.row_unplanned .rowIcon { color: rgba(231, 236, 244, 0.35); }
+.row_pending .rowIcon  { color: var(--text-on-surface-muted); }
+.row_unplanned .rowIcon { color: var(--text-on-surface-muted); }
 
 .rowInfo {
   display: flex;
@@ -75,14 +75,14 @@
 
 .rowName {
   font-size: var(--type-label-size);
-  color: rgba(231, 236, 244, 0.9);
+  color: var(--color-text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .row_covered .rowName {
-  color: rgba(231, 236, 244, 0.55);
+  color: var(--text-on-surface-muted);
 }
 
 .rowStatus {
@@ -90,7 +90,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: rgba(231, 236, 244, 0.35);
+  color: var(--text-on-surface-muted);
 }
 
 .row_covered .rowStatus  { color: #1A9E4A; }
@@ -98,7 +98,7 @@
 
 .rowMeta {
   font-size: var(--type-caption-size);
-  color: rgba(231, 236, 244, 0.35);
+  color: var(--text-on-surface-muted);
 }
 
 .rowAmounts {
@@ -111,7 +111,7 @@
 .rowDelivered {
   font-size: var(--type-label-size);
   font-weight: 600;
-  color: rgba(231, 236, 244, 0.85);
+  color: var(--color-text-primary);
 }
 
 .row_covered .rowDelivered {
@@ -120,7 +120,7 @@
 
 .rowExpected {
   font-size: var(--type-caption-size);
-  color: rgba(231, 236, 244, 0.35);
+  color: var(--text-on-surface-muted);
 }
 
 .linkBtn {
@@ -169,7 +169,7 @@
 
 .modalTitle {
   font-size: var(--type-body-small-size);
-  color: rgba(231, 236, 244, 0.9);
+  color: var(--color-text-primary);
   margin: 0;
 }
 
@@ -179,13 +179,13 @@
 
 .modalHint {
   font-size: var(--type-caption-size);
-  color: rgba(231, 236, 244, 0.45);
+  color: var(--text-on-surface-muted);
   margin: 0;
 }
 
 .modalEmpty {
   font-size: var(--type-label-size);
-  color: rgba(231, 236, 244, 0.45);
+  color: var(--text-on-surface-muted);
   text-align: center;
   padding: 24px 0;
   margin: 0;
@@ -233,7 +233,7 @@
 
 .modalRowConcept {
   font-size: var(--type-label-size);
-  color: rgba(231, 236, 244, 0.9);
+  color: var(--color-text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -241,20 +241,20 @@
 
 .modalRowMeta {
   font-size: var(--type-caption-size);
-  color: rgba(231, 236, 244, 0.4);
+  color: var(--text-on-surface-muted);
 }
 
 .modalRowAmount {
   font-size: var(--type-label-size);
   font-weight: 600;
-  color: rgba(231, 236, 244, 0.75);
+  color: var(--text-on-surface-soft);
   white-space: nowrap;
 }
 
 .modalCancel {
   font-size: var(--type-label-size);
   font-weight: 500;
-  color: rgba(231, 236, 244, 0.5);
+  color: var(--text-on-surface-muted);
   background: none;
   border: none;
   padding: 8px;
@@ -264,5 +264,5 @@
 }
 
 .modalCancel:hover {
-  color: rgba(231, 236, 244, 0.8);
+  color: var(--color-text-primary);
 }

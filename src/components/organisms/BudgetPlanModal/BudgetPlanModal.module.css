@@ -15,7 +15,7 @@
 
 .body {
   --background: transparent;
-  --color: rgba(231, 236, 244, 0.85);
+  --color: var(--color-text-primary);
 }
 
 .panel {
@@ -74,7 +74,7 @@
   margin: 0;
   font-size: var(--type-card-title-size);
   font-weight: 600;
-  color: #fff;
+  color: var(--color-text-primary);
 }
 
 .closeBtn {
@@ -115,7 +115,7 @@
 
 .loadingText {
   margin: 0;
-  color: rgba(231, 236, 244, 0.45);
+  color: var(--text-on-surface-muted);
   font-size: var(--type-body-small-size);
 }
 
@@ -146,7 +146,7 @@
 
 .sectionTitle {
   margin: 0 0 0.85rem;
-  color: rgba(231, 236, 244, 0.45);
+  color: var(--text-on-surface-muted);
   font-size: var(--type-caption-size);
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -154,7 +154,7 @@
 }
 
 .sectionHint {
-  color: rgba(231, 236, 244, 0.25);
+  color: var(--color-text-disabled);
   font-weight: 400;
   letter-spacing: 0;
   text-transform: none;
@@ -172,7 +172,7 @@
 
 .incomeValue {
   margin: 0;
-  color: #fff;
+  color: var(--color-text-primary);
   font-size: var(--type-page-title-size);
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -180,7 +180,7 @@
 
 .incomeLabel {
   margin: 0.2rem 0 0;
-  color: rgba(231, 236, 244, 0.4);
+  color: var(--text-on-surface-muted);
   font-size: var(--type-label-size);
 }
 
@@ -210,7 +210,7 @@
 }
 
 .toggleText {
-  color: rgba(231, 236, 244, 0.7);
+  color: var(--text-on-surface-soft);
   font-size: var(--type-body-small-size);
   white-space: nowrap;
 }
@@ -236,22 +236,22 @@
 }
 
 .committedName {
-  color: rgba(231, 236, 244, 0.65);
+  color: var(--text-on-surface-soft);
   font-size: var(--type-body-small-size);
 }
 
 .committedTotal .committedName {
-  color: rgba(231, 236, 244, 0.85);
+  color: var(--color-text-primary);
   font-weight: 600;
 }
 
 .committedAmount {
-  color: rgba(231, 236, 244, 0.5);
+  color: var(--text-on-surface-muted);
   font-size: var(--type-body-small-size);
 }
 
 .committedTotal .committedAmount {
-  color: #fff;
+  color: var(--color-text-primary);
   font-weight: 600;
 }
 
@@ -318,7 +318,7 @@
   border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: transparent;
-  color: rgba(231, 236, 244, 0.35);
+  color: var(--text-on-surface-muted);
   font-size: var(--type-body-size);
   line-height: 1;
   cursor: pointer;
@@ -335,13 +335,13 @@
 }
 
 .categoryName {
-  color: rgba(231, 236, 244, 0.85);
+  color: var(--color-text-primary);
   font-size: var(--type-body-small-size);
 }
 
 .rangeHint {
   display: block;
-  color: rgba(231, 236, 244, 0.35);
+  color: var(--text-on-surface-muted);
   font-size: var(--type-caption-size);
   margin-top: 0.1rem;
 }
@@ -356,7 +356,7 @@
 
 .addLabel {
   margin: 0 0 0.5rem;
-  color: rgba(231, 236, 244, 0.35);
+  color: var(--text-on-surface-muted);
   font-size: var(--type-caption-size);
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -406,7 +406,7 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.04);
-  color: #fff;
+  color: var(--color-text-primary);
   font-size: var(--type-body-small-size);
   text-align: right;
   outline: none;
@@ -465,12 +465,12 @@
 }
 
 .footerLabel {
-  color: rgba(231, 236, 244, 0.4);
+  color: var(--text-on-surface-muted);
   font-size: var(--type-label-size);
 }
 
 .footerValue {
-  color: rgba(231, 236, 244, 0.7);
+  color: var(--text-on-surface-soft);
   font-size: var(--type-body-small-size);
 }
 

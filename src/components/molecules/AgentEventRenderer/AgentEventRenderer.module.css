@@ -2,18 +2,18 @@
 
 .toolbar {
   --background: #10131a;
-  --color: #fff;
+  --color: var(--color-text-primary);
   padding-top: env(safe-area-inset-top);
 }
 
 .toolbarTitle {
   font-size: var(--type-body-size);
   font-weight: 600;
-  color: #fff;
+  color: var(--color-text-primary);
 }
 
 .closeBtn {
-  --color: rgba(231, 236, 244, 0.55);
+  --color: var(--text-on-surface-muted);
   font-size: var(--type-card-title-size);
   margin-right: 0.25rem;
 }
@@ -70,7 +70,7 @@
 
 .stepActive .stepDot {
   background: #fff;
-  border-color: #fff;
+  border-color: var(--color-text-primary);
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.15);
 }
 
@@ -79,7 +79,7 @@
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: rgba(231, 236, 244, 0.3);
+  color: var(--text-on-surface-muted);
   transition: color 0.2s;
   text-align: center;
   white-space: nowrap;
@@ -90,14 +90,14 @@
 }
 
 .stepActive .stepLabel {
-  color: rgba(231, 236, 244, 0.85);
+  color: var(--color-text-primary);
 }
 
 /* ── Modal body ───────────────────────────────────────────────────────────── */
 
 .modalBody {
   --background: #10131a;
-  --color: rgba(231, 236, 244, 0.85);
+  --color: var(--color-text-primary);
 }
 
 /* ── Loading state ────────────────────────────────────────────────────────── */
@@ -116,14 +116,14 @@
 
 .loadingTitle {
   margin: 0;
-  color: #fff;
+  color: var(--color-text-primary);
   font-size: var(--type-card-title-size);
   font-weight: 600;
 }
 
 .loadingSubtitle {
   margin: 0;
-  color: rgba(231, 236, 244, 0.45);
+  color: var(--text-on-surface-muted);
   font-size: var(--type-body-small-size);
   line-height: 1.6;
 }
@@ -168,17 +168,17 @@
 }
 
 .summaryLabel {
-  color: rgba(231, 236, 244, 0.65);
+  color: var(--text-on-surface-soft);
   font-size: var(--type-body-small-size);
 }
 
 .summaryValue {
-  color: #fff;
+  color: var(--color-text-primary);
   font-size: var(--type-body-size);
 }
 
 .summaryValueMuted {
-  color: rgba(231, 236, 244, 0.45);
+  color: var(--text-on-surface-muted);
   font-size: var(--type-body-small-size);
 }
 
@@ -201,7 +201,7 @@
 
 .sectionLabel {
   margin: 0;
-  color: rgba(231, 236, 244, 0.4);
+  color: var(--text-on-surface-muted);
   font-size: var(--type-caption-size);
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -224,12 +224,12 @@
 }
 
 .distributionLabel {
-  color: rgba(231, 236, 244, 0.65);
+  color: var(--text-on-surface-soft);
   font-size: var(--type-label-size);
 }
 
 .distributionAmount {
-  color: #fff;
+  color: var(--color-text-primary);
   font-size: var(--type-body-small-size);
   font-weight: 600;
 }
@@ -279,14 +279,14 @@
 
 .infoBody {
   margin: 0;
-  color: rgba(231, 236, 244, 0.85);
+  color: var(--color-text-primary);
   font-size: var(--type-body-size);
   line-height: 1.65;
 }
 
 .infoContext {
   margin: 0;
-  color: rgba(231, 236, 244, 0.5);
+  color: var(--text-on-surface-muted);
   font-size: var(--type-body-small-size);
   line-height: 1.6;
   font-style: italic;
@@ -296,7 +296,7 @@
 
 .selectorSubtitle {
   margin: 0;
-  color: rgba(231, 236, 244, 0.5);
+  color: var(--text-on-surface-muted);
   font-size: var(--type-body-small-size);
   line-height: 1.6;
 }
@@ -312,7 +312,7 @@
 }
 
 .categoryGroupLabel {
-  color: rgba(231, 236, 244, 0.35);
+  color: var(--text-on-surface-muted);
   font-size: var(--type-caption-size);
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -344,12 +344,12 @@
 }
 
 .categoryName {
-  color: rgba(231, 236, 244, 0.85);
+  color: var(--color-text-primary);
   font-size: var(--type-body-size);
 }
 
 .selectionCount {
-  color: rgba(231, 236, 244, 0.45);
+  color: var(--text-on-surface-muted);
   font-size: var(--type-body-small-size);
   align-self: center;
   margin-right: auto;
@@ -370,7 +370,7 @@
 }
 
 .amountLabel {
-  color: rgba(231, 236, 244, 0.75);
+  color: var(--text-on-surface-soft);
   font-size: var(--type-body-small-size);
   flex: 1;
 }
@@ -381,7 +381,7 @@
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.05);
-  color: #fff;
+  color: var(--color-text-primary);
   font-size: var(--type-body-small-size);
   text-align: right;
   outline: none;
@@ -393,7 +393,7 @@
 }
 
 .amountFixed {
-  color: rgba(231, 236, 244, 0.4);
+  color: var(--text-on-surface-muted);
   font-size: var(--type-body-small-size);
 }
 
