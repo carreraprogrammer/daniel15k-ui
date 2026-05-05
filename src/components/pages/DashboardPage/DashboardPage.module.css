@@ -483,15 +483,65 @@
 /* ── Responsive ───────────────────────────────────────────────────────────── */
 
 @media (max-width: 700px) {
+  .heroCard {
+    gap: 0.75rem;
+    padding: 0.85rem;
+    border-radius: 20px;
+  }
+
   .heroTop {
     grid-template-columns: 1fr;
+    gap: 0.7rem;
+  }
+
+  .heroCopy {
+    gap: 0.35rem;
+  }
+
+  .heroTitle {
+    font-size: 1.18rem;
+    line-height: 1.08;
+  }
+
+  .heroDesc,
+  .insightMeta,
+  .pressureCaption,
+  .heroBadges {
+    display: none;
+  }
+
+  .heroAction {
+    padding: 0.5rem 0.65rem;
+    font-size: var(--type-caption-size);
   }
 
   .heroMetric {
     justify-items: start;
     text-align: left;
     border-top: 1px solid rgba(255, 255, 255, 0.07);
-    padding-top: 0.85rem;
+    padding-top: 0.65rem;
+  }
+
+  .metricValue,
+  .availableBandValue {
+    font-size: 1.5rem;
+  }
+
+  .availableBand {
+    padding: 0.7rem 0.8rem;
+    border-radius: 16px;
+  }
+
+  .availableBandHint {
+    display: none;
+  }
+
+  .pressureWrap {
+    gap: 0.3rem;
+  }
+
+  .heroActions {
+    gap: 0.35rem;
   }
 
   .kpiRow {
