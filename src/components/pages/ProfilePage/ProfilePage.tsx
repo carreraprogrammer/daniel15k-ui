@@ -3,6 +3,8 @@ import { IonContent } from '@ionic/react';
 import { useToast } from '../../../hooks/useToast';
 import { useAuthStore } from '../../../store/authStore';
 import { useThemeStore, type ThemePreference } from '../../../store/themeStore';
+import { useProgressStore, LEVEL_NAMES } from '../../../store/progressStore';
+import { AvatarNucleus } from '../../atoms/AvatarNucleus';
 import { api } from '../../../services/api';
 import { DataState } from '../../molecules/DataState/DataState';
 import { DynamicForm } from '../../organisms/DynamicForm';
@@ -32,10 +34,16 @@ export const ProfileContent = () => {
   const setUser = useAuthStore((state) => state.setUser);
   const themePreference = useThemeStore((state) => state.preference);
   const setThemePreference = useThemeStore((state) => state.setPreference);
+  const { data: progressData, fetchProgress, setPreviewLevel, getEffectiveLevel } = useProgressStore();
   const { showError, showSuccess, toast } = useToast();
   const [financialContext, setFinancialContext] = useState<FinancialCtx | null>(null);
   const [contextLoading, setContextLoading] = useState(true);
   const [contextError, setContextError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchProgress();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     setContextLoading(true);
@@ -118,6 +126,36 @@ export const ProfileContent = () => {
                 ))}
               </div>
             </div>
+
+            {progressData?.bypassReadiness && (
+              <div className={styles.preferenceBlock}>
+                <div>
+                  <span className={styles.metaLabel}>Vista previa de avatar</span>
+                  <strong>Nivel {getEffectiveLevel()} — {LEVEL_NAMES[getEffectiveLevel()]}</strong>
+                </div>
+                <div className={styles.levelPreview}>
+                  <AvatarNucleus
+                    seed={progressData.avatarSeed}
+                    level={getEffectiveLevel()}
+                    size={48}
+                  />
+                </div>
+                <div className={styles.levelSwitch} role="group" aria-label="Nivel de vista previa">
+                  {LEVEL_NAMES.map((name, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      className={`${styles.levelOption} ${getEffectiveLevel() === idx ? styles.levelOptionActive : ''}`}
+                      onClick={() => setPreviewLevel(idx)}
+                      aria-pressed={getEffectiveLevel() === idx}
+                      title={name}
+                    >
+                      {idx}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <span className={styles.eyebrow} style={{ marginTop: '8px' }}>Contexto financiero</span>
             <DataState

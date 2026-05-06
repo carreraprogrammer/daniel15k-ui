@@ -1,0 +1,184 @@
+/* ── Shell (anchor for FAB + panel) ─────────────────────────── */
+
+.shell {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 150;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+/* ── Backdrop ────────────────────────────────────────────────── */
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 149;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(2px);
+  animation: fadeIn 0.18s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── FAB button ──────────────────────────────────────────────── */
+
+.fab {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  background: var(--surface-panel-soft);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.35),
+    0 0 0 1px var(--surface-border);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  flex-shrink: 0;
+}
+
+.fab:hover {
+  transform: scale(1.06);
+  box-shadow:
+    0 6px 28px rgba(0, 0, 0, 0.45),
+    0 0 0 1px var(--surface-border);
+}
+
+.fab:active {
+  transform: scale(0.96);
+}
+
+/* ── Chat panel ──────────────────────────────────────────────── */
+
+.panel {
+  width: 320px;
+  border-radius: 22px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface-panel-soft);
+  backdrop-filter: blur(24px);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Panel header */
+.panelHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--surface-border-muted);
+}
+
+.panelMeta {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.panelName {
+  color: var(--color-text-primary);
+  font-size: var(--type-label-size, 13px);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.panelSub {
+  color: var(--color-text-secondary, #888);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.closeBtn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: var(--surface-control, rgba(255,255,255,0.06));
+  color: var(--color-text-secondary, #888);
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.closeBtn:hover {
+  background: var(--surface-border, rgba(255,255,255,0.12));
+  color: var(--color-text-primary);
+}
+
+/* Messages area */
+.messages {
+  flex: 1;
+  min-height: 200px;
+  max-height: 380px;
+  padding: 20px 16px;
+  overflow-y: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emptyHint {
+  margin: 0;
+  color: var(--color-text-secondary, #888);
+  font-size: var(--type-label-size, 13px);
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* Input bar */
+.inputBar {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--surface-border-muted);
+}
+
+.input {
+  flex: 1;
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 12px;
+  border: 1px solid var(--surface-border-muted);
+  background: var(--surface-control, rgba(255,255,255,0.04));
+  color: var(--color-text-primary);
+  font-size: 14px;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sendBtn {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  border: none;
+  background: rgba(var(--color-brand-rgb, 255 255 255), 0.12);
+  color: var(--color-text-secondary, #888);
+  font-size: 16px;
+  cursor: not-allowed;
+  opacity: 0.4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

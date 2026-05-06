@@ -1,0 +1,151 @@
+/* ── Tilt animations ─────────────────────────────────────────── */
+
+@keyframes breathe {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.08); }
+}
+
+@keyframes flutter {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  25%       { transform: scale(1.06) rotate(2deg); }
+  75%       { transform: scale(0.96) rotate(-2deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%       { transform: scale(1.12); opacity: 0.85; }
+}
+
+@keyframes ripple {
+  0%    { transform: scale(1); }
+  30%   { transform: scale(1.1); }
+  60%   { transform: scale(0.94); }
+  100%  { transform: scale(1); }
+}
+
+@keyframes drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(2px, -3px) scale(1.04); }
+  66%       { transform: translate(-2px, 2px) scale(0.97); }
+}
+
+@keyframes ringRotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes haloSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(-360deg); }
+}
+
+/* ── Root ────────────────────────────────────────────────────── */
+
+.root {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--av-size);
+  height: var(--av-size);
+}
+
+/* ── Core orb ────────────────────────────────────────────────── */
+
+.core {
+  position: relative;
+  z-index: 2;
+  width: var(--av-size);
+  height: var(--av-size);
+  background: radial-gradient(
+    circle at 38% 35%,
+    hsl(var(--av-hue) var(--av-sat) 80%) 0%,
+    hsl(var(--av-hue) var(--av-sat) 52%) 55%,
+    hsl(var(--av-hue) var(--av-sat) 32%) 100%
+  );
+  animation-duration: var(--av-speed);
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+/* Shape variants */
+.root[data-shape='circle'] .core   { border-radius: 50%; }
+.root[data-shape='blob'] .core     { border-radius: 42% 58% 60% 40% / 48% 42% 58% 52%; }
+.root[data-shape='faceted'] .core  { border-radius: 28% 72% 62% 38% / 40% 30% 70% 60%; }
+
+/* Tilt animation wiring */
+.root[data-tilt='breathe'] .core  { animation-name: breathe; }
+.root[data-tilt='flutter'] .core  { animation-name: flutter; }
+.root[data-tilt='pulse'] .core    { animation-name: pulse; }
+.root[data-tilt='ripple'] .core   { animation-name: ripple; }
+.root[data-tilt='drift'] .core    { animation-name: drift; }
+
+/* Glow — subtle */
+.root[data-glow='subtle'] .core {
+  box-shadow:
+    0 0 calc(var(--av-size) * 0.35) hsl(var(--av-hue) var(--av-sat) 55% / 0.35),
+    0 0 calc(var(--av-size) * 0.12) hsl(var(--av-hue) var(--av-sat) 70% / 0.5);
+}
+
+/* Glow — plena */
+.root[data-glow='plena'] .core {
+  box-shadow:
+    0 0 calc(var(--av-size) * 0.55) hsl(var(--av-hue) var(--av-sat) 55% / 0.55),
+    0 0 calc(var(--av-size) * 0.25) hsl(var(--av-hue) var(--av-sat) 75% / 0.7),
+    0 0 calc(var(--av-size) * 0.08) hsl(var(--av-hue) var(--av-sat) 90% / 0.9);
+}
+
+/* Level 5 intensifies glow regardless of amplitude */
+.root[data-level='5'] .core {
+  box-shadow:
+    0 0 calc(var(--av-size) * 0.7)  hsl(var(--av-hue) var(--av-sat) 55% / 0.65),
+    0 0 calc(var(--av-size) * 0.35) hsl(var(--av-hue) var(--av-sat) 75% / 0.8),
+    0 0 calc(var(--av-size) * 0.1)  hsl(var(--av-hue) var(--av-sat) 95% / 1);
+}
+
+/* ── Ring (level 2+) ─────────────────────────────────────────── */
+
+.ring {
+  display: none;
+  position: absolute;
+  z-index: 1;
+  inset: calc(var(--av-size) * -0.22);
+  border-radius: 50%;
+  border: 1.5px solid hsl(var(--av-hue) var(--av-sat) 65% / 0.45);
+  animation: ringRotate calc(var(--av-speed) * 4) linear infinite;
+}
+
+.root[data-level='2'] .ring,
+.root[data-level='3'] .ring,
+.root[data-level='4'] .ring,
+.root[data-level='5'] .ring { display: block; }
+
+/* ── Corona (level 4+ — second hue) ─────────────────────────── */
+
+.corona {
+  display: none;
+  position: absolute;
+  z-index: 0;
+  inset: calc(var(--av-size) * -0.44);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    hsl(var(--av-sec-hue) 70% 60% / 0.18) 0%,
+    transparent 70%
+  );
+  animation: breathe calc(var(--av-speed) * 1.6) ease-in-out infinite;
+}
+
+.root[data-level='4'] .corona,
+.root[data-level='5'] .corona { display: block; }
+
+/* ── Halo (level 5 only) ─────────────────────────────────────── */
+
+.root[data-level='5'] .ring::after {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border-radius: 50%;
+  border: 1px dashed hsl(var(--av-sec-hue) 70% 70% / 0.55);
+  animation: haloSpin calc(var(--av-speed) * 6) linear infinite;
+}
