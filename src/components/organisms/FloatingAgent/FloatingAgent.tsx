@@ -14,7 +14,7 @@ export const FloatingAgent = () => {
 
   const level = getEffectiveLevel()
   const seed = data?.avatarSeed ?? '0'
-  const levelName = LEVEL_NAMES[level] ?? 'Huevo'
+  const levelName = LEVEL_NAMES[level] ?? 'Semilla'
 
   if (loading && !data) return null
 

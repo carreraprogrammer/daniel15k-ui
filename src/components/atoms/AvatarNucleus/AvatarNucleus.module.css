@@ -26,6 +26,11 @@
   66% { transform: translate(-50%, -50%) translate(-1px, 1px) scale(0.96); }
 }
 
+@keyframes seedSway {
+  0%, 100% { transform: translate(-50%, -50%) rotate(-22deg) scale(1); }
+  50% { transform: translate(-50%, -50%) rotate(-17deg) scale(1.04); }
+}
+
 @keyframes orbit {
   from { transform: rotate(var(--av-offset)); }
   to { transform: rotate(calc(var(--av-offset) + 360deg)); }
@@ -105,8 +110,29 @@
 }
 
 .root[data-level='0'] {
-  filter: saturate(0.35) brightness(0.78);
-  opacity: 0.72;
+  filter: saturate(0.58) brightness(0.86);
+  opacity: 0.82;
+}
+
+.root[data-level='0'] .core {
+  width: calc(var(--av-size) * 0.38);
+  height: calc(var(--av-size) * 0.58);
+  border-radius: 62% 38% 54% 46% / 68% 56% 44% 32%;
+  background:
+    radial-gradient(circle at 38% 28%, hsl(var(--av-hue) var(--av-sat) 86% / 0.9), transparent 30%),
+    linear-gradient(145deg, hsl(var(--av-hue) var(--av-sat) 54%), hsl(var(--av-hue) var(--av-sat) 30%) 76%);
+  animation-name: seedSway;
+  box-shadow:
+    0 0 calc(var(--av-size) * 0.12) hsl(var(--av-hue) var(--av-sat) 52% / 0.22),
+    inset 1px 0 0 hsl(var(--av-hue) var(--av-sat) 90% / 0.32);
+}
+
+.root[data-level='0'] .pieces {
+  display: none;
+}
+
+.root[data-level='1'] .pieces {
+  display: block;
 }
 
 .root[data-level='2'] .ring,

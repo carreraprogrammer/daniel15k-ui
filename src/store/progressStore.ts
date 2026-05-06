@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { api } from '../services/api'
 
 export const LEVEL_NAMES = [
-  'Huevo',
+  'Semilla',
   'Pulso',
   'Conciencia',
   'Estructura',
