@@ -28,6 +28,7 @@ export const AvatarNucleus = ({ seed, level, size }: Props) => {
       style={cssVars}
       data-level={level}
       data-shape={params.shape}
+      data-family={params.family}
       data-tilt={params.tiltPattern}
       aria-hidden="true"
     >

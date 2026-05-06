@@ -147,6 +147,92 @@
   display: block;
 }
 
+.root[data-family='sprout'] .core {
+  border-radius: 58% 42% 50% 50% / 68% 68% 32% 32%;
+}
+
+.root[data-family='sprout'] .pieces {
+  animation-duration: calc(var(--av-speed) * 12);
+}
+
+.root[data-family='sprout'] .piece {
+  border-radius: 68% 32% 62% 38% / 54% 64% 36% 46%;
+  transform:
+    translate(-50%, -50%)
+    rotate(calc(var(--piece-angle) * 0.22 - 34deg))
+    translateY(calc(var(--av-size) * -0.34))
+    translateX(calc(var(--av-size) * 0.04));
+}
+
+.root[data-family='sprout'][data-level='2']::after,
+.root[data-family='sprout'][data-level='3']::after,
+.root[data-family='sprout'][data-level='4']::after,
+.root[data-family='sprout'][data-level='5']::after {
+  display: block;
+  width: calc(var(--av-size) * 0.1);
+  height: calc(var(--av-size) * 0.56);
+  border-radius: 999px;
+  background: linear-gradient(to bottom, hsl(var(--av-sec-hue) 76% 66% / 0.42), transparent);
+  transform: translate(-50%, -24%);
+}
+
+.root[data-family='crystal'] .core {
+  border-radius: 18% 44% 20% 46% / 42% 20% 48% 24%;
+  clip-path: polygon(50% 0, 92% 28%, 78% 100%, 22% 100%, 8% 28%);
+}
+
+.root[data-family='crystal'] .piece {
+  border-radius: 2px;
+  transform:
+    translate(-50%, -50%)
+    rotate(var(--piece-angle))
+    translateX(calc(var(--av-size) * 0.4))
+    rotate(45deg);
+}
+
+.root[data-family='crystal'] .ring {
+  border-radius: 28% 48% 28% 48%;
+}
+
+.root[data-family='crystal'][data-level='4']::before,
+.root[data-family='crystal'][data-level='5']::before {
+  border-radius: 22% 50% 22% 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.root[data-family='comet'] .pieces {
+  animation-duration: calc(var(--av-speed) * 9);
+}
+
+.root[data-family='comet'] .piece {
+  width: calc(var(--av-size) * 0.11);
+  height: calc(var(--av-size) * 0.11);
+  transform:
+    translate(-50%, -50%)
+    rotate(calc(var(--av-offset) + (var(--av-piece) * -12deg)))
+    translateX(calc(var(--av-size) * 0.48));
+}
+
+.root[data-family='comet'] .piece:nth-child(2n) {
+  opacity: 0.72;
+}
+
+.root[data-family='comet'] .piece:nth-child(3n) {
+  opacity: 0.54;
+}
+
+.root[data-family='comet'][data-level='2']::after,
+.root[data-family='comet'][data-level='3']::after,
+.root[data-family='comet'][data-level='4']::after,
+.root[data-family='comet'][data-level='5']::after {
+  display: block;
+  width: calc(var(--av-size) * 0.76);
+  height: calc(var(--av-size) * 0.2);
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, hsl(var(--av-sec-hue) 80% 66% / 0.32), transparent);
+  transform: translate(-72%, -50%) rotate(-18deg);
+}
+
 .root[data-level='2'] .ring,
 .root[data-level='3'] .ring,
 .root[data-level='4'] .ring,
@@ -223,6 +309,26 @@
   box-shadow:
     inset 0 0 calc(var(--av-size) * 0.08) hsl(var(--av-hue) var(--av-sat) 70% / 0.16),
     0 0 calc(var(--av-size) * 0.16) hsl(var(--av-hue) var(--av-sat) 70% / 0.18);
+}
+
+.root[data-family='sprout'][data-level='5']::after {
+  width: calc(var(--av-size) * 0.12);
+  height: calc(var(--av-size) * 0.7);
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(to bottom, hsl(var(--av-sec-hue) 76% 66% / 0.5), transparent);
+  transform: translate(-50%, -26%);
+  box-shadow: 0 0 calc(var(--av-size) * 0.18) hsl(var(--av-sec-hue) 76% 66% / 0.22);
+}
+
+.root[data-family='comet'][data-level='5']::after {
+  width: calc(var(--av-size) * 0.86);
+  height: calc(var(--av-size) * 0.22);
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, hsl(var(--av-sec-hue) 80% 66% / 0.42), transparent);
+  transform: translate(-76%, -50%) rotate(-18deg);
+  box-shadow: 0 0 calc(var(--av-size) * 0.16) hsl(var(--av-sec-hue) 80% 66% / 0.16);
 }
 
 .root[data-level='5'] .piece {
