@@ -30,7 +30,7 @@ const STRATEGY_LABEL: Record<string, string> = {
   avalanche: 'Avalancha (mayor interés primero)',
 };
 
-const AVATAR_SAMPLE_USERS = [1, 2, 3, 4, 5, 6];
+const AVATAR_SAMPLE_USERS = Array.from({ length: 18 }, (_, index) => index + 1);
 
 export const ProfileContent = () => {
   const user    = useAuthStore((state) => state.user);
