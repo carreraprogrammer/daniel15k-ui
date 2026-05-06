@@ -1,5 +1,5 @@
 import { IonIcon, IonLabel, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs } from '@ionic/react';
-import type { ComponentType } from 'react';
+import { useEffect, useRef, type ComponentType } from 'react';
 import { Redirect, Route, useLocation } from 'react-router-dom';
 import {
   calendarOutline,
@@ -88,8 +88,42 @@ const AUTH_PATHS = [
 
 export const AppRouter = () => {
   const location = useLocation();
+  const tabBarRef = useRef<HTMLIonTabBarElement | null>(null);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const showTabs = isAuthenticated && (AUTH_PATHS.includes(location.pathname) || location.pathname.startsWith('/budgets/'));
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const tabBar = tabBarRef.current;
+
+    if (!showTabs || !tabBar) {
+      root.style.setProperty('--app-viewport-tabbar-height', '0px');
+      return undefined;
+    }
+
+    const syncTabBarHeight = () => {
+      root.style.setProperty('--app-viewport-tabbar-height', `${tabBar.getBoundingClientRect().height}px`);
+    };
+
+    syncTabBarHeight();
+    window.addEventListener('resize', syncTabBarHeight);
+
+    if (typeof ResizeObserver === 'undefined') {
+      return () => {
+        window.removeEventListener('resize', syncTabBarHeight);
+        root.style.setProperty('--app-viewport-tabbar-height', '0px');
+      };
+    }
+
+    const observer = new ResizeObserver(syncTabBarHeight);
+    observer.observe(tabBar);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', syncTabBarHeight);
+      root.style.setProperty('--app-viewport-tabbar-height', '0px');
+    };
+  }, [showTabs]);
 
   return (
     <IonTabs className={styles.tabsRoot}>
@@ -112,7 +146,7 @@ export const AppRouter = () => {
       </IonRouterOutlet>
 
       {showTabs ? (
-        <IonTabBar slot="bottom" className={styles.tabBar}>
+        <IonTabBar ref={tabBarRef} slot="bottom" className={styles.tabBar}>
           {TAB_ITEMS.map((item) => (
             <IonTabButton
               key={item.tab}
