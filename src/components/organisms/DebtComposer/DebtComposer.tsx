@@ -6,21 +6,8 @@ import { SelectInput } from '../../atoms/SelectInput';
 import { TextInput } from '../../atoms/TextInput';
 import { TextareaInput } from '../../atoms/TextareaInput';
 import type { Debt, DebtPayload } from '../../../types/finance.types';
+import { debtStatusOptions, debtTypeOptions } from '../../../utils/debtLabels';
 import styles from '../ComposerForm.module.css';
-
-const debtTypeOptions = [
-  { label: 'Tarjeta de crédito', value: 'credit_card' },
-  { label: 'Préstamo personal', value: 'personal_loan' },
-  { label: 'Familiar', value: 'family' },
-  { label: 'Hipoteca', value: 'mortgage' },
-];
-
-const debtStatusOptions = [
-  { label: 'Activa', value: 'active' },
-  { label: 'Pagada', value: 'paid_off' },
-  { label: 'Pausada', value: 'paused' },
-  { label: 'En disputa', value: 'disputed' },
-];
 
 interface DebtComposerValues {
   name: string;

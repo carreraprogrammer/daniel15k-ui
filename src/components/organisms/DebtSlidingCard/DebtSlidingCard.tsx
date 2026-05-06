@@ -2,15 +2,9 @@ import { IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding } from 
 import { createOutline, linkOutline, trashOutline } from 'ionicons/icons';
 import { Badge, type BadgeStatus } from '../../atoms/Badge';
 import type { Debt } from '../../../types/finance.types';
+import { formatDebtStatus, formatDebtType } from '../../../utils/debtLabels';
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import styles from './DebtSlidingCard.module.css';
-
-const statusLabels: Record<string, string> = {
-  active: 'Activa',
-  paid_off: 'Pagada',
-  paused: 'Pausada',
-  disputed: 'Disputa',
-};
 
 const statusTone: Record<string, BadgeStatus> = {
   active: 'success',
@@ -33,9 +27,9 @@ export const DebtSlidingCard = ({ debt, linkedObligationLabel, onManageLink, onE
       <div className={styles.card}>
         <div className={styles.primary}>
           <div className={styles.header}>
-            <span className={styles.type}>{debt.attributes.debt_type}</span>
+            <span className={styles.type}>{formatDebtType(debt.attributes.debt_type)}</span>
             <Badge
-              label={statusLabels[debt.attributes.status] ?? debt.attributes.status}
+              label={formatDebtStatus(debt.attributes.status)}
               status={statusTone[debt.attributes.status] ?? 'neutral'}
               size="sm"
             />

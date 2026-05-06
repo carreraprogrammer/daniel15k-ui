@@ -18,6 +18,7 @@ import { DebtComposer } from '../../organisms/DebtComposer';
 import { DebtSlidingCard } from '../../organisms/DebtSlidingCard';
 import { useToast } from '../../../hooks/useToast';
 import { financeService } from '../../../services/financeService';
+import { debtStatusOptions, debtTypeOptions, formatDebtStatus, formatDebtType } from '../../../utils/debtLabels';
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import type { Debt, DebtPayload, DebtQueryParams, RecurringObligation } from '../../../types/finance.types';
 import styles from '../FinancePage.module.css';
@@ -136,8 +137,8 @@ export const DebtsContent = () => {
   const appliedChips = useMemo(() => {
     const chips = [];
     if (filters.q) chips.push({ key: 'q', label: `Buscar: ${filters.q}` });
-    if (filters.status) chips.push({ key: 'status', label: `Estado: ${filters.status}` });
-    if (filters.debt_type) chips.push({ key: 'debt_type', label: `Tipo: ${filters.debt_type}` });
+    if (filters.status) chips.push({ key: 'status', label: `Estado: ${formatDebtStatus(filters.status)}` });
+    if (filters.debt_type) chips.push({ key: 'debt_type', label: `Tipo: ${formatDebtType(filters.debt_type)}` });
     return chips;
   }, [filters.debt_type, filters.q, filters.status]);
   const activeFilterCount = useMemo(
@@ -395,24 +396,14 @@ export const DebtsContent = () => {
                     name="debt-inline-status"
                     value={filters.status ?? ''}
                     onChange={(status) => setFilters((current) => ({ ...current, status: String(status) }))}
-                    options={[
-                      { label: 'Activa', value: 'active' },
-                      { label: 'Pagada', value: 'paid_off' },
-                      { label: 'Pausada', value: 'paused' },
-                      { label: 'En disputa', value: 'disputed' },
-                    ]}
+                    options={debtStatusOptions}
                     placeholder="Todos los estados"
                   />
                   <SelectInput
                     name="debt-inline-type"
                     value={filters.debt_type ?? ''}
                     onChange={(debt_type) => setFilters((current) => ({ ...current, debt_type: String(debt_type) }))}
-                    options={[
-                      { label: 'Tarjeta de crédito', value: 'credit_card' },
-                      { label: 'Préstamo personal', value: 'personal_loan' },
-                      { label: 'Familiar', value: 'family' },
-                      { label: 'Hipoteca', value: 'mortgage' },
-                    ]}
+                    options={debtTypeOptions}
                     placeholder="Todos los tipos"
                   />
                 </div>
