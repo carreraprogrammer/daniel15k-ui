@@ -7,9 +7,9 @@ export interface AvatarParams {
   shape: AvatarShape
   tiltPattern: TiltPattern
   pulseSpeed: number    // 1.2–3.0 s
-  glowAmplitude: 'subtle' | 'plena'
-  coreSize: number      // 28–44 px
-  secondaryHue: number  // for level 4+
+  pieceCount: number
+  orbitOffset: number
+  secondaryHue: number
 }
 
 const TILT_PATTERNS: TiltPattern[] = ['breathe', 'flutter', 'pulse', 'ripple', 'drift']
@@ -31,13 +31,13 @@ function seedToBytes(seed: string, count: number): number[] {
 export function deriveAvatarParams(seed: string): AvatarParams {
   const b = seedToBytes(seed, 8)
   return {
-    hue:           Math.floor((b[0] / 255) * 360),
-    saturation:    50 + Math.floor((b[1] / 255) * 40),
-    shape:         SHAPES[b[2] % 3],
-    tiltPattern:   TILT_PATTERNS[b[3] % 5],
-    pulseSpeed:    1.2 + (b[4] / 255) * 1.8,
-    glowAmplitude: b[5] > 127 ? 'plena' : 'subtle',
-    coreSize:      28 + Math.floor((b[6] / 255) * 16),
-    secondaryHue:  Math.floor((b[7] / 255) * 360),
+    hue:          Math.floor((b[0] / 255) * 360),
+    saturation:   50 + Math.floor((b[1] / 255) * 40),
+    shape:        SHAPES[b[2] % 3],
+    tiltPattern:  TILT_PATTERNS[b[3] % 5],
+    pulseSpeed:   1.2 + (b[4] / 255) * 1.8,
+    pieceCount:   4 + (b[5] % 4),
+    orbitOffset:  Math.floor((b[6] / 255) * 360),
+    secondaryHue: Math.floor((b[7] / 255) * 360),
   }
 }

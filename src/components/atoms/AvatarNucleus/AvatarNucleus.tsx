@@ -10,14 +10,16 @@ interface Props {
 
 export const AvatarNucleus = ({ seed, level, size }: Props) => {
   const params = deriveAvatarParams(seed)
-  const coreSize = size ?? params.coreSize
+  const avatarSize = size ?? 28
+  const pieces = Array.from({ length: params.pieceCount }, (_, index) => index)
 
   const cssVars = {
     '--av-hue':     String(params.hue),
     '--av-sat':     `${params.saturation}%`,
-    '--av-size':    `${coreSize}px`,
+    '--av-size':    `${avatarSize}px`,
     '--av-speed':   `${params.pulseSpeed}s`,
     '--av-sec-hue': String(params.secondaryHue),
+    '--av-offset':  `${params.orbitOffset}deg`,
   } as CSSProperties
 
   return (
@@ -27,12 +29,19 @@ export const AvatarNucleus = ({ seed, level, size }: Props) => {
       data-level={level}
       data-shape={params.shape}
       data-tilt={params.tiltPattern}
-      data-glow={params.glowAmplitude}
       aria-hidden="true"
     >
-      <div className={styles.corona} />
       <div className={styles.ring} />
       <div className={styles.core} />
+      <div className={styles.pieces}>
+        {pieces.map((piece) => (
+          <span
+            key={piece}
+            className={styles.piece}
+            style={{ '--av-piece': piece, '--av-total': pieces.length } as CSSProperties}
+          />
+        ))}
+      </div>
     </div>
   )
 }

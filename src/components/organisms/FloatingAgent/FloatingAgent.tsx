@@ -32,7 +32,7 @@ export const FloatingAgent = () => {
         {isOpen && (
           <div className={styles.panel}>
             <div className={styles.panelHeader}>
-              <AvatarNucleus seed={seed} level={level} size={32} />
+              <AvatarNucleus seed={seed} level={level} size={24} />
               <div className={styles.panelMeta}>
                 <span className={styles.panelName}>{levelName}</span>
                 <span className={styles.panelSub}>Nivel {level}</span>
@@ -67,7 +67,7 @@ export const FloatingAgent = () => {
           onClick={() => setIsOpen((v) => !v)}
           aria-label={isOpen ? 'Cerrar agente' : 'Abrir agente'}
         >
-          <AvatarNucleus seed={seed} level={level} size={40} />
+          <AvatarNucleus seed={seed} level={level} size={24} />
         </button>
       </div>
     </>,
