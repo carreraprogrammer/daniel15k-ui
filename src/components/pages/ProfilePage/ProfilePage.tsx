@@ -30,7 +30,7 @@ const STRATEGY_LABEL: Record<string, string> = {
   avalanche: 'Avalancha (mayor interés primero)',
 };
 
-const AVATAR_SAMPLE_USERS = Array.from({ length: 18 }, (_, index) => index + 1);
+const AVATAR_SAMPLE_OFFSETS = [-8, -4, -2, -1, 0, 1, 2, 4, 8, 13, 21, 34];
 
 export const ProfileContent = () => {
   const user    = useAuthStore((state) => state.user);
@@ -43,7 +43,7 @@ export const ProfileContent = () => {
   const [financialContext, setFinancialContext] = useState<FinancialCtx | null>(null);
   const [contextLoading, setContextLoading] = useState(true);
   const [contextError, setContextError] = useState<string | null>(null);
-  const [avatarSampleUser, setAvatarSampleUser] = useState(1);
+  const [avatarSampleUserId, setAvatarSampleUserId] = useState('1');
 
   useEffect(() => {
     fetchProgress();
@@ -84,10 +84,29 @@ export const ProfileContent = () => {
     [user?.name, user?.city],
   );
 
+  const normalizedAvatarUserId = avatarSampleUserId.trim() || '1';
   const avatarPreviewSeed = useMemo(
-    () => `${progressData?.avatarSeed ?? 'seed'}:sample-user:${avatarSampleUser}`,
-    [avatarSampleUser, progressData?.avatarSeed],
+    () => `${progressData?.avatarSeed ?? 'seed'}:sample-user:${normalizedAvatarUserId}`,
+    [normalizedAvatarUserId, progressData?.avatarSeed],
   );
+  const avatarNearbyUserIds = useMemo(() => {
+    const numericId = Number.parseInt(normalizedAvatarUserId, 10);
+    if (Number.isFinite(numericId)) {
+      return AVATAR_SAMPLE_OFFSETS
+        .map((offset) => Math.max(1, numericId + offset))
+        .filter((sampleId, index, ids) => ids.indexOf(sampleId) === index)
+        .map(String);
+    }
+
+    return [
+      normalizedAvatarUserId,
+      `${normalizedAvatarUserId}-a`,
+      `${normalizedAvatarUserId}-b`,
+      `${normalizedAvatarUserId}-c`,
+      `${normalizedAvatarUserId}-d`,
+      `${normalizedAvatarUserId}-e`,
+    ];
+  }, [normalizedAvatarUserId]);
 
   return (
     <IonContent className={styles.pageContent}>
@@ -142,7 +161,7 @@ export const ProfileContent = () => {
                 <div>
                   <span className={styles.metaLabel}>Vista previa de avatar</span>
                   <strong>
-                    Usuario {avatarSampleUser} · Nivel {getEffectiveLevel()} — {LEVEL_NAMES[getEffectiveLevel()]}
+                    Usuario {normalizedAvatarUserId} · Nivel {getEffectiveLevel()} — {LEVEL_NAMES[getEffectiveLevel()]}
                   </strong>
                 </div>
                 <div className={styles.levelPreview}>
@@ -154,19 +173,15 @@ export const ProfileContent = () => {
                 </div>
                 <div className={styles.avatarControlGroup}>
                   <span className={styles.controlLabel}>Usuario simulado</span>
-                  <div className={styles.levelSwitch} role="group" aria-label="Usuario simulado">
-                    {AVATAR_SAMPLE_USERS.map((sampleUser) => (
-                      <button
-                        key={sampleUser}
-                        type="button"
-                        className={`${styles.levelOption} ${avatarSampleUser === sampleUser ? styles.levelOptionActive : ''}`}
-                        onClick={() => setAvatarSampleUser(sampleUser)}
-                        aria-pressed={avatarSampleUser === sampleUser}
-                      >
-                        {sampleUser}
-                      </button>
-                    ))}
-                  </div>
+                  <input
+                    className={styles.avatarSeedInput}
+                    type="text"
+                    inputMode="numeric"
+                    value={avatarSampleUserId}
+                    onChange={(event) => setAvatarSampleUserId(event.target.value)}
+                    placeholder="Ej: 1042"
+                    aria-label="ID de usuario simulado"
+                  />
                 </div>
                 <div className={styles.levelSwitch} role="group" aria-label="Nivel de vista previa">
                   {LEVEL_NAMES.map((name, idx) => (
@@ -191,14 +206,14 @@ export const ProfileContent = () => {
                   ))}
                 </div>
                 <div className={styles.avatarMatrix} aria-label="Comparación de avatar por usuario simulado">
-                  {AVATAR_SAMPLE_USERS.map((sampleUser) => (
-                    <div key={sampleUser} className={styles.avatarMatrixItem}>
+                  {avatarNearbyUserIds.map((sampleUserId) => (
+                    <div key={sampleUserId} className={styles.avatarMatrixItem}>
                       <AvatarNucleus
-                        seed={`${progressData.avatarSeed}:sample-user:${sampleUser}`}
+                        seed={`${progressData.avatarSeed}:sample-user:${sampleUserId}`}
                         level={getEffectiveLevel()}
                         size={32}
                       />
-                      <span>U{sampleUser}</span>
+                      <span>U{sampleUserId}</span>
                     </div>
                   ))}
                 </div>

@@ -152,6 +152,28 @@
   text-transform: uppercase;
 }
 
+.avatarSeedInput {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--surface-border-muted);
+  border-radius: 14px;
+  background: var(--surface-panel-soft);
+  color: var(--color-text-primary);
+  font-size: var(--type-label-size);
+  font-weight: 800;
+  outline: none;
+}
+
+.avatarSeedInput:focus {
+  border-color: rgba(var(--color-brand-rgb), 0.48);
+  box-shadow: 0 0 0 3px rgba(var(--color-brand-rgb), 0.14);
+}
+
+.avatarSeedInput::placeholder {
+  color: var(--color-text-muted);
+}
+
 .levelSwitch {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
