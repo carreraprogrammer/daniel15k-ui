@@ -95,6 +95,7 @@ export const DashboardContent = () => {
   const liquidity = summary?.liquidity;
   const burnCategories = summary?.burn_rate?.categories ?? [];
   const hasPlanPendingConfirmation = completeness?.pending_confirmation?.includes('monthly_plan') ?? false;
+  const rollingChanges = (summary?.monthly_plan?.assumptions?.rolling_changes as string[] | undefined) ?? [];
   const lastMilestone = milestones.length > 0 ? milestones[0] : null;
   const activeSavingsGoals = summary?.savings_goals?.filter((g) => g.status === 'active') ?? [];
   const planMonthLabel = summary?.period
@@ -290,9 +291,20 @@ export const DashboardContent = () => {
 
               {hasPlanPendingConfirmation ? (
                 <div className={styles.planBanner}>
-                  <p className={styles.planBannerText}>
-                    Tu plan de {planMonthLabel} está listo para revisar — heredado del mes anterior.
-                  </p>
+                  <div className={styles.planBannerBody}>
+                    <p className={styles.planBannerText}>
+                      Tu plan de {planMonthLabel} está listo para revisar — heredado del mes anterior.
+                    </p>
+                    {rollingChanges.length > 0 ? (
+                      <ul className={styles.planBannerChanges}>
+                        {rollingChanges.map((change) => (
+                          <li key={change} className={styles.planBannerChange}>
+                            {change}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
+                  </div>
                   <button
                     type="button"
                     className={styles.planBannerBtn}
