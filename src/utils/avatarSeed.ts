@@ -1,6 +1,6 @@
 export type TiltPattern = 'breathe' | 'flutter' | 'pulse' | 'ripple' | 'drift'
 export type AvatarShape = 'circle' | 'blob' | 'faceted'
-export type AvatarFamily = 'orbit' | 'sprout' | 'crystal' | 'comet'
+export type AvatarFamily = 'orbit' | 'sprout' | 'crystal' | 'comet' | 'horned' | 'stardust' | 'wave' | 'winged'
 
 export interface AvatarParams {
   hue: number           // 0–360
@@ -16,7 +16,7 @@ export interface AvatarParams {
 
 const TILT_PATTERNS: TiltPattern[] = ['breathe', 'flutter', 'pulse', 'ripple', 'drift']
 const SHAPES: AvatarShape[] = ['circle', 'blob', 'faceted']
-const FAMILIES: AvatarFamily[] = ['orbit', 'sprout', 'crystal', 'comet']
+const FAMILIES: AvatarFamily[] = ['orbit', 'sprout', 'crystal', 'comet', 'horned', 'stardust', 'wave', 'winged']
 
 function seedToBytes(seed: string, count: number): number[] {
   const bytes: number[] = []
@@ -37,7 +37,7 @@ export function deriveAvatarParams(seed: string): AvatarParams {
     hue:          Math.floor((b[0] / 255) * 360),
     saturation:   50 + Math.floor((b[1] / 255) * 40),
     shape:        SHAPES[b[2] % 3],
-    family:       FAMILIES[b[8] % 4],
+    family:       FAMILIES[b[8] % FAMILIES.length],
     tiltPattern:  TILT_PATTERNS[b[3] % 5],
     pulseSpeed:   1.2 + (b[4] / 255) * 1.8,
     pieceCount:   4 + (b[5] % 4),

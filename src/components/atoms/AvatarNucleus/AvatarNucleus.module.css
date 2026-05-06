@@ -233,14 +233,137 @@
   transform: translate(-72%, -50%) rotate(-18deg);
 }
 
-.root[data-level='2'] .ring,
-.root[data-level='3'] .ring,
-.root[data-level='4'] .ring,
-.root[data-level='5'] .ring {
+.root[data-family='horned'] .core {
+  border-radius: 48% 52% 44% 56% / 56% 54% 46% 44%;
+}
+
+.root[data-family='horned'][data-level='2']::before,
+.root[data-family='horned'][data-level='3']::before,
+.root[data-family='horned'][data-level='4']::before,
+.root[data-family='horned'][data-level='5']::before {
+  display: block;
+  width: calc(var(--av-size) * 0.62);
+  height: calc(var(--av-size) * 0.36);
+  border-radius: 50% 50% 12% 12%;
+  border-top: calc(var(--av-size) * 0.1) solid hsl(var(--av-sec-hue) 76% 68% / 0.74);
+  border-left: calc(var(--av-size) * 0.08) solid transparent;
+  border-right: calc(var(--av-size) * 0.08) solid transparent;
+  transform: translate(-50%, -92%);
+}
+
+.root[data-family='horned'] .piece {
+  border-radius: 4px 999px 999px 4px;
+  transform:
+    translate(-50%, -50%)
+    rotate(var(--piece-angle))
+    translateX(calc(var(--av-size) * 0.42));
+}
+
+.root[data-family='stardust'] .piece {
+  width: calc(var(--av-size) * 0.1);
+  height: calc(var(--av-size) * 0.1);
+  border-radius: 35% 65% 35% 65%;
+  transform:
+    translate(-50%, -50%)
+    rotate(var(--piece-angle))
+    translateX(calc(var(--av-size) * 0.46))
+    rotate(45deg);
+  box-shadow:
+    0 0 calc(var(--av-size) * 0.08) hsl(var(--av-sec-hue) 84% 72% / 0.46),
+    calc(var(--av-size) * 0.16) calc(var(--av-size) * -0.08) 0 calc(var(--av-size) * -0.04) hsl(var(--av-hue) var(--av-sat) 72% / 0.7);
+}
+
+.root[data-family='stardust'][data-level='3']::before,
+.root[data-family='stardust'][data-level='4']::before,
+.root[data-family='stardust'][data-level='5']::before {
+  display: block;
+  width: calc(var(--av-size) * 0.8);
+  height: calc(var(--av-size) * 0.8);
+  background:
+    radial-gradient(circle at 18% 28%, hsl(var(--av-sec-hue) 86% 76% / 0.8) 0 4%, transparent 5%),
+    radial-gradient(circle at 82% 38%, hsl(var(--av-hue) var(--av-sat) 72% / 0.72) 0 3%, transparent 4%),
+    radial-gradient(circle at 38% 86%, hsl(var(--av-sec-hue) 86% 76% / 0.62) 0 3%, transparent 4%);
+  transform: translate(-50%, -50%) rotate(18deg);
+}
+
+.root[data-family='wave'] .pieces {
+  animation-duration: calc(var(--av-speed) * 10);
+}
+
+.root[data-family='wave'] .piece {
+  width: calc(var(--av-size) * 0.16);
+  height: calc(var(--av-size) * 0.08);
+  border-radius: 999px;
+  transform:
+    translate(-50%, -50%)
+    rotate(calc(var(--piece-angle) * 0.5))
+    translateX(calc(var(--av-size) * 0.42));
+}
+
+.root[data-family='wave'][data-level='2']::before,
+.root[data-family='wave'][data-level='3']::before,
+.root[data-family='wave'][data-level='4']::before,
+.root[data-family='wave'][data-level='5']::before {
+  display: block;
+  width: calc(var(--av-size) * 0.76);
+  height: calc(var(--av-size) * 0.42);
+  border-top: 1px solid hsl(var(--av-sec-hue) 78% 68% / 0.42);
+  border-bottom: 1px solid hsl(var(--av-hue) var(--av-sat) 68% / 0.28);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) rotate(-12deg);
+}
+
+.root[data-family='wave'][data-level='4']::after,
+.root[data-family='wave'][data-level='5']::after {
+  display: block;
+  width: calc(var(--av-size) * 0.9);
+  height: calc(var(--av-size) * 0.56);
+  border-top: 1px solid hsl(var(--av-sec-hue) 78% 68% / 0.26);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) rotate(12deg);
+}
+
+.root[data-family='winged'] .core {
+  border-radius: 56% 44% 52% 48% / 48% 48% 52% 52%;
+}
+
+.root[data-family='winged'][data-level='2']::before,
+.root[data-family='winged'][data-level='3']::before,
+.root[data-family='winged'][data-level='4']::before,
+.root[data-family='winged'][data-level='5']::before {
+  display: block;
+  width: calc(var(--av-size) * 0.96);
+  height: calc(var(--av-size) * 0.44);
+  border-radius: 70% 70% 18% 18% / 72% 72% 28% 28%;
+  background:
+    radial-gradient(ellipse at 20% 48%, hsl(var(--av-sec-hue) 78% 72% / 0.38), transparent 54%),
+    radial-gradient(ellipse at 80% 48%, hsl(var(--av-sec-hue) 78% 72% / 0.38), transparent 54%);
+  transform: translate(-50%, -50%);
+}
+
+.root[data-family='winged'] .piece {
+  width: calc(var(--av-size) * 0.12);
+  height: calc(var(--av-size) * 0.16);
+  border-radius: 999px 999px 40% 40%;
+  transform:
+    translate(-50%, -50%)
+    rotate(var(--piece-angle))
+    translateX(calc(var(--av-size) * 0.4));
+}
+
+.root[data-family='orbit'][data-level='2'] .ring,
+.root[data-family='orbit'][data-level='3'] .ring,
+.root[data-family='orbit'][data-level='4'] .ring,
+.root[data-family='orbit'][data-level='5'] .ring,
+.root[data-family='crystal'][data-level='2'] .ring,
+.root[data-family='crystal'][data-level='3'] .ring,
+.root[data-family='crystal'][data-level='4'] .ring,
+.root[data-family='crystal'][data-level='5'] .ring {
   display: block;
 }
 
-.root[data-level='2'] .ring {
+.root[data-family='orbit'][data-level='2'] .ring,
+.root[data-family='crystal'][data-level='2'] .ring {
   transform: scale(0.82);
   border-color: hsl(var(--av-hue) var(--av-sat) 68% / 0.4);
   box-shadow: 0 0 calc(var(--av-size) * 0.12) hsl(var(--av-hue) var(--av-sat) 60% / 0.16);
@@ -251,7 +374,8 @@
   height: calc(var(--av-size) * 0.48);
 }
 
-.root[data-level='3'] .piece {
+.root[data-family='orbit'][data-level='3'] .piece,
+.root[data-family='crystal'][data-level='3'] .piece {
   width: calc(var(--av-size) * 0.15);
   height: calc(var(--av-size) * 0.15);
   transform:
@@ -261,17 +385,22 @@
     rotate(calc(var(--piece-angle) * -1));
 }
 
-.root[data-level='3'] .piece:nth-child(2n) {
+.root[data-family='orbit'][data-level='3'] .piece:nth-child(2n),
+.root[data-family='crystal'][data-level='3'] .piece:nth-child(2n) {
   border-radius: 40% 60% 60% 40%;
 }
 
-.root[data-level='4'] .ring,
-.root[data-level='5'] .ring {
+.root[data-family='orbit'][data-level='4'] .ring,
+.root[data-family='orbit'][data-level='5'] .ring,
+.root[data-family='crystal'][data-level='4'] .ring,
+.root[data-family='crystal'][data-level='5'] .ring {
   border-color: hsl(var(--av-sec-hue) 70% 64% / 0.34);
 }
 
-.root[data-level='4']::before,
-.root[data-level='5']::before {
+.root[data-family='orbit'][data-level='4']::before,
+.root[data-family='orbit'][data-level='5']::before,
+.root[data-family='crystal'][data-level='4']::before,
+.root[data-family='crystal'][data-level='5']::before {
   display: block;
   width: calc(var(--av-size) * 0.86);
   height: calc(var(--av-size) * 0.86);
@@ -289,8 +418,10 @@
     inset 0 1px 0 hsl(var(--av-hue) var(--av-sat) 92% / 0.62);
 }
 
-.root[data-level='4'] .piece,
-.root[data-level='5'] .piece {
+.root[data-family='orbit'][data-level='4'] .piece,
+.root[data-family='orbit'][data-level='5'] .piece,
+.root[data-family='crystal'][data-level='4'] .piece,
+.root[data-family='crystal'][data-level='5'] .piece {
   width: calc(var(--av-size) * 0.17);
   height: calc(var(--av-size) * 0.17);
   transform:
@@ -300,7 +431,8 @@
     rotate(calc(var(--piece-angle) * -1));
 }
 
-.root[data-level='5']::after {
+.root[data-family='orbit'][data-level='5']::after,
+.root[data-family='crystal'][data-level='5']::after {
   display: block;
   width: calc(var(--av-size) * 0.64);
   height: calc(var(--av-size) * 0.64);
