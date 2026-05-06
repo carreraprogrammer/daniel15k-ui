@@ -63,6 +63,13 @@ const liquidityLabels: Record<string, string> = {
   critical: 'Liquidez crítica',
 };
 
+const overflowRuleLabels: Record<string, string> = {
+  debt: 'abono a deuda',
+  emergency_fund: 'fondo de emergencia',
+  investment: 'inversión',
+  mixed: 'estrategia mixta',
+};
+
 export const DashboardContent = () => {
   const { summary, insight, debts, pending, creditCardPending, obligations, completeness, milestones, loading, error, reload } =
     useDashboardData();
@@ -509,6 +516,11 @@ export const DashboardContent = () => {
                             ? `de ${formatCurrencyCompact(summary.overflow_status.realized_overflow)} sobre el plan — el resto ya se gastó`
                             : 'ingreso extra sobre el plan base'}
                         </span>
+                        {summary.overflow_status.rule && summary.overflow_status.rule !== 'flexible' ? (
+                          <span className={styles.kpiHint}>
+                            destino según plan: {summary.overflow_status.suggested_destination?.label ?? overflowRuleLabels[summary.overflow_status.rule] ?? summary.overflow_status.rule}
+                          </span>
+                        ) : null}
                       </div>
                     ) : summary.overflow_status?.status === 'blocked_by_liquidity' ? (
                       <div className={styles.kpi}>
