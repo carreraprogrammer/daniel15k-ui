@@ -325,6 +325,10 @@
     display: flex;
   }
 
+  .actions .avatarButton {
+    display: flex;
+  }
+
   .mobileProfileLink {
     display: inline-flex;
     align-items: center;
