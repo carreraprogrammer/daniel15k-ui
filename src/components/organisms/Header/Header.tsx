@@ -3,10 +3,8 @@ import { createPortal } from 'react-dom';
 import { IonIcon } from '@ionic/react';
 import { menuOutline, personCircleOutline } from 'ionicons/icons';
 import { Link } from 'react-router-dom';
-import { Button } from '../../atoms/Button';
 import { BrandMark } from '../../atoms/BrandMark';
 import { AvatarNucleus } from '../../atoms/AvatarNucleus';
-import { useAuthStore } from '../../../store/authStore';
 import { useProgressStore, LEVEL_NAMES } from '../../../store/progressStore';
 import styles from './Header.module.css';
 
@@ -19,7 +17,6 @@ export const Header = ({
   onMenuToggle?: () => void;
   menuOpen?: boolean;
 }) => {
-  const logout = useAuthStore((state) => state.logout);
   const { data, fetchProgress, getEffectiveLevel } = useProgressStore();
   const [agentOpen, setAgentOpen] = useState(false);
 
@@ -66,7 +63,6 @@ export const Header = ({
           <Link to="/profile" className={styles.link}>
             Mi perfil
           </Link>
-          <Button label="Cerrar sesion" variant="ghost" onClick={() => void logout()} />
         </nav>
       </div>
 

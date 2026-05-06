@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { IonContent } from '@ionic/react';
 import { useToast } from '../../../hooks/useToast';
 import { useAuthStore } from '../../../store/authStore';
+import { Button } from '../../atoms/Button';
 import { useThemeStore, type ThemePreference } from '../../../store/themeStore';
 import { useProgressStore, LEVEL_NAMES } from '../../../store/progressStore';
 import { AvatarNucleus } from '../../atoms/AvatarNucleus';
@@ -32,6 +33,7 @@ const STRATEGY_LABEL: Record<string, string> = {
 export const ProfileContent = () => {
   const user    = useAuthStore((state) => state.user);
   const setUser = useAuthStore((state) => state.setUser);
+  const logout  = useAuthStore((state) => state.logout);
   const themePreference = useThemeStore((state) => state.preference);
   const setThemePreference = useThemeStore((state) => state.setPreference);
   const { data: progressData, fetchProgress, setPreviewLevel, getEffectiveLevel } = useProgressStore();
@@ -156,6 +158,12 @@ export const ProfileContent = () => {
                 </div>
               </div>
             )}
+
+            <Button
+              label="Cerrar sesión"
+              variant="ghost"
+              onClick={() => void logout()}
+            />
 
             <span className={styles.eyebrow} style={{ marginTop: '8px' }}>Contexto financiero</span>
             <DataState
