@@ -124,6 +124,159 @@
   color: var(--text-on-surface);
 }
 
+.avatarButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--surface-border);
+  border-radius: 14px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--text-on-surface) 6%, transparent), color-mix(in srgb, var(--text-on-surface) 2%, transparent)),
+    var(--surface-control);
+  box-shadow: 0 12px 22px rgba(2, 6, 23, 0.15);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+
+.avatarButton:active {
+  opacity: 0.7;
+}
+
+.agentBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(2px);
+  animation: agentFadeIn 0.15s ease;
+}
+
+@keyframes agentFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.agentPanel {
+  position: fixed;
+  top: 72px;
+  right: 16px;
+  z-index: 201;
+  width: min(320px, calc(100vw - 32px));
+  border-radius: 22px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface-panel-soft);
+  backdrop-filter: blur(24px);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: agentSlideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes agentSlideDown {
+  from { opacity: 0; transform: translateY(-8px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.agentHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--surface-border-muted);
+}
+
+.agentMeta {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.agentName {
+  color: var(--color-text-primary);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.agentSub {
+  color: var(--color-text-secondary, #888);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.agentClose {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: var(--surface-control, rgba(255,255,255,0.06));
+  color: var(--color-text-secondary, #888);
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.agentMessages {
+  min-height: 180px;
+  max-height: 340px;
+  padding: 20px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+}
+
+.agentEmptyHint {
+  margin: 0;
+  color: var(--color-text-secondary, #888);
+  font-size: 13px;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.agentInputBar {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--surface-border-muted);
+}
+
+.agentInput {
+  flex: 1;
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 12px;
+  border: 1px solid var(--surface-border-muted);
+  background: var(--surface-control, rgba(255,255,255,0.04));
+  color: var(--color-text-primary);
+  font-size: 14px;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.agentSendBtn {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  border: none;
+  background: rgba(var(--color-brand-rgb, 255 255 255), 0.12);
+  color: var(--color-text-secondary, #888);
+  font-size: 16px;
+  cursor: not-allowed;
+  opacity: 0.4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .mobileProfileLink {
   display: none;
 }

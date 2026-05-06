@@ -7,7 +7,6 @@ import { BrandMark } from '../../atoms/BrandMark';
 import { BreadcrumbTrail, type BreadcrumbItem } from '../../organisms/BreadcrumbTrail';
 import { CompletenessIndicator } from '../../molecules/CompletenessIndicator';
 import { AgentEventRenderer } from '../../molecules/AgentEventRenderer';
-import { FloatingAgent } from '../../organisms/FloatingAgent';
 import { rememberAuthPath } from '../../../utils/navigation';
 import { useAuthStore } from '../../../store/authStore';
 import { AppLayoutContext } from './AppLayoutContext';
@@ -100,7 +99,6 @@ export const AppLayout = ({ title, children }: { title: string; children: ReactN
 
           <AgentEventRenderer />
           <CompletenessIndicator />
-          <FloatingAgent />
         </div>
       </IonPage>
     </AppLayoutContext.Provider>
