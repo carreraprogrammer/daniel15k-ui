@@ -45,6 +45,18 @@
   isolation: isolate;
 }
 
+.root::before,
+.root::after {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  top: 50%;
+  left: 50%;
+  display: none;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
 .core {
   position: absolute;
   z-index: 2;
@@ -142,9 +154,75 @@
   display: block;
 }
 
+.root[data-level='2'] .ring {
+  transform: scale(0.82);
+  border-color: hsl(var(--av-hue) var(--av-sat) 68% / 0.4);
+  box-shadow: 0 0 calc(var(--av-size) * 0.12) hsl(var(--av-hue) var(--av-sat) 60% / 0.16);
+}
+
+.root[data-level='3'] .core {
+  width: calc(var(--av-size) * 0.48);
+  height: calc(var(--av-size) * 0.48);
+}
+
+.root[data-level='3'] .piece {
+  width: calc(var(--av-size) * 0.15);
+  height: calc(var(--av-size) * 0.15);
+  transform:
+    translate(-50%, -50%)
+    rotate(var(--piece-angle))
+    translateX(calc(var(--av-size) * 0.44))
+    rotate(calc(var(--piece-angle) * -1));
+}
+
+.root[data-level='3'] .piece:nth-child(2n) {
+  border-radius: 40% 60% 60% 40%;
+}
+
 .root[data-level='4'] .ring,
 .root[data-level='5'] .ring {
   border-color: hsl(var(--av-sec-hue) 70% 64% / 0.34);
+}
+
+.root[data-level='4']::before,
+.root[data-level='5']::before {
+  display: block;
+  width: calc(var(--av-size) * 0.86);
+  height: calc(var(--av-size) * 0.86);
+  border: 1px solid hsl(var(--av-sec-hue) 76% 66% / 0.3);
+  transform: translate(-50%, -50%) rotate(18deg);
+  box-shadow: 0 0 calc(var(--av-size) * 0.18) hsl(var(--av-sec-hue) 76% 66% / 0.2);
+}
+
+.root[data-level='4'] .core,
+.root[data-level='5'] .core {
+  width: calc(var(--av-size) * 0.5);
+  height: calc(var(--av-size) * 0.5);
+  box-shadow:
+    0 0 calc(var(--av-size) * 0.24) hsl(var(--av-hue) var(--av-sat) 62% / 0.46),
+    inset 0 1px 0 hsl(var(--av-hue) var(--av-sat) 92% / 0.62);
+}
+
+.root[data-level='4'] .piece,
+.root[data-level='5'] .piece {
+  width: calc(var(--av-size) * 0.17);
+  height: calc(var(--av-size) * 0.17);
+  transform:
+    translate(-50%, -50%)
+    rotate(var(--piece-angle))
+    translateX(calc(var(--av-size) * 0.48))
+    rotate(calc(var(--piece-angle) * -1));
+}
+
+.root[data-level='5']::after {
+  display: block;
+  width: calc(var(--av-size) * 0.64);
+  height: calc(var(--av-size) * 0.64);
+  border: 1px solid hsl(var(--av-hue) var(--av-sat) 76% / 0.34);
+  transform: translate(-50%, -50%) rotate(-28deg);
+  box-shadow:
+    inset 0 0 calc(var(--av-size) * 0.08) hsl(var(--av-hue) var(--av-sat) 70% / 0.16),
+    0 0 calc(var(--av-size) * 0.16) hsl(var(--av-hue) var(--av-sat) 70% / 0.18);
 }
 
 .root[data-level='5'] .piece {
