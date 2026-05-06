@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { AvatarNucleus } from '../../atoms/AvatarNucleus'
 import { useProgressStore, LEVEL_NAMES } from '../../../store/progressStore'
 import styles from './FloatingAgent.module.css'
@@ -17,7 +18,7 @@ export const FloatingAgent = () => {
 
   if (loading && !data) return null
 
-  return (
+  return createPortal(
     <>
       {isOpen && (
         <div
@@ -28,7 +29,6 @@ export const FloatingAgent = () => {
       )}
 
       <div className={`${styles.shell} ${isOpen ? styles.shellOpen : ''}`}>
-        {/* Chat panel */}
         {isOpen && (
           <div className={styles.panel}>
             <div className={styles.panelHeader}>
@@ -62,7 +62,6 @@ export const FloatingAgent = () => {
           </div>
         )}
 
-        {/* FAB */}
         <button
           className={styles.fab}
           onClick={() => setIsOpen((v) => !v)}
@@ -71,6 +70,7 @@ export const FloatingAgent = () => {
           <AvatarNucleus seed={seed} level={level} size={40} />
         </button>
       </div>
-    </>
+    </>,
+    document.body
   )
 }
