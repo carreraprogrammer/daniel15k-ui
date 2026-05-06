@@ -20,7 +20,7 @@ export const ListToolbar = ({
   searchPlaceholder,
   searchValue,
   resultLabel,
-  density = 'default',
+  density = 'compact',
   activeFilterCount = 0,
   onSearchChange,
   onOpenSort,
