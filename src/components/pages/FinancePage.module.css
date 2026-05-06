@@ -1010,10 +1010,11 @@
   overflow: hidden;
   padding: 1.15rem 1.25rem;
   border-radius: 18px;
-  border: 1px solid var(--surface-border);
+  border: 1px solid rgba(var(--color-brand-rgb), 0.24);
   background:
     var(--surface-highlight),
-    var(--surface-panel-soft);
+    linear-gradient(135deg, rgba(var(--color-brand-rgb), 0.12), rgba(var(--color-accent-rgb), 0.05)),
+    var(--surface-brand-tint);
   box-shadow: var(--shadow-surface);
   transition:
     transform 160ms ease,
@@ -1027,7 +1028,9 @@
   inset: 1px;
   border-radius: inherit;
   pointer-events: none;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--text-on-surface) 5%, transparent), transparent 20%);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--text-on-surface) 5%, transparent), transparent 20%),
+    radial-gradient(circle at top right, rgba(var(--color-accent-rgb), 0.08), transparent 42%);
 }
 
 .pocketCard > * {
