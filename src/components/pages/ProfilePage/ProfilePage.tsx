@@ -30,6 +30,8 @@ const STRATEGY_LABEL: Record<string, string> = {
   avalanche: 'Avalancha (mayor interés primero)',
 };
 
+const AVATAR_SAMPLE_USERS = [1, 2, 3, 4, 5, 6];
+
 export const ProfileContent = () => {
   const user    = useAuthStore((state) => state.user);
   const setUser = useAuthStore((state) => state.setUser);
@@ -41,6 +43,7 @@ export const ProfileContent = () => {
   const [financialContext, setFinancialContext] = useState<FinancialCtx | null>(null);
   const [contextLoading, setContextLoading] = useState(true);
   const [contextError, setContextError] = useState<string | null>(null);
+  const [avatarSampleUser, setAvatarSampleUser] = useState(1);
 
   useEffect(() => {
     fetchProgress();
@@ -79,6 +82,11 @@ export const ProfileContent = () => {
   const initialValues = useMemo(
     () => ({ name: user?.name ?? '', city: user?.city ?? '' }),
     [user?.name, user?.city],
+  );
+
+  const avatarPreviewSeed = useMemo(
+    () => `${progressData?.avatarSeed ?? 'seed'}:sample-user:${avatarSampleUser}`,
+    [avatarSampleUser, progressData?.avatarSeed],
   );
 
   return (
@@ -133,14 +141,32 @@ export const ProfileContent = () => {
               <div className={styles.preferenceBlock}>
                 <div>
                   <span className={styles.metaLabel}>Vista previa de avatar</span>
-                  <strong>Nivel {getEffectiveLevel()} — {LEVEL_NAMES[getEffectiveLevel()]}</strong>
+                  <strong>
+                    Usuario {avatarSampleUser} · Nivel {getEffectiveLevel()} — {LEVEL_NAMES[getEffectiveLevel()]}
+                  </strong>
                 </div>
                 <div className={styles.levelPreview}>
                   <AvatarNucleus
-                    seed={progressData.avatarSeed}
+                    seed={avatarPreviewSeed}
                     level={getEffectiveLevel()}
                     size={48}
                   />
+                </div>
+                <div className={styles.avatarControlGroup}>
+                  <span className={styles.controlLabel}>Usuario simulado</span>
+                  <div className={styles.levelSwitch} role="group" aria-label="Usuario simulado">
+                    {AVATAR_SAMPLE_USERS.map((sampleUser) => (
+                      <button
+                        key={sampleUser}
+                        type="button"
+                        className={`${styles.levelOption} ${avatarSampleUser === sampleUser ? styles.levelOptionActive : ''}`}
+                        onClick={() => setAvatarSampleUser(sampleUser)}
+                        aria-pressed={avatarSampleUser === sampleUser}
+                      >
+                        {sampleUser}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 <div className={styles.levelSwitch} role="group" aria-label="Nivel de vista previa">
                   {LEVEL_NAMES.map((name, idx) => (
@@ -154,6 +180,26 @@ export const ProfileContent = () => {
                     >
                       {idx}
                     </button>
+                  ))}
+                </div>
+                <div className={styles.avatarMatrix} aria-label="Comparación de avatar por nivel">
+                  {LEVEL_NAMES.map((name, idx) => (
+                    <div key={name} className={styles.avatarMatrixItem}>
+                      <AvatarNucleus seed={avatarPreviewSeed} level={idx} size={32} />
+                      <span>{idx}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className={styles.avatarMatrix} aria-label="Comparación de avatar por usuario simulado">
+                  {AVATAR_SAMPLE_USERS.map((sampleUser) => (
+                    <div key={sampleUser} className={styles.avatarMatrixItem}>
+                      <AvatarNucleus
+                        seed={`${progressData.avatarSeed}:sample-user:${sampleUser}`}
+                        level={getEffectiveLevel()}
+                        size={32}
+                      />
+                      <span>U{sampleUser}</span>
+                    </div>
                   ))}
                 </div>
               </div>
