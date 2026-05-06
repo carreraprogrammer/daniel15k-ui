@@ -1,5 +1,5 @@
 import { IonIcon, IonLabel, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs } from '@ionic/react';
-import { useEffect, useRef, type ComponentType } from 'react';
+import { useEffect, type ComponentType } from 'react';
 import { Redirect, Route, useLocation } from 'react-router-dom';
 import {
   calendarOutline,
@@ -88,15 +88,14 @@ const AUTH_PATHS = [
 
 export const AppRouter = () => {
   const location = useLocation();
-  const tabBarRef = useRef<HTMLIonTabBarElement | null>(null);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const showTabs = isAuthenticated && (AUTH_PATHS.includes(location.pathname) || location.pathname.startsWith('/budgets/'));
 
   useEffect(() => {
     const root = document.documentElement;
-    const tabBar = tabBarRef.current;
+    const tabBar = document.querySelector('[data-app-tabbar="true"]');
 
-    if (!showTabs || !tabBar) {
+    if (!showTabs || !(tabBar instanceof HTMLElement)) {
       root.style.setProperty('--app-viewport-tabbar-height', '0px');
       return undefined;
     }
@@ -146,7 +145,7 @@ export const AppRouter = () => {
       </IonRouterOutlet>
 
       {showTabs ? (
-        <IonTabBar ref={tabBarRef} slot="bottom" className={styles.tabBar}>
+        <IonTabBar slot="bottom" className={styles.tabBar} data-app-tabbar="true">
           {TAB_ITEMS.map((item) => (
             <IonTabButton
               key={item.tab}
