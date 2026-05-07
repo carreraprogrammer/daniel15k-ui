@@ -6,6 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -p tsconfig.json && vite build",
+    "ios:clean-build": "rm -rf ios/App/build",
+    "ios:sync": "npm run build && npm run ios:clean-build && cap sync ios",
+    "ios:open": "npm run ios:sync && cap open ios",
     "test": "vitest run",
     "test:watch": "vitest",
     "preview": "vite preview"
