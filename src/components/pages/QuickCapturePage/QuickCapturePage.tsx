@@ -8,9 +8,10 @@ import {
   walletOutline,
 } from 'ionicons/icons';
 import { useLocation } from 'react-router-dom';
-import { BrandMark } from '../../atoms/BrandMark/BrandMark';
+import { AvatarNucleus } from '../../atoms/AvatarNucleus';
 import { useAgentUI } from '../../../contexts/AgentUIContext';
 import { useToast } from '../../../hooks/useToast';
+import { useProgressStore } from '../../../store/progressStore';
 import type { PaymentSource } from '../../../types/finance.types';
 import styles from './QuickCapturePage.module.css';
 
@@ -18,6 +19,12 @@ const PAYMENT_SOURCE_LABEL: Record<PaymentSource, string> = {
   credit_card: 'Tarjeta de crédito',
   debit: 'Débito',
   cash: 'Efectivo',
+};
+
+const PAYMENT_SOURCE_TONE: Record<PaymentSource, string> = {
+  credit_card: 'Crédito. Lo dejo pendiente.',
+  debit: 'Débito. Sale de caja.',
+  cash: 'Efectivo. Sin ruido.',
 };
 
 const PAYMENT_SOURCE_OPTIONS: Array<{ value: PaymentSource; label: string; icon: string }> = [
@@ -54,19 +61,26 @@ export const QuickCapturePage = () => {
 
   const { startChat } = useAgentUI();
   const { showError, toast } = useToast();
+  const { data, fetchProgress, getEffectiveLevel } = useProgressStore();
+  const avatarSeed = data?.avatarSeed ?? 'quick-capture';
+  const avatarLevel = getEffectiveLevel();
   const assistantMessage = saving
-    ? 'Estoy leyendo el gasto y buscando dónde encaja.'
+    ? 'Leyendo el gasto.'
     : successCount > 0
-      ? 'Listo. Lo envié al agente para clasificarlo y registrarlo.'
+      ? 'Lo tengo.'
       : quickPaymentSource
-        ? `${PAYMENT_SOURCE_LABEL[quickPaymentSource]} seleccionado. Capturo el gasto y lo ordeno.`
-        : 'Elige cómo pagaste y dime el gasto.';
+        ? PAYMENT_SOURCE_TONE[quickPaymentSource]
+        : 'Dime el gasto.';
   const assistantIcon = successCount > 0 ? checkmarkCircleOutline : sparklesOutline;
 
   useEffect(() => {
     setQuickPaymentSource(initialPaymentSource);
     setQuickError(null);
   }, [initialPaymentSource]);
+
+  useEffect(() => {
+    void fetchProgress();
+  }, [fetchProgress]);
 
   useEffect(() => {
     if (successCount > 0) {
@@ -114,7 +128,9 @@ export const QuickCapturePage = () => {
       <IonContent fullscreen className={styles.content}>
         <div className={styles.wrapper}>
           <header className={styles.header}>
-            <BrandMark />
+            <div className={styles.avatarMark} aria-hidden="true">
+              <AvatarNucleus seed={avatarSeed} level={avatarLevel} size={42} />
+            </div>
             {successCount > 0 ? (
               <span className={styles.successBadge}>
                 <IonIcon icon={checkmarkCircleOutline} aria-hidden="true" />
