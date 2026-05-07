@@ -468,3 +468,81 @@
     0 0 calc(var(--av-size) * 0.12) hsl(var(--av-sec-hue) 75% 68% / 0.46),
     0 0 calc(var(--av-size) * 0.22) hsl(var(--av-hue) var(--av-sat) 55% / 0.16);
 }
+
+/* ── Universal glow progression (all families) ───────────────── */
+
+.root[data-level='1'] .core {
+  box-shadow:
+    0 0 calc(var(--av-size) * 0.22) hsl(var(--av-hue) var(--av-sat) 62% / 0.42),
+    inset 0 1px 0 hsl(var(--av-hue) var(--av-sat) 92% / 0.55);
+}
+
+.root[data-level='2'] .core {
+  box-shadow:
+    0 0 calc(var(--av-size) * 0.38) hsl(var(--av-hue) var(--av-sat) 62% / 0.52),
+    0 0 calc(var(--av-size) * 0.14) hsl(var(--av-hue) var(--av-sat) 84% / 0.7),
+    inset 0 1px 0 hsl(var(--av-hue) var(--av-sat) 92% / 0.55);
+}
+
+.root[data-level='3'] .core {
+  box-shadow:
+    0 0 calc(var(--av-size) * 0.52) hsl(var(--av-hue) var(--av-sat) 62% / 0.6),
+    0 0 calc(var(--av-size) * 0.2)  hsl(var(--av-hue) var(--av-sat) 84% / 0.75),
+    inset 0 1px 0 hsl(var(--av-hue) var(--av-sat) 92% / 0.55);
+}
+
+.root[data-level='4'] .core {
+  box-shadow:
+    0 0 calc(var(--av-size) * 0.62) hsl(var(--av-hue) var(--av-sat) 62% / 0.62),
+    0 0 calc(var(--av-size) * 0.28) hsl(var(--av-hue) var(--av-sat) 84% / 0.78),
+    0 0 calc(var(--av-size) * 0.38) hsl(var(--av-sec-hue) 72% 66% / 0.28),
+    inset 0 1px 0 hsl(var(--av-hue) var(--av-sat) 92% / 0.62);
+}
+
+.root[data-level='5'] .core {
+  box-shadow:
+    0 0 calc(var(--av-size) * 0.78) hsl(var(--av-hue) var(--av-sat) 62% / 0.72),
+    0 0 calc(var(--av-size) * 0.36) hsl(var(--av-hue) var(--av-sat) 84% / 0.85),
+    0 0 calc(var(--av-size) * 0.52) hsl(var(--av-sec-hue) 72% 66% / 0.38),
+    0 0 calc(var(--av-size) * 0.12) hsl(var(--av-hue) var(--av-sat) 96% / 1),
+    inset 0 1px 0 hsl(var(--av-hue) var(--av-sat) 96% / 0.7);
+}
+
+/* ── Universal ring for all families at level 3+ ─────────────── */
+
+.root[data-level='3'] .ring,
+.root[data-level='4'] .ring,
+.root[data-level='5'] .ring {
+  display: block;
+}
+
+/* Ring shape follows avatar shape */
+.root[data-shape='blob'] .ring {
+  border-radius: 44% 56% 62% 38% / 50% 44% 56% 50%;
+}
+
+.root[data-shape='faceted'] .ring {
+  border-radius: 24% 44% 24% 44%;
+}
+
+/* Ring gets more visible each level */
+.root[data-level='3'] .ring {
+  border-color: hsl(var(--av-hue) var(--av-sat) 68% / 0.35);
+  box-shadow: 0 0 calc(var(--av-size) * 0.1) hsl(var(--av-hue) var(--av-sat) 64% / 0.2);
+}
+
+.root[data-level='4'] .ring {
+  border-color: hsl(var(--av-hue) var(--av-sat) 70% / 0.48);
+  border-width: 1.5px;
+  box-shadow:
+    0 0 calc(var(--av-size) * 0.14) hsl(var(--av-hue) var(--av-sat) 68% / 0.28),
+    0 0 calc(var(--av-size) * 0.08) hsl(var(--av-sec-hue) 72% 68% / 0.2);
+}
+
+.root[data-level='5'] .ring {
+  border-color: hsl(var(--av-hue) var(--av-sat) 74% / 0.6);
+  border-width: 2px;
+  box-shadow:
+    0 0 calc(var(--av-size) * 0.18) hsl(var(--av-hue) var(--av-sat) 68% / 0.35),
+    0 0 calc(var(--av-size) * 0.12) hsl(var(--av-sec-hue) 72% 68% / 0.3);
+}
