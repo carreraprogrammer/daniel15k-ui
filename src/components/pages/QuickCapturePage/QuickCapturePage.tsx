@@ -3,10 +3,9 @@ import { IonButton, IonContent, IonIcon, IonPage } from '@ionic/react';
 import { cardOutline, cashOutline, checkmarkCircleOutline, walletOutline } from 'ionicons/icons';
 import { useLocation } from 'react-router-dom';
 import { BrandMark } from '../../atoms/BrandMark/BrandMark';
+import { useAgentUI } from '../../../contexts/AgentUIContext';
 import { useToast } from '../../../hooks/useToast';
-import { financeService } from '../../../services/financeService';
-import type { PaymentSource, TransactionCreatePayload } from '../../../types/finance.types';
-import { parseQuickCaptureText } from '../../../utils/quickCaptureParser';
+import type { PaymentSource } from '../../../types/finance.types';
 import styles from './QuickCapturePage.module.css';
 
 const PAYMENT_SOURCE_LABEL: Record<PaymentSource, string> = {
@@ -26,6 +25,17 @@ const parsePaymentSource = (search: string): PaymentSource | null => {
   return raw === 'credit_card' || raw === 'debit' || raw === 'cash' ? raw : null;
 };
 
+const buildAgentMessage = (text: string, paymentSource: PaymentSource) => {
+  const paymentLabel = PAYMENT_SOURCE_LABEL[paymentSource];
+  return [
+    'Registro rapido desde shortcut de la app.',
+    `Medio de pago ya seleccionado por el usuario: ${paymentLabel} (${paymentSource}).`,
+    'Usa el mismo comportamiento del agente de Telegram para clasificar y registrar el gasto.',
+    paymentSource === 'credit_card' ? 'Si registras una transaccion, usa credit_card_status="pending".' : null,
+    `Mensaje del usuario: ${text}`,
+  ].filter(Boolean).join('\n');
+};
+
 export const QuickCapturePage = () => {
   const location = useLocation();
   const initialPaymentSource = parsePaymentSource(location.search);
@@ -36,6 +46,7 @@ export const QuickCapturePage = () => {
   const [quickError, setQuickError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const { startChat } = useAgentUI();
   const { showError, showSuccess, toast } = useToast();
 
   useEffect(() => {
@@ -55,36 +66,33 @@ export const QuickCapturePage = () => {
     return () => clearTimeout(t);
   }, []);
 
-  const handleCreate = async (payload: TransactionCreatePayload) => {
-    setSaving(true);
-    try {
-      await financeService.createTransaction({ ...payload, source: 'manual' });
-      setSuccessCount((n) => n + 1);
-      showSuccess('Transacción guardada.');
-      inputRef.current?.focus();
-    } catch (nextError) {
-      showError(nextError instanceof Error ? nextError.message : 'No fue posible guardar la transacción.');
-      throw nextError;
-    } finally {
-      setSaving(false);
-    }
-  };
-
   const handleQuickSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const parsed = parseQuickCaptureText(quickText, quickPaymentSource);
+    const text = quickText.trim();
 
-    if (!parsed.payload) {
-      setQuickError(parsed.error);
+    if (!text) {
+      setQuickError('Escribe el gasto que quieres registrar.');
+      return;
+    }
+
+    if (!quickPaymentSource) {
+      setQuickError('Elige si fue tarjeta, débito o efectivo.');
       return;
     }
 
     setQuickError(null);
-    try {
-      await handleCreate(parsed.payload);
+    setSaving(true);
+
+    const didStart = await startChat(buildAgentMessage(text, quickPaymentSource));
+    setSaving(false);
+
+    if (didStart) {
+      setSuccessCount((n) => n + 1);
+      showSuccess('Enviado al agente.');
       setQuickText('');
-    } catch {
-      // handleCreate already surfaces the error through the shared toast.
+      inputRef.current?.focus();
+    } else {
+      showError('No fue posible enviar el gasto al agente.');
     }
   };
 
@@ -97,7 +105,7 @@ export const QuickCapturePage = () => {
             {successCount > 0 ? (
               <span className={styles.successBadge}>
                 <IonIcon icon={checkmarkCircleOutline} aria-hidden="true" />
-                Guardado
+                Enviado
               </span>
             ) : quickPaymentSource ? (
               <span className={styles.sourceBadge}>{PAYMENT_SOURCE_LABEL[quickPaymentSource]}</span>
@@ -118,7 +126,7 @@ export const QuickCapturePage = () => {
                 aria-label="Captura rápida"
               />
               <button className={styles.quickSubmit} type="submit" disabled={saving || !quickText.trim()}>
-                Guardar
+                Enviar
               </button>
             </div>
 

@@ -76,7 +76,7 @@ function reducer(state: AgentUIState, action: AgentUIAction): AgentUIState {
 
 interface AgentUIContextValue {
   state: AgentUIState;
-  startChat: (message: string) => Promise<void>;
+  startChat: (message: string) => Promise<boolean>;
   reply: (
     eventId: number,
     type: AgentReplyType,
@@ -165,9 +165,11 @@ export function AgentUIProvider({ children }: { children: ReactNode }) {
         const result = await financeService.startWebChat(message);
         dispatch({ type: 'CHAT_STARTED', payload: { sessionId: result.session_id } });
         startPolling();
+        return true;
       } catch (err) {
         ERR('startChat error:', err);
         dispatch({ type: 'CHAT_ERROR' });
+        return false;
       }
     },
     [startPolling],
