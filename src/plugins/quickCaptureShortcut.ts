@@ -2,6 +2,7 @@ import { registerPlugin } from '@capacitor/core';
 import type { PaymentSource } from '../types/finance.types';
 
 interface PendingQuickCaptureLaunch {
+  shouldOpen?: boolean;
   paymentSource?: PaymentSource;
 }
 

@@ -68,8 +68,11 @@ export default function App() {
     if (!isPlatform('capacitor')) return undefined;
 
     const syncShortcutLaunch = async () => {
-      const pending = await QuickCaptureShortcut.getPendingLaunch().catch(() => ({ paymentSource: undefined }));
-      if (pending.paymentSource) openQuickCapture(pending.paymentSource);
+      const pending = await QuickCaptureShortcut.getPendingLaunch().catch(() => ({
+        shouldOpen: false,
+        paymentSource: undefined,
+      }));
+      if (pending.shouldOpen) openQuickCapture(pending.paymentSource);
     };
 
     void syncShortcutLaunch();

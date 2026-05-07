@@ -1,13 +1,11 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { IonContent, IonIcon, IonPage } from '@ionic/react';
+import { IonButton, IonContent, IonIcon, IonPage } from '@ionic/react';
 import { cardOutline, cashOutline, checkmarkCircleOutline, walletOutline } from 'ionicons/icons';
 import { useLocation } from 'react-router-dom';
-import { TransactionComposer } from '../../organisms/TransactionComposer/TransactionComposer';
 import { BrandMark } from '../../atoms/BrandMark/BrandMark';
-import { ErrorState } from '../../molecules/ErrorState';
 import { useToast } from '../../../hooks/useToast';
 import { financeService } from '../../../services/financeService';
-import type { CategoryResource, PaymentSource, TransactionCreatePayload, TransactionUpdatePayload } from '../../../types/finance.types';
+import type { PaymentSource, TransactionCreatePayload } from '../../../types/finance.types';
 import { parseQuickCaptureText } from '../../../utils/quickCaptureParser';
 import styles from './QuickCapturePage.module.css';
 
@@ -31,31 +29,14 @@ const parsePaymentSource = (search: string): PaymentSource | null => {
 export const QuickCapturePage = () => {
   const location = useLocation();
   const initialPaymentSource = parsePaymentSource(location.search);
-  const [categories, setCategories] = useState<CategoryResource[]>([]);
-  const [categoryError, setCategoryError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [successCount, setSuccessCount] = useState(0);
   const [quickText, setQuickText] = useState('');
   const [quickPaymentSource, setQuickPaymentSource] = useState<PaymentSource | null>(initialPaymentSource);
   const [quickError, setQuickError] = useState<string | null>(null);
-  const inputRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const { showError, showSuccess, toast } = useToast();
-
-  const loadCategories = async () => {
-    setCategoryError(null);
-
-    try {
-      const res = await financeService.fetchCategories();
-      setCategories(res.data);
-    } catch (nextError) {
-      setCategoryError(nextError instanceof Error ? nextError.message : 'No fue posible cargar las categorías.');
-    }
-  };
-
-  useEffect(() => {
-    void loadCategories();
-  }, []);
 
   useEffect(() => {
     setQuickPaymentSource(initialPaymentSource);
@@ -69,13 +50,18 @@ export const QuickCapturePage = () => {
     }
   }, [successCount]);
 
+  useEffect(() => {
+    const t = setTimeout(() => inputRef.current?.focus(), 250);
+    return () => clearTimeout(t);
+  }, []);
+
   const handleCreate = async (payload: TransactionCreatePayload) => {
     setSaving(true);
     try {
       await financeService.createTransaction({ ...payload, source: 'manual' });
       setSuccessCount((n) => n + 1);
       showSuccess('Transacción guardada.');
-      inputRef.current?.querySelector('input')?.focus();
+      inputRef.current?.focus();
     } catch (nextError) {
       showError(nextError instanceof Error ? nextError.message : 'No fue posible guardar la transacción.');
       throw nextError;
@@ -102,19 +88,6 @@ export const QuickCapturePage = () => {
     }
   };
 
-  const handleUpdate = async (id: string, payload: TransactionUpdatePayload) => {
-    setSaving(true);
-    try {
-      await financeService.updateTransaction(id, payload);
-      showSuccess('Transacción actualizada.');
-    } catch (nextError) {
-      showError(nextError instanceof Error ? nextError.message : 'No fue posible actualizar la transacción.');
-      throw nextError;
-    } finally {
-      setSaving(false);
-    }
-  };
-
   return (
     <IonPage>
       <IonContent fullscreen className={styles.content}>
@@ -134,6 +107,7 @@ export const QuickCapturePage = () => {
           <form className={styles.quickCard} onSubmit={handleQuickSubmit}>
             <div className={styles.quickInputRow}>
               <input
+                ref={inputRef}
                 className={styles.quickInput}
                 value={quickText}
                 onChange={(event) => setQuickText(event.target.value)}
@@ -171,24 +145,9 @@ export const QuickCapturePage = () => {
 
             {quickError ? <p className={styles.quickError}>{quickError}</p> : null}
           </form>
-
-          {categoryError ? (
-            <ErrorState
-              title="No pudimos preparar la captura"
-              message={categoryError}
-              onRetry={() => void loadCategories()}
-            />
-          ) : null}
-
-          <div ref={inputRef} className={styles.composerWrap}>
-            <TransactionComposer
-              categories={categories}
-              initialPaymentSource={quickPaymentSource}
-              loading={saving}
-              onCreate={handleCreate}
-              onUpdate={handleUpdate}
-            />
-          </div>
+          <IonButton fill="clear" size="small" routerLink="/dashboard" className={styles.closeButton}>
+            Cerrar
+          </IonButton>
           {toast}
         </div>
       </IonContent>

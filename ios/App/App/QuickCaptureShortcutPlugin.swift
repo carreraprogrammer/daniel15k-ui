@@ -10,12 +10,16 @@ public class QuickCaptureShortcutPlugin: CAPPlugin, CAPBridgedPlugin {
     ]
 
     @objc func getPendingLaunch(_ call: CAPPluginCall) {
-        if let paymentSource = QuickCaptureShortcutStore.consumePaymentSource() {
-            call.resolve([
-                "paymentSource": paymentSource
-            ])
-        } else {
+        let launch = QuickCaptureShortcutStore.consumeLaunch()
+        guard launch.shouldOpen else {
             call.resolve([:])
+            return
         }
+
+        var payload: [String: Any] = ["shouldOpen": true]
+        if let paymentSource = launch.paymentSource {
+            payload["paymentSource"] = paymentSource
+        }
+        call.resolve(payload)
     }
 }
