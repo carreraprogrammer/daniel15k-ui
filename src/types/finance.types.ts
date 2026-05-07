@@ -836,6 +836,7 @@ export interface AgentInsight {
 export type AgentUiEventType =
   | 'show_plan_proposal'
   | 'show_card'
+  | 'show_quick_replies'
   | 'show_form'
   | 'request_confirmation'
   | 'show_category_selector'
@@ -860,6 +861,12 @@ export interface ShowCardPayload {
   title: string;
   body: string;
   tone: 'info' | 'warning' | 'success';
+}
+
+export interface ShowQuickRepliesPayload {
+  title?: string;
+  body: string;
+  buttons: Array<{ text: string; callback_data: string }>;
 }
 
 export interface DynamicField {
@@ -909,6 +916,7 @@ export interface ShowAmountEditorPayload {
 export type AgentUiEventPayload =
   | ({ draft: MonthlyPlanDraft } & { warnings?: string[] })
   | ShowCardPayload
+  | ShowQuickRepliesPayload
   | ShowFormPayload
   | RequestConfirmationPayload
   | ShowCategorySelectorPayload

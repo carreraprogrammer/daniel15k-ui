@@ -23,6 +23,14 @@ interface AgentUIState {
   events: AgentUiEvent[];
 }
 
+type AgentReplyType =
+  | 'form_submitted'
+  | 'confirmed'
+  | 'dismissed'
+  | 'categories_selected'
+  | 'amounts_confirmed'
+  | 'callback';
+
 const initialState: AgentUIState = {
   sessionId: null,
   status: 'idle',
@@ -44,14 +52,15 @@ function reducer(state: AgentUIState, action: AgentUIAction): AgentUIState {
     case 'CHAT_LOADING':
       return { ...state, status: 'loading' };
     case 'CHAT_STARTED':
-      return { ...state, sessionId: action.payload.sessionId, status: 'active', events: [] };
+      // Keep status='loading' — typing dots stay visible until events arrive
+      return { ...state, sessionId: action.payload.sessionId, status: 'loading', events: [] };
     case 'CHAT_ERROR':
       return { ...state, status: 'error' };
     case 'EVENTS_RECEIVED': {
       const existingIds = new Set(state.events.map((e) => e.id));
       const newEvents = action.payload.filter((e) => !existingIds.has(e.id));
       return newEvents.length > 0
-        ? { ...state, events: [...state.events, ...newEvents] }
+        ? { ...state, status: 'active', events: [...state.events, ...newEvents] }
         : state;
     }
     case 'EVENT_CONSUMED':
@@ -70,7 +79,7 @@ interface AgentUIContextValue {
   startChat: (message: string) => Promise<void>;
   reply: (
     eventId: number,
-    type: 'form_submitted' | 'confirmed' | 'dismissed' | 'categories_selected' | 'amounts_confirmed',
+    type: AgentReplyType,
     data?: Record<string, unknown>,
   ) => Promise<void>;
   consume: (id: number) => Promise<void>;
@@ -167,7 +176,7 @@ export function AgentUIProvider({ children }: { children: ReactNode }) {
   const reply = useCallback(
     async (
       eventId: number,
-      type: 'form_submitted' | 'confirmed' | 'dismissed' | 'categories_selected' | 'amounts_confirmed',
+      type: AgentReplyType,
       data?: Record<string, unknown>,
     ) => {
       const sid = sessionIdRef.current;
@@ -176,7 +185,7 @@ export function AgentUIProvider({ children }: { children: ReactNode }) {
       try {
         await financeService.replyWebChat(sid, eventId, type, data);
         dispatch({ type: 'EVENT_CONSUMED', payload: { id: eventId } });
-        dispatch({ type: 'CHAT_STARTED', payload: { sessionId: sid } });
+        // Keep status='loading' — typing dots stay until brain emits next events via polling
       } catch (err) {
         ERR('reply error:', err);
         dispatch({ type: 'CHAT_ERROR' });

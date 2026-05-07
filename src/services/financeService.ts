@@ -448,7 +448,7 @@ export const financeService = {
   async replyWebChat(
     sessionId: string,
     eventId: number,
-    type: 'form_submitted' | 'confirmed' | 'dismissed' | 'categories_selected' | 'amounts_confirmed',
+    type: 'form_submitted' | 'confirmed' | 'dismissed' | 'categories_selected' | 'amounts_confirmed' | 'callback',
     eventData?: Record<string, unknown>,
   ): Promise<void> {
     await api.post('/api/v1/agents/chat', {
