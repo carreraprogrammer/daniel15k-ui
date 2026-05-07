@@ -1,5 +1,23 @@
 import AppIntents
 import Foundation
+import UIKit
+
+private func quickCaptureURL(paymentSource: String?) -> URL {
+    var components = URLComponents()
+    components.scheme = "daniel15k"
+    components.host = "quick"
+    if let paymentSource {
+        components.queryItems = [
+            URLQueryItem(name: "payment_source", value: paymentSource)
+        ]
+    }
+    return components.url ?? URL(string: "daniel15k://quick")!
+}
+
+@MainActor
+private func openQuickCaptureURL(paymentSource: String?) {
+    UIApplication.shared.open(quickCaptureURL(paymentSource: paymentSource))
+}
 
 @available(iOS 16.0, *)
 struct QuickCaptureIntent: AppIntent {
@@ -9,6 +27,7 @@ struct QuickCaptureIntent: AppIntent {
 
     func perform() async throws -> some IntentResult {
         QuickCaptureShortcutStore.save(paymentSource: nil)
+        await openQuickCaptureURL(paymentSource: nil)
         return .result()
     }
 }
@@ -21,6 +40,7 @@ struct QuickCaptureCreditCardIntent: AppIntent {
 
     func perform() async throws -> some IntentResult {
         QuickCaptureShortcutStore.save(paymentSource: "credit_card")
+        await openQuickCaptureURL(paymentSource: "credit_card")
         return .result()
     }
 }
@@ -33,6 +53,7 @@ struct QuickCaptureDebitIntent: AppIntent {
 
     func perform() async throws -> some IntentResult {
         QuickCaptureShortcutStore.save(paymentSource: "debit")
+        await openQuickCaptureURL(paymentSource: "debit")
         return .result()
     }
 }
@@ -45,6 +66,7 @@ struct QuickCaptureCashIntent: AppIntent {
 
     func perform() async throws -> some IntentResult {
         QuickCaptureShortcutStore.save(paymentSource: "cash")
+        await openQuickCaptureURL(paymentSource: "cash")
         return .result()
     }
 }
