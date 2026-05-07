@@ -98,6 +98,7 @@ const valuesFromTransaction = (transaction: Transaction | null): TransactionComp
 export interface TransactionComposerProps {
   transaction?: Transaction | null;
   categories: CategoryResource[];
+  initialPaymentSource?: PaymentSource | null;
   loading?: boolean;
   onCreate: (payload: TransactionCreatePayload) => Promise<void>;
   onUpdate: (id: string, payload: TransactionUpdatePayload) => Promise<void>;
@@ -107,6 +108,7 @@ export interface TransactionComposerProps {
 export const TransactionComposer = ({
   transaction = null,
   categories,
+  initialPaymentSource = null,
   loading,
   onCreate,
   onUpdate,
@@ -131,13 +133,17 @@ export const TransactionComposer = ({
   );
 
   useEffect(() => {
-    setValues(valuesFromTransaction(transaction));
+    const nextValues = valuesFromTransaction(transaction);
+    setValues({
+      ...nextValues,
+      paymentSource: transaction ? nextValues.paymentSource : initialPaymentSource,
+    });
     setLocalCategories(categories);
     setError(null);
-  }, [categories, transaction]);
+  }, [categories, initialPaymentSource, transaction]);
 
   const reset = () => {
-    setValues(emptyValues);
+    setValues({ ...emptyValues, paymentSource: initialPaymentSource });
     setError(null);
   };
 

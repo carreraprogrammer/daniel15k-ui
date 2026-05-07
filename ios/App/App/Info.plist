@@ -53,6 +53,14 @@
 				<string>com.googleusercontent.apps.224259448673-ec625g235gj916acod4i7u0suql0a5eh</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.daniel15k.app</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>daniel15k</string>
+			</array>
+		</dict>
 	</array>
 </dict>
 </plist>

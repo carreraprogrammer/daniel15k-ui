@@ -1,15 +1,29 @@
 import { useEffect, useRef, useState } from 'react';
 import { IonContent, IonIcon, IonPage } from '@ionic/react';
 import { checkmarkCircleOutline } from 'ionicons/icons';
+import { useLocation } from 'react-router-dom';
 import { TransactionComposer } from '../../organisms/TransactionComposer/TransactionComposer';
 import { BrandMark } from '../../atoms/BrandMark/BrandMark';
 import { ErrorState } from '../../molecules/ErrorState';
 import { useToast } from '../../../hooks/useToast';
 import { financeService } from '../../../services/financeService';
-import type { CategoryResource, TransactionCreatePayload, TransactionUpdatePayload } from '../../../types/finance.types';
+import type { CategoryResource, PaymentSource, TransactionCreatePayload, TransactionUpdatePayload } from '../../../types/finance.types';
 import styles from './QuickCapturePage.module.css';
 
+const PAYMENT_SOURCE_LABEL: Record<PaymentSource, string> = {
+  credit_card: 'Tarjeta de crédito',
+  debit: 'Débito',
+  cash: 'Efectivo',
+};
+
+const parsePaymentSource = (search: string): PaymentSource | null => {
+  const raw = new URLSearchParams(search).get('payment_source');
+  return raw === 'credit_card' || raw === 'debit' || raw === 'cash' ? raw : null;
+};
+
 export const QuickCapturePage = () => {
+  const location = useLocation();
+  const initialPaymentSource = parsePaymentSource(location.search);
   const [categories, setCategories] = useState<CategoryResource[]>([]);
   const [categoryError, setCategoryError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -74,12 +88,14 @@ export const QuickCapturePage = () => {
         <div className={styles.wrapper}>
           <header className={styles.header}>
             <BrandMark />
-            {successCount > 0 && (
+            {successCount > 0 ? (
               <span className={styles.successBadge}>
                 <IonIcon icon={checkmarkCircleOutline} aria-hidden="true" />
                 Guardado
               </span>
-            )}
+            ) : initialPaymentSource ? (
+              <span className={styles.sourceBadge}>{PAYMENT_SOURCE_LABEL[initialPaymentSource]}</span>
+            ) : null}
           </header>
 
           {categoryError ? (
@@ -93,6 +109,7 @@ export const QuickCapturePage = () => {
           <div ref={inputRef} className={styles.composerWrap}>
             <TransactionComposer
               categories={categories}
+              initialPaymentSource={initialPaymentSource}
               loading={saving}
               onCreate={handleCreate}
               onUpdate={handleUpdate}
