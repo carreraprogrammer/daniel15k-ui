@@ -7,7 +7,7 @@
   flex-direction: column;
   justify-content: center;
   min-height: 100%;
-  padding: 18px 16px calc(18px + var(--ion-safe-area-bottom, 0px));
+  padding: 20px 16px calc(18px + var(--ion-safe-area-bottom, 0px));
   max-width: 420px;
   margin: 0 auto;
 }
@@ -42,6 +42,107 @@
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-4px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+
+.agentBubble {
+  position: relative;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 66px;
+  margin-bottom: 12px;
+  padding: 12px 13px 12px 12px;
+  border: 1px solid rgba(var(--color-brand-rgb, 248, 197, 94), 0.22);
+  border-radius: 16px;
+  background:
+    linear-gradient(135deg, rgba(var(--color-brand-rgb, 248, 197, 94), 0.12), transparent 48%),
+    color-mix(in srgb, var(--surface-panel, rgba(255, 255, 255, 0.08)) 86%, transparent);
+  box-shadow:
+    0 18px 42px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 color-mix(in srgb, var(--text-on-surface, #fff) 6%, transparent);
+  animation: bubbleIn 0.24s ease-out;
+  overflow: hidden;
+}
+
+.agentBubble::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.045), transparent);
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
+.agentBubbleThinking::before {
+  opacity: 1;
+  animation: scan 1.7s ease-in-out infinite;
+}
+
+.agentGlyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  background: rgba(var(--color-brand-rgb, 248, 197, 94), 0.14);
+  color: var(--color-accent, #F8C55E);
+}
+
+.agentGlyph ion-icon {
+  font-size: 18px;
+}
+
+.agentBubble p {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  color: var(--text-on-surface-soft, #E8E3D8);
+  font-size: 14px;
+  line-height: 1.42;
+  font-weight: 620;
+}
+
+.thinkingDots {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding-left: 2px;
+}
+
+.thinkingDots span {
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(var(--color-brand-rgb, 248, 197, 94), 0.84);
+  animation: dotPulse 1s ease-in-out infinite;
+}
+
+.thinkingDots span:nth-child(2) {
+  animation-delay: 0.14s;
+}
+
+.thinkingDots span:nth-child(3) {
+  animation-delay: 0.28s;
+}
+
+@keyframes bubbleIn {
+  from { opacity: 0; transform: translateY(6px) scale(0.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes scan {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes dotPulse {
+  0%, 80%, 100% { opacity: 0.36; transform: translateY(0); }
+  40% { opacity: 1; transform: translateY(-3px); }
 }
 
 .quickCard {
@@ -167,5 +268,14 @@
 
   .quickSourceButton span {
     font-size: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .successBadge,
+  .agentBubble,
+  .agentBubbleThinking::before,
+  .thinkingDots span {
+    animation: none;
   }
 }

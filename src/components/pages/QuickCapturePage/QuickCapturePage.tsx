@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { IonButton, IonContent, IonIcon, IonPage } from '@ionic/react';
-import { cardOutline, cashOutline, checkmarkCircleOutline, walletOutline } from 'ionicons/icons';
+import {
+  cardOutline,
+  cashOutline,
+  checkmarkCircleOutline,
+  sparklesOutline,
+  walletOutline,
+} from 'ionicons/icons';
 import { useLocation } from 'react-router-dom';
 import { BrandMark } from '../../atoms/BrandMark/BrandMark';
 import { useAgentUI } from '../../../contexts/AgentUIContext';
@@ -47,7 +53,15 @@ export const QuickCapturePage = () => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const { startChat } = useAgentUI();
-  const { showError, showSuccess, toast } = useToast();
+  const { showError, toast } = useToast();
+  const assistantMessage = saving
+    ? 'Estoy leyendo el gasto y buscando dónde encaja.'
+    : successCount > 0
+      ? 'Listo. Lo envié al agente para clasificarlo y registrarlo.'
+      : quickPaymentSource
+        ? `${PAYMENT_SOURCE_LABEL[quickPaymentSource]} seleccionado. Capturo el gasto y lo ordeno.`
+        : 'Elige cómo pagaste y dime el gasto.';
+  const assistantIcon = successCount > 0 ? checkmarkCircleOutline : sparklesOutline;
 
   useEffect(() => {
     setQuickPaymentSource(initialPaymentSource);
@@ -88,7 +102,6 @@ export const QuickCapturePage = () => {
 
     if (didStart) {
       setSuccessCount((n) => n + 1);
-      showSuccess('Enviado al agente.');
       setQuickText('');
       inputRef.current?.focus();
     } else {
@@ -111,6 +124,20 @@ export const QuickCapturePage = () => {
               <span className={styles.sourceBadge}>{PAYMENT_SOURCE_LABEL[quickPaymentSource]}</span>
             ) : null}
           </header>
+
+          <div className={[styles.agentBubble, saving ? styles.agentBubbleThinking : ''].filter(Boolean).join(' ')}>
+            <span className={styles.agentGlyph}>
+              <IonIcon icon={assistantIcon} aria-hidden="true" />
+            </span>
+            <p>{assistantMessage}</p>
+            {saving ? (
+              <span className={styles.thinkingDots} aria-hidden="true">
+                <span />
+                <span />
+                <span />
+              </span>
+            ) : null}
+          </div>
 
           <form className={styles.quickCard} onSubmit={handleQuickSubmit}>
             <div className={styles.quickInputRow}>
