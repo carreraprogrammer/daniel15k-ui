@@ -6,21 +6,21 @@
 
 :root {
   /* ── COLORES BASE ── */
-  --color-bg-primary:     #030303;   /* fondo principal */
-  --color-bg-secondary:   #090909;   /* fondo de cards, sidebars */
-  --color-bg-elevated:    #111111;   /* fondo de modales, dropdowns */
-  --color-bg-input:       #151515;   /* fondo de inputs */
+  --color-bg-primary:     #0B0B0E;   /* fondo principal */
+  --color-bg-secondary:   #131318;   /* fondo de cards, sidebars */
+  --color-bg-elevated:    #1B1B22;   /* fondo de modales, dropdowns */
+  --color-bg-input:       #1B1B22;   /* fondo de inputs */
 
   /* ── COLORES DE MARCA (cambiar por cliente) ── */
-  --color-brand:          #D6A84A;   /* primario — dorado sobrio */
-  --color-brand-rgb:      214, 168, 74;
-  --color-brand-hover:    #E7C36D;
-  --color-brand-active:   #B58527;
-  --color-brand-subtle:   #2B1F08;   /* fondo sutil con tono de marca */
+  --color-brand:          #E6B656;   /* primario — dorado cálido ASCENT */
+  --color-brand-rgb:      230, 182, 86;
+  --color-brand-hover:    #F0C96A;
+  --color-brand-active:   #C49430;
+  --color-brand-subtle:   #2B1E08;   /* fondo sutil con tono de marca */
 
   /* ── COLORES DE ACENTO ── */
-  --color-accent:         #F3D27A;   /* solar */
-  --color-accent-rgb:     243, 210, 122;
+  --color-accent:         #F0C96A;   /* solar */
+  --color-accent-rgb:     240, 201, 106;
   --color-accent-subtle:  #32260B;
 
   /* ── COLORES SEMÁNTICOS ── */
@@ -37,8 +37,8 @@
   --color-flow-subtle:    rgba(var(--color-brand-rgb), 0.1);
 
   /* ── TEXTO ── */
-  --color-text-primary:   #F8FAFC;   /* texto principal */
-  --color-text-secondary: #A6A6A6;   /* texto secundario, labels */
+  --color-text-primary:   #F4F1EA;   /* texto principal */
+  --color-text-secondary: #ADA89F;   /* texto secundario, labels */
   --color-text-disabled:  #5C5C5C;   /* texto deshabilitado */
   --color-text-inverse:   #050505;   /* texto sobre fondos claros */
 
@@ -49,9 +49,9 @@
   --color-border-subtle:  #1A1A1A;
 
   /* ── TIPOGRAFÍA ── */
-  --font-sans:    'Manrope', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --font-display: var(--font-sans);
-  --font-mono:    var(--font-sans);
+  --font-sans:    'DM Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-display: 'Sora', var(--font-sans);
+  --font-mono:    'DM Mono', 'SF Mono', 'Fira Code', monospace;
 
   --text-xs:      0.75rem;    /* 12px */
   --text-sm:      0.875rem;   /* 14px */
@@ -123,7 +123,7 @@
   --shadow-sm:  0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-md:  0 4px 12px rgba(0, 0, 0, 0.5);
   --shadow-lg:  0 8px 32px rgba(0, 0, 0, 0.6);
-  --shadow-brand: 0 0 0 3px rgba(214, 168, 74, 0.24);  /* glow en foco */
+  --shadow-brand: 0 0 0 3px rgba(230, 182, 86, 0.24);  /* glow en foco */
   --shadow-float: 0 18px 48px rgba(0, 0, 0, 0.46), 0 4px 14px rgba(0, 0, 0, 0.28);
   --shadow-float-hover: 0 26px 64px rgba(0, 0, 0, 0.52), 0 8px 18px rgba(0, 0, 0, 0.32);
   --shadow-surface: 0 12px 26px rgba(0, 0, 0, 0.24);
@@ -131,13 +131,13 @@
   --surface-panel-strong: rgba(8, 8, 8, 0.96);
   --surface-panel-soft: rgba(255, 255, 255, 0.028);
   --surface-highlight: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0) 24%);
-  --surface-glow: radial-gradient(circle at top left, rgba(243, 210, 122, 0.1), transparent 34%),
-                  radial-gradient(circle at 82% 14%, rgba(214, 168, 74, 0.08), transparent 30%);
+  --surface-glow: radial-gradient(circle at top left, rgba(230, 182, 86, 0.1), transparent 34%),
+                  radial-gradient(circle at 82% 14%, rgba(230, 182, 86, 0.08), transparent 30%);
   --surface-shell-bg:
-    radial-gradient(circle at 12% 8%, rgba(243, 210, 122, 0.08), transparent 18%),
-    radial-gradient(circle at top left, rgba(214, 168, 74, 0.07), transparent 22%),
+    radial-gradient(circle at 12% 8%, rgba(230, 182, 86, 0.08), transparent 18%),
+    radial-gradient(circle at top left, rgba(230, 182, 86, 0.07), transparent 22%),
     radial-gradient(circle at right 18%, rgba(107, 78, 25, 0.1), transparent 24%),
-    linear-gradient(180deg, #020202 0%, #070707 48%, #030303 100%);
+    linear-gradient(180deg, #0B0B0E 0%, #0F0F14 48%, #0B0B0E 100%);
   --surface-grid-line: rgba(255, 255, 255, 0.018);
   --surface-overlay: rgba(9, 9, 9, 0.88);
   --surface-header: rgba(8, 8, 8, 0.86);

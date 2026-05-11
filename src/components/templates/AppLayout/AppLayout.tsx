@@ -6,7 +6,6 @@ import { Header } from '../../organisms/Header';
 import { BrandMark } from '../../atoms/BrandMark';
 import { BreadcrumbTrail, type BreadcrumbItem } from '../../organisms/BreadcrumbTrail';
 import { CompletenessIndicator } from '../../molecules/CompletenessIndicator';
-import { AgentEventRenderer } from '../../molecules/AgentEventRenderer';
 import { FloatingAgent } from '../../organisms/FloatingAgent';
 import { rememberAuthPath } from '../../../utils/navigation';
 import { useAuthStore } from '../../../store/authStore';
@@ -92,13 +91,12 @@ export const AppLayout = ({ title, children }: { title: string; children: ReactN
               </div>
             </aside>
             <main className={styles.main}>
-              <div className={styles.contentShell}>
+              <div className={styles.contentShell} data-agent-drag-surface="content">
                 {children}
               </div>
             </main>
           </div>
 
-          <AgentEventRenderer />
           <CompletenessIndicator />
           <FloatingAgent />
         </div>

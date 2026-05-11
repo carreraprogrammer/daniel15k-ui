@@ -286,6 +286,7 @@ export interface Transaction {
     product: string;
     amount: number;
     transaction_type?: TransactionType;
+    category_type?: string | null;
     status?: TransactionStatus;
     source?: string;
     category_id?: number | null;

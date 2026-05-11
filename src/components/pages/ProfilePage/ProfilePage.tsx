@@ -168,7 +168,7 @@ export const ProfileContent = () => {
                   <AvatarNucleus
                     seed={avatarPreviewSeed}
                     level={getEffectiveLevel()}
-                    size={48}
+                    size={28}
                   />
                 </div>
                 <div className={styles.avatarControlGroup}>
@@ -197,21 +197,13 @@ export const ProfileContent = () => {
                     </button>
                   ))}
                 </div>
-                <div className={styles.avatarMatrix} aria-label="Comparación de avatar por nivel">
-                  {LEVEL_NAMES.map((name, idx) => (
-                    <div key={name} className={styles.avatarMatrixItem}>
-                      <AvatarNucleus seed={avatarPreviewSeed} level={idx} size={32} />
-                      <span>{idx}</span>
-                    </div>
-                  ))}
-                </div>
                 <div className={styles.avatarMatrix} aria-label="Comparación de avatar por usuario simulado">
                   {avatarNearbyUserIds.map((sampleUserId) => (
                     <div key={sampleUserId} className={styles.avatarMatrixItem}>
                       <AvatarNucleus
                         seed={`${progressData.avatarSeed}:sample-user:${sampleUserId}`}
                         level={getEffectiveLevel()}
-                        size={32}
+                        size={18}
                       />
                       <span>U{sampleUserId}</span>
                     </div>

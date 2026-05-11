@@ -1,548 +1,264 @@
-@keyframes breathe {
-  0%, 100% { transform: translate(-50%, -50%) scale(1); }
-  50% { transform: translate(-50%, -50%) scale(1.08); }
-}
-
-@keyframes flutter {
-  0%, 100% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
-  35% { transform: translate(-50%, -50%) rotate(4deg) scale(1.06); }
-  70% { transform: translate(-50%, -50%) rotate(-3deg) scale(0.96); }
-}
-
-@keyframes pulse {
-  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.96; }
-  50% { transform: translate(-50%, -50%) scale(1.16); opacity: 0.78; }
-}
-
-@keyframes ripple {
-  0%, 100% { transform: translate(-50%, -50%) scale(1); }
-  30% { transform: translate(-50%, -50%) scale(1.12); }
-  60% { transform: translate(-50%, -50%) scale(0.92); }
-}
-
-@keyframes drift {
-  0%, 100% { transform: translate(-50%, -50%) translate(0, 0) scale(1); }
-  33% { transform: translate(-50%, -50%) translate(1px, -1.5px) scale(1.06); }
-  66% { transform: translate(-50%, -50%) translate(-1px, 1px) scale(0.96); }
-}
-
 @keyframes seedSway {
-  0%, 100% { transform: translate(-50%, -50%) rotate(-22deg) scale(1); }
-  50% { transform: translate(-50%, -50%) rotate(-17deg) scale(1.04); }
+  0%, 100% { transform: rotate(-8deg) scale(0.9); }
+  50%       { transform: rotate(6deg)  scale(0.94); }
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.06); }
+}
+
+@keyframes breathe-strong {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.12); }
 }
 
 @keyframes orbit {
-  from { transform: rotate(var(--av-offset)); }
-  to { transform: rotate(calc(var(--av-offset) + 360deg)); }
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }
+
+@keyframes orbit-reverse {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(-360deg); }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.9; }
+  50%       { opacity: 0.45; }
+}
+
+/* ── Root ─────────────────────────────────────────────────────── */
 
 .root {
   position: relative;
   width: var(--av-size);
   height: var(--av-size);
   flex: 0 0 var(--av-size);
-  overflow: visible;
   isolation: isolate;
 }
 
-.root::before,
-.root::after {
+/* Second ring (level 4–5) */
+.root::before {
   content: '';
   position: absolute;
-  z-index: 0;
-  top: 50%;
-  left: 50%;
-  display: none;
   border-radius: 50%;
+  pointer-events: none;
+  display: none;
+}
+
+/* ── Core: DiceBear/Seed SVG ──────────────────────────────────── */
+
+.core {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #000;        /* dark bg — no overflow bleeds, glow pops */
+  transition: box-shadow 0.5s ease, border-radius 0.5s ease;
+}
+
+.core::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  display: none;
   pointer-events: none;
 }
 
-.core {
-  position: absolute;
-  z-index: 2;
-  top: 50%;
-  left: 50%;
-  width: calc(var(--av-size) * 0.42);
-  height: calc(var(--av-size) * 0.42);
-  background:
-    radial-gradient(circle at 35% 30%, hsl(var(--av-hue) var(--av-sat) 88%), hsl(var(--av-hue) var(--av-sat) 48%) 72%);
-  animation-duration: var(--av-speed);
-  animation-timing-function: ease-in-out;
-  animation-iteration-count: infinite;
-  box-shadow:
-    0 0 calc(var(--av-size) * 0.18) hsl(var(--av-hue) var(--av-sat) 62% / 0.38),
-    inset 0 1px 0 hsl(var(--av-hue) var(--av-sat) 92% / 0.55);
+.core > svg {
+  width: 100%;
+  height: 100%
+  display: block;
 }
 
-.root[data-shape='circle'] .core { border-radius: 50%; }
-.root[data-shape='blob'] .core { border-radius: 42% 58% 60% 40% / 48% 42% 58% 52%; }
-.root[data-shape='faceted'] .core { border-radius: 34% 66% 56% 44% / 42% 34% 66% 58%; }
+/* ── Shape variants (clip the DiceBear SVG differently) ──────── */
 
-.root[data-tilt='breathe'] .core { animation-name: breathe; }
-.root[data-tilt='flutter'] .core { animation-name: flutter; }
-.root[data-tilt='pulse'] .core { animation-name: pulse; }
-.root[data-tilt='ripple'] .core { animation-name: ripple; }
-.root[data-tilt='drift'] .core { animation-name: drift; }
+.root[data-shape='blob'] .core {
+  border-radius: 42% 58% 60% 40% / 48% 42% 58% 52%;
+}
 
-.pieces,
-.ring {
+.root[data-shape='rounded'] .core {
+  border-radius: 28%;
+}
+
+/* ── Creature overlay ─────────────────────────────────────────── */
+
+.overlay {
   position: absolute;
   inset: 0;
-  border-radius: 50%;
-  animation: orbit calc(var(--av-speed) * 7) linear infinite;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  /* overflow: visible is set inline on the SVG element */
 }
 
-.piece {
-  --piece-angle: calc((360deg / var(--av-total)) * var(--av-piece));
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: calc(var(--av-size) * 0.13);
-  height: calc(var(--av-size) * 0.13);
-  border-radius: 50%;
-  background: hsl(var(--av-sec-hue) 72% 66% / 0.92);
-  box-shadow: 0 0 calc(var(--av-size) * 0.09) hsl(var(--av-sec-hue) 72% 66% / 0.34);
-  transform:
-    translate(-50%, -50%)
-    rotate(var(--piece-angle))
-    translateX(calc(var(--av-size) * 0.38))
-    rotate(calc(var(--piece-angle) * -1));
+/* Overlay scale + opacity grows with level — creature features evolve */
+.root[data-level='1'] .overlay { opacity: 0.45; transform: scale(0.78); transform-origin: 50% 50%; }
+.root[data-level='2'] .overlay { opacity: 0.65; transform: scale(0.88); transform-origin: 50% 50%; }
+.root[data-level='3'] .overlay { opacity: 0.82; transform: scale(0.98); transform-origin: 50% 50%; }
+.root[data-level='4'] .overlay { opacity: 0.96; transform: scale(1.16) rotate(-4deg); transform-origin: 50% 50%; }
+.root[data-level='5'] .overlay { opacity: 1; transform: scale(1.3) rotate(5deg); transform-origin: 50% 50%; }
+
+/* Orbit family: the whole overlay SVG rotates */
+.overlayOrbit {
+  animation: orbit calc(var(--av-speed) * 6) linear infinite;
 }
 
-.piece:nth-child(2n) {
-  width: calc(var(--av-size) * 0.1);
-  height: calc(var(--av-size) * 0.1);
-  background: hsl(var(--av-hue) var(--av-sat) 72% / 0.88);
+/* Stardust family: twinkling */
+.root[data-family='stardust'] .overlay {
+  animation: twinkle calc(var(--av-speed) * 0.9) ease-in-out infinite;
 }
+
+/* ── Ring ─────────────────────────────────────────────────────── */
 
 .ring {
+  position: absolute;
+  z-index: 3;
+  inset: -5px;
+  border-radius: 50%;
+  border: 2px solid transparent;
   display: none;
-  z-index: 1;
-  border: 1px solid hsl(var(--av-hue) var(--av-sat) 64% / 0.24);
+  pointer-events: none;
 }
 
-.root[data-level='0'] {
-  filter: saturate(0.58) brightness(0.86);
-  opacity: 0.82;
-}
+/* ─────────────────────────────────────────────────────────────── */
+/* LEVEL 0 — Semilla. Same for everyone. No creature visible.     */
+/* ─────────────────────────────────────────────────────────────── */
 
 .root[data-level='0'] .core {
-  width: calc(var(--av-size) * 0.38);
-  height: calc(var(--av-size) * 0.58);
-  border-radius: 62% 38% 54% 46% / 68% 56% 44% 32%;
-  background:
-    radial-gradient(circle at 38% 28%, hsl(var(--av-hue) var(--av-sat) 86% / 0.9), transparent 30%),
-    linear-gradient(145deg, hsl(var(--av-hue) var(--av-sat) 54%), hsl(var(--av-hue) var(--av-sat) 30%) 76%);
-  animation-name: seedSway;
+  background: #0a120a;
+  border-radius: 46% 54% 50% 50% / 58% 50% 50% 42%;
+  animation: seedSway calc(var(--av-speed) * 1.4) ease-in-out infinite;
   box-shadow:
-    0 0 calc(var(--av-size) * 0.12) hsl(var(--av-hue) var(--av-sat) 52% / 0.22),
-    inset 1px 0 0 hsl(var(--av-hue) var(--av-sat) 90% / 0.32);
+    0 0 calc(var(--av-size) * 0.4) rgba(70, 130, 50, 0.42);
 }
 
-.root[data-level='0'] .pieces {
-  display: none;
-}
-
-.root[data-level='1'] .pieces {
-  display: block;
-}
-
-.root[data-family='sprout'] .core {
-  border-radius: 58% 42% 50% 50% / 68% 68% 32% 32%;
-}
-
-.root[data-family='sprout'] .pieces {
-  animation-duration: calc(var(--av-speed) * 12);
-}
-
-.root[data-family='sprout'] .piece {
-  border-radius: 68% 32% 62% 38% / 54% 64% 36% 46%;
-  transform:
-    translate(-50%, -50%)
-    rotate(calc(var(--piece-angle) * 0.22 - 34deg))
-    translateY(calc(var(--av-size) * -0.34))
-    translateX(calc(var(--av-size) * 0.04));
-}
-
-.root[data-family='sprout'][data-level='2']::after,
-.root[data-family='sprout'][data-level='3']::after,
-.root[data-family='sprout'][data-level='4']::after,
-.root[data-family='sprout'][data-level='5']::after {
-  display: block;
-  width: calc(var(--av-size) * 0.1);
-  height: calc(var(--av-size) * 0.56);
-  border-radius: 999px;
-  background: linear-gradient(to bottom, hsl(var(--av-sec-hue) 76% 66% / 0.42), transparent);
-  transform: translate(-50%, -24%);
-}
-
-.root[data-family='crystal'] .core {
-  border-radius: 18% 44% 20% 46% / 42% 20% 48% 24%;
-  clip-path: polygon(50% 0, 92% 28%, 78% 100%, 22% 100%, 8% 28%);
-}
-
-.root[data-family='crystal'] .piece {
-  border-radius: 2px;
-  transform:
-    translate(-50%, -50%)
-    rotate(var(--piece-angle))
-    translateX(calc(var(--av-size) * 0.4))
-    rotate(45deg);
-}
-
-.root[data-family='crystal'] .ring {
-  border-radius: 28% 48% 28% 48%;
-}
-
-.root[data-family='crystal'][data-level='4']::before,
-.root[data-family='crystal'][data-level='5']::before {
-  border-radius: 22% 50% 22% 50%;
-  transform: translate(-50%, -50%) rotate(45deg);
-}
-
-.root[data-family='comet'] .pieces {
-  animation-duration: calc(var(--av-speed) * 9);
-}
-
-.root[data-family='comet'] .piece {
-  width: calc(var(--av-size) * 0.11);
-  height: calc(var(--av-size) * 0.11);
-  transform:
-    translate(-50%, -50%)
-    rotate(calc(var(--av-offset) + (var(--av-piece) * -12deg)))
-    translateX(calc(var(--av-size) * 0.48));
-}
-
-.root[data-family='comet'] .piece:nth-child(2n) {
-  opacity: 0.72;
-}
-
-.root[data-family='comet'] .piece:nth-child(3n) {
-  opacity: 0.54;
-}
-
-.root[data-family='comet'][data-level='2']::after,
-.root[data-family='comet'][data-level='3']::after,
-.root[data-family='comet'][data-level='4']::after,
-.root[data-family='comet'][data-level='5']::after {
-  display: block;
-  width: calc(var(--av-size) * 0.76);
-  height: calc(var(--av-size) * 0.2);
-  border-radius: 999px;
-  background: linear-gradient(90deg, transparent, hsl(var(--av-sec-hue) 80% 66% / 0.32), transparent);
-  transform: translate(-72%, -50%) rotate(-18deg);
-}
-
-.root[data-family='horned'] .core {
-  border-radius: 48% 52% 44% 56% / 56% 54% 46% 44%;
-}
-
-.root[data-family='horned'][data-level='2']::before,
-.root[data-family='horned'][data-level='3']::before,
-.root[data-family='horned'][data-level='4']::before,
-.root[data-family='horned'][data-level='5']::before {
-  display: block;
-  width: calc(var(--av-size) * 0.62);
-  height: calc(var(--av-size) * 0.36);
-  border-radius: 50% 50% 12% 12%;
-  border-top: calc(var(--av-size) * 0.1) solid hsl(var(--av-sec-hue) 76% 68% / 0.74);
-  border-left: calc(var(--av-size) * 0.08) solid transparent;
-  border-right: calc(var(--av-size) * 0.08) solid transparent;
-  transform: translate(-50%, -92%);
-}
-
-.root[data-family='horned'] .piece {
-  border-radius: 4px 999px 999px 4px;
-  transform:
-    translate(-50%, -50%)
-    rotate(var(--piece-angle))
-    translateX(calc(var(--av-size) * 0.42));
-}
-
-.root[data-family='stardust'] .piece {
-  width: calc(var(--av-size) * 0.1);
-  height: calc(var(--av-size) * 0.1);
-  border-radius: 35% 65% 35% 65%;
-  transform:
-    translate(-50%, -50%)
-    rotate(var(--piece-angle))
-    translateX(calc(var(--av-size) * 0.46))
-    rotate(45deg);
-  box-shadow:
-    0 0 calc(var(--av-size) * 0.08) hsl(var(--av-sec-hue) 84% 72% / 0.46),
-    calc(var(--av-size) * 0.16) calc(var(--av-size) * -0.08) 0 calc(var(--av-size) * -0.04) hsl(var(--av-hue) var(--av-sat) 72% / 0.7);
-}
-
-.root[data-family='stardust'][data-level='3']::before,
-.root[data-family='stardust'][data-level='4']::before,
-.root[data-family='stardust'][data-level='5']::before {
-  display: block;
-  width: calc(var(--av-size) * 0.8);
-  height: calc(var(--av-size) * 0.8);
-  background:
-    radial-gradient(circle at 18% 28%, hsl(var(--av-sec-hue) 86% 76% / 0.8) 0 4%, transparent 5%),
-    radial-gradient(circle at 82% 38%, hsl(var(--av-hue) var(--av-sat) 72% / 0.72) 0 3%, transparent 4%),
-    radial-gradient(circle at 38% 86%, hsl(var(--av-sec-hue) 86% 76% / 0.62) 0 3%, transparent 4%);
-  transform: translate(-50%, -50%) rotate(18deg);
-}
-
-.root[data-family='wave'] .pieces {
-  animation-duration: calc(var(--av-speed) * 10);
-}
-
-.root[data-family='wave'] .piece {
-  width: calc(var(--av-size) * 0.16);
-  height: calc(var(--av-size) * 0.08);
-  border-radius: 999px;
-  transform:
-    translate(-50%, -50%)
-    rotate(calc(var(--piece-angle) * 0.5))
-    translateX(calc(var(--av-size) * 0.42));
-}
-
-.root[data-family='wave'][data-level='2']::before,
-.root[data-family='wave'][data-level='3']::before,
-.root[data-family='wave'][data-level='4']::before,
-.root[data-family='wave'][data-level='5']::before {
-  display: block;
-  width: calc(var(--av-size) * 0.76);
-  height: calc(var(--av-size) * 0.42);
-  border-top: 1px solid hsl(var(--av-sec-hue) 78% 68% / 0.42);
-  border-bottom: 1px solid hsl(var(--av-hue) var(--av-sat) 68% / 0.28);
-  border-radius: 50%;
-  transform: translate(-50%, -50%) rotate(-12deg);
-}
-
-.root[data-family='wave'][data-level='4']::after,
-.root[data-family='wave'][data-level='5']::after {
-  display: block;
-  width: calc(var(--av-size) * 0.9);
-  height: calc(var(--av-size) * 0.56);
-  border-top: 1px solid hsl(var(--av-sec-hue) 78% 68% / 0.26);
-  border-radius: 50%;
-  transform: translate(-50%, -50%) rotate(12deg);
-}
-
-.root[data-family='winged'] .core {
-  border-radius: 56% 44% 52% 48% / 48% 48% 52% 52%;
-}
-
-.root[data-family='winged'][data-level='2']::before,
-.root[data-family='winged'][data-level='3']::before,
-.root[data-family='winged'][data-level='4']::before,
-.root[data-family='winged'][data-level='5']::before {
-  display: block;
-  width: calc(var(--av-size) * 0.96);
-  height: calc(var(--av-size) * 0.44);
-  border-radius: 70% 70% 18% 18% / 72% 72% 28% 28%;
-  background:
-    radial-gradient(ellipse at 20% 48%, hsl(var(--av-sec-hue) 78% 72% / 0.38), transparent 54%),
-    radial-gradient(ellipse at 80% 48%, hsl(var(--av-sec-hue) 78% 72% / 0.38), transparent 54%);
-  transform: translate(-50%, -50%);
-}
-
-.root[data-family='winged'] .piece {
-  width: calc(var(--av-size) * 0.12);
-  height: calc(var(--av-size) * 0.16);
-  border-radius: 999px 999px 40% 40%;
-  transform:
-    translate(-50%, -50%)
-    rotate(var(--piece-angle))
-    translateX(calc(var(--av-size) * 0.4));
-}
-
-.root[data-family='orbit'][data-level='2'] .ring,
-.root[data-family='orbit'][data-level='3'] .ring,
-.root[data-family='orbit'][data-level='4'] .ring,
-.root[data-family='orbit'][data-level='5'] .ring,
-.root[data-family='crystal'][data-level='2'] .ring,
-.root[data-family='crystal'][data-level='3'] .ring,
-.root[data-family='crystal'][data-level='4'] .ring,
-.root[data-family='crystal'][data-level='5'] .ring {
-  display: block;
-}
-
-.root[data-family='orbit'][data-level='2'] .ring,
-.root[data-family='crystal'][data-level='2'] .ring {
-  transform: scale(0.82);
-  border-color: hsl(var(--av-hue) var(--av-sat) 68% / 0.4);
-  box-shadow: 0 0 calc(var(--av-size) * 0.12) hsl(var(--av-hue) var(--av-sat) 60% / 0.16);
-}
-
-.root[data-level='3'] .core {
-  width: calc(var(--av-size) * 0.48);
-  height: calc(var(--av-size) * 0.48);
-}
-
-.root[data-family='orbit'][data-level='3'] .piece,
-.root[data-family='crystal'][data-level='3'] .piece {
-  width: calc(var(--av-size) * 0.15);
-  height: calc(var(--av-size) * 0.15);
-  transform:
-    translate(-50%, -50%)
-    rotate(var(--piece-angle))
-    translateX(calc(var(--av-size) * 0.44))
-    rotate(calc(var(--piece-angle) * -1));
-}
-
-.root[data-family='orbit'][data-level='3'] .piece:nth-child(2n),
-.root[data-family='crystal'][data-level='3'] .piece:nth-child(2n) {
-  border-radius: 40% 60% 60% 40%;
-}
-
-.root[data-family='orbit'][data-level='4'] .ring,
-.root[data-family='orbit'][data-level='5'] .ring,
-.root[data-family='crystal'][data-level='4'] .ring,
-.root[data-family='crystal'][data-level='5'] .ring {
-  border-color: hsl(var(--av-sec-hue) 70% 64% / 0.34);
-}
-
-.root[data-family='orbit'][data-level='4']::before,
-.root[data-family='orbit'][data-level='5']::before,
-.root[data-family='crystal'][data-level='4']::before,
-.root[data-family='crystal'][data-level='5']::before {
-  display: block;
-  width: calc(var(--av-size) * 0.86);
-  height: calc(var(--av-size) * 0.86);
-  border: 1px solid hsl(var(--av-sec-hue) 76% 66% / 0.3);
-  transform: translate(-50%, -50%) rotate(18deg);
-  box-shadow: 0 0 calc(var(--av-size) * 0.18) hsl(var(--av-sec-hue) 76% 66% / 0.2);
-}
-
-.root[data-level='4'] .core,
-.root[data-level='5'] .core {
-  width: calc(var(--av-size) * 0.5);
-  height: calc(var(--av-size) * 0.5);
-  box-shadow:
-    0 0 calc(var(--av-size) * 0.24) hsl(var(--av-hue) var(--av-sat) 62% / 0.46),
-    inset 0 1px 0 hsl(var(--av-hue) var(--av-sat) 92% / 0.62);
-}
-
-.root[data-family='orbit'][data-level='4'] .piece,
-.root[data-family='orbit'][data-level='5'] .piece,
-.root[data-family='crystal'][data-level='4'] .piece,
-.root[data-family='crystal'][data-level='5'] .piece {
-  width: calc(var(--av-size) * 0.17);
-  height: calc(var(--av-size) * 0.17);
-  transform:
-    translate(-50%, -50%)
-    rotate(var(--piece-angle))
-    translateX(calc(var(--av-size) * 0.48))
-    rotate(calc(var(--piece-angle) * -1));
-}
-
-.root[data-family='orbit'][data-level='5']::after,
-.root[data-family='crystal'][data-level='5']::after {
-  display: block;
-  width: calc(var(--av-size) * 0.64);
-  height: calc(var(--av-size) * 0.64);
-  border: 1px solid hsl(var(--av-hue) var(--av-sat) 76% / 0.34);
-  transform: translate(-50%, -50%) rotate(-28deg);
-  box-shadow:
-    inset 0 0 calc(var(--av-size) * 0.08) hsl(var(--av-hue) var(--av-sat) 70% / 0.16),
-    0 0 calc(var(--av-size) * 0.16) hsl(var(--av-hue) var(--av-sat) 70% / 0.18);
-}
-
-.root[data-family='sprout'][data-level='5']::after {
-  width: calc(var(--av-size) * 0.12);
-  height: calc(var(--av-size) * 0.7);
-  border: 0;
-  border-radius: 999px;
-  background: linear-gradient(to bottom, hsl(var(--av-sec-hue) 76% 66% / 0.5), transparent);
-  transform: translate(-50%, -26%);
-  box-shadow: 0 0 calc(var(--av-size) * 0.18) hsl(var(--av-sec-hue) 76% 66% / 0.22);
-}
-
-.root[data-family='comet'][data-level='5']::after {
-  width: calc(var(--av-size) * 0.86);
-  height: calc(var(--av-size) * 0.22);
-  border: 0;
-  border-radius: 999px;
-  background: linear-gradient(90deg, transparent, hsl(var(--av-sec-hue) 80% 66% / 0.42), transparent);
-  transform: translate(-76%, -50%) rotate(-18deg);
-  box-shadow: 0 0 calc(var(--av-size) * 0.16) hsl(var(--av-sec-hue) 80% 66% / 0.16);
-}
-
-.root[data-level='5'] .piece {
-  box-shadow:
-    0 0 calc(var(--av-size) * 0.12) hsl(var(--av-sec-hue) 75% 68% / 0.46),
-    0 0 calc(var(--av-size) * 0.22) hsl(var(--av-hue) var(--av-sat) 55% / 0.16);
-}
-
-/* ── Universal glow progression (all families) ───────────────── */
+/* ─────────────────────────────────────────────────────────────── */
+/* LEVEL 1 — Creature emerges. Faint, small.                      */
+/* ─────────────────────────────────────────────────────────────── */
 
 .root[data-level='1'] .core {
+  animation: breathe var(--av-speed) ease-in-out infinite;
   box-shadow:
-    0 0 calc(var(--av-size) * 0.22) hsl(var(--av-hue) var(--av-sat) 62% / 0.42),
-    inset 0 1px 0 hsl(var(--av-hue) var(--av-sat) 92% / 0.55);
+    0 0 calc(var(--av-size) * 0.5) hsl(var(--av-hue) var(--av-sat) 55% / 0.38);
 }
 
+/* ─────────────────────────────────────────────────────────────── */
+/* LEVEL 2 — Features sharpen. Glow grows.                        */
+/* ─────────────────────────────────────────────────────────────── */
+
 .root[data-level='2'] .core {
+  animation: breathe var(--av-speed) ease-in-out infinite;
   box-shadow:
-    0 0 calc(var(--av-size) * 0.38) hsl(var(--av-hue) var(--av-sat) 62% / 0.52),
-    0 0 calc(var(--av-size) * 0.14) hsl(var(--av-hue) var(--av-sat) 84% / 0.7),
-    inset 0 1px 0 hsl(var(--av-hue) var(--av-sat) 92% / 0.55);
+    0 0 calc(var(--av-size) * 0.7)  hsl(var(--av-hue) var(--av-sat) 58% / 0.55),
+    0 0 calc(var(--av-size) * 0.2)  hsl(var(--av-hue) var(--av-sat) 80% / 0.65);
+}
+
+/* ─────────────────────────────────────────────────────────────── */
+/* LEVEL 3 — Full creature + first ring. Clear visual jump.       */
+/* ─────────────────────────────────────────────────────────────── */
+
+.root[data-level='3'] .ring {
+  display: block;
+  inset: -7px;
+  border-color: hsl(var(--av-hue) var(--av-sat) 72% / 0.8);
+  border-width: 2px;
+  box-shadow:
+    0 0 calc(var(--av-size) * 0.25) hsl(var(--av-hue) var(--av-sat) 72% / 0.5),
+    inset 0 0 calc(var(--av-size) * 0.1) hsl(var(--av-hue) var(--av-sat) 72% / 0.25);
+  animation: orbit calc(var(--av-speed) * 9) linear infinite;
 }
 
 .root[data-level='3'] .core {
+  animation: breathe var(--av-speed) ease-in-out infinite;
   box-shadow:
-    0 0 calc(var(--av-size) * 0.52) hsl(var(--av-hue) var(--av-sat) 62% / 0.6),
-    0 0 calc(var(--av-size) * 0.2)  hsl(var(--av-hue) var(--av-sat) 84% / 0.75),
-    inset 0 1px 0 hsl(var(--av-hue) var(--av-sat) 92% / 0.55);
+    0 0 calc(var(--av-size) * 0.8)  hsl(var(--av-hue) var(--av-sat) 60% / 0.6),
+    0 0 calc(var(--av-size) * 0.25) hsl(var(--av-hue) var(--av-sat) 80% / 0.75);
+}
+
+/* ─────────────────────────────────────────────────────────────── */
+/* LEVEL 4 — Two rings. Creature at ~full size. Dual-color glow.  */
+/* ─────────────────────────────────────────────────────────────── */
+
+.root[data-level='4'] .ring {
+  display: block;
+  inset: -9px;
+  border-color: hsl(var(--av-hue) var(--av-sat) 76% / 0.88);
+  border-width: 2.5px;
+  box-shadow:
+    0 0 calc(var(--av-size) * 0.3) hsl(var(--av-hue) var(--av-sat) 76% / 0.6);
+  animation: orbit calc(var(--av-speed) * 8) linear infinite;
+}
+
+.root[data-level='4']::before {
+  display: block;
+  inset: -18px;
+  border: 1.5px solid hsl(var(--av-sec-hue) 70% 68% / 0.58);
+  box-shadow: 0 0 calc(var(--av-size) * 0.18) hsl(var(--av-sec-hue) 70% 68% / 0.32);
+  animation: orbit-reverse calc(var(--av-speed) * 13) linear infinite;
 }
 
 .root[data-level='4'] .core {
+  border-radius: 34% 66% 52% 48% / 46% 34% 66% 54%;
+  filter: saturate(1.18) contrast(1.05);
   box-shadow:
-    0 0 calc(var(--av-size) * 0.62) hsl(var(--av-hue) var(--av-sat) 62% / 0.62),
-    0 0 calc(var(--av-size) * 0.28) hsl(var(--av-hue) var(--av-sat) 84% / 0.78),
-    0 0 calc(var(--av-size) * 0.38) hsl(var(--av-sec-hue) 72% 66% / 0.28),
-    inset 0 1px 0 hsl(var(--av-hue) var(--av-sat) 92% / 0.62);
+    0 0 calc(var(--av-size) * 1.1)  hsl(var(--av-hue) var(--av-sat) 60% / 0.7),
+    0 0 calc(var(--av-size) * 0.4)  hsl(var(--av-hue) var(--av-sat) 80% / 0.9),
+    0 0 calc(var(--av-size) * 0.5)  hsl(var(--av-sec-hue) 70% 64% / 0.35);
+}
+
+.root[data-level='4'] .core::after {
+  display: block;
+  background:
+    linear-gradient(120deg, transparent 33%, hsl(var(--av-sec-hue) 78% 78% / 0.34) 48%, transparent 63%),
+    radial-gradient(circle at 72% 26%, white 0 5%, transparent 6%);
+  mix-blend-mode: screen;
+}
+
+/* ─────────────────────────────────────────────────────────────── */
+/* LEVEL 5 — Radiant. Two rings + max creature + inner white core */
+/* ─────────────────────────────────────────────────────────────── */
+
+.root[data-level='5'] .ring {
+  display: block;
+  inset: -10px;
+  border-color: hsl(var(--av-hue) var(--av-sat) 82% / 0.95);
+  border-width: 3px;
+  box-shadow:
+    0 0 calc(var(--av-size) * 0.4)  hsl(var(--av-hue) var(--av-sat) 82% / 0.68),
+    inset 0 0 calc(var(--av-size) * 0.12) hsl(var(--av-hue) var(--av-sat) 82% / 0.3);
+  animation: orbit calc(var(--av-speed) * 7) linear infinite;
+}
+
+.root[data-level='5']::before {
+  display: block;
+  inset: -22px;
+  border: 2px solid hsl(var(--av-sec-hue) 70% 72% / 0.68);
+  box-shadow: 0 0 calc(var(--av-size) * 0.24) hsl(var(--av-sec-hue) 70% 72% / 0.4);
+  animation: orbit-reverse calc(var(--av-speed) * 11) linear infinite;
 }
 
 .root[data-level='5'] .core {
+  animation: breathe-strong var(--av-speed) ease-in-out infinite;
+  border-radius: 28% 72% 38% 62% / 36% 30% 70% 64%;
+  filter: saturate(1.34) contrast(1.12) brightness(1.08);
   box-shadow:
-    0 0 calc(var(--av-size) * 0.78) hsl(var(--av-hue) var(--av-sat) 62% / 0.72),
-    0 0 calc(var(--av-size) * 0.36) hsl(var(--av-hue) var(--av-sat) 84% / 0.85),
-    0 0 calc(var(--av-size) * 0.52) hsl(var(--av-sec-hue) 72% 66% / 0.38),
-    0 0 calc(var(--av-size) * 0.12) hsl(var(--av-hue) var(--av-sat) 96% / 1),
-    inset 0 1px 0 hsl(var(--av-hue) var(--av-sat) 96% / 0.7);
+    0 0 calc(var(--av-size) * 1.3)  hsl(var(--av-hue) var(--av-sat) 60% / 0.8),
+    0 0 calc(var(--av-size) * 0.5)  hsl(var(--av-hue) var(--av-sat) 80% / 0.9),
+    0 0 calc(var(--av-size) * 0.7)  hsl(var(--av-sec-hue) 70% 64% / 0.5);
 }
 
-/* ── Universal ring for all families at level 3+ ─────────────── */
-
-.root[data-level='3'] .ring,
-.root[data-level='4'] .ring,
-.root[data-level='5'] .ring {
+.root[data-level='5'] .core::after {
   display: block;
+  background:
+    radial-gradient(circle at 50% 50%, white 0 8%, transparent 9%),
+    linear-gradient(0deg, transparent 42%, hsl(var(--av-sec-hue) 86% 82% / 0.42) 49%, transparent 57%),
+    linear-gradient(90deg, transparent 42%, hsl(var(--av-hue) var(--av-sat) 84% / 0.38) 49%, transparent 57%),
+    radial-gradient(circle at 72% 22%, white 0 4%, transparent 5%);
+  mix-blend-mode: screen;
 }
-
-/* Ring shape follows avatar shape */
-.root[data-shape='blob'] .ring {
-  border-radius: 44% 56% 62% 38% / 50% 44% 56% 50%;
-}
-
-.root[data-shape='faceted'] .ring {
-  border-radius: 24% 44% 24% 44%;
-}
-
-/* Ring gets more visible each level */
-.root[data-level='3'] .ring {
-  border-color: hsl(var(--av-hue) var(--av-sat) 68% / 0.35);
-  box-shadow: 0 0 calc(var(--av-size) * 0.1) hsl(var(--av-hue) var(--av-sat) 64% / 0.2);
-}
-
-.root[data-level='4'] .ring {
-  border-color: hsl(var(--av-hue) var(--av-sat) 70% / 0.48);
-  border-width: 1.5px;
-  box-shadow:
-    0 0 calc(var(--av-size) * 0.14) hsl(var(--av-hue) var(--av-sat) 68% / 0.28),
-    0 0 calc(var(--av-size) * 0.08) hsl(var(--av-sec-hue) 72% 68% / 0.2);
-}
-
-.root[data-level='5'] .ring {
-  border-color: hsl(var(--av-hue) var(--av-sat) 74% / 0.6);
-  border-width: 2px;
-  box-shadow:
-    0 0 calc(var(--av-size) * 0.18) hsl(var(--av-hue) var(--av-sat) 68% / 0.35),
-    0 0 calc(var(--av-size) * 0.12) hsl(var(--av-sec-hue) 72% 68% / 0.3);
-}
+å

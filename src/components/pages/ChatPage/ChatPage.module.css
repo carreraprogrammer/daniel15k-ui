@@ -456,7 +456,7 @@
 
 .inputWrap {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   gap: 8px;
   background:
     linear-gradient(180deg, color-mix(in srgb, var(--text-on-surface) 4%, transparent), transparent),
@@ -475,10 +475,14 @@
 
 .input {
   flex: 1;
+  display: block;
   background: none;
   border: none;
   outline: none;
   resize: none;
+  margin: 0;
+  padding: 0;
+  min-height: calc(var(--text-base, 15px) * 1.5);
   font-family: var(--font-sans, inherit);
   font-size: var(--text-base, 15px);
   color: var(--color-text-primary);

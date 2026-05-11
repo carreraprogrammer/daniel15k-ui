@@ -21,6 +21,8 @@
     "@capacitor/keyboard": "8.0.1",
     "@capacitor/splash-screen": "^8.0.1",
     "@capacitor/status-bar": "8.0.1",
+    "@dicebear/collection": "^9.4.2",
+    "@dicebear/core": "^9.4.2",
     "@ionic/react": "^8.4.0",
     "@ionic/react-router": "^8.8.4",
     "@southdevs/capacitor-google-auth": "^7.0.0",
@@ -37,7 +39,7 @@
     "zustand": "^4.5.5"
   },
   "devDependencies": {
-    "@capacitor/cli": "8.0.1",
+    "@capacitor/cli": "^8.0.1",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",

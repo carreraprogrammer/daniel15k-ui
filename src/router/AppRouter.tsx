@@ -83,6 +83,7 @@ const AUTH_PATHS = [
   '/planned-expenses',
   '/recurring',
   '/profile',
+  '/quick',
 ];
 
 export const AppRouter = () => {

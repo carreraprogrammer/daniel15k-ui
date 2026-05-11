@@ -1,0 +1,358 @@
+.page {
+  display: grid;
+  gap: 20px;
+  padding: 20px 16px calc(120px + env(safe-area-inset-bottom, 0px));
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ── Toggle ── */
+/* ── 3-segment tab bar ── */
+.segmentRow {
+  display: flex;
+  gap: 6px;
+  padding: 4px;
+  border: 1px solid var(--surface-border, rgba(255, 255, 255, 0.09));
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.segBtn {
+  flex: 1;
+  padding: 9px 6px;
+  border-radius: 15px;
+  border: 1px solid transparent;
+  background: none;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-on-surface-muted);
+  cursor: pointer;
+  text-align: center;
+  white-space: nowrap;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.segBtn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text-primary);
+}
+
+.segBtnActive {
+  border-color: rgba(var(--color-brand-rgb, 230 182 86), 0.4);
+  background: linear-gradient(
+    135deg,
+    rgba(var(--color-brand-rgb, 230 182 86), 0.12),
+    rgba(var(--color-brand-rgb, 230 182 86), 0.06)
+  );
+  color: var(--color-text-primary);
+}
+
+/* ── View header (total) ── */
+.viewHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  border: 1px solid var(--surface-border-muted);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.viewLabel {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-on-surface-muted);
+}
+
+.viewTotal {
+  font-family: var(--font-mono);
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.viewTotalIncome { color: var(--color-income, #0E96AD); }
+
+/* ── Recurring row ── */
+.recurringRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--surface-border-muted);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.rowStatusActive {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+  background: rgba(26, 158, 74, 0.15);
+  color: var(--color-investment, #1A9E4A);
+}
+
+.rowStatusInactive {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text-on-surface-muted);
+}
+
+/* ── Obligation summary stats ── */
+.obligationSummary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.obligationStat {
+  padding: 12px 14px;
+  border: 1px solid var(--surface-border-muted);
+  border-radius: 14px;
+  background: rgba(192, 57, 43, 0.05);
+  display: grid;
+  gap: 4px;
+}
+
+.obligationStatLabel {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-on-surface-muted);
+}
+
+.obligationStatValue {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--color-committed, #C0392B);
+  letter-spacing: -0.01em;
+}
+
+/* legacy 2-col toggle — kept for reference */
+.toggleRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.toggleChip {
+  display: grid;
+  gap: 4px;
+  padding: 14px 16px;
+  border: 1px solid var(--surface-border, rgba(255, 255, 255, 0.08));
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.toggleChipActiveIncome {
+  border-color: rgba(var(--color-income, 14, 150, 173), 0.4);
+  background: rgba(14, 150, 173, 0.08);
+}
+
+.toggleChipActiveDebt {
+  border-color: rgba(var(--color-committed, 192, 57, 43), 0.4);
+  background: rgba(192, 57, 43, 0.08);
+}
+
+.toggleLabel {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-on-surface-muted);
+}
+
+.toggleAmount {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+
+.toggleAmountIncome { color: var(--color-income, #0E96AD); }
+.toggleAmountDebt   { color: var(--color-committed, #C0392B); }
+
+/* ── Sections ── */
+.listSection {
+  display: grid;
+  gap: 12px;
+}
+
+.sectionEyebrow {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-on-surface-muted);
+}
+
+.empty {
+  margin: 0;
+  color: var(--text-on-surface-muted);
+  font-size: 14px;
+  padding: 24px 0;
+  text-align: center;
+}
+
+/* ── List rows ── */
+.list {
+  display: grid;
+  gap: 8px;
+}
+
+.incomeRow,
+.debtRow {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid var(--surface-border-muted);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.debtRowTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.incomeRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.rowMain {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.rowName {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rowSub {
+  font-size: 12px;
+  color: var(--text-on-surface-muted);
+}
+
+.rowRight {
+  display: grid;
+  gap: 2px;
+  text-align: right;
+  flex: 0 0 auto;
+}
+
+.rowAmountIncome {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--color-income, #0E96AD);
+  letter-spacing: -0.01em;
+}
+
+.rowAmountDebt {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--color-committed, #C0392B);
+  letter-spacing: -0.01em;
+}
+
+.rowStatus {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+
+/* ── Debt summary stats ── */
+.debtSummary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.debtStat {
+  padding: 12px 14px;
+  border: 1px solid var(--surface-border-muted);
+  border-radius: 14px;
+  background: rgba(192, 57, 43, 0.05);
+  display: grid;
+  gap: 4px;
+}
+
+.debtStatLabel {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-on-surface-muted);
+}
+
+.debtStatValue {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--color-committed, #C0392B);
+  letter-spacing: -0.01em;
+}
+
+/* ── Progress bar per debt ── */
+.pressureTrack {
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+}
+
+.pressureFill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--color-investment, #1A9E4A);
+  transition: width 0.3s ease;
+}
+
+/* ── Manage link ── */
+.manageLink {
+  align-self: start;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-brand, #E6B656);
+  cursor: pointer;
+  letter-spacing: 0.01em;
+}

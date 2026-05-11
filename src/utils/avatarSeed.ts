@@ -1,22 +1,26 @@
-export type TiltPattern = 'breathe' | 'flutter' | 'pulse' | 'ripple' | 'drift'
-export type AvatarShape = 'circle' | 'blob' | 'faceted'
-export type AvatarFamily = 'orbit' | 'sprout' | 'crystal' | 'comet' | 'horned' | 'stardust' | 'wave' | 'winged'
+export type AvatarFamily =
+  | 'orbit' | 'sprout' | 'crystal' | 'comet'
+  | 'horned' | 'stardust' | 'wave' | 'winged'
+
+export type AvatarShape = 'circle' | 'blob' | 'rounded'
 
 export interface AvatarParams {
-  hue: number           // 0–360
-  saturation: number    // 50–90
-  shape: AvatarShape
-  family: AvatarFamily
-  tiltPattern: TiltPattern
-  pulseSpeed: number    // 1.2–3.0 s
-  pieceCount: number
-  orbitOffset: number
-  secondaryHue: number
+  hue: number          // 0–360  (primary color)
+  saturation: number   // 60–90
+  secondaryHue: number // 0–360  (accent color)
+  pulseSpeed: number   // 1.8–3.2 s
+  family: AvatarFamily // creature type
+  shape: AvatarShape   // core clip shape
+  pieceCount: number   // 3–7
+  orbitOffset: number  // 0–360 deg
+  tiltPattern: number  // 0–3
 }
 
-const TILT_PATTERNS: TiltPattern[] = ['breathe', 'flutter', 'pulse', 'ripple', 'drift']
-const SHAPES: AvatarShape[] = ['circle', 'blob', 'faceted']
-const FAMILIES: AvatarFamily[] = ['orbit', 'sprout', 'crystal', 'comet', 'horned', 'stardust', 'wave', 'winged']
+const FAMILIES: AvatarFamily[] = [
+  'orbit', 'sprout', 'crystal', 'comet',
+  'horned', 'stardust', 'wave', 'winged',
+]
+const SHAPES: AvatarShape[] = ['circle', 'blob', 'rounded']
 
 function seedToBytes(seed: string, count: number): number[] {
   const bytes: number[] = []
@@ -33,15 +37,19 @@ function seedToBytes(seed: string, count: number): number[] {
 
 export function deriveAvatarParams(seed: string): AvatarParams {
   const b = seedToBytes(seed, 9)
+
+  const hue = 34 + Math.floor((b[0] / 255) * 22)
+  const secondaryHue = 42 + Math.floor((b[2] / 255) * 16)
+
   return {
-    hue:          Math.floor((b[0] / 255) * 360),
-    saturation:   50 + Math.floor((b[1] / 255) * 40),
-    shape:        SHAPES[b[2] % 3],
-    family:       FAMILIES[b[8] % FAMILIES.length],
-    tiltPattern:  TILT_PATTERNS[b[3] % 5],
-    pulseSpeed:   1.2 + (b[4] / 255) * 1.8,
-    pieceCount:   4 + (b[5] % 4),
-    orbitOffset:  Math.floor((b[6] / 255) * 360),
-    secondaryHue: Math.floor((b[7] / 255) * 360),
+    hue,
+    saturation:   62 + Math.floor((b[1] / 255) * 18),
+    secondaryHue,
+    pulseSpeed:   1.8 + (b[3] / 255) * 1.4,
+    family:       FAMILIES[b[4] % FAMILIES.length],
+    shape:        SHAPES[b[5] % SHAPES.length],
+    pieceCount:   3 + (b[6] % 5),
+    orbitOffset:  Math.floor((b[7] / 255) * 360),
+    tiltPattern:  b[8] % 4,
   }
 }

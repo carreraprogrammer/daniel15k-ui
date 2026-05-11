@@ -976,7 +976,7 @@ export const TransactionsContent = () => {
 };
 
 export const TransactionsPage = () => (
-  <AppLayout title="Transacciones">
+  <AppLayout title="Flujo">
     <TransactionsContent />
   </AppLayout>
 );

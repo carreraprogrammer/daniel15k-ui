@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useAgentUI } from '../../../contexts/AgentUIContext'
 import { AvatarNucleus } from '../../atoms/AvatarNucleus'
-import { useProgressStore, LEVEL_NAMES } from '../../../store/progressStore'
+import { useProgressStore } from '../../../store/progressStore'
 import { formatCurrencyCompact } from '../../../utils/formatCurrency'
 import type {
   AgentUiEvent,
@@ -248,8 +248,6 @@ export const ChatPage = ({ onClose, seed, level }: Props) => {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
-  const levelName = LEVEL_NAMES[effectiveLevel] ?? 'Huevo'
-
   // Capture incoming events into local history
   useEffect(() => {
     const newEntries: ChatEntry[] = []
@@ -308,10 +306,10 @@ export const ChatPage = ({ onClose, seed, level }: Props) => {
           </svg>
         </button>
         <div className={styles.headerAvatar}>
-          <AvatarNucleus seed={seed} level={level} size={44} />
+          <AvatarNucleus seed={seed} level={level} size={24} />
         </div>
-        <p className={styles.headerName}>{levelName}</p>
-        <p className={styles.headerSub}>Nivel {effectiveLevel} · Asistente financiero</p>
+        <p className={styles.headerName}>Tu asistente</p>
+        <p className={styles.headerSub}>Nivel {effectiveLevel} · Finanzas personales</p>
       </header>
 
       {/* Messages */}
@@ -333,7 +331,7 @@ export const ChatPage = ({ onClose, seed, level }: Props) => {
             ) : (
               <div className={styles.agentRow}>
                 <div className={styles.agentAvatarSmall}>
-                  <AvatarNucleus seed={seed} level={level} size={28} />
+                  <AvatarNucleus seed={seed} level={level} size={16} />
                 </div>
                 <div className={styles.agentContent}>
                   <InlineCard event={entry.event} />
@@ -346,7 +344,7 @@ export const ChatPage = ({ onClose, seed, level }: Props) => {
         {isLoading && (
           <div className={styles.agentRow}>
             <div className={styles.agentAvatarSmall}>
-              <AvatarNucleus seed={seed} level={level} size={28} />
+              <AvatarNucleus seed={seed} level={level} size={16} />
             </div>
             <TypingDots />
           </div>

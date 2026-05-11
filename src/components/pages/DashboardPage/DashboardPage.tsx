@@ -30,9 +30,6 @@ const TOOLTIP_STYLE = {
   itemStyle: { color: 'var(--color-text-primary)', fontSize: 12 },
 };
 
-const AGENTS_URL = import.meta.env.VITE_AGENTS_URL as string | undefined;
-const SERVICE_TOKEN = import.meta.env.VITE_SERVICE_TOKEN as string | undefined;
-
 const formatRelativeTime = (iso: string): string => {
   const diff = Date.now() - new Date(iso).getTime();
   const days = Math.floor(diff / 86_400_000);
@@ -76,28 +73,7 @@ export const DashboardContent = () => {
   const history = useHistory();
   const [snapshotOpen, setSnapshotOpen] = useState(true);
   const [detailOpen, setDetailOpen] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
-  const [refreshMsg, setRefreshMsg] = useState<string | null>(null);
   const [chartGroupBy, setChartGroupBy] = useState<'category' | 'subcategory'>('category');
-
-  const handleRefreshInsight = async () => {
-    if (!AGENTS_URL || !SERVICE_TOKEN) return;
-    setRefreshing(true);
-    setRefreshMsg(null);
-    try {
-      const res = await fetch(`${AGENTS_URL}/agents/insight`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${SERVICE_TOKEN}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
-      });
-      const body = await res.json() as { ok: boolean; message?: string };
-      setRefreshMsg(body.message ?? (body.ok ? 'Análisis en proceso...' : 'No disponible aún.'));
-    } catch {
-      setRefreshMsg('Error al conectar con el agente.');
-    } finally {
-      setRefreshing(false);
-    }
-  };
 
   const liquidity = summary?.liquidity;
   const burnCategories = summary?.burn_rate?.categories ?? [];
@@ -278,6 +254,7 @@ export const DashboardContent = () => {
                           axisLine={false}
                         />
                         <Tooltip
+                          cursor={false}
                           formatter={(value, name) => [
                             formatCurrencyCompact(Number(value ?? 0)),
                             name === 'gastado' ? 'Gastado' : 'Presupuesto',
@@ -459,20 +436,7 @@ export const DashboardContent = () => {
                       onClick={() => setSnapshotOpen((v) => !v)}
                     />
                   ) : null}
-                  {detailOpen && AGENTS_URL && SERVICE_TOKEN ? (
-                    <Button
-                      label={refreshing ? 'Actualizando…' : 'Actualizar análisis'}
-                      variant="link"
-                      size="sm"
-                      onClick={() => void handleRefreshInsight()}
-                      loading={refreshing}
-                      disabled={refreshing}
-                    />
-                  ) : null}
                 </div>
-                {refreshMsg ? (
-                  <p className={styles.insightMeta}>{refreshMsg}</p>
-                ) : null}
               </div>
 
               {/* ── ZONA 2 — Ejecución del mes ───────────────────────────── */}

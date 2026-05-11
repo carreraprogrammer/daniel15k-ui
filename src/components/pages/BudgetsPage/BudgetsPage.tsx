@@ -551,20 +551,18 @@ export const BudgetsContent = () => {
                               </div>
                             </div>
                             <div className={styles.historyActions}>
-                              <div className={styles.historyActionsPrimary}>
-                                <span className={styles.historyStatus}>{planStatusLabel(plan)}</span>
-                                {plan.status === 'confirmed' && !plan.closed_at ? (
-                                  <span onClick={(event) => event.stopPropagation()}>
-                                    <Button
-                                      label={closingPlanId === plan.id ? 'Cerrando…' : 'Cerrar mes'}
-                                      variant="ghost"
-                                      size="sm"
-                                      disabled={closingPlanId === plan.id}
-                                      onClick={() => void handleCloseMonth(plan.id)}
-                                    />
-                                  </span>
-                                ) : null}
-                              </div>
+                              <span className={styles.historyStatus}>{planStatusLabel(plan)}</span>
+                              {plan.status === 'confirmed' && !plan.closed_at ? (
+                                <span onClick={(event) => event.stopPropagation()}>
+                                  <Button
+                                    label={closingPlanId === plan.id ? 'Cerrando…' : 'Cerrar mes'}
+                                    variant="ghost"
+                                    size="sm"
+                                    disabled={closingPlanId === plan.id}
+                                    onClick={() => void handleCloseMonth(plan.id)}
+                                  />
+                                </span>
+                              ) : null}
                               <span className={styles.historyDetailHint}>Ver detalle</span>
                             </div>
                           </article>

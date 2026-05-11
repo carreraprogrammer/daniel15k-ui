@@ -129,7 +129,7 @@ export const QuickCapturePage = () => {
         <div className={styles.wrapper}>
           <header className={styles.header}>
             <div className={styles.avatarMark} aria-hidden="true">
-              <AvatarNucleus seed={avatarSeed} level={avatarLevel} size={42} />
+              <AvatarNucleus seed={avatarSeed} level={avatarLevel} size={24} />
             </div>
             {successCount > 0 ? (
               <span className={styles.successBadge}>
