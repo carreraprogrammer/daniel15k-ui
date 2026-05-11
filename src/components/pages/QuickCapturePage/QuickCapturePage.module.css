@@ -12,73 +12,140 @@
   margin: 0 auto;
 }
 
-.header {
+/* ── Agent section (avatar + bubble, centered) ─────────────────── */
+
+.agentSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+/* ── Avatar with Siri-style halo ───────────────────────────────── */
+
+.avatarHalo {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+}
+
+/* Diffuse ambient glow */
+.avatarHalo::before {
+  content: '';
+  position: absolute;
+  inset: -18px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(var(--color-brand-rgb, 248, 197, 94), 0.2) 0%,
+    rgba(var(--color-brand-rgb, 248, 197, 94), 0.05) 58%,
+    transparent 74%
+  );
+  animation: haloAura 3.2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Spinning conic ring */
+.haloRing {
+  position: absolute;
+  inset: -7px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0%,
+    rgba(var(--color-brand-rgb, 248, 197, 94), 0.52) 18%,
+    rgba(var(--color-brand-rgb, 248, 197, 94), 0.1) 40%,
+    transparent 52%,
+    rgba(var(--color-brand-rgb, 248, 197, 94), 0.44) 70%,
+    rgba(var(--color-brand-rgb, 248, 197, 94), 0.08) 88%,
+    transparent 100%
+  );
+  -webkit-mask: radial-gradient(circle, transparent 74%, black 75%);
+  mask: radial-gradient(circle, transparent 74%, black 75%);
+  filter: blur(2.5px);
+  animation: haloSpin 8s linear infinite;
+  pointer-events: none;
 }
 
 .avatarMark {
+  position: relative;
+  z-index: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 50px;
-  height: 50px;
-  border: 1px solid rgba(var(--color-brand-rgb, 248, 197, 94), 0.18);
-  border-radius: 16px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
   background:
-    radial-gradient(circle at 50% 10%, rgba(var(--color-brand-rgb, 248, 197, 94), 0.18), transparent 62%),
+    radial-gradient(circle at 40% 15%, rgba(var(--color-brand-rgb, 248, 197, 94), 0.13), transparent 55%),
     var(--surface-panel, rgba(255, 255, 255, 0.08));
+  border: 1px solid rgba(var(--color-brand-rgb, 248, 197, 94), 0.18);
   box-shadow:
-    0 16px 34px rgba(0, 0, 0, 0.24),
-    inset 0 1px 0 color-mix(in srgb, var(--text-on-surface, #fff) 6%, transparent);
+    0 8px 24px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
-.successBadge {
-  font-size: var(--type-label-size);
-  font-weight: 600;
-  color: var(--color-investment, #1A9E4A);
-  background: rgba(26, 158, 74, 0.12);
-  padding: 4px 10px;
-  border-radius: 20px;
-  animation: fadeIn 0.2s ease;
+/* Active state — halo brightens and spins faster */
+.avatarHaloActive::before {
+  background: radial-gradient(
+    circle,
+    rgba(var(--color-brand-rgb, 248, 197, 94), 0.5) 0%,
+    rgba(var(--color-brand-rgb, 248, 197, 94), 0.15) 58%,
+    transparent 74%
+  );
+  animation: haloAura 0.9s ease-in-out infinite;
 }
 
-.sourceBadge {
-  font-size: var(--type-label-size);
-  font-weight: 650;
-  color: var(--text-on-surface-soft, #E8E3D8);
-  background: var(--surface-panel, rgba(255, 255, 255, 0.08));
-  border: 1px solid var(--surface-border, rgba(255, 255, 255, 0.12));
-  padding: 4px 10px;
-  border-radius: 20px;
+.avatarHaloActive .haloRing {
+  background: conic-gradient(
+    from 0deg,
+    transparent 0%,
+    rgba(var(--color-brand-rgb, 248, 197, 94), 0.88) 18%,
+    rgba(var(--color-brand-rgb, 248, 197, 94), 0.22) 40%,
+    transparent 52%,
+    rgba(var(--color-brand-rgb, 248, 197, 94), 0.76) 70%,
+    rgba(var(--color-brand-rgb, 248, 197, 94), 0.14) 88%,
+    transparent 100%
+  );
+  filter: blur(1.5px);
+  animation: haloSpin 2s linear infinite;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-4px); }
-  to   { opacity: 1; transform: translateY(0); }
+@keyframes haloSpin {
+  to { transform: rotate(360deg); }
 }
+
+@keyframes haloAura {
+  0%, 100% { opacity: 0.55; }
+  50%       { opacity: 1; }
+}
+
+/* ── Agent bubble ──────────────────────────────────────────────── */
 
 .agentBubble {
   position: relative;
-  display: grid;
-  grid-template-columns: 30px minmax(0, 1fr) auto;
+  display: flex;
   align-items: center;
-  gap: 9px;
-  min-height: 54px;
-  margin-bottom: 12px;
-  padding: 10px 12px 10px 10px;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 16px;
   border: 1px solid rgba(var(--color-brand-rgb, 248, 197, 94), 0.22);
   border-radius: 16px;
+  text-align: center;
   background:
-    linear-gradient(135deg, rgba(var(--color-brand-rgb, 248, 197, 94), 0.12), transparent 48%),
+    linear-gradient(135deg, rgba(var(--color-brand-rgb, 248, 197, 94), 0.1), transparent 48%),
     color-mix(in srgb, var(--surface-panel, rgba(255, 255, 255, 0.08)) 86%, transparent);
   box-shadow:
-    0 18px 42px rgba(0, 0, 0, 0.22),
-    inset 0 1px 0 color-mix(in srgb, var(--text-on-surface, #fff) 6%, transparent);
+    0 14px 32px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 color-mix(in srgb, var(--text-on-surface, #fff) 5%, transparent);
   animation: bubbleIn 0.24s ease-out;
   overflow: hidden;
+  width: 100%;
 }
 
 .agentBubble::before {
@@ -93,21 +160,6 @@
 .agentBubbleThinking::before {
   opacity: 1;
   animation: scan 1.7s ease-in-out infinite;
-}
-
-.agentGlyph {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 34px;
-  height: 30px;
-  border-radius: 10px;
-  background: rgba(var(--color-brand-rgb, 248, 197, 94), 0.14);
-  color: var(--color-accent, #F8C55E);
-}
-
-.agentGlyph ion-icon {
-  font-size: 17px;
 }
 
 .agentBubble p {
@@ -126,7 +178,6 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding-left: 2px;
 }
 
 .thinkingDots span {
@@ -137,29 +188,26 @@
   animation: dotPulse 1s ease-in-out infinite;
 }
 
-.thinkingDots span:nth-child(2) {
-  animation-delay: 0.14s;
-}
-
-.thinkingDots span:nth-child(3) {
-  animation-delay: 0.28s;
-}
+.thinkingDots span:nth-child(2) { animation-delay: 0.14s; }
+.thinkingDots span:nth-child(3) { animation-delay: 0.28s; }
 
 @keyframes bubbleIn {
   from { opacity: 0; transform: translateY(6px) scale(0.99); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes scan {
-  0% { transform: translateX(-100%); }
-  50% { transform: translateX(100%); }
+  0%   { transform: translateX(-100%); }
+  50%  { transform: translateX(100%); }
   100% { transform: translateX(100%); }
 }
 
 @keyframes dotPulse {
   0%, 80%, 100% { opacity: 0.36; transform: translateY(0); }
-  40% { opacity: 1; transform: translateY(-3px); }
+  40%           { opacity: 1;    transform: translateY(-3px); }
 }
+
+/* ── Form card ─────────────────────────────────────────────────── */
 
 .quickCard {
   display: grid;
@@ -271,7 +319,7 @@
 
 .closeButton {
   align-self: center;
-  margin-top: 2px;
+  margin-top: 20px;
   color: var(--text-on-surface-muted, rgba(255, 255, 255, 0.48));
   font-size: var(--type-label-size, 13px);
   text-transform: none;
@@ -288,10 +336,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .successBadge,
   .agentBubble,
   .agentBubbleThinking::before,
-  .thinkingDots span {
+  .thinkingDots span,
+  .haloRing,
+  .avatarHalo::before {
     animation: none;
   }
 }

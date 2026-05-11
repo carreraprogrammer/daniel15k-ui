@@ -225,6 +225,33 @@
   line-height: 1;
 }
 
+.accentPicker {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.accentSwatch {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2.5px solid transparent;
+  background: var(--swatch-color);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  outline: none;
+}
+
+.accentSwatch:hover {
+  transform: scale(1.12);
+}
+
+.accentSwatchActive {
+  box-shadow:
+    0 0 0 2px var(--surface-panel-soft),
+    0 0 0 4px var(--swatch-color);
+}
+
 @media (max-width: 900px) {
   .grid {
     grid-template-columns: 1fr;

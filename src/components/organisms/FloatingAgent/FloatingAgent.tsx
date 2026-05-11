@@ -134,15 +134,18 @@ export const FloatingAgent = () => {
   }
 
   useEffect(() => {
-    syncPosition()
-  }, [location.pathname, metrics.bubbleHeight, metrics.bubbleWidth])
+    if (!isOpen) syncPosition()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname, metrics.bubbleHeight, metrics.bubbleWidth, isOpen])
 
   useEffect(() => {
     const surface = getDragSurface()
     if (!surface) return undefined
 
+    const canSync = () => !isOpen && dragRef.current.pointerId === -1
+
     const frame = window.requestAnimationFrame(() => {
-      syncPosition(positionRef.current)
+      if (canSync()) syncPosition(positionRef.current)
     })
 
     if (typeof ResizeObserver === 'undefined') {
@@ -150,7 +153,7 @@ export const FloatingAgent = () => {
     }
 
     const observer = new ResizeObserver(() => {
-      syncPosition(positionRef.current)
+      if (canSync()) syncPosition(positionRef.current)
     })
 
     observer.observe(surface)
@@ -159,7 +162,8 @@ export const FloatingAgent = () => {
       window.cancelAnimationFrame(frame)
       observer.disconnect()
     }
-  }, [location.pathname, metrics.bubbleHeight, metrics.bubbleWidth])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname, metrics.bubbleHeight, metrics.bubbleWidth, isOpen])
 
   useEffect(() => {
     const handleResize = () => {
@@ -220,6 +224,7 @@ export const FloatingAgent = () => {
   }
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    if (dragRef.current.pointerId !== -1) return
     const current = positionRef.current
     if (!current) return
 

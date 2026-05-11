@@ -3,10 +3,9 @@ import { IonButton, IonContent, IonIcon, IonPage } from '@ionic/react';
 import {
   cardOutline,
   cashOutline,
-  checkmarkCircleOutline,
-  sparklesOutline,
   walletOutline,
 } from 'ionicons/icons';
+import { Haptics, ImpactStyle } from '@capacitor/haptics';
 import { useLocation } from 'react-router-dom';
 import { AvatarNucleus } from '../../atoms/AvatarNucleus';
 import { useAgentUI } from '../../../contexts/AgentUIContext';
@@ -71,7 +70,6 @@ export const QuickCapturePage = () => {
       : quickPaymentSource
         ? PAYMENT_SOURCE_TONE[quickPaymentSource]
         : 'Dime el gasto.';
-  const assistantIcon = successCount > 0 ? checkmarkCircleOutline : sparklesOutline;
 
   useEffect(() => {
     setQuickPaymentSource(initialPaymentSource);
@@ -118,6 +116,7 @@ export const QuickCapturePage = () => {
       setSuccessCount((n) => n + 1);
       setQuickText('');
       inputRef.current?.focus();
+      void Haptics.impact({ style: ImpactStyle.Medium }).catch(() => {});
     } else {
       showError('No fue posible enviar el gasto al agente.');
     }
@@ -127,32 +126,28 @@ export const QuickCapturePage = () => {
     <IonPage>
       <IonContent fullscreen className={styles.content}>
         <div className={styles.wrapper}>
-          <header className={styles.header}>
-            <div className={styles.avatarMark} aria-hidden="true">
-              <AvatarNucleus seed={avatarSeed} level={avatarLevel} size={24} />
-            </div>
-            {successCount > 0 ? (
-              <span className={styles.successBadge}>
-                <IonIcon icon={checkmarkCircleOutline} aria-hidden="true" />
-                Enviado
-              </span>
-            ) : quickPaymentSource ? (
-              <span className={styles.sourceBadge}>{PAYMENT_SOURCE_LABEL[quickPaymentSource]}</span>
-            ) : null}
-          </header>
 
-          <div className={[styles.agentBubble, saving ? styles.agentBubbleThinking : ''].filter(Boolean).join(' ')}>
-            <span className={styles.agentGlyph}>
-              <IonIcon icon={assistantIcon} aria-hidden="true" />
-            </span>
-            <p>{assistantMessage}</p>
-            {saving ? (
-              <span className={styles.thinkingDots} aria-hidden="true">
-                <span />
-                <span />
-                <span />
-              </span>
-            ) : null}
+          <div className={styles.agentSection}>
+            <div
+              className={`${styles.avatarHalo}${successCount > 0 ? ` ${styles.avatarHaloActive}` : ''}`}
+              aria-hidden="true"
+            >
+              <div className={styles.haloRing} />
+              <div className={styles.avatarMark}>
+                <AvatarNucleus seed={avatarSeed} level={avatarLevel} size={18} />
+              </div>
+            </div>
+
+            <div className={[styles.agentBubble, saving ? styles.agentBubbleThinking : ''].filter(Boolean).join(' ')}>
+              <p>{assistantMessage}</p>
+              {saving ? (
+                <span className={styles.thinkingDots} aria-hidden="true">
+                  <span />
+                  <span />
+                  <span />
+                </span>
+              ) : null}
+            </div>
           </div>
 
           <form className={styles.quickCard} onSubmit={handleQuickSubmit}>
@@ -196,6 +191,7 @@ export const QuickCapturePage = () => {
 
             {quickError ? <p className={styles.quickError}>{quickError}</p> : null}
           </form>
+
           <IonButton fill="clear" size="small" routerLink="/dashboard" className={styles.closeButton}>
             Cerrar
           </IonButton>

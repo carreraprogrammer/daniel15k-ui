@@ -144,7 +144,7 @@
 .root[data-level='1'] .core {
   animation: breathe var(--av-speed) ease-in-out infinite;
   box-shadow:
-    0 0 calc(var(--av-size) * 0.5) hsl(var(--av-hue) var(--av-sat) 55% / 0.38);
+    0 0 calc(var(--av-size) * 0.5) hsl(var(--color-brand-hue, var(--av-hue)) var(--av-sat) 55% / 0.38);
 }
 
 /* ─────────────────────────────────────────────────────────────── */
@@ -154,8 +154,8 @@
 .root[data-level='2'] .core {
   animation: breathe var(--av-speed) ease-in-out infinite;
   box-shadow:
-    0 0 calc(var(--av-size) * 0.7)  hsl(var(--av-hue) var(--av-sat) 58% / 0.55),
-    0 0 calc(var(--av-size) * 0.2)  hsl(var(--av-hue) var(--av-sat) 80% / 0.65);
+    0 0 calc(var(--av-size) * 0.7)  hsl(var(--color-brand-hue, var(--av-hue)) var(--av-sat) 58% / 0.55),
+    0 0 calc(var(--av-size) * 0.2)  hsl(var(--color-brand-hue, var(--av-hue)) var(--av-sat) 80% / 0.65);
 }
 
 /* ─────────────────────────────────────────────────────────────── */
@@ -165,19 +165,19 @@
 .root[data-level='3'] .ring {
   display: block;
   inset: -7px;
-  border-color: hsl(var(--av-hue) var(--av-sat) 72% / 0.8);
+  border-color: hsl(var(--color-brand-hue, var(--av-hue)) var(--av-sat) 72% / 0.8);
   border-width: 2px;
   box-shadow:
-    0 0 calc(var(--av-size) * 0.25) hsl(var(--av-hue) var(--av-sat) 72% / 0.5),
-    inset 0 0 calc(var(--av-size) * 0.1) hsl(var(--av-hue) var(--av-sat) 72% / 0.25);
+    0 0 calc(var(--av-size) * 0.25) hsl(var(--color-brand-hue, var(--av-hue)) var(--av-sat) 72% / 0.5),
+    inset 0 0 calc(var(--av-size) * 0.1) hsl(var(--color-brand-hue, var(--av-hue)) var(--av-sat) 72% / 0.25);
   animation: orbit calc(var(--av-speed) * 9) linear infinite;
 }
 
 .root[data-level='3'] .core {
   animation: breathe var(--av-speed) ease-in-out infinite;
   box-shadow:
-    0 0 calc(var(--av-size) * 0.8)  hsl(var(--av-hue) var(--av-sat) 60% / 0.6),
-    0 0 calc(var(--av-size) * 0.25) hsl(var(--av-hue) var(--av-sat) 80% / 0.75);
+    0 0 calc(var(--av-size) * 0.8)  hsl(var(--color-brand-hue, var(--av-hue)) var(--av-sat) 60% / 0.6),
+    0 0 calc(var(--av-size) * 0.25) hsl(var(--color-brand-hue, var(--av-hue)) var(--av-sat) 80% / 0.75);
 }
 
 /* ─────────────────────────────────────────────────────────────── */
@@ -187,18 +187,18 @@
 .root[data-level='4'] .ring {
   display: block;
   inset: -9px;
-  border-color: hsl(var(--av-hue) var(--av-sat) 76% / 0.88);
+  border-color: hsl(var(--color-brand-hue, var(--av-hue)) var(--av-sat) 76% / 0.88);
   border-width: 2.5px;
   box-shadow:
-    0 0 calc(var(--av-size) * 0.3) hsl(var(--av-hue) var(--av-sat) 76% / 0.6);
+    0 0 calc(var(--av-size) * 0.3) hsl(var(--color-brand-hue, var(--av-hue)) var(--av-sat) 76% / 0.6);
   animation: orbit calc(var(--av-speed) * 8) linear infinite;
 }
 
 .root[data-level='4']::before {
   display: block;
   inset: -18px;
-  border: 1.5px solid hsl(var(--av-sec-hue) 70% 68% / 0.58);
-  box-shadow: 0 0 calc(var(--av-size) * 0.18) hsl(var(--av-sec-hue) 70% 68% / 0.32);
+  border: 1.5px solid hsl(calc(var(--color-brand-hue, var(--av-sec-hue)) + 18) 70% 68% / 0.58);
+  box-shadow: 0 0 calc(var(--av-size) * 0.18) hsl(calc(var(--color-brand-hue, var(--av-sec-hue)) + 18) 70% 68% / 0.32);
   animation: orbit-reverse calc(var(--av-speed) * 13) linear infinite;
 }
 
@@ -206,15 +206,15 @@
   border-radius: 34% 66% 52% 48% / 46% 34% 66% 54%;
   filter: saturate(1.18) contrast(1.05);
   box-shadow:
-    0 0 calc(var(--av-size) * 1.1)  hsl(var(--av-hue) var(--av-sat) 60% / 0.7),
-    0 0 calc(var(--av-size) * 0.4)  hsl(var(--av-hue) var(--av-sat) 80% / 0.9),
-    0 0 calc(var(--av-size) * 0.5)  hsl(var(--av-sec-hue) 70% 64% / 0.35);
+    0 0 calc(var(--av-size) * 1.1)  hsl(var(--color-brand-hue, var(--av-hue)) var(--av-sat) 60% / 0.7),
+    0 0 calc(var(--av-size) * 0.4)  hsl(var(--color-brand-hue, var(--av-hue)) var(--av-sat) 80% / 0.9),
+    0 0 calc(var(--av-size) * 0.5)  hsl(calc(var(--color-brand-hue, var(--av-sec-hue)) + 18) 70% 64% / 0.35);
 }
 
 .root[data-level='4'] .core::after {
   display: block;
   background:
-    linear-gradient(120deg, transparent 33%, hsl(var(--av-sec-hue) 78% 78% / 0.34) 48%, transparent 63%),
+    linear-gradient(120deg, transparent 33%, hsl(calc(var(--color-brand-hue, var(--av-sec-hue)) + 18) 78% 78% / 0.34) 48%, transparent 63%),
     radial-gradient(circle at 72% 26%, white 0 5%, transparent 6%);
   mix-blend-mode: screen;
 }
@@ -226,19 +226,19 @@
 .root[data-level='5'] .ring {
   display: block;
   inset: -10px;
-  border-color: hsl(var(--av-hue) var(--av-sat) 82% / 0.95);
+  border-color: hsl(var(--color-brand-hue, var(--av-hue)) var(--av-sat) 82% / 0.95);
   border-width: 3px;
   box-shadow:
-    0 0 calc(var(--av-size) * 0.4)  hsl(var(--av-hue) var(--av-sat) 82% / 0.68),
-    inset 0 0 calc(var(--av-size) * 0.12) hsl(var(--av-hue) var(--av-sat) 82% / 0.3);
+    0 0 calc(var(--av-size) * 0.4)  hsl(var(--color-brand-hue, var(--av-hue)) var(--av-sat) 82% / 0.68),
+    inset 0 0 calc(var(--av-size) * 0.12) hsl(var(--color-brand-hue, var(--av-hue)) var(--av-sat) 82% / 0.3);
   animation: orbit calc(var(--av-speed) * 7) linear infinite;
 }
 
 .root[data-level='5']::before {
   display: block;
   inset: -22px;
-  border: 2px solid hsl(var(--av-sec-hue) 70% 72% / 0.68);
-  box-shadow: 0 0 calc(var(--av-size) * 0.24) hsl(var(--av-sec-hue) 70% 72% / 0.4);
+  border: 2px solid hsl(calc(var(--color-brand-hue, var(--av-sec-hue)) + 18) 70% 72% / 0.68);
+  box-shadow: 0 0 calc(var(--av-size) * 0.24) hsl(calc(var(--color-brand-hue, var(--av-sec-hue)) + 18) 70% 72% / 0.4);
   animation: orbit-reverse calc(var(--av-speed) * 11) linear infinite;
 }
 
@@ -247,18 +247,51 @@
   border-radius: 28% 72% 38% 62% / 36% 30% 70% 64%;
   filter: saturate(1.34) contrast(1.12) brightness(1.08);
   box-shadow:
-    0 0 calc(var(--av-size) * 1.3)  hsl(var(--av-hue) var(--av-sat) 60% / 0.8),
-    0 0 calc(var(--av-size) * 0.5)  hsl(var(--av-hue) var(--av-sat) 80% / 0.9),
-    0 0 calc(var(--av-size) * 0.7)  hsl(var(--av-sec-hue) 70% 64% / 0.5);
+    0 0 calc(var(--av-size) * 1.3)  hsl(var(--color-brand-hue, var(--av-hue)) var(--av-sat) 60% / 0.8),
+    0 0 calc(var(--av-size) * 0.5)  hsl(var(--color-brand-hue, var(--av-hue)) var(--av-sat) 80% / 0.9),
+    0 0 calc(var(--av-size) * 0.7)  hsl(calc(var(--color-brand-hue, var(--av-sec-hue)) + 18) 70% 64% / 0.5);
 }
 
 .root[data-level='5'] .core::after {
   display: block;
   background:
     radial-gradient(circle at 50% 50%, white 0 8%, transparent 9%),
-    linear-gradient(0deg, transparent 42%, hsl(var(--av-sec-hue) 86% 82% / 0.42) 49%, transparent 57%),
-    linear-gradient(90deg, transparent 42%, hsl(var(--av-hue) var(--av-sat) 84% / 0.38) 49%, transparent 57%),
+    linear-gradient(0deg, transparent 42%, hsl(calc(var(--color-brand-hue, var(--av-sec-hue)) + 18) 86% 82% / 0.42) 49%, transparent 57%),
+    linear-gradient(90deg, transparent 42%, hsl(var(--color-brand-hue, var(--av-hue)) var(--av-sat) 84% / 0.38) 49%, transparent 57%),
     radial-gradient(circle at 72% 22%, white 0 4%, transparent 5%);
   mix-blend-mode: screen;
 }
-å
+
+/* ── Orbital pieces (level 4–5) ─────────────────────────────────── */
+
+.pieces {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  display: none;
+}
+
+.root[data-level='4'] .pieces,
+.root[data-level='5'] .pieces {
+  display: block;
+}
+
+.piece {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 3px;
+  height: 3px;
+  margin: -1.5px 0 0 -1.5px;
+  border-radius: 50%;
+  background: hsl(var(--color-brand-hue, var(--av-hue)) var(--av-sat) 78% / 0.65);
+  transform-origin: 1.5px 1.5px;
+  animation: orbitPiece calc(var(--av-speed) * 9) linear infinite;
+  animation-delay: calc(var(--av-speed) * 9 * -1 * var(--av-piece) / var(--av-total));
+}
+
+@keyframes orbitPiece {
+  from { transform: rotate(0deg) translateX(calc(var(--av-size) * 0.56)); }
+  to   { transform: rotate(360deg) translateX(calc(var(--av-size) * 0.56)); }
+}

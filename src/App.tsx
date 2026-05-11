@@ -17,6 +17,7 @@ import { AppRouter } from './router/AppRouter';
 import { AgentUIProvider } from './contexts/AgentUIContext';
 import { QuickCaptureShortcut } from './plugins/quickCaptureShortcut';
 import { applyThemeMode, getThemeMediaQuery, useThemeStore } from './store/themeStore';
+import { applyAccent, useAccentStore } from './store/accentStore';
 
 const openQuickCapture = (paymentSource?: string) => {
   const params = new URLSearchParams();
@@ -41,6 +42,11 @@ const handleDeepLink = (rawUrl: string) => {
 
 export default function App() {
   const themePreference = useThemeStore((state) => state.preference);
+  const accentPreset = useAccentStore((state) => state.preset);
+
+  useEffect(() => {
+    applyAccent(accentPreset);
+  }, [accentPreset]);
 
   useEffect(() => {
     applyThemeMode(themePreference);

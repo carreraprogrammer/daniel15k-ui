@@ -306,7 +306,7 @@ export const ChatPage = ({ onClose, seed, level }: Props) => {
           </svg>
         </button>
         <div className={styles.headerAvatar}>
-          <AvatarNucleus seed={seed} level={level} size={24} />
+          <AvatarNucleus seed={seed} level={level} size={18} />
         </div>
         <p className={styles.headerName}>Tu asistente</p>
         <p className={styles.headerSub}>Nivel {effectiveLevel} · Finanzas personales</p>
@@ -331,7 +331,7 @@ export const ChatPage = ({ onClose, seed, level }: Props) => {
             ) : (
               <div className={styles.agentRow}>
                 <div className={styles.agentAvatarSmall}>
-                  <AvatarNucleus seed={seed} level={level} size={16} />
+                  <AvatarNucleus seed={seed} level={level} size={14} />
                 </div>
                 <div className={styles.agentContent}>
                   <InlineCard event={entry.event} />
@@ -344,7 +344,7 @@ export const ChatPage = ({ onClose, seed, level }: Props) => {
         {isLoading && (
           <div className={styles.agentRow}>
             <div className={styles.agentAvatarSmall}>
-              <AvatarNucleus seed={seed} level={level} size={16} />
+              <AvatarNucleus seed={seed} level={level} size={14} />
             </div>
             <TypingDots />
           </div>
