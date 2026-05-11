@@ -54,8 +54,9 @@
   .tabBar :global(ion-tab-button.tab-selected),
   .tabButtonActive {
     --background: rgba(var(--color-brand-rgb), 0.13);
-    --color: var(--tabbar-text-active);
-    box-shadow: inset 0 0 0 1px rgba(243, 210, 122, 0.16);
+    --color: var(--color-brand);
+    --color-selected: var(--color-brand);
+    box-shadow: inset 0 0 0 1px rgba(var(--color-brand-rgb), 0.16);
   }
 
   .tabBar :global(ion-icon) {

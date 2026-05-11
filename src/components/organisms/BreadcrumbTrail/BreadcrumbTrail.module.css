@@ -57,7 +57,7 @@
 }
 
 .current {
-  color: var(--text-on-surface);
+  color: var(--color-brand);
   font-weight: 720;
 }
 
