@@ -15,6 +15,7 @@ import { App as CapacitorApp } from '@capacitor/app';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { AppRouter } from './router/AppRouter';
 import { AgentUIProvider } from './contexts/AgentUIContext';
+import { FloatingAgent } from './components/organisms/FloatingAgent';
 import { QuickCaptureShortcut } from './plugins/quickCaptureShortcut';
 import { applyThemeMode, getThemeMediaQuery, useThemeStore } from './store/themeStore';
 import { applyAccent, useAccentStore } from './store/accentStore';
@@ -99,6 +100,7 @@ export default function App() {
       <IonReactRouter>
         <AgentUIProvider>
           <AppRouter />
+          <FloatingAgent />
         </AgentUIProvider>
       </IonReactRouter>
     </IonApp>

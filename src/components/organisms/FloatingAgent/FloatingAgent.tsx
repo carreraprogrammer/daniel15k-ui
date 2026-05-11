@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useLocation } from 'react-router-dom'
 import { AvatarNucleus } from '../../atoms/AvatarNucleus'
+import { useAuthStore } from '../../../store/authStore'
 import { useProgressStore } from '../../../store/progressStore'
 import { ChatPortal } from '../../pages/ChatPage/ChatPage'
 import styles from './FloatingAgent.module.css'
@@ -33,11 +34,15 @@ function clampPoint(point: Point, bounds: DragBounds): Point {
   }
 }
 
-function getDragSurface() {
-  const ionContent = document.querySelector('[data-agent-drag-surface="content"] ion-content') as HTMLElement | null
-  if (ionContent) return ionContent
-
-  return document.querySelector('[data-agent-drag-surface="content"]') as HTMLElement | null
+function getViewportBounds(bubbleWidth: number, bubbleHeight: number): DragBounds {
+  const w = window.innerWidth
+  const h = window.innerHeight
+  return {
+    left: DRAG_MARGIN,
+    top: DRAG_MARGIN,
+    right: Math.max(DRAG_MARGIN, w - bubbleWidth - DRAG_MARGIN),
+    bottom: Math.max(DRAG_MARGIN, h - bubbleHeight - DRAG_MARGIN),
+  }
 }
 
 function getBubbleMetrics(level: number) {
@@ -74,6 +79,7 @@ function readStoredPosition() {
 
 export const FloatingAgent = () => {
   const location = useLocation()
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
   const { data, loading, fetchProgress, getEffectiveLevel } = useProgressStore()
   const [isOpen, setIsOpen] = useState(false)
   const [position, setPosition] = useState<Point | null>(readStoredPosition)
@@ -91,94 +97,43 @@ export const FloatingAgent = () => {
   })
 
   useEffect(() => {
-    fetchProgress()
-  }, [fetchProgress])
+    if (isAuthenticated) fetchProgress()
+  }, [fetchProgress, isAuthenticated])
 
   const level = getEffectiveLevel()
   const seed = data?.avatarSeed ?? '0'
   const metrics = useMemo(() => getBubbleMetrics(level), [level])
 
-  const getBounds = () => {
-    const surface = getDragSurface()
-    let rect = surface?.getBoundingClientRect()
-    
-    // Si la superficie no mide nada (p.ej. durante una transición de página), usamos la ventana
-    if (!rect || (rect.width === 0 && rect.height === 0)) {
-      rect = {
-        left: 0,
-        top: 0,
-        right: window.innerWidth,
-        bottom: window.innerHeight,
-      } as DOMRect
-    }
-
-    const left = rect.left + DRAG_MARGIN
-    const top = rect.top + DRAG_MARGIN
-    const right = Math.max(left, rect.right - metrics.bubbleWidth - DRAG_MARGIN)
-    const bottom = Math.max(top, rect.bottom - metrics.bubbleHeight - DRAG_MARGIN)
-
-    return { left, top, right, bottom }
-  }
-
   const syncPosition = (candidate?: Point | null) => {
     if (typeof window === 'undefined') return
-
-    const bounds = getBounds()
-    const fallback = {
-      x: bounds.right,
-      y: bounds.bottom,
-    }
+    const bounds = getViewportBounds(metrics.bubbleWidth, metrics.bubbleHeight)
+    const fallback = { x: bounds.right, y: bounds.bottom }
     const next = clampPoint(candidate ?? positionRef.current ?? fallback, bounds)
     positionRef.current = next
     setPosition(next)
   }
 
+  // Re-clamp when route or bubble size changes (not during open or active drag)
   useEffect(() => {
-    if (!isOpen) syncPosition()
+    if (isOpen || dragRef.current.pointerId !== -1) return
+    syncPosition(positionRef.current)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.pathname, metrics.bubbleHeight, metrics.bubbleWidth, isOpen])
+  }, [location.pathname, metrics.bubbleWidth, metrics.bubbleHeight, isOpen])
 
-  useEffect(() => {
-    const surface = getDragSurface()
-    if (!surface) return undefined
-
-    const canSync = () => !isOpen && dragRef.current.pointerId === -1
-
-    const frame = window.requestAnimationFrame(() => {
-      if (canSync()) syncPosition(positionRef.current)
-    })
-
-    if (typeof ResizeObserver === 'undefined') {
-      return () => window.cancelAnimationFrame(frame)
-    }
-
-    const observer = new ResizeObserver(() => {
-      if (canSync()) syncPosition(positionRef.current)
-    })
-
-    observer.observe(surface)
-
-    return () => {
-      window.cancelAnimationFrame(frame)
-      observer.disconnect()
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.pathname, metrics.bubbleHeight, metrics.bubbleWidth, isOpen])
-
+  // Re-clamp on viewport resize
   useEffect(() => {
     const handleResize = () => {
+      if (isOpen || dragRef.current.pointerId !== -1) return
       syncPosition(positionRef.current)
     }
-
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
-  }, [metrics.bubbleHeight, metrics.bubbleWidth])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, metrics.bubbleWidth, metrics.bubbleHeight])
 
   useEffect(() => {
     positionRef.current = position
-
     if (!position) return
-
     window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(position))
   }, [position])
 
@@ -228,7 +183,6 @@ export const FloatingAgent = () => {
     const current = positionRef.current
     if (!current) return
 
-    // Previene que se disparen interacciones de texto nativas u otros ghostings en Safari
     event.currentTarget.setPointerCapture(event.pointerId)
 
     dragRef.current = {
@@ -238,7 +192,7 @@ export const FloatingAgent = () => {
       startX: event.clientX,
       startY: event.clientY,
       moved: false,
-      bounds: getBounds(),
+      bounds: getViewportBounds(metrics.bubbleWidth, metrics.bubbleHeight),
     }
 
     window.addEventListener('pointermove', handlePointerMove)
@@ -251,6 +205,7 @@ export const FloatingAgent = () => {
     setIsOpen(true)
   }
 
+  if (!isAuthenticated) return null
   if (loading && !data) return null
   if (!position) return null
 
