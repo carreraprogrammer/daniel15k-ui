@@ -1,6 +1,6 @@
 .modal::part(backdrop) {
   background:
-    radial-gradient(circle at 18% 14%, rgba(243, 210, 122, 0.08), transparent 24%),
+    radial-gradient(circle at 18% 14%, rgba(var(--color-brand-rgb), 0.08), transparent 24%),
     radial-gradient(circle at 82% 16%, rgba(124, 224, 211, 0.05), transparent 22%),
     rgba(4, 6, 10, 0.95);
   backdrop-filter: blur(22px) saturate(70%);
@@ -142,12 +142,12 @@
 }
 
 .progressSegmentDone {
-  background: rgba(243, 210, 122, 0.45);
+  background: rgba(var(--color-brand-rgb), 0.45);
 }
 
 .progressSegmentCurrent {
-  background: var(--color-accent, #f3d27a);
-  box-shadow: 0 0 6px rgba(243, 210, 122, 0.5);
+  background: var(--color-brand);
+  box-shadow: 0 0 6px rgba(var(--color-brand-rgb), 0.5);
 }
 
 .stage {
@@ -229,7 +229,7 @@
   padding: 0.95rem 1.5rem;
   border-radius: var(--radius-full);
   border: none;
-  background: linear-gradient(135deg, rgba(214, 168, 74, 0.98), rgba(181, 133, 39, 0.98));
+  background: linear-gradient(135deg, rgba(var(--color-brand-rgb), 0.98), rgba(181, 133, 39, 0.98));
   color: var(--color-text-inverse);
   font-family: var(--font-sans);
   font-size: var(--text-sm);
@@ -305,9 +305,9 @@
 }
 
 .incomeModeBtnActive {
-  background: rgba(243, 210, 122, 0.12);
-  border-color: rgba(243, 210, 122, 0.4);
-  color: var(--color-accent, #f3d27a);
+  background: rgba(var(--color-brand-rgb), 0.12);
+  border-color: rgba(var(--color-brand-rgb), 0.4);
+  color: var(--color-brand);
 }
 
 @media (max-width: 520px) {

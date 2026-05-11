@@ -149,9 +149,9 @@
 }
 
 .navLinkActive {
-  border-color: rgba(214, 168, 74, 0.28);
+  border-color: rgba(var(--color-brand-rgb), 0.28);
   background:
-    linear-gradient(135deg, rgba(243, 210, 122, 0.14), rgba(214, 168, 74, 0.18)),
+    linear-gradient(135deg, rgba(var(--color-brand-rgb), 0.14), rgba(var(--color-brand-rgb), 0.18)),
     var(--surface-control);
   color: var(--text-on-surface);
   box-shadow: 0 14px 28px rgba(2, 6, 23, 0.18);
@@ -259,8 +259,8 @@
     gap: 1.25rem;
     padding: max(18px, env(safe-area-inset-top)) 18px max(18px, env(safe-area-inset-bottom)) 18px;
     background:
-      radial-gradient(circle at 14% 10%, rgba(243, 210, 122, 0.1), transparent 18%),
-      radial-gradient(circle at top right, rgba(214, 168, 74, 0.12), transparent 28%),
+      radial-gradient(circle at 14% 10%, rgba(var(--color-brand-rgb), 0.1), transparent 18%),
+      radial-gradient(circle at top right, rgba(var(--color-brand-rgb), 0.12), transparent 28%),
       radial-gradient(circle at left 20%, rgba(107, 78, 25, 0.12), transparent 26%),
       linear-gradient(180deg, rgba(4, 4, 4, 0.98) 0%, rgba(10, 10, 10, 0.98) 100%);
     opacity: 0;

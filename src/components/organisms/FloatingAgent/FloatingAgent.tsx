@@ -37,11 +37,14 @@ function clampPoint(point: Point, bounds: DragBounds): Point {
 function getViewportBounds(bubbleWidth: number, bubbleHeight: number): DragBounds {
   const w = window.innerWidth
   const h = window.innerHeight
+  const tabBarH = parseFloat(
+    getComputedStyle(document.documentElement).getPropertyValue('--app-viewport-tabbar-height') || '0',
+  )
   return {
     left: DRAG_MARGIN,
     top: DRAG_MARGIN,
     right: Math.max(DRAG_MARGIN, w - bubbleWidth - DRAG_MARGIN),
-    bottom: Math.max(DRAG_MARGIN, h - bubbleHeight - DRAG_MARGIN),
+    bottom: Math.max(DRAG_MARGIN, h - bubbleHeight - (Number.isFinite(tabBarH) ? tabBarH : 0) - DRAG_MARGIN),
   }
 }
 

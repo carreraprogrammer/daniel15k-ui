@@ -205,7 +205,7 @@
 }
 
 .heroActions button:first-child {
-  background: linear-gradient(135deg, rgba(214, 168, 74, 0.96), rgba(187, 139, 49, 0.96));
+  background: linear-gradient(135deg, rgba(var(--color-brand-rgb), 0.96), rgba(187, 139, 49, 0.96));
   color: var(--text-on-accent);
 }
 

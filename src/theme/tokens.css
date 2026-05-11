@@ -18,10 +18,10 @@
   --color-brand-active:   #C49430;
   --color-brand-subtle:   #2B1E08;   /* fondo sutil con tono de marca */
 
-  /* ── COLORES DE ACENTO ── */
-  --color-accent:         #F0C96A;   /* solar */
-  --color-accent-rgb:     240, 201, 106;
-  --color-accent-subtle:  #32260B;
+  /* ── COLORES DE ACENTO (alias de brand — sigue al accent picker) ── */
+  --color-accent:         var(--color-brand);
+  --color-accent-rgb:     var(--color-brand-rgb);
+  --color-accent-subtle:  var(--color-brand-subtle);
 
   /* ── COLORES SEMÁNTICOS ── */
   --color-success:        #22C55E;
@@ -123,7 +123,7 @@
   --shadow-sm:  0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-md:  0 4px 12px rgba(0, 0, 0, 0.5);
   --shadow-lg:  0 8px 32px rgba(0, 0, 0, 0.6);
-  --shadow-brand: 0 0 0 3px rgba(230, 182, 86, 0.24);  /* glow en foco */
+  --shadow-brand: 0 0 0 3px rgba(var(--color-brand-rgb), 0.24);  /* glow en foco */
   --shadow-float: 0 18px 48px rgba(0, 0, 0, 0.46), 0 4px 14px rgba(0, 0, 0, 0.28);
   --shadow-float-hover: 0 26px 64px rgba(0, 0, 0, 0.52), 0 8px 18px rgba(0, 0, 0, 0.32);
   --shadow-surface: 0 12px 26px rgba(0, 0, 0, 0.24);
@@ -131,11 +131,11 @@
   --surface-panel-strong: rgba(8, 8, 8, 0.96);
   --surface-panel-soft: rgba(255, 255, 255, 0.028);
   --surface-highlight: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0) 24%);
-  --surface-glow: radial-gradient(circle at top left, rgba(230, 182, 86, 0.1), transparent 34%),
-                  radial-gradient(circle at 82% 14%, rgba(230, 182, 86, 0.08), transparent 30%);
+  --surface-glow: radial-gradient(circle at top left, rgba(var(--color-brand-rgb), 0.1), transparent 34%),
+                  radial-gradient(circle at 82% 14%, rgba(var(--color-brand-rgb), 0.08), transparent 30%);
   --surface-shell-bg:
-    radial-gradient(circle at 12% 8%, rgba(230, 182, 86, 0.08), transparent 18%),
-    radial-gradient(circle at top left, rgba(230, 182, 86, 0.07), transparent 22%),
+    radial-gradient(circle at 12% 8%, rgba(var(--color-brand-rgb), 0.08), transparent 18%),
+    radial-gradient(circle at top left, rgba(var(--color-brand-rgb), 0.07), transparent 22%),
     radial-gradient(circle at right 18%, rgba(107, 78, 25, 0.1), transparent 24%),
     linear-gradient(180deg, #0B0B0E 0%, #0F0F14 48%, #0B0B0E 100%);
   --surface-grid-line: rgba(255, 255, 255, 0.018);
@@ -210,9 +210,9 @@
   --color-brand-active:   #68460D;
   --color-brand-subtle:   #F3E5C6;
 
-  --color-accent:         #B8841F;
-  --color-accent-rgb:     184, 132, 31;
-  --color-accent-subtle:  #F6E8C7;
+  --color-accent:         var(--color-brand);
+  --color-accent-rgb:     var(--color-brand-rgb);
+  --color-accent-subtle:  var(--color-brand-subtle);
 
   --color-success:        #147A3A;
   --color-success-subtle: #DDF6E7;
@@ -234,7 +234,7 @@
   --shadow-sm:  0 1px 2px rgba(55, 43, 25, 0.08);
   --shadow-md:  0 4px 12px rgba(55, 43, 25, 0.12);
   --shadow-lg:  0 8px 32px rgba(55, 43, 25, 0.16);
-  --shadow-brand: 0 0 0 3px rgba(154, 106, 24, 0.2);
+  --shadow-brand: 0 0 0 3px rgba(var(--color-brand-rgb), 0.2);
   --shadow-float: 0 18px 48px rgba(55, 43, 25, 0.16), 0 4px 14px rgba(55, 43, 25, 0.08);
   --shadow-float-hover: 0 26px 64px rgba(55, 43, 25, 0.2), 0 8px 18px rgba(55, 43, 25, 0.1);
   --shadow-surface: 0 12px 26px rgba(55, 43, 25, 0.1);
@@ -242,12 +242,12 @@
   --surface-panel-strong: rgba(255, 255, 255, 0.96);
   --surface-panel-soft: rgba(55, 43, 25, 0.035);
   --surface-highlight: linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(255, 255, 255, 0) 30%);
-  --surface-glow: radial-gradient(circle at top left, rgba(214, 168, 74, 0.16), transparent 34%),
-                  radial-gradient(circle at 82% 14%, rgba(154, 106, 24, 0.08), transparent 30%);
+  --surface-glow: radial-gradient(circle at top left, rgba(var(--color-brand-rgb), 0.16), transparent 34%),
+                  radial-gradient(circle at 82% 14%, rgba(var(--color-brand-rgb), 0.08), transparent 30%);
   --surface-shell-bg:
-    radial-gradient(circle at 12% 8%, rgba(214, 168, 74, 0.16), transparent 18%),
+    radial-gradient(circle at 12% 8%, rgba(var(--color-brand-rgb), 0.16), transparent 18%),
     radial-gradient(circle at top left, rgba(255, 255, 255, 0.72), transparent 25%),
-    radial-gradient(circle at right 18%, rgba(154, 106, 24, 0.1), transparent 24%),
+    radial-gradient(circle at right 18%, rgba(var(--color-brand-rgb), 0.1), transparent 24%),
     linear-gradient(180deg, #FAF6ED 0%, #F2E9DA 48%, #EFE3D0 100%);
   --surface-grid-line: rgba(55, 43, 25, 0.045);
   --surface-overlay: rgba(255, 253, 247, 0.88);

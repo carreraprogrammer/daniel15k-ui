@@ -558,7 +558,7 @@
 .focusRailFill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, rgba(243, 210, 122, 0.92), rgba(214, 168, 74, 0.88));
+  background: linear-gradient(90deg, rgba(var(--color-brand-rgb), 0.92), rgba(var(--color-brand-rgb), 0.88));
 }
 
 .focusRailFillWarn {
@@ -1196,9 +1196,9 @@
 }
 
 .historyItemActive {
-  border-color: rgba(243, 210, 122, 0.28);
+  border-color: rgba(var(--color-brand-rgb), 0.28);
   background:
-    linear-gradient(135deg, rgba(243, 210, 122, 0.08), rgba(255, 255, 255, 0.02)),
+    linear-gradient(135deg, rgba(var(--color-brand-rgb), 0.08), rgba(255, 255, 255, 0.02)),
     rgba(12, 12, 12, 0.72);
 }
 
@@ -1283,7 +1283,7 @@
   min-height: 1.8rem;
   padding: 0.32rem 0.7rem;
   border-radius: 999px;
-  background: rgba(243, 210, 122, 0.14);
+  background: rgba(var(--color-brand-rgb), 0.14);
   color: var(--color-accent);
   font-size: var(--type-caption-size);
   font-weight: 760;
@@ -1317,7 +1317,7 @@
   width: fit-content;
   padding: 0.3rem 0.65rem;
   border-radius: 999px;
-  background: rgba(243, 210, 122, 0.14);
+  background: rgba(var(--color-brand-rgb), 0.14);
   color: var(--color-accent);
   font-size: var(--type-caption-size);
   font-weight: 700;

@@ -57,7 +57,7 @@
 .link:hover {
   color: var(--color-text-primary);
   text-decoration: underline;
-  text-decoration-color: rgba(243, 210, 122, 0.5);
+  text-decoration-color: rgba(var(--color-brand-rgb), 0.5);
   text-underline-offset: 3px;
 }
 

@@ -224,7 +224,7 @@ export const RecurringObligationsContent = () => {
       categories.map((category) => ({
         id: String(category.id),
         name: category.attributes.name ?? 'Sin categoría',
-        color: category.attributes.color ?? 'var(--color-accent)',
+        color: category.attributes.color ?? 'var(--color-brand)',
       })),
     [categories],
   );

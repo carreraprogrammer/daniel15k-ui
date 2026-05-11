@@ -9,8 +9,8 @@
   border: 1px solid rgba(var(--color-brand-rgb), 0.32);
   border-radius: 22px;
   background:
-    radial-gradient(circle at top left, rgba(243, 210, 122, 0.14), transparent 34%),
-    linear-gradient(135deg, rgba(243, 210, 122, 0.1), rgba(214, 168, 74, 0.04)),
+    radial-gradient(circle at top left, rgba(var(--color-brand-rgb), 0.14), transparent 34%),
+    linear-gradient(135deg, rgba(var(--color-brand-rgb), 0.1), rgba(var(--color-brand-rgb), 0.04)),
     var(--surface-brand-tint);
   box-shadow: 0 16px 34px rgba(0, 0, 0, 0.26);
 }
@@ -50,7 +50,7 @@
   padding: 0.58rem 0.9rem;
   border: 0;
   border-radius: 999px;
-  background: rgba(243, 210, 122, 0.92);
+  background: rgba(var(--color-brand-rgb), 0.92);
   color: var(--color-text-inverse);
   font-size: var(--type-label-size);
   font-weight: 800;
@@ -266,7 +266,7 @@
 .pressureFill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, rgba(243, 210, 122, 0.92), rgba(214, 168, 74, 0.88));
+  background: linear-gradient(90deg, rgba(var(--color-brand-rgb), 0.92), rgba(var(--color-brand-rgb), 0.88));
   transition: width 400ms ease;
 }
 
@@ -319,8 +319,8 @@
 }
 
 .badge_milestone {
-  background: rgba(243, 210, 122, 0.12);
-  border-color: rgba(243, 210, 122, 0.28);
+  background: rgba(var(--color-brand-rgb), 0.12);
+  border-color: rgba(var(--color-brand-rgb), 0.28);
   color: var(--color-warning);
 }
 

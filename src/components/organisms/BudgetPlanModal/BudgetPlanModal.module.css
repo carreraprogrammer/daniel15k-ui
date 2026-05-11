@@ -1,7 +1,7 @@
 .modal::part(backdrop) {
   background:
-    radial-gradient(circle at 20% 16%, rgba(243, 210, 122, 0.12), transparent 26%),
-    radial-gradient(circle at 78% 18%, rgba(214, 168, 74, 0.1), transparent 24%),
+    radial-gradient(circle at 20% 16%, rgba(var(--color-brand-rgb), 0.12), transparent 26%),
+    radial-gradient(circle at 78% 18%, rgba(var(--color-brand-rgb), 0.1), transparent 24%),
     rgba(3, 4, 7, 0.97);
   backdrop-filter: blur(36px) saturate(55%);
 }
@@ -38,7 +38,7 @@
   border: 1px solid rgba(255, 255, 255, 0.07);
   background:
     linear-gradient(180deg, rgba(21, 18, 15, 0.9), rgba(14, 12, 11, 0.92)),
-    radial-gradient(circle at top left, rgba(243, 210, 122, 0.08), transparent 26%);
+    radial-gradient(circle at top left, rgba(var(--color-brand-rgb), 0.08), transparent 26%);
 }
 
 .topbarBrand {
@@ -261,8 +261,8 @@
   margin: 1rem 1.5rem 0;
   padding: 0.85rem 1rem;
   border-radius: 12px;
-  background: rgba(243, 210, 122, 0.08);
-  border: 1px solid rgba(243, 210, 122, 0.2);
+  background: rgba(var(--color-brand-rgb), 0.08);
+  border: 1px solid rgba(var(--color-brand-rgb), 0.2);
 }
 
 .noHistoryText {
@@ -279,8 +279,8 @@
   align-items: center;
   padding: 0.34rem 0.7rem;
   border-radius: var(--radius-full);
-  border: 1px solid rgba(243, 210, 122, 0.18);
-  background: rgba(243, 210, 122, 0.08);
+  border: 1px solid rgba(var(--color-brand-rgb), 0.18);
+  background: rgba(var(--color-brand-rgb), 0.08);
   color: var(--color-accent);
   font-family: var(--font-sans);
   font-size: var(--text-xs);
@@ -372,8 +372,8 @@
 .addChip {
   padding: 0.3rem 0.75rem;
   border-radius: 20px;
-  border: 1px solid rgba(243, 210, 122, 0.22);
-  background: rgba(243, 210, 122, 0.07);
+  border: 1px solid rgba(var(--color-brand-rgb), 0.22);
+  background: rgba(var(--color-brand-rgb), 0.07);
   color: var(--color-accent);
   font-size: var(--type-label-size);
   cursor: pointer;
@@ -381,8 +381,8 @@
 }
 
 .addChip:hover {
-  background: rgba(243, 210, 122, 0.14);
-  border-color: rgba(243, 210, 122, 0.34);
+  background: rgba(var(--color-brand-rgb), 0.14);
+  border-color: rgba(var(--color-brand-rgb), 0.34);
 }
 
 .categoryType {
@@ -415,7 +415,7 @@
 }
 
 .amountInput:focus {
-  border-color: rgba(243, 210, 122, 0.4);
+  border-color: rgba(var(--color-brand-rgb), 0.4);
 }
 
 /* ── Warnings ─────────────────────────────────────────────────────────────── */
@@ -443,7 +443,7 @@
   border: 1px solid rgba(255, 255, 255, 0.07);
   background:
     linear-gradient(180deg, rgba(16, 14, 12, 0.92), rgba(12, 10, 10, 0.96)),
-    radial-gradient(circle at bottom right, rgba(214, 168, 74, 0.08), transparent 24%);
+    radial-gradient(circle at bottom right, rgba(var(--color-brand-rgb), 0.08), transparent 24%);
 }
 
 .footerSummary {
