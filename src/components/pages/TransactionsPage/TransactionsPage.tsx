@@ -278,7 +278,7 @@ export const TransactionsContent = () => {
     [selectedCategoryId, visibleAppliedChips],
   );
   const monthBalance = metrics.incomeTotal - metrics.expenseTotal;
-  const realAvailable = summary?.liquidity?.confirmed_balance ?? summary?.balance.net_balance ?? monthBalance;
+  const realAvailable = summary?.cash_flow_runway?.confirmed_balance ?? summary?.balance.net_balance ?? monthBalance;
   const linkPeriodOptions = useMemo(() => periodOptionsFor(linkingTransaction), [linkingTransaction]);
   const toolbar = useMemo(
     () => ({

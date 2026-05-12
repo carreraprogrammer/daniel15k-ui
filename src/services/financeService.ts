@@ -133,11 +133,6 @@ export const financeService = {
     return normalizeCollection<Transaction['attributes']>(data) as JsonApiCollection<Transaction>;
   },
 
-  async fetchCreditCardPendingTransactions(): Promise<JsonApiCollection<Transaction>> {
-    const { data } = await api.get('/api/v1/transactions/credit_card_pending');
-    return normalizeCollection<Transaction['attributes']>(data) as JsonApiCollection<Transaction>;
-  },
-
   async fetchDebts(params: DebtQueryParams = {}): Promise<JsonApiCollection<Debt>> {
     const { data } = await api.get('/api/v1/debts', {
       params: {

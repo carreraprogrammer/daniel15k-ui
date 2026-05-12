@@ -84,10 +84,7 @@ export interface SummaryOverflowStatus {
   realized_expected_variable_income: number;
   realized_overflow: number;
   remaining_expected_overflow: number;
-  safe_to_deploy: number;
-  deployable_overflow: number;
-  blocked_by_liquidity: boolean;
-  status: 'waiting' | 'available' | 'blocked_by_liquidity';
+  status: 'waiting' | 'available';
   suggested_destination?: {
     type: string;
     label?: string;
@@ -98,20 +95,29 @@ export interface SummaryOverflowStatus {
   suggested_action?: string | null;
 }
 
-export interface LiquidityProjection {
+export interface CashFlowRunwayObligation {
+  id: number;
+  name: string;
+  due_day: number;
+  expected: number;
+  paid: number;
+  remaining: number;
+}
+
+export interface CashFlowRunway {
   confirmed_balance: number;
-  pending_income: number;
-  pending_variable: number;
-  pending_base: number;
-  next_cycle_base: number;
-  projected_eom_balance: number;
-  next_cycle_obligations: number;
-  credit_card_pending: number;
-  protected_buffer: number;
-  free_after_obligations: number;
-  safe_to_deploy: number;
-  deployable_this_cycle: number;
-  buffer_status: 'critical' | 'tight' | 'comfortable';
+  daily_necessary_burn: number;
+  days_to_next_income: number | null;
+  next_income_day: number | null;
+  committed_before_next_income: number;
+  committed_obligations: CashFlowRunwayObligation[];
+  runway_days: number;
+  effective_runway_days: number | null;
+  buffer_days: number | null;
+  commitment_gap: number | null;
+  health_status: 'comfortable' | 'warning' | 'critical' | null;
+  burn_window_days: number;
+  has_sufficient_history: boolean;
 }
 
 export type MonthExecutionStatus = 'pending' | 'partial' | 'covered' | 'unplanned';
@@ -208,8 +214,7 @@ export interface SummaryResponse {
   monthly_plan?: SummaryMonthlyPlan | null;
   overflow_status?: SummaryOverflowStatus | null;
   financial_context: FinancialContextSummary | null;
-  liquidity?: LiquidityProjection | null;
-  credit_card_pending?: number;
+  cash_flow_runway?: CashFlowRunway | null;
   savings_goals?: SummaryGoal[];
 }
 

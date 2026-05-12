@@ -26,7 +26,7 @@ export const DashboardContent = () => {
   const { summary, insight, obligations, completeness, loading, error, reload } = useDashboardData();
   const history = useHistory();
 
-  const liquidity = summary?.liquidity;
+  const runway = summary?.cash_flow_runway;
   const hasPlanPendingConfirmation = completeness?.pending_confirmation?.includes('monthly_plan') ?? false;
   const rollingChanges = (summary?.monthly_plan?.assumptions?.rolling_changes as string[] | undefined) ?? [];
   const planMonthLabel = summary?.period
@@ -52,37 +52,33 @@ export const DashboardContent = () => {
     100,
   );
 
-  const margin = liquidity?.free_after_obligations ?? 0;
-  const balance = liquidity?.confirmed_balance ?? summary?.balance.net_balance ?? summary?.balance.balance_confirmed ?? 0;
-  const shortfall = Math.abs(margin);
+  const commitmentGap = runway?.commitment_gap ?? null;
+  const balance = runway?.confirmed_balance ?? summary?.balance.net_balance ?? summary?.balance.balance_confirmed ?? 0;
+  const shortfall = commitmentGap !== null && commitmentGap < 0 ? Math.abs(commitmentGap) : 0;
 
-  const stateColor = !liquidity
+  const stateColor = !runway?.health_status
     ? 'var(--text-on-surface-muted)'
-    : liquidity.buffer_status === 'comfortable'
+    : runway.health_status === 'comfortable'
     ? 'var(--color-success)'
-    : liquidity.buffer_status === 'tight'
+    : runway.health_status === 'warning'
     ? '#C9980A'
     : 'var(--color-error)';
 
-  const heroPhrase = !liquidity
-    ? 'Sin plan activo.'
-    : liquidity.buffer_status === 'comfortable'
+  const heroPhrase = !runway?.health_status
+    ? 'Sin datos de flujo.'
+    : runway.health_status === 'comfortable'
     ? 'Vas relajado.'
-    : liquidity.buffer_status === 'tight'
+    : runway.health_status === 'warning'
     ? 'Vas justo hasta la quincena.'
-    : margin < -(balance / 2)
-    ? 'Estás en rojo.'
-    : `Te van a faltar ${formatCurrencyCompact(shortfall)}.`;
+    : 'Estás en rojo.';
 
-  const heroSubtitle = !liquidity
-    ? 'Crea un plan mensual para ver tu posición.'
-    : liquidity.buffer_status === 'comfortable'
-    ? `Tu plata cubre lo que viene y te sobran ${formatCurrencyCompact(margin)} hasta el ${nextCycleLabel}.`
-    : liquidity.buffer_status === 'tight'
+  const heroSubtitle = !runway?.health_status
+    ? 'Registrá transacciones para ver tu posición.'
+    : runway.health_status === 'comfortable'
+    ? `Te sobran ${formatCurrencyCompact(commitmentGap ?? 0)} después de cubrir lo que viene hasta el ${nextCycleLabel}.`
+    : runway.health_status === 'warning'
     ? `Tus ${formatCurrencyCompact(balance)} cubren lo del día a día. No hay margen, pero no hay riesgo.`
-    : margin < -(balance / 2)
-    ? `Faltan ${formatCurrencyCompact(shortfall)} antes del ${nextCycleLabel}. Déjame ayudarte.`
-    : `Llegamos al límite antes del corte. Tenemos opciones, ¿hablamos?`;
+    : `Faltan ${formatCurrencyCompact(shortfall)} antes del ${nextCycleLabel}. Déjame ayudarte.`;
 
 
   return (
@@ -121,18 +117,18 @@ export const DashboardContent = () => {
                   </div>
                 </div>
 
-                {liquidity ? (
+                {runway ? (
                   <div className={styles.heroZeroNumbers}>
                     <div className={styles.heroZeroNumberItem}>
                       <span className={styles.heroZeroNumberLabel}>En tu flujo</span>
                       <span className={styles.heroZeroNumberValue}>
-                        {formatCurrencyCompact(liquidity.confirmed_balance)}
+                        {formatCurrencyCompact(runway.confirmed_balance)}
                       </span>
                     </div>
                     <div className={styles.heroZeroNumberItem}>
-                      <span className={styles.heroZeroNumberLabel}>Margen para extras</span>
+                      <span className={styles.heroZeroNumberLabel}>Margen hasta la quincena</span>
                       <span className={styles.heroZeroNumberAccent}>
-                        {formatCurrencyCompact(liquidity.free_after_obligations)}
+                        {formatCurrencyCompact(runway.commitment_gap ?? 0)}
                       </span>
                     </div>
                   </div>
