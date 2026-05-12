@@ -742,6 +742,228 @@
   flex-shrink: 0;
 }
 
+/* ── Zone 2 — Chip stats ─────────────────────────────────────────────────── */
+
+.secHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 4px 2px 0;
+}
+
+.secHeadTitle {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: var(--type-section-title-size, 1rem);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.secHeadMore {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-on-surface-muted);
+  font-size: var(--type-label-size, 0.8rem);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.chipRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.chipStat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--surface-border);
+  border-radius: 18px;
+  background: var(--surface-panel-soft);
+}
+
+.chipStatLabel {
+  color: var(--text-on-surface-muted);
+  font-size: var(--type-caption-size, 0.75rem);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.chipStatValue {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  color: var(--color-text-primary);
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.chipStatUnit {
+  font-size: var(--type-caption-size, 0.75rem);
+  font-weight: 500;
+  color: var(--text-on-surface-muted);
+}
+
+/* ── Zone 3 — Gavetas ────────────────────────────────────────────────────── */
+
+.catList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.catCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--surface-border);
+  border-radius: 18px;
+  background: var(--surface-panel-soft);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.catCard:hover {
+  background: var(--surface-panel-strong);
+}
+
+.catIconWrap {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  border-radius: 11px;
+  background: var(--cat-soft);
+  color: var(--cat-color);
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+}
+
+.catMain {
+  flex: 1;
+  min-width: 0;
+}
+
+.catName {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.catSub {
+  font-size: 11.5px;
+  color: var(--text-on-surface-muted);
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.catBar {
+  margin-top: 7px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--surface-control-hover);
+  overflow: hidden;
+}
+
+.catBarFill {
+  height: 100%;
+  background: var(--cat-color);
+  border-radius: 999px;
+  transition: width 500ms ease;
+}
+
+.catBarFillOver {
+  background: #C0392B;
+}
+
+.catChevron {
+  color: var(--text-on-surface-muted);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+/* ── Zone 4 — Lo último ──────────────────────────────────────────────────── */
+
+.txnList {
+  border: 1px solid var(--surface-border);
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--surface-panel-soft);
+}
+
+.txnRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  position: relative;
+}
+
+.txnRow + .txnRow::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 58px;
+  right: 14px;
+  height: 1px;
+  background: var(--surface-border-muted);
+}
+
+.txnIcon {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  border-radius: 10px;
+  background: var(--cat-soft);
+  color: var(--cat-color);
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+}
+
+.txnBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.txnName {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.txnMeta {
+  font-size: 11.5px;
+  color: var(--text-on-surface-muted);
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.txnAmt {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.txnAmtIncome {
+  color: #1A9E4A;
+}
+
 /* ── Responsive ───────────────────────────────────────────────────────────── */
 
 @media (max-width: 700px) {
