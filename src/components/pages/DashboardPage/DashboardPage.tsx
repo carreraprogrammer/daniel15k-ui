@@ -299,9 +299,10 @@ export const DashboardContent = () => {
                   </div>
                   <div className={styles.catList}>
                     {(summary.burn_rate?.categories ?? []).slice(0, 4).map((cat) => {
-                      const cfg = catConfig(cat.category);
+                      const cfg = catConfig(cat.category_type);
                       const pct = cat.budget > 0 ? Math.min((cat.spent / cat.budget) * 100, 100) : 0;
                       const over = cat.spent > cat.budget && cat.budget > 0;
+                      const detailPath = `/budgets/detail/${cat.category_type}`;
                       return (
                         <div
                           key={cat.category_id}
@@ -309,8 +310,8 @@ export const DashboardContent = () => {
                           style={{ '--cat-color': cfg.color, '--cat-soft': cfg.soft } as React.CSSProperties}
                           role="button"
                           tabIndex={0}
-                          onClick={() => history.push('/budgets')}
-                          onKeyDown={(e) => e.key === 'Enter' && history.push('/budgets')}
+                          onClick={() => history.push(detailPath, { category: cat })}
+                          onKeyDown={(e) => e.key === 'Enter' && history.push(detailPath, { category: cat })}
                         >
                           <div className={styles.catIconWrap}>
                             <IonIcon icon={cfg.icon} />

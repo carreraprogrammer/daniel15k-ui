@@ -21,6 +21,7 @@ import { DebtsPage } from '../components/pages/DebtsPage';
 import { PlannedExpensesPage } from '../components/pages/PlannedExpensesPage';
 import { RecurringObligationsPage } from '../components/pages/RecurringObligationsPage';
 import { BudgetsPage } from '../components/pages/BudgetsPage';
+import { BudgetDetailPage } from '../components/pages/BudgetDetailPage/BudgetDetailPage';
 import { SavingsGoalsPage } from '../components/pages/SavingsGoalsPage';
 import { QuickCapturePage } from '../components/pages/QuickCapturePage';
 import { getLastAuthPath } from '../utils/navigation';
@@ -137,6 +138,7 @@ export const AppRouter = () => {
         <ProtectedRoute exact path="/planned-expenses" component={PlannedExpensesPage} />
         <ProtectedRoute exact path="/recurring" component={RecurringObligationsPage} />
         <ProtectedRoute exact path="/budgets" component={BudgetsPage} />
+        <ProtectedRoute exact path="/budgets/detail/:categoryType" component={BudgetDetailPage} />
         <ProtectedRoute exact path="/budgets/:year/:month" component={BudgetsPage} />
         <ProtectedRoute exact path="/savings-goals" component={SavingsGoalsPage} />
         <ProtectedRoute exact path="/profile" component={ProfilePage} />

@@ -23,6 +23,7 @@ export interface BurnRateSubcategory {
 
 export interface BurnRateCategory {
   category: string;
+  category_type: string;
   category_id: number;
   budget: number;
   spent: number;
