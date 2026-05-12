@@ -39,6 +39,7 @@ interface BudgetWizardModalProps {
   onComplete: (planData: BudgetPlanDraft) => void;
   wizardData?: WizardData;
   month: string; // e.g. "2026-05"
+  existingMode?: 'conservative' | 'expected';
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -113,11 +114,12 @@ export const BudgetWizardModal = ({
   onComplete,
   wizardData,
   month,
+  existingMode,
 }: BudgetWizardModalProps) => {
   const history = useHistory();
   const [currentStep, setCurrentStep] = useState(0);
   const [stepData, setStepData] = useState<Record<string, Record<string, number>>>({});
-  const [includeVariable, setIncludeVariable] = useState(true);
+  const [includeVariable, setIncludeVariable] = useState(existingMode !== 'conservative');
 
   // ── Subcategory sheet state ────────────────────────────────────────────────
   const [addSubOpen, setAddSubOpen] = useState(false);
@@ -146,6 +148,11 @@ export const BudgetWizardModal = ({
   useEffect(() => {
     if (isOpen) setCurrentStep(firstStep);
   }, [firstStep, isOpen]);
+
+  // Reset income-mode toggle to match the existing plan's mode each time the modal opens.
+  useEffect(() => {
+    if (isOpen) setIncludeVariable(existingMode !== 'conservative');
+  }, [isOpen, existingMode]);
 
   const totalIncome = wizardData
     ? wizardData.income.sources.reduce((sum, source) => {

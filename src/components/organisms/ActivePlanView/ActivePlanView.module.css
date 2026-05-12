@@ -415,6 +415,12 @@
   border: 1px solid var(--surface-border);
 }
 
+.subcategoryCardUnaccounted {
+  border-style: dashed;
+  border-color: rgba(241, 180, 76, 0.28);
+  background: rgba(241, 180, 76, 0.04);
+}
+
 .subcategoryTop {
   display: flex;
   align-items: flex-start;

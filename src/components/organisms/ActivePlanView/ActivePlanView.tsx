@@ -1,6 +1,6 @@
 import { useMemo, useState, type CSSProperties } from 'react';
 import { IonIcon } from '@ionic/react';
-import { chevronDownOutline, chevronForwardOutline } from 'ionicons/icons';
+import { alertCircleOutline, chevronDownOutline, chevronForwardOutline } from 'ionicons/icons';
 import type { CurrentPlan, CurrentPlanCategory, CurrentPlanSubcategory } from '../../../types/finance.types';
 import { Button } from '../../atoms/Button';
 import { CurrencyValue } from '../../atoms/CurrencyValue';
@@ -83,7 +83,11 @@ const signalClassFor = (
   return '';
 };
 
-const resolveBudgetAccent = (categoryCode: string): string => {
+const resolveBudgetAccent = (categoryCode: string, explicitColor?: string | null): string => {
+  if (explicitColor) {
+    return explicitColor;
+  }
+
   if (categoryCode === 'income' || categoryCode === 'unknown') {
     return 'var(--color-accent)';
   }
@@ -180,7 +184,7 @@ export const CategoryGroup = ({ category, defaultExpanded = false }: CategoryGro
   const spentPct = totalBudgeted > 0 ? clampPct((totalSpent / totalBudgeted) * 100) : 0;
   const remaining = totalBudgeted - totalSpent;
   const statusLabel = buildStatusLabel(category);
-  const colorVar = resolveBudgetAccent(categoryCode);
+  const colorVar = resolveBudgetAccent(categoryCode, category.color);
   const isOverSpent = totalSpent > totalBudgeted;
 
   return (
@@ -268,6 +272,48 @@ export const CategoryGroup = ({ category, defaultExpanded = false }: CategoryGro
                   accentColor={colorVar}
                 />
               ))}
+              {(() => {
+                const accountedSpent = subcategories.reduce((sum, s) => sum + (s.spent ?? 0), 0);
+                const unaccountedSpent = totalSpent - accountedSpent;
+                if (unaccountedSpent <= 0) return null;
+                return (
+                  <article
+                    className={`${styles.subcategoryCard} ${styles.subcategoryCardUnaccounted}`}
+                    style={{ '--subcategory-accent': 'var(--color-warning)' } as CSSProperties}
+                    title="Gasto sin línea de presupuesto asignada"
+                  >
+                    <div className={styles.subcategoryTop}>
+                      <div className={styles.subcategoryIdentity}>
+                        <span className={styles.subcategoryIconWrap}>
+                          <IonIcon icon={alertCircleOutline} className={styles.subcategoryIcon} />
+                        </span>
+                        <div className={styles.subcategoryCopy}>
+                          <h4 className={styles.subcategoryName}>Sin presupuesto</h4>
+                          <p className={styles.subcategoryMeta}>Gasto fuera del plan</p>
+                        </div>
+                      </div>
+                      <span className={`${styles.subcategorySignal} ${styles.subcategorySignalAttention}`}>
+                        <span className={styles.subcategorySignalDot} />
+                        <span className={styles.subcategorySignalLabel}>Revisar</span>
+                      </span>
+                    </div>
+                    <dl className={styles.subcategoryStats}>
+                      <div className={styles.subcategoryStat}>
+                        <dt>Presupuesto</dt>
+                        <dd>—</dd>
+                      </div>
+                      <div className={styles.subcategoryStat}>
+                        <dt>Gastado</dt>
+                        <dd><CurrencyValue amount={unaccountedSpent} mode="compact" /></dd>
+                      </div>
+                      <div className={styles.subcategoryStat}>
+                        <dt>Restante</dt>
+                        <dd>—</dd>
+                      </div>
+                    </dl>
+                  </article>
+                );
+              })()}
             </div>
           ) : (
             <div className={styles.emptySubcategories}>

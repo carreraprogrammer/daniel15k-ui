@@ -242,6 +242,21 @@ export const BudgetsContent = () => {
       })),
     [categories],
   );
+  const currentPlanWithCategoryColors = useMemo(() => {
+    if (!currentPlan) return null;
+
+    const colorByCode = new Map(
+      categories.map((category) => [category.attributes.code ?? '', category.attributes.color ?? 'var(--color-accent)']),
+    );
+
+    return {
+      ...currentPlan,
+      categories: (currentPlan.categories ?? []).map((category) => ({
+        ...category,
+        color: category.color ?? colorByCode.get(category.code ?? '') ?? 'var(--color-accent)',
+      })),
+    };
+  }, [categories, currentPlan]);
 
   const chips = useMemo(() => {
     const next = [];
@@ -268,6 +283,9 @@ export const BudgetsContent = () => {
   const burnCategories = summary?.burn_rate?.categories ?? [];
   const outOfRange = burnCategories.filter((item) => item.on_track === false);
   const topRisk = outOfRange[0] ?? burnCategories[0] ?? null;
+  const topRiskAccent = topRisk
+    ? categoryFilters.find((category) => category.id === String(topRisk.category_id))?.color ?? 'var(--color-accent)'
+    : 'var(--color-accent)';
   const toolbar = useMemo(
     () => (
       detailsOpen
@@ -315,10 +333,10 @@ export const BudgetsContent = () => {
           {/* ── Active plan view (shown when there is a confirmed plan) ── */}
           {!loading && !error && ((currentPlan && !detailsOpen) || (!currentPlan && !detailsOpen)) ? (
             <div className={styles.focusStage}>
-              {currentPlan ? (
+              {currentPlanWithCategoryColors ? (
                 <div className={styles.budgetHeroSurface}>
                   <ActivePlanView
-                    currentPlan={currentPlan}
+                    currentPlan={currentPlanWithCategoryColors}
                     onEditPlan={handleOpenWizard}
                     onExploreDetail={() => setDetailsOpen(true)}
                   />
@@ -364,7 +382,10 @@ export const BudgetsContent = () => {
                   ) : null}
 
                   {topRisk && !detailsOpen ? (
-                    <section className={styles.focusSupport}>
+                    <section
+                      className={styles.focusSupport}
+                      style={{ '--category-accent': topRiskAccent } as CSSProperties}
+                    >
                       <div className={styles.focusSupportHeader}>
                         <h3 className={styles.focusSupportTitle}>Riesgo principal</h3>
                         <span className={styles.focusSupportValue}>{Math.round(topRisk.pct)}%</span>
@@ -447,9 +468,9 @@ export const BudgetsContent = () => {
               {/* ── Tab: Detalle ── */}
               {detailTab === 'detail' ? (
                 <>
-                  {currentPlan && Array.isArray(currentPlan.categories) && currentPlan.categories.length > 0 ? (
+                  {currentPlanWithCategoryColors && Array.isArray(currentPlanWithCategoryColors.categories) && currentPlanWithCategoryColors.categories.length > 0 ? (
                     <div className={styles.detailPanel}>
-                      {currentPlan.categories.map((cat, index) => (
+                      {currentPlanWithCategoryColors.categories.map((cat, index) => (
                         <CategoryGroup
                           key={cat.code ?? cat.name ?? 'unknown'}
                           category={cat}
@@ -504,36 +525,36 @@ export const BudgetsContent = () => {
                         <EmptyState message="No hay presupuestos definidos para el período actual." />
                       ) : null}
                       {!loading && !error && budgets.length ? (
-                        <div className={styles.tableWrap}>
-                          <table className={styles.table}>
-                            <thead>
-                              <tr>
-                                <th>Categoría</th>
-                                <th className={styles.numeric}>Límite</th>
-                                <th className={styles.numeric}>Gastado</th>
-                                <th className={styles.numeric}>Proyectado</th>
-                                <th>Estado</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {budgets.map((budget) => {
-                                const burnRate = summary?.burn_rate?.categories.find(
-                                  (item) => item.category_id === budget.attributes.category_id,
-                                );
-                                return (
-                                  <tr key={budget.id}>
-                                    <td>{normalizeFlexibleLabel(budget.attributes.category_name) || `Categoría ${budget.attributes.category_id}`}</td>
-                                    <td className={styles.numeric}>{formatCurrencyCompact(budget.attributes.amount_limit)}</td>
-                                    <td className={styles.numeric}>{formatCurrencyCompact(burnRate?.spent ?? 0)}</td>
-                                    <td className={styles.numeric}>{formatCurrencyCompact(burnRate?.projected ?? 0)}</td>
-                                    <td className={burnRate?.on_track === false ? styles.statusWarn : styles.statusGood}>
-                                      {burnRate?.on_track === false ? 'Fuera de rango' : 'En rango'}
-                                    </td>
-                                  </tr>
-                                );
-                              })}
-                            </tbody>
-                          </table>
+                        <div className={styles.list}>
+                          {budgets.map((budget) => {
+                            const burnRate = summary?.burn_rate?.categories.find(
+                              (item) => item.category_id === budget.attributes.category_id,
+                            );
+                            const onTrack = burnRate?.on_track !== false;
+                            return (
+                              <div key={budget.id} className={styles.listItem}>
+                                <div className={styles.listPrimary}>
+                                  <span className={styles.listLabel}>
+                                    {normalizeFlexibleLabel(budget.attributes.category_name) || `Categoría ${budget.attributes.category_id}`}
+                                  </span>
+                                  <span className={styles.listMeta}>
+                                    Límite {formatCurrencyCompact(budget.attributes.amount_limit)}
+                                    {burnRate ? ` · Gasto ${formatCurrencyCompact(burnRate.spent)}` : ''}
+                                  </span>
+                                </div>
+                                <div className={styles.listSecondary}>
+                                  <span className={onTrack ? styles.statusGood : styles.statusWarn}>
+                                    {onTrack ? 'En rango' : 'Fuera de rango'}
+                                  </span>
+                                  {burnRate ? (
+                                    <span className={styles.listMeta}>
+                                      Proyectado {formatCurrencyCompact(burnRate.projected)}
+                                    </span>
+                                  ) : null}
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                       ) : null}
                     </>
@@ -622,6 +643,7 @@ export const BudgetsContent = () => {
           onComplete={(draft: BudgetPlanDraft) => void handleWizardComplete(draft)}
           wizardData={wizardData ?? undefined}
           month={month}
+          existingMode={currentPlan?.mode}
         />
 
         {/* Loading overlay shown inside wizard when fetching wizard data */}

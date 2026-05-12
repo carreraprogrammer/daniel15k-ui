@@ -734,6 +734,7 @@ export interface CurrentPlan {
   month: number;
   year: number;
   status: string;
+  mode?: 'conservative' | 'expected';
   total_income: number;
   month_label?: string;
   categories: CurrentPlanCategory[];
