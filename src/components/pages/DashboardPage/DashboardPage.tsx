@@ -298,7 +298,7 @@ export const DashboardContent = () => {
                     </button>
                   </div>
                   <div className={styles.catList}>
-                    {(summary.burn_rate?.categories ?? []).slice(0, 4).map((cat) => {
+                    {(summary.burn_rate?.categories ?? []).map((cat) => {
                       const cfg = catConfig(cat.category_type);
                       const pct = cat.budget > 0 ? Math.min((cat.spent / cat.budget) * 100, 100) : 0;
                       const over = cat.spent > cat.budget && cat.budget > 0;
