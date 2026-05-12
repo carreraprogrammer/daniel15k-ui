@@ -224,7 +224,7 @@ const CategorySelectorCard = ({ event }: { event: AgentUiEvent }) => {
   const typeLabel: Record<string, string> = {
     committed:    'Comprometidos',
     necessary:    'Necesarios',
-    discretionary:'Discrecionales',
+    discretionary:'Flexibles',
     investment:   'Inversión',
   };
 

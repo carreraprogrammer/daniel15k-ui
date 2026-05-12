@@ -31,7 +31,7 @@ export interface BehaviorSignal {
 export const behaviorCopy: Record<BehaviorTone, { label: string; cue: string }> = {
   committed: { label: 'Comprometido', cue: 'Carga fija' },
   necessary: { label: 'Necesario', cue: 'Mantené control' },
-  discretionary: { label: 'Discrecional', cue: 'Elegido por vos' },
+  discretionary: { label: 'Flexible', cue: 'Elegido por vos' },
   investment: { label: 'Inversión', cue: 'Construye futuro' },
   social: { label: 'Social', cue: 'Relación / vínculo' },
   income: { label: 'Ingreso', cue: 'Entrada de caja' },
@@ -144,7 +144,7 @@ export const buildBehaviorSignals = (summary: BehaviorSummary): BehaviorSignal[]
   if (discretionary > 0 && discretionary > investment * 2) {
     signals.push({
       tone: 'discretionary',
-      title: 'Fricción discrecional',
+      title: 'Fricción en gasto flexible',
       message: `Tu gasto elegido va muy por encima de lo que está construyendo futuro este mes.`,
     });
   }

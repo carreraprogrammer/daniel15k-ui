@@ -5,6 +5,7 @@ import { NumberInput } from '../../atoms/NumberInput';
 import { SelectInput } from '../../atoms/SelectInput';
 import { TextInput } from '../../atoms/TextInput';
 import { TextareaInput } from '../../atoms/TextareaInput';
+import { getCategoryDisplayName } from '../../../utils/categoryLabels';
 import type { CategoryResource, PlannedExpense, PlannedExpensePayload } from '../../../types/finance.types';
 import styles from '../ComposerForm.module.css';
 
@@ -90,7 +91,7 @@ export const PlannedExpenseComposer = ({
   const categoryOptions = useMemo(
     () =>
       categories.map((category) => ({
-        label: category.attributes.name ?? 'Sin categoría',
+        label: getCategoryDisplayName({ name: category.attributes.name, code: category.attributes.code, type: category.attributes.category_type }),
         value: String(category.id),
       })),
     [categories],

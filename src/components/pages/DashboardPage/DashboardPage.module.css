@@ -1,3 +1,184 @@
+/* ── Zone 0 — Hero ────────────────────────────────────────────────────────── */
+
+.heroZero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: grid;
+  gap: 1.25rem;
+  padding: clamp(1.4rem, 3.5vw, 2rem);
+  border: 1px solid var(--surface-border-strong);
+  border-bottom-color: var(--surface-border-muted);
+  border-radius: 28px;
+  background:
+    radial-gradient(80% 60% at 50% -10%, rgba(var(--color-brand-rgb), 0.13), transparent 60%),
+    var(--surface-highlight),
+    var(--surface-brand-tint);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
+}
+
+.heroZeroStatus {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.heroZeroStatusDot {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  border-radius: 50%;
+  background: var(--state-color, var(--color-brand));
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 color-mix(in srgb, var(--state-color, var(--color-brand)) 50%, transparent); }
+  50% { opacity: 0.8; box-shadow: 0 0 0 5px transparent; }
+}
+
+.heroZeroStatusText {
+  color: var(--text-on-surface-muted);
+  font-size: var(--type-caption-size);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.heroZeroCopy {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.heroZeroPhrase {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: clamp(1.6rem, 5vw, 2.2rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+}
+
+.heroZeroSubtitle {
+  margin: 0;
+  color: var(--text-on-surface-soft);
+  font-size: var(--type-body-small-size);
+  line-height: var(--leading-normal);
+}
+
+.heroZeroTemporal {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.heroZeroTemporalDates {
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-on-surface-muted);
+  font-size: var(--type-caption-size);
+}
+
+.heroZeroTemporalFill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--state-color, var(--color-brand));
+  transition: width 400ms ease;
+}
+
+.heroZeroNumbers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--surface-border-muted);
+}
+
+.heroZeroNumberItem {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.heroZeroNumberLabel {
+  color: var(--text-on-surface-muted);
+  font-size: var(--type-caption-size);
+  font-weight: 500;
+}
+
+.heroZeroNumberValue {
+  color: var(--color-text-primary);
+  font-size: var(--type-body-size);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.heroZeroNumberAccent {
+  color: var(--state-color, var(--color-brand));
+  font-size: var(--type-body-size);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* ── Zone 1 — Insight card ───────────────────────────────────────────────── */
+
+.insightCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--surface-border);
+  border-radius: 22px;
+  background: var(--surface-panel-soft);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.insightCard:hover {
+  background: var(--surface-panel-strong);
+  border-color: var(--surface-border-strong);
+}
+
+.insightCardIcon {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  border-radius: 12px;
+  background: var(--brand-soft, rgba(var(--color-brand-rgb), 0.16));
+  border: 1px solid rgba(var(--color-brand-rgb), 0.32);
+  color: var(--color-brand);
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+}
+
+.insightCardBody {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.insightCardTitle {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: var(--type-body-small-size);
+  font-weight: 600;
+}
+
+.insightCardText {
+  margin: 0;
+  color: var(--text-on-surface-soft);
+  font-size: var(--type-body-small-size);
+  line-height: var(--leading-normal);
+}
+
+.insightCardMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-on-surface-muted);
+  font-size: var(--type-caption-size);
+}
+
 /* ── Hero card ────────────────────────────────────────────────────────────── */
 
 .planBanner {

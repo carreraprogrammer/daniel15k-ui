@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
-import { IonContent } from '@ionic/react';
+import { IonContent, IonIcon } from '@ionic/react';
+import { funnelOutline, optionsOutline } from 'ionicons/icons';
 import { useHistory, useParams } from 'react-router-dom';
 import { AppLayout } from '../../templates/AppLayout';
+import { useAppToolbar } from '../../templates/AppLayout/AppLayoutContext';
 import { BreadcrumbTrail } from '../../organisms/BreadcrumbTrail';
 import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
@@ -9,7 +11,6 @@ import { ErrorState } from '../../molecules/ErrorState';
 import { EmptyState } from '../../molecules/EmptyState';
 import { ErrorNotice } from '../../molecules/ErrorNotice/ErrorNotice';
 import { LoadingOverlay } from '../../molecules/LoadingOverlay/LoadingOverlay';
-import { ListToolbar } from '../../molecules/ListToolbar';
 import { AppliedFiltersBar } from '../../molecules/AppliedFiltersBar';
 import { SortSheet } from '../../molecules/SortSheet';
 import { BudgetPlanModal } from '../../organisms/BudgetPlanModal/BudgetPlanModal';
@@ -26,6 +27,7 @@ import type {
   MonthlyPlanHistory,
   SummaryResponse,
 } from '../../../types/finance.types';
+import { getCategoryDisplayName, normalizeFlexibleLabel } from '../../../utils/categoryLabels';
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import styles from '../FinancePage.module.css';
 
@@ -231,7 +233,11 @@ export const BudgetsContent = () => {
     () =>
       categories.map((category) => ({
         id: String(category.id),
-        name: category.attributes.name ?? 'Sin categoría',
+        name: getCategoryDisplayName({
+          name: category.attributes.name,
+          code: category.attributes.code,
+          type: category.attributes.category_type,
+        }),
         color: category.attributes.color ?? 'var(--color-accent)',
       })),
     [categories],
@@ -255,9 +261,50 @@ export const BudgetsContent = () => {
     () => chips.filter((chip) => chip.key !== 'q').length,
     [chips],
   );
+  const selectedPeriodLabel = useMemo(
+    () => new Intl.DateTimeFormat('es-CO', { month: 'long', year: 'numeric' }).format(new Date(selectedPeriod.year, selectedPeriod.month - 1, 1)),
+    [selectedPeriod.month, selectedPeriod.year],
+  );
   const burnCategories = summary?.burn_rate?.categories ?? [];
   const outOfRange = burnCategories.filter((item) => item.on_track === false);
   const topRisk = outOfRange[0] ?? burnCategories[0] ?? null;
+  const toolbar = useMemo(
+    () => (
+      detailsOpen
+        ? {
+            title: detailTab === 'history' ? 'Historial' : 'Plan del mes',
+            subtitle: selectedPeriodLabel,
+            searchPlaceholder: !currentPlan && detailTab === 'detail' ? 'Categoría' : undefined,
+            searchValue: !currentPlan && detailTab === 'detail' ? (filters.q ?? '') : undefined,
+            resultLabel: !currentPlan && detailTab === 'detail' ? `${budgets.length} resultados` : undefined,
+            onSearchChange: !currentPlan && detailTab === 'detail'
+              ? (q: string) => setFilters((current) => ({ ...current, q }))
+              : undefined,
+            actions: !currentPlan && detailTab === 'detail'
+              ? [
+                  {
+                    key: 'sort',
+                    label: 'Ordenar',
+                    icon: <IonIcon icon={optionsOutline} />,
+                    onClick: () => setSortOpen(true),
+                  },
+                  {
+                    key: 'filters',
+                    label: 'Filtrar',
+                    icon: <IonIcon icon={funnelOutline} />,
+                    onClick: () => setFiltersVisible((visible) => !visible),
+                    badgeCount: activeFilterCount,
+                    active: filtersVisible,
+                  },
+                ]
+              : [],
+          }
+        : null
+    ),
+    [activeFilterCount, budgets.length, currentPlan, detailTab, detailsOpen, filters.q, filtersVisible, selectedPeriodLabel],
+  );
+
+  useAppToolbar(toolbar);
 
   // ── Render ──────────────────────────────────────────────────────────────────
 
@@ -414,16 +461,6 @@ export const BudgetsContent = () => {
 
                   {!currentPlan ? (
                     <div className={styles.detailPanel}>
-                      <ListToolbar
-                        searchLabel="Buscar presupuestos"
-                        searchPlaceholder="Categoría"
-                        searchValue={filters.q ?? ''}
-                        resultLabel={`${budgets.length} resultados`}
-                        activeFilterCount={activeFilterCount}
-                        onSearchChange={(q) => setFilters((f) => ({ ...f, q }))}
-                        onOpenSort={() => setSortOpen(true)}
-                        onOpenFilters={() => setFiltersVisible((v) => !v)}
-                      />
                       {filtersVisible ? (
                         <div className={styles.filterPanel}>
                           <section className={styles.filterComposer}>
@@ -461,7 +498,7 @@ export const BudgetsContent = () => {
 
                   {!currentPlan ? (
                     <>
-                      {loading ? <Spinner size="lg" /> : null}
+                      {loading ? <div className={styles.centeredState}><Spinner size="lg" /></div> : null}
                       {error ? <ErrorState message={error} onRetry={() => void load()} /> : null}
                       {!loading && !error && !budgets.length ? (
                         <EmptyState message="No hay presupuestos definidos para el período actual." />
@@ -485,7 +522,7 @@ export const BudgetsContent = () => {
                                 );
                                 return (
                                   <tr key={budget.id}>
-                                    <td>{budget.attributes.category_name ?? `Categoría ${budget.attributes.category_id}`}</td>
+                                    <td>{normalizeFlexibleLabel(budget.attributes.category_name) || `Categoría ${budget.attributes.category_id}`}</td>
                                     <td className={styles.numeric}>{formatCurrencyCompact(budget.attributes.amount_limit)}</td>
                                     <td className={styles.numeric}>{formatCurrencyCompact(burnRate?.spent ?? 0)}</td>
                                     <td className={styles.numeric}>{formatCurrencyCompact(burnRate?.projected ?? 0)}</td>

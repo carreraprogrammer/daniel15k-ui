@@ -2,6 +2,7 @@ import { IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding } from 
 import { checkmarkDoneOutline, closeOutline, createOutline } from 'ionicons/icons';
 import { Badge, type BadgeStatus } from '../../atoms/Badge';
 import type { PlannedExpense } from '../../../types/finance.types';
+import { normalizeFlexibleLabel } from '../../../utils/categoryLabels';
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import styles from './PlannedExpenseSlidingCard.module.css';
 
@@ -52,7 +53,7 @@ export const PlannedExpenseSlidingCard = ({
             </div>
             <strong className={styles.name}>{attrs.name}</strong>
             <div className={styles.chipRow}>
-              {attrs.category_name ? <span className={styles.catChip}>{attrs.category_name}</span> : null}
+              {attrs.category_name ? <span className={styles.catChip}>{normalizeFlexibleLabel(attrs.category_name)}</span> : null}
               {attrs.subcategory_name ? <span className={styles.subChip}>{attrs.subcategory_name}</span> : null}
             </div>
             <span className={styles.meta}>Objetivo {formatDate(attrs.target_date)}</span>

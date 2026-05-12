@@ -330,9 +330,6 @@ export const ChatPage = ({ onClose, seed, level }: Props) => {
               </div>
             ) : (
               <div className={styles.agentRow}>
-                <div className={styles.agentAvatarSmall}>
-                  <AvatarNucleus seed={seed} level={level} size={14} />
-                </div>
                 <div className={styles.agentContent}>
                   <InlineCard event={entry.event} />
                 </div>
@@ -343,9 +340,6 @@ export const ChatPage = ({ onClose, seed, level }: Props) => {
 
         {isLoading && (
           <div className={styles.agentRow}>
-            <div className={styles.agentAvatarSmall}>
-              <AvatarNucleus seed={seed} level={level} size={14} />
-            </div>
             <TypingDots />
           </div>
         )}

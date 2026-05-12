@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { IonContent, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, useIonAlert, useIonToast } from '@ionic/react';
-import { addOutline, cardOutline, warningOutline } from 'ionicons/icons';
+import { addOutline, optionsOutline, warningOutline } from 'ionicons/icons';
 import { AppLayout } from '../../templates/AppLayout';
+import { useAppToolbar } from '../../templates/AppLayout/AppLayoutContext';
 import { BreadcrumbTrail } from '../../organisms/BreadcrumbTrail';
 import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
@@ -9,21 +10,21 @@ import { SelectInput } from '../../atoms/SelectInput';
 import { ErrorState } from '../../molecules/ErrorState';
 import { EmptyState } from '../../molecules/EmptyState';
 import { CrudModal } from '../../molecules/CrudModal';
-import { ListToolbar } from '../../molecules/ListToolbar';
 import { AppliedFiltersBar } from '../../molecules/AppliedFiltersBar';
 import { SortSheet } from '../../molecules/SortSheet';
 import { TransactionComposer } from '../../organisms/TransactionComposer';
 import { TransactionSlidingCard } from '../../organisms/TransactionSlidingCard';
 import type { IncomeSource, RecurringObligation, SinkingFund, Transaction, TransactionCreatePayload, TransactionUpdatePayload } from '../../../types/finance.types';
+import { getCategoryDisplayName } from '../../../utils/categoryLabels';
 import { resolveTransactionCategory } from '../../../utils/financeBehavior';
 import { initialTransactionFilters, useTransactionsPage } from '../../../hooks/useTransactionsPage';
 import { formatCurrencyCompact, formatCurrencyFull } from '../../../utils/formatCurrency';
-import { resolveNamedIcon } from '../../organisms/BudgetWizard/iconRegistry';
 import { financeService } from '../../../services/financeService';
 import formStyles from '../../organisms/ComposerForm.module.css';
 import styles from '../FinancePage.module.css';
 
 const periodFormatter = new Intl.DateTimeFormat('es-CO', { month: 'long', year: 'numeric' });
+const dayFormatter = new Intl.DateTimeFormat('es-CO', { weekday: 'short', day: 'numeric' });
 
 const padMonth = (month: number) => String(month).padStart(2, '0');
 
@@ -54,6 +55,36 @@ const transactionPeriod = (transaction: Transaction) => {
 
   const now = new Date();
   return { year: now.getFullYear(), month: now.getMonth() + 1 };
+};
+
+const resolveTransactionDate = (transaction: Transaction) => {
+  const rawDate = transaction.attributes.date;
+  const isoMatch = rawDate.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (isoMatch) {
+    return new Date(Number(isoMatch[1]), Number(isoMatch[2]) - 1, Number(isoMatch[3]));
+  }
+
+  const localMatch = rawDate.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+  if (localMatch) {
+    return new Date(Number(localMatch[3]), Number(localMatch[2]) - 1, Number(localMatch[1]));
+  }
+
+  return new Date(rawDate);
+};
+
+const startOfDay = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+const formatTransactionDayLabel = (transaction: Transaction) => {
+  const date = resolveTransactionDate(transaction);
+  const target = startOfDay(date);
+  const today = startOfDay(new Date());
+  const diffDays = Math.round((today.getTime() - target.getTime()) / 86_400_000);
+
+  if (diffDays === 0) return 'Hoy';
+  if (diffDays === 1) return 'Ayer';
+
+  const formatted = dayFormatter.format(date).replace(/[.,]/g, '');
+  return formatted.charAt(0).toUpperCase() + formatted.slice(1);
 };
 
 const appliedPeriodFor = (transaction: Transaction) => {
@@ -92,7 +123,6 @@ type ExpenseLinkKind = 'recurring_obligation' | 'sinking_fund';
 export const TransactionsContent = () => {
   const [composerOpen, setComposerOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
-  const [filtersVisible, setFiltersVisible] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [linkingTransaction, setLinkingTransaction] = useState<Transaction | null>(null);
@@ -110,18 +140,14 @@ export const TransactionsContent = () => {
 
   const {
     transactions,
-    creditCardPending,
     summary,
     categories,
     loading,
-    loadingMore,
     submitting,
     error,
     filters,
     metrics,
     categoryLookup,
-    behaviorSummary,
-    behaviorSignals,
     appliedChips,
     hasNextPage,
     period,
@@ -157,13 +183,10 @@ export const TransactionsContent = () => {
     void loadLinkOptions();
   }, [loadLinkOptions]);
 
-  const latestTransaction = transactions[0] ?? null;
-  const creditCardPendingPreview = creditCardPending.slice(0, 4);
-
   const TYPE_LABELS: Record<string, string> = {
     committed:     'Comprometido',
     necessary:     'Necesario',
-    discretionary: 'Discrecional',
+    discretionary: 'Flexible',
     investment:    'Inversión',
     social:        'Social',
   };
@@ -196,44 +219,94 @@ export const TransactionsContent = () => {
   const spotlight = useMemo(() => {
     const cats = summary?.burn_rate?.categories;
     if (!cats?.length) return null;
-    const over = cats.filter((c) => !c.on_track && c.budget > 0);
-    if (over.length) return over.reduce((a, b) => (a.pct > b.pct ? a : b));
-    const withBudget = cats.filter((c) => c.budget > 0);
-    if (withBudget.length) return withBudget.reduce((a, b) => (a.pct > b.pct ? a : b));
-    return cats.reduce((a, b) => (a.spent > b.spent ? a : b));
-  }, [summary]);
+      let target;
+      const over = cats.filter((c) => !c.on_track && c.budget > 0);
+      if (over.length) {
+        target = over.reduce((a, b) => (a.pct > b.pct ? a : b));
+      } else {
+        const withBudget = cats.filter((c) => c.budget > 0);
+        if (withBudget.length) target = withBudget.reduce((a, b) => (a.pct > b.pct ? a : b));
+        else target = cats.reduce((a, b) => (a.spent > b.spent ? a : b));
+      }
+      
+      const catObj = categories.find(c => String(c.id) === String(target.category_id));
+      return { ...target, color: catObj?.attributes.color };
+    }, [summary, categories]);
   const selectedCategoryId = filters.category_id ? String(filters.category_id) : '';
-  const selectedSubcategoryId = filters.subcategory_id ? String(filters.subcategory_id) : '';
-  const selectedCategory = useMemo(
-    () => categories.find((category) => String(category.id) === selectedCategoryId) ?? null,
-    [categories, selectedCategoryId],
-  );
-  const categoryAccent = selectedCategory?.attributes.color ?? '#7ce0d3';
   const categoryFilters = useMemo(
     () => categories.map((category) => ({
       id: String(category.id),
-      name: category.attributes.name ?? 'Sin categoría',
+      name: getCategoryDisplayName({
+        name: category.attributes.name,
+        code: category.attributes.code,
+        type: category.attributes.category_type,
+      }),
       color: category.attributes.color ?? '#7ce0d3',
-      count: category.relationships?.subcategories?.data?.length ?? 0,
     })),
     [categories],
   );
-  const subcategoryFilters = useMemo(
-    () =>
-      selectedCategory?.relationships?.subcategories?.data?.map((subcategory) => ({
-        id: String(subcategory.id),
-        name: subcategory.attributes?.name ?? 'Sin subcategoría',
-        icon: subcategory.attributes?.icon ?? undefined,
-      })) ?? [],
-    [selectedCategory],
-  );
-  const activeFilterCount = useMemo(
-    () => appliedChips.filter((chip) => chip.key !== 'q').length,
+  const visibleAppliedChips = useMemo(
+    () => appliedChips.filter((chip) => chip.key !== 'category_id' && chip.key !== 'subcategory_id'),
     [appliedChips],
+  );
+  const groupedTransactions = useMemo(() => {
+    const groups: Array<{ key: string; label: string; items: Transaction[] }> = [];
+    const indexByKey = new Map<string, number>();
+
+    transactions.forEach((transaction) => {
+      const date = resolveTransactionDate(transaction);
+      const key = Number.isNaN(date.getTime()) ? transaction.attributes.date : startOfDay(date).toISOString();
+      const existingIndex = indexByKey.get(key);
+
+      if (existingIndex === undefined) {
+        indexByKey.set(key, groups.length);
+        groups.push({
+          key,
+          label: formatTransactionDayLabel(transaction),
+          items: [transaction],
+        });
+        return;
+      }
+
+      groups[existingIndex].items.push(transaction);
+    });
+
+    return groups;
+  }, [transactions]);
+  const activeFilterCount = useMemo(
+    () => visibleAppliedChips.filter((chip) => chip.key !== 'q').length + (selectedCategoryId ? 1 : 0),
+    [selectedCategoryId, visibleAppliedChips],
   );
   const monthBalance = metrics.incomeTotal - metrics.expenseTotal;
   const realAvailable = summary?.liquidity?.confirmed_balance ?? summary?.balance.net_balance ?? monthBalance;
   const linkPeriodOptions = useMemo(() => periodOptionsFor(linkingTransaction), [linkingTransaction]);
+  const toolbar = useMemo(
+    () => ({
+      title: 'Movimientos',
+      subtitle: monthName,
+      searchPlaceholder: 'Concepto o producto',
+      searchValue: filters.q ?? '',
+      resultLabel: `${metrics.count} resultados`,
+      onSearchChange: (q: string) => {
+        setDetailsOpen(true);
+        setFilters((current) => ({ ...current, q }));
+      },
+      actions: [
+        {
+          key: 'sort',
+          label: 'Ordenar',
+          icon: <IonIcon icon={optionsOutline} />,
+          onClick: () => {
+            setDetailsOpen(true);
+            setSortOpen(true);
+          },
+        },
+      ],
+    }),
+    [filters.q, metrics.count, monthName, setFilters],
+  );
+
+  useAppToolbar(toolbar);
 
   const handleCreate = async (payload: TransactionCreatePayload) => {
     try {
@@ -489,9 +562,6 @@ export const TransactionsContent = () => {
                   {metrics.pendingCount > 0 ? (
                     <span className={styles.focusBadge}>{metrics.pendingCount} pendientes</span>
                   ) : null}
-                  {metrics.creditCardPendingCount > 0 ? (
-                    <span className={styles.focusBadge}>{formatCurrencyCompact(metrics.creditCardPendingTotal)} por pagar TC</span>
-                  ) : null}
                   <span className={styles.focusBadge}>{metrics.count} movimientos</span>
                 </div>
               </div>
@@ -523,7 +593,10 @@ export const TransactionsContent = () => {
 
               {/* Spotlight */}
               {spotlight ? (
-                <div className={`${styles.focusSupport} ${!spotlight.on_track ? styles.focusSupportWarn : ''}`}>
+                  <div
+                    className={`${styles.focusSupport} ${!spotlight.on_track ? styles.focusSupportWarn : ''}`}
+                    style={spotlight.color ? { '--category-accent': spotlight.color } as React.CSSProperties : undefined}
+                  >
                   <div className={styles.focusSupportHeader}>
                     <h3 className={styles.focusSupportTitle}>
                       {!spotlight.on_track ? <IonIcon icon={warningOutline} aria-hidden="true" /> : null}
@@ -548,47 +621,13 @@ export const TransactionsContent = () => {
                       </div>
                       <p className={styles.focusSupportText}>
                         {spotlight.pct}% de {formatCurrencyCompact(spotlight.budget)} presupuestados
-                        {!spotlight.on_track ? ' — va a superarse' : ''}
+                          {!spotlight.on_track ? (spotlight.pct >= 100 ? ' — ya se superó' : ' — va a superarse') : ''}
                       </p>
                     </>
                   ) : (
                     <p className={styles.focusSupportText}>mayor gasto del mes</p>
                   )}
                 </div>
-              ) : null}
-
-              {creditCardPending.length > 0 ? (
-                <section className={styles.creditPoolPanel}>
-                  <div className={styles.creditPoolHeader}>
-                    <div className={styles.creditPoolTitleWrap}>
-                      <span className={styles.creditPoolIcon}>
-                        <IonIcon icon={cardOutline} />
-                      </span>
-                      <div>
-                        <h3 className={styles.creditPoolTitle}>Tarjeta de crédito pendiente</h3>
-                        <p className={styles.creditPoolText}>
-                          Compras ya registradas; falta confirmar el abono al banco.
-                        </p>
-                      </div>
-                    </div>
-                    <strong className={styles.creditPoolTotal}>{formatCurrencyCompact(metrics.creditCardPendingTotal)}</strong>
-                  </div>
-                  <div className={styles.creditPoolList}>
-                    {creditCardPendingPreview.map((transaction) => (
-                      <div key={transaction.id} className={styles.creditPoolRow}>
-                        <span className={styles.creditPoolConcept}>{transaction.attributes.concept}</span>
-                        <span className={styles.creditPoolAmount}>
-                          {formatCurrencyCompact(transaction.attributes.amount)}
-                        </span>
-                      </div>
-                    ))}
-                    {creditCardPending.length > creditCardPendingPreview.length ? (
-                      <div className={styles.creditPoolMore}>
-                        +{creditCardPending.length - creditCardPendingPreview.length} compras más
-                      </div>
-                    ) : null}
-                  </div>
-                </section>
               ) : null}
 
               {/* Actions */}
@@ -619,78 +658,18 @@ export const TransactionsContent = () => {
               { label: 'Transacciones', onClick: () => setDetailsOpen(false) },
               { label: monthName },
             ]} />
-            <div className={styles.detailStageHeader}>
-              <div className={styles.detailStageCopy}>
-                <h3 className={styles.detailStageTitle}>Detalle de transacciones</h3>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
-                  <button
-                    onClick={() => setPeriod(shiftPeriod(period.year, period.month, -1))}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 4px', color: 'inherit', fontSize: '1rem', opacity: 0.7 }}
-                  >‹</button>
-                  <span className={styles.detailStageText} style={{ margin: 0 }}>{monthName}</span>
-                  <button
-                    onClick={() => { if (!isCurrentPeriod) setPeriod(shiftPeriod(period.year, period.month, 1)); }}
-                    style={{ background: 'none', border: 'none', cursor: isCurrentPeriod ? 'default' : 'pointer', padding: '0 4px', color: 'inherit', fontSize: '1rem', opacity: isCurrentPeriod ? 0.2 : 0.7 }}
-                  >›</button>
-                </div>
-              </div>
-            </div>
             <div className={styles.detailPanel}>
-            <ListToolbar
-              density="compact"
-              searchPlaceholder="Concepto o producto"
-              searchValue={filters.q ?? ''}
-              resultLabel={`${metrics.count} resultados`}
-              activeFilterCount={activeFilterCount}
-              onSearchChange={(q) => {
-                const next = { ...filters, q };
-                setFilters(next);
-              }}
-              onOpenSort={() => setSortOpen(true)}
-              onOpenFilters={() => setFiltersVisible((visible) => !visible)}
-            />
-
-            {filtersVisible ? (
-              <div className={styles.filterPanel}>
-                <div className={styles.inlineFilters}>
-                  <SelectInput
-                    name="tx-inline-status"
-                    value={filters.status ?? ''}
-                    onChange={(status) => setFilters((current) => ({ ...current, status: String(status) }))}
-                    options={[
-                      { label: 'Confirmada', value: 'confirmed' },
-                      { label: 'Pendiente', value: 'pending' },
-                    ]}
-                    placeholder="Todos los estados"
-                  />
-                  <SelectInput
-                    name="tx-inline-type"
-                    value={filters.transaction_type ?? ''}
-                    onChange={(transaction_type) =>
-                      setFilters((current) => ({ ...current, transaction_type: String(transaction_type) }))
-                    }
-                    options={[
-                      { label: 'Gasto', value: 'expense' },
-                      { label: 'Ingreso', value: 'income' },
-                    ]}
-                    placeholder="Todos los tipos"
-                  />
-                  <SelectInput
-                    name="tx-inline-source"
-                    value={filters.source ?? ''}
-                    onChange={(source) => setFilters((current) => ({ ...current, source: String(source) }))}
-                    options={[{ label: 'Manual', value: 'manual' }]}
-                    placeholder="Todos los orígenes"
-                  />
-                </div>
-
-                <section className={styles.filterComposer}>
-                  <div className={styles.filterComposerHeader}>
-                    <span className={styles.filterComposerLabel}>Categoría</span>
-                    <span className={styles.filterComposerHint}>Elige un color para abrir sus subcategorías.</span>
-                  </div>
-
+              <section className={styles.inlineCategoryFilters}>
+                <div className={styles.categoryRailScroller}>
                   <div className={styles.categoryRail}>
+                    <button
+                      type="button"
+                      className={[styles.categoryToken, !selectedCategoryId ? styles.categoryTokenActive : ''].filter(Boolean).join(' ')}
+                      style={{ '--category-accent': 'var(--color-brand)' } as CSSProperties}
+                      onClick={() => setFilters((current) => ({ ...current, category_id: '', subcategory_id: '' }))}
+                    >
+                      <span className={styles.categoryTokenText}>Todo</span>
+                    </button>
                     {categoryFilters.map((category) => {
                       const active = category.id === selectedCategoryId;
                       return (
@@ -699,15 +678,11 @@ export const TransactionsContent = () => {
                           type="button"
                           className={[styles.categoryToken, active ? styles.categoryTokenActive : ''].filter(Boolean).join(' ')}
                           style={{ '--category-accent': category.color } as CSSProperties}
-                          onClick={() => {
-                            const nextCategoryId = active ? '' : category.id;
-                            const next = {
-                              ...filters,
-                              category_id: nextCategoryId,
-                              subcategory_id: '',
-                            };
-                            setFilters(next);
-                          }}
+                          onClick={() => setFilters((current) => ({
+                            ...current,
+                            category_id: category.id,
+                            subcategory_id: '',
+                          }))}
                         >
                           <span className={styles.categorySwatch} />
                           <span className={styles.categoryTokenText}>{category.name}</span>
@@ -715,53 +690,55 @@ export const TransactionsContent = () => {
                       );
                     })}
                   </div>
-
-                  {selectedCategory && subcategoryFilters.length ? (
-                    <div
-                      className={styles.subcategoryRail}
-                      style={{ '--category-accent': categoryAccent } as CSSProperties}
-                    >
-                      {subcategoryFilters.map((subcategory) => {
-                        const active = subcategory.id === selectedSubcategoryId;
-                        return (
-                          <button
-                            key={subcategory.id}
-                            type="button"
-                            className={[styles.subcategoryToken, active ? styles.subcategoryTokenActive : ''].filter(Boolean).join(' ')}
-                            onClick={() => {
-                              const next = {
-                                ...filters,
-                                category_id: selectedCategory.id,
-                                subcategory_id: active ? '' : subcategory.id,
-                              };
-                              setFilters(next);
-                            }}
-                          >
-                            <span className={styles.subcategoryIconWrap}>
-                              <IonIcon icon={resolveNamedIcon(subcategory.icon)} className={styles.subcategoryIcon} />
-                            </span>
-                            <span className={styles.subcategoryTokenText}>{subcategory.name}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  ) : null}
-                </section>
-              </div>
-            ) : null}
+                </div>
+              </section>
 
             <AppliedFiltersBar
-              chips={appliedChips}
+              chips={visibleAppliedChips}
               onRemove={removeChip}
               onClearAll={() => {
                 setFilters(initialTransactionFilters);
               }}
             />
+            {!loading && !error && transactions.length ? (
+              <div className={styles.transactionDayGroups}>
+                {groupedTransactions.map((group) => (
+                  <section key={group.key} className={styles.transactionDaySection}>
+                    <h3 className={styles.transactionDayLabel}>{group.label}</h3>
+                    <div className={styles.transactionGroupCard}>
+                      {group.items.map((transaction) => (
+                        <TransactionSlidingCard
+                          key={transaction.id}
+                          variant="grouped"
+                          transaction={transaction}
+                          category={resolveTransactionCategory(transaction, categoryLookup)}
+                          linkedLabel={
+                            transaction.attributes.transaction_type === 'income'
+                              ? (incomeSources.find((s) => String(s.id) === String(transaction.attributes.income_source_id))?.attributes.name ?? null)
+                              : transaction.attributes.sinking_fund_id
+                                ? (sinkingFunds.find((f) => String(f.id) === String(transaction.attributes.sinking_fund_id))?.name ?? null)
+                                : (obligations.find((o) => String(o.id) === String(transaction.attributes.recurring_obligation_id))?.attributes.name ?? null)
+                          }
+                          onEdit={(nextTransaction) => {
+                            setEditingTransaction(nextTransaction);
+                            setComposerOpen(true);
+                          }}
+                          onDelete={(selectedTransaction) => {
+                            void requestDelete(selectedTransaction);
+                          }}
+                          onLink={(tx) => { handleOpenLink(tx); }}
+                        />
+                      ))}
+                    </div>
+                  </section>
+                ))}
+              </div>
+            ) : null}
             </div>
           </div>
         ) : null}
 
-        {loading ? <Spinner size="lg" /> : null}
+        {loading ? <div className={styles.centeredState}><Spinner size="lg" /></div> : null}
         {error ? <ErrorState message={error} onRetry={() => void reload()} /> : null}
         {!loading && !error && !transactions.length ? (
           <EmptyState
@@ -779,32 +756,6 @@ export const TransactionsContent = () => {
           />
         ) : null}
 
-        {!loading && !error && transactions.length && detailsOpen ? (
-          <div className={styles.list}>
-            {transactions.map((transaction) => (
-              <TransactionSlidingCard
-                key={transaction.id}
-                transaction={transaction}
-                category={resolveTransactionCategory(transaction, categoryLookup)}
-                linkedLabel={
-                  transaction.attributes.transaction_type === 'income'
-                    ? (incomeSources.find((s) => String(s.id) === String(transaction.attributes.income_source_id))?.attributes.name ?? null)
-                    : transaction.attributes.sinking_fund_id
-                      ? (sinkingFunds.find((f) => String(f.id) === String(transaction.attributes.sinking_fund_id))?.name ?? null)
-                      : (obligations.find((o) => String(o.id) === String(transaction.attributes.recurring_obligation_id))?.attributes.name ?? null)
-                }
-                onEdit={(nextTransaction) => {
-                  setEditingTransaction(nextTransaction);
-                  setComposerOpen(true);
-                }}
-                onDelete={(selectedTransaction) => {
-                  void requestDelete(selectedTransaction);
-                }}
-                onLink={(tx) => { handleOpenLink(tx); }}
-              />
-            ))}
-          </div>
-        ) : null}
       </section>
 
       {detailsOpen ? (

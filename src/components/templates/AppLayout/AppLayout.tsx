@@ -8,7 +8,7 @@ import { BreadcrumbTrail, type BreadcrumbItem } from '../../organisms/Breadcrumb
 import { CompletenessIndicator } from '../../molecules/CompletenessIndicator';
 import { rememberAuthPath } from '../../../utils/navigation';
 import { useAuthStore } from '../../../store/authStore';
-import { AppLayoutContext } from './AppLayoutContext';
+import { AppLayoutContext, type AppToolbarConfig } from './AppLayoutContext';
 import styles from './AppLayout.module.css';
 
 const NAV_ITEMS = [
@@ -26,13 +26,15 @@ export const AppLayout = ({ title, children }: { title: string; children: ReactN
   const shellRef = useRef<HTMLDivElement | null>(null);
   const headerRef = useRef<HTMLDivElement | null>(null);
   const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbItem[]>([]);
+  const [toolbar, setToolbar] = useState<AppToolbarConfig | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const logout = useAuthStore((state) => state.logout);
-  const layoutContext = useMemo(() => ({ setBreadcrumbs }), []);
+  const layoutContext = useMemo(() => ({ setBreadcrumbs, setToolbar }), []);
 
   useEffect(() => {
     rememberAuthPath(location.pathname);
     setBreadcrumbs([]);
+    setToolbar(null);
   }, [location.pathname]);
 
   useEffect(() => {
@@ -79,7 +81,7 @@ export const AppLayout = ({ title, children }: { title: string; children: ReactN
         <div ref={shellRef} className={styles.shell}>
           <div className={styles.backdrop} aria-hidden="true" />
           <div ref={headerRef} className={styles.headerSlot}>
-            <Header currentSection={title} />
+            <Header currentSection={title} toolbar={toolbar} />
             <BreadcrumbTrail items={breadcrumbs} />
           </div>
           <div className={styles.grid}>

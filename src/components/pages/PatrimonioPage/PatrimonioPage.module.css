@@ -6,6 +6,12 @@
   margin: 0 auto;
 }
 
+.centeredState {
+  display: grid;
+  place-items: center;
+  min-height: 50vh;
+}
+
 /* ── Toggle ── */
 /* ── 3-segment tab bar ── */
 .segmentRow {

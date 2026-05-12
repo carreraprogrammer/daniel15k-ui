@@ -347,7 +347,7 @@ export const ActivePlanView = ({
         </div>
 
         <div className={styles.heroActions}>
-          <Button label="Editar plan" size="sm" onClick={onEditPlan} />
+          <Button label="Editar plan" size="sm" variant="secondary" onClick={onEditPlan} />
           {onExploreDetail ? (
             <Button label="Ver detalle" size="sm" variant="ghost" onClick={onExploreDetail} />
           ) : null}

@@ -24,7 +24,7 @@ import styles from './BudgetWizardModal.module.css';
  *  2 — Necesario
  *  3 — Inversión
  *  4 — Social
- *  5 — Discrecional
+ *  5 — Flexible
  *  6 — Resumen
  */
 const TOTAL_STEPS = 7; // 0..6

@@ -5,7 +5,9 @@ import { AppLayout } from '../../templates/AppLayout';
 import { Spinner } from '../../atoms/Spinner';
 import { ErrorState } from '../../molecules/ErrorState';
 import { financeService } from '../../../services/financeService';
+import { normalizeFlexibleLabel } from '../../../utils/categoryLabels';
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
+import pageStyles from '../FinancePage.module.css';
 import type { Debt, IncomeSource, RecurringObligation } from '../../../types/finance.types';
 import styles from './PatrimonioPage.module.css';
 
@@ -84,31 +86,31 @@ export const EstructuraContent = () => {
       <div className={styles.page}>
 
         {/* ── Segment selector ── */}
-        <div className={styles.segmentRow}>
+        <div className={pageStyles.detailTabBar}>
           <button
             type="button"
-            className={[styles.segBtn, view === 'ingresos' ? styles.segBtnActive : ''].filter(Boolean).join(' ')}
+            className={[pageStyles.detailTabBtn, view === 'ingresos' ? pageStyles.detailTabBtnActive : ''].filter(Boolean).join(' ')}
             onClick={() => setView('ingresos')}
           >
             Ingresos
           </button>
           <button
             type="button"
-            className={[styles.segBtn, view === 'recurrentes' ? styles.segBtnActive : ''].filter(Boolean).join(' ')}
+            className={[pageStyles.detailTabBtn, view === 'recurrentes' ? pageStyles.detailTabBtnActive : ''].filter(Boolean).join(' ')}
             onClick={() => setView('recurrentes')}
           >
             Recurrentes
           </button>
           <button
             type="button"
-            className={[styles.segBtn, view === 'deudas' ? styles.segBtnActive : ''].filter(Boolean).join(' ')}
+            className={[pageStyles.detailTabBtn, view === 'deudas' ? pageStyles.detailTabBtnActive : ''].filter(Boolean).join(' ')}
             onClick={() => setView('deudas')}
           >
             Deudas
           </button>
         </div>
 
-        {loading ? <Spinner size="lg" /> : null}
+        {loading ? <div className={styles.centeredState}><Spinner size="lg" /></div> : null}
         {!loading && error ? <ErrorState message={error} onRetry={() => void load()} /> : null}
 
         {/* ── Vista: Ingresos ── */}
@@ -173,7 +175,7 @@ export const EstructuraContent = () => {
                         <span className={styles.rowName}>{attr.name}</span>
                         <span className={styles.rowSub}>
                           {attr.due_day ? `Día ${attr.due_day}` : 'Fecha variable'}
-                          {attr.category_name ? ` · ${attr.category_name}` : ''}
+                          {attr.category_name ? ` · ${normalizeFlexibleLabel(attr.category_name)}` : ''}
                         </span>
                       </div>
                       <div className={styles.rowRight}>

@@ -7,6 +7,7 @@ import { TextInput } from '../../atoms/TextInput';
 import { TextareaInput } from '../../atoms/TextareaInput';
 import { AddSubcategorySheet } from '../BudgetWizard/AddSubcategorySheet';
 import { resolveNamedIcon } from '../BudgetWizard/iconRegistry';
+import { getCategoryDisplayName } from '../../../utils/categoryLabels';
 import type { CategoryResource, RecurringObligation, RecurringObligationPayload } from '../../../types/finance.types';
 import styles from '../ComposerForm.module.css';
 
@@ -220,7 +221,7 @@ export const RecurringObligationComposer = ({
                   }
                 >
                   <span className={styles.categorySwatch} />
-                  <span className={styles.categoryTokenText}>{category.attributes.name ?? 'Sin categoría'}</span>
+                  <span className={styles.categoryTokenText}>{getCategoryDisplayName({ name: category.attributes.name, code: category.attributes.code, type: category.attributes.category_type })}</span>
                 </button>
               );
             })}
@@ -282,7 +283,7 @@ export const RecurringObligationComposer = ({
           isOpen={subcategorySheetOpen}
           onClose={() => setSubcategorySheetOpen(false)}
           categoryCode={selectedCategory.attributes.code ?? 'unknown'}
-          categoryName={selectedCategory.attributes.name ?? 'Categoría'}
+          categoryName={getCategoryDisplayName({ name: selectedCategory.attributes.name, code: selectedCategory.attributes.code, type: selectedCategory.attributes.category_type, fallback: 'Categoría' })}
           categoryId={String(selectedCategory.id)}
           onCreated={(sub) => {
             setLocalCategories((current) =>

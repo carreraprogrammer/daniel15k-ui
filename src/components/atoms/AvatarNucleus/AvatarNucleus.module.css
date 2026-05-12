@@ -1,6 +1,6 @@
 @keyframes seedSway {
-  0%, 100% { transform: rotate(-8deg) scale(0.9); }
-  50%       { transform: rotate(6deg)  scale(0.94); }
+  0%, 100% { transform: rotate(-6deg) scale(0.91); }
+  50%       { transform: rotate(5deg)  scale(0.95); }
 }
 
 @keyframes breathe {
@@ -25,7 +25,7 @@
 
 @keyframes twinkle {
   0%, 100% { opacity: 0.9; }
-  50%       { opacity: 0.45; }
+  50%       { opacity: 0.4; }
 }
 
 /* ── Root ─────────────────────────────────────────────────────── */
@@ -47,7 +47,7 @@
   display: none;
 }
 
-/* ── Core: DiceBear/Seed SVG ──────────────────────────────────── */
+/* ── Core: abstract SVG nucleus ──────────────────────────────── */
 
 .core {
   position: relative;
@@ -56,16 +56,7 @@
   height: 100%;
   border-radius: 50%;
   overflow: hidden;
-  background: #000;        /* dark bg — no overflow bleeds, glow pops */
   transition: box-shadow 0.5s ease, border-radius 0.5s ease;
-}
-
-.core::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  display: none;
-  pointer-events: none;
 }
 
 .core > svg {
@@ -74,7 +65,31 @@
   display: block;
 }
 
-/* ── Shape variants (clip the DiceBear SVG differently) ──────── */
+/* DiceBear rings base layer — colors already constrained to brand palette */
+.ringBase {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  filter: brightness(0.55) saturate(1.2);
+}
+
+.ringBase > svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Custom glow + filaments overlay — blends additively over the rings */
+.overlayGlow {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  mix-blend-mode: screen;
+}
+
+/* ── Shape variants ──────────────────────────────────────────── */
 
 .root[data-shape='blob'] .core {
   border-radius: 42% 58% 60% 40% / 48% 42% 58% 52%;
@@ -82,35 +97,6 @@
 
 .root[data-shape='rounded'] .core {
   border-radius: 28%;
-}
-
-/* ── Creature overlay ─────────────────────────────────────────── */
-
-.overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  /* overflow: visible is set inline on the SVG element */
-}
-
-/* Overlay scale + opacity grows with level — creature features evolve */
-.root[data-level='1'] .overlay { opacity: 0.45; transform: scale(0.78); transform-origin: 50% 50%; }
-.root[data-level='2'] .overlay { opacity: 0.65; transform: scale(0.88); transform-origin: 50% 50%; }
-.root[data-level='3'] .overlay { opacity: 0.82; transform: scale(0.98); transform-origin: 50% 50%; }
-.root[data-level='4'] .overlay { opacity: 0.96; transform: scale(1.16) rotate(-4deg); transform-origin: 50% 50%; }
-.root[data-level='5'] .overlay { opacity: 1; transform: scale(1.3) rotate(5deg); transform-origin: 50% 50%; }
-
-/* Orbit family: the whole overlay SVG rotates */
-.overlayOrbit {
-  animation: orbit calc(var(--av-speed) * 6) linear infinite;
-}
-
-/* Stardust family: twinkling */
-.root[data-family='stardust'] .overlay {
-  animation: twinkle calc(var(--av-speed) * 0.9) ease-in-out infinite;
 }
 
 /* ── Ring ─────────────────────────────────────────────────────── */
@@ -126,140 +112,119 @@
 }
 
 /* ─────────────────────────────────────────────────────────────── */
-/* LEVEL 0 — Semilla. Same for everyone. No creature visible.     */
+/* LEVEL 0 — Semilla. Dormant. Barely alive.                       */
 /* ─────────────────────────────────────────────────────────────── */
 
 .root[data-level='0'] .core {
-  background: #0a120a;
   border-radius: 46% 54% 50% 50% / 58% 50% 50% 42%;
   animation: seedSway calc(var(--av-speed) * 1.4) ease-in-out infinite;
-  box-shadow:
-    0 0 calc(var(--av-size) * 0.4) rgba(70, 130, 50, 0.42);
+  box-shadow: 0 0 calc(var(--av-size) * 0.3) hsl(var(--av-hue) var(--av-sat) 30% / 0.25);
 }
 
 /* ─────────────────────────────────────────────────────────────── */
-/* LEVEL 1 — Creature emerges. Faint, small.                      */
+/* LEVEL 1 — Pulso. The nucleus stirs.                             */
 /* ─────────────────────────────────────────────────────────────── */
 
 .root[data-level='1'] .core {
   animation: breathe var(--av-speed) ease-in-out infinite;
-  box-shadow:
-    0 0 calc(var(--av-size) * 0.5) hsl(var(--av-hue) var(--av-sat) 55% / 0.38);
+  box-shadow: 0 0 calc(var(--av-size) * 0.45) hsl(var(--av-hue) var(--av-sat) 55% / 0.32);
 }
 
 /* ─────────────────────────────────────────────────────────────── */
-/* LEVEL 2 — Features sharpen. Glow grows.                        */
+/* LEVEL 2 — Conciencia. Center of light opens.                    */
 /* ─────────────────────────────────────────────────────────────── */
 
 .root[data-level='2'] .core {
   animation: breathe var(--av-speed) ease-in-out infinite;
   box-shadow:
-    0 0 calc(var(--av-size) * 0.7)  hsl(var(--av-hue) var(--av-sat) 58% / 0.55),
-    0 0 calc(var(--av-size) * 0.2)  hsl(var(--av-hue) var(--av-sat) 80% / 0.65);
+    0 0 calc(var(--av-size) * 0.6)  hsl(var(--av-hue) var(--av-sat) 58% / 0.48),
+    0 0 calc(var(--av-size) * 0.18) hsl(var(--av-sec-hue) 85% 78% / 0.55);
 }
 
 /* ─────────────────────────────────────────────────────────────── */
-/* LEVEL 3 — Full creature + first ring. Clear visual jump.       */
+/* LEVEL 3 — Estructura. First ring appears. Clear visual jump.    */
 /* ─────────────────────────────────────────────────────────────── */
 
 .root[data-level='3'] .ring {
   display: block;
   inset: -7px;
-  border-color: hsl(var(--color-brand-hue, var(--av-hue)) var(--av-sat) 72% / 0.8);
+  border-color: hsl(var(--av-hue) var(--av-sat) 72% / 0.75);
   border-width: 2px;
   box-shadow:
-    0 0 calc(var(--av-size) * 0.25) hsl(var(--color-brand-hue, var(--av-hue)) var(--av-sat) 72% / 0.5),
-    inset 0 0 calc(var(--av-size) * 0.1) hsl(var(--color-brand-hue, var(--av-hue)) var(--av-sat) 72% / 0.25);
+    0 0 calc(var(--av-size) * 0.22) hsl(var(--av-hue) var(--av-sat) 72% / 0.45),
+    inset 0 0 calc(var(--av-size) * 0.1) hsl(var(--av-hue) var(--av-sat) 72% / 0.2);
   animation: orbit calc(var(--av-speed) * 9) linear infinite;
 }
 
 .root[data-level='3'] .core {
   animation: breathe var(--av-speed) ease-in-out infinite;
   box-shadow:
-    0 0 calc(var(--av-size) * 0.8)  hsl(var(--av-hue) var(--av-sat) 60% / 0.6),
-    0 0 calc(var(--av-size) * 0.25) hsl(var(--av-hue) var(--av-sat) 80% / 0.75);
+    0 0 calc(var(--av-size) * 0.75) hsl(var(--av-hue) var(--av-sat) 60% / 0.55),
+    0 0 calc(var(--av-size) * 0.22) hsl(var(--av-sec-hue) 85% 75% / 0.65);
 }
 
 /* ─────────────────────────────────────────────────────────────── */
-/* LEVEL 4 — Two rings. Creature at ~full size. Dual-color glow.  */
+/* LEVEL 4 — Estrategia. Two rings. Dual-color glow.               */
 /* ─────────────────────────────────────────────────────────────── */
 
 .root[data-level='4'] .ring {
   display: block;
   inset: -9px;
-  border-color: hsl(var(--color-brand-hue, var(--av-hue)) var(--av-sat) 76% / 0.88);
+  border-color: hsl(var(--av-hue) var(--av-sat) 76% / 0.85);
   border-width: 2.5px;
-  box-shadow:
-    0 0 calc(var(--av-size) * 0.3) hsl(var(--color-brand-hue, var(--av-hue)) var(--av-sat) 76% / 0.6);
+  box-shadow: 0 0 calc(var(--av-size) * 0.28) hsl(var(--av-hue) var(--av-sat) 76% / 0.55);
   animation: orbit calc(var(--av-speed) * 8) linear infinite;
 }
 
 .root[data-level='4']::before {
   display: block;
   inset: -18px;
-  border: 1.5px solid hsl(calc(var(--color-brand-hue, var(--av-sec-hue)) + 18) 70% 68% / 0.58);
-  box-shadow: 0 0 calc(var(--av-size) * 0.18) hsl(calc(var(--color-brand-hue, var(--av-sec-hue)) + 18) 70% 68% / 0.32);
+  border: 1.5px solid hsl(var(--av-sec-hue) 78% 68% / 0.55);
+  box-shadow: 0 0 calc(var(--av-size) * 0.16) hsl(var(--av-sec-hue) 78% 68% / 0.28);
   animation: orbit-reverse calc(var(--av-speed) * 13) linear infinite;
 }
 
 .root[data-level='4'] .core {
   border-radius: 34% 66% 52% 48% / 46% 34% 66% 54%;
-  filter: saturate(1.18) contrast(1.05);
+  animation: breathe var(--av-speed) ease-in-out infinite;
+  filter: saturate(1.15) contrast(1.04);
   box-shadow:
-    0 0 calc(var(--av-size) * 1.1)  hsl(var(--av-hue) var(--av-sat) 60% / 0.7),
-    0 0 calc(var(--av-size) * 0.4)  hsl(var(--av-hue) var(--av-sat) 80% / 0.9),
-    0 0 calc(var(--av-size) * 0.5)  hsl(calc(var(--av-sec-hue) + 18) 70% 64% / 0.35);
-}
-
-.root[data-level='4'] .core::after {
-  display: block;
-  background:
-    linear-gradient(120deg, transparent 33%, hsl(calc(var(--av-sec-hue) + 18) 78% 78% / 0.34) 48%, transparent 63%),
-    radial-gradient(circle at 72% 26%, white 0 5%, transparent 6%);
-  mix-blend-mode: screen;
+    0 0 calc(var(--av-size) * 1.0)  hsl(var(--av-hue) var(--av-sat) 60% / 0.65),
+    0 0 calc(var(--av-size) * 0.36) hsl(var(--av-hue) var(--av-sat) 80% / 0.85),
+    0 0 calc(var(--av-size) * 0.45) hsl(var(--av-sec-hue) 80% 64% / 0.32);
 }
 
 /* ─────────────────────────────────────────────────────────────── */
-/* LEVEL 5 — Radiant. Two rings + max creature + inner white core */
+/* LEVEL 5 — Sistema Nervioso. Radiant. Fully alive.               */
 /* ─────────────────────────────────────────────────────────────── */
 
 .root[data-level='5'] .ring {
   display: block;
-  inset: -10px;
-  border-color: hsl(var(--color-brand-hue, var(--av-hue)) var(--av-sat) 82% / 0.95);
-  border-width: 3px;
+  inset: -7px;
+  border-color: hsl(var(--av-hue) var(--av-sat) 82% / 0.92);
+  border-width: 2.5px;
   box-shadow:
-    0 0 calc(var(--av-size) * 0.4)  hsl(var(--color-brand-hue, var(--av-hue)) var(--av-sat) 82% / 0.68),
-    inset 0 0 calc(var(--av-size) * 0.12) hsl(var(--color-brand-hue, var(--av-hue)) var(--av-sat) 82% / 0.3);
+    0 0 calc(var(--av-size) * 0.26)  hsl(var(--av-hue) var(--av-sat) 82% / 0.58),
+    inset 0 0 calc(var(--av-size) * 0.11) hsl(var(--av-hue) var(--av-sat) 82% / 0.28);
   animation: orbit calc(var(--av-speed) * 7) linear infinite;
 }
 
 .root[data-level='5']::before {
   display: block;
-  inset: -22px;
-  border: 2px solid hsl(calc(var(--color-brand-hue, var(--av-sec-hue)) + 18) 70% 72% / 0.68);
-  box-shadow: 0 0 calc(var(--av-size) * 0.24) hsl(calc(var(--color-brand-hue, var(--av-sec-hue)) + 18) 70% 72% / 0.4);
+  inset: -13px;
+  border: 1.5px solid hsl(var(--av-sec-hue) 75% 72% / 0.58);
+  box-shadow: 0 0 calc(var(--av-size) * 0.16) hsl(var(--av-sec-hue) 75% 72% / 0.28);
   animation: orbit-reverse calc(var(--av-speed) * 11) linear infinite;
 }
 
 .root[data-level='5'] .core {
   animation: breathe-strong var(--av-speed) ease-in-out infinite;
   border-radius: 28% 72% 38% 62% / 36% 30% 70% 64%;
-  filter: saturate(1.34) contrast(1.12) brightness(1.08);
+  filter: saturate(1.3) contrast(1.1) brightness(1.06);
   box-shadow:
-    0 0 calc(var(--av-size) * 1.3)  hsl(var(--av-hue) var(--av-sat) 60% / 0.8),
-    0 0 calc(var(--av-size) * 0.5)  hsl(var(--av-hue) var(--av-sat) 80% / 0.9),
-    0 0 calc(var(--av-size) * 0.7)  hsl(calc(var(--av-sec-hue) + 18) 70% 64% / 0.5);
-}
-
-.root[data-level='5'] .core::after {
-  display: block;
-  background:
-    radial-gradient(circle at 50% 50%, white 0 8%, transparent 9%),
-    linear-gradient(0deg, transparent 42%, hsl(calc(var(--av-sec-hue) + 18) 86% 82% / 0.42) 49%, transparent 57%),
-    linear-gradient(90deg, transparent 42%, hsl(var(--av-hue) var(--av-sat) 84% / 0.38) 49%, transparent 57%),
-    radial-gradient(circle at 72% 22%, white 0 4%, transparent 5%);
-  mix-blend-mode: screen;
+    0 0 calc(var(--av-size) * 1.25) hsl(var(--av-hue) var(--av-sat) 60% / 0.75),
+    0 0 calc(var(--av-size) * 0.48) hsl(var(--av-hue) var(--av-sat) 80% / 0.88),
+    0 0 calc(var(--av-size) * 0.62) hsl(var(--av-sec-hue) 78% 64% / 0.48);
 }
 
 /* ── Orbital pieces (level 4–5) ─────────────────────────────────── */
@@ -285,7 +250,7 @@
   height: 3px;
   margin: -1.5px 0 0 -1.5px;
   border-radius: 50%;
-  background: hsl(var(--av-hue) var(--av-sat) 78% / 0.65);
+  background: hsl(var(--av-sec-hue) 85% 78% / 0.7);
   transform-origin: 1.5px 1.5px;
   animation: orbitPiece calc(var(--av-speed) * 9) linear infinite;
   animation-delay: calc(var(--av-speed) * 9 * -1 * var(--av-piece) / var(--av-total));

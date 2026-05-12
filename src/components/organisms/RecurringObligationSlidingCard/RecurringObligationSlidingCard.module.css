@@ -150,11 +150,12 @@
 }
 
 .amount {
-  font-family: var(--font-mono);
-  font-size: var(--type-card-title-size);
-  font-weight: var(--font-bold);
+  font-family: var(--font-sans);
+  font-size: var(--type-amount-medium-size);
+  font-weight: var(--type-amount-weight);
+  font-variant-numeric: tabular-nums;
   color: var(--color-text-primary);
-  letter-spacing: var(--tracking-tight);
+  letter-spacing: var(--tracking-normal);
   white-space: nowrap;
 }
 

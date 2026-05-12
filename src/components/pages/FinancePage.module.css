@@ -42,6 +42,14 @@
   min-height: 100%;
 }
 
+.centeredState {
+  display: grid;
+  flex: 1 1 auto;
+  place-items: center;
+  width: 100%;
+  min-height: 50vh;
+}
+
 .hero {
   display: grid;
   gap: 1.25rem;
@@ -286,10 +294,10 @@
 
 .focusSupportWarn {
   background:
-    linear-gradient(180deg, rgba(245, 158, 11, 0.1), rgba(239, 68, 68, 0.06)),
+    linear-gradient(180deg, color-mix(in srgb, var(--category-accent, var(--color-warning)) 12%, transparent), color-mix(in srgb, var(--color-error) 6%, transparent)),
     rgba(255, 255, 255, 0.03);
   box-shadow:
-    inset 0 1px 0 rgba(245, 158, 11, 0.14),
+    inset 0 1px 0 color-mix(in srgb, var(--category-accent, var(--color-warning)) 16%, transparent),
     var(--shadow-surface);
 }
 
@@ -558,17 +566,18 @@
 .focusRailFill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, rgba(var(--color-brand-rgb), 0.92), rgba(var(--color-brand-rgb), 0.88));
+  background: linear-gradient(90deg, color-mix(in srgb, var(--category-accent, var(--color-brand)) 92%, transparent), color-mix(in srgb, var(--category-accent, var(--color-accent)) 84%, transparent));
 }
 
 .focusRailFillWarn {
-  background: linear-gradient(90deg, rgba(245, 158, 11, 0.88), rgba(239, 68, 68, 0.9));
+  background: linear-gradient(90deg, color-mix(in srgb, var(--category-accent, var(--color-warning)) 88%, transparent), color-mix(in srgb, var(--category-accent, var(--color-error)) 80%, transparent));
 }
 
 .detailStage {
   display: grid;
-  gap: var(--finance-space-xl);
+  gap: var(--finance-space-md);
   align-content: start;
+  padding-block: var(--finance-space-md);
 }
 
 .detailStageHeader {
@@ -591,20 +600,21 @@
 .detailTabBar {
   display: flex;
   gap: var(--space-1, 4px);
-  background: var(--surface-control);
-  border: 1px solid var(--surface-border-strong);
+  background: var(--surface-panel-soft);
+  border: 1px solid color-mix(in srgb, rgba(var(--color-accent-rgb), 0.24) 72%, var(--surface-border));
   border-radius: var(--radius-full, 999px);
-  padding: 3px;
+  padding: 4px;
 }
 
 .detailTabBtn {
-  padding: 6px 18px;
+  padding: 0.5rem 1rem;
   border-radius: var(--radius-full, 999px);
   border: 1px solid transparent;
   background: transparent;
   color: var(--text-on-surface-muted);
   font-family: var(--font-sans);
   font-size: var(--type-body-small-size);
+  font-weight: 600;
   cursor: pointer;
   transition:
     background 0.15s,
@@ -615,9 +625,9 @@
 }
 
 .detailTabBtn:hover {
-  border-color: var(--surface-border);
-  background: var(--surface-control-hover);
-  color: var(--color-text-primary);
+  border-color: color-mix(in srgb, rgba(var(--color-accent-rgb), 0.2) 70%, var(--surface-border));
+  background: color-mix(in srgb, rgba(var(--color-accent-rgb), 0.08) 70%, var(--surface-panel));
+  color: var(--color-accent);
 }
 
 .detailTabBtn:focus-visible {
@@ -626,11 +636,11 @@
 }
 
 .detailTabBtnActive {
-  border-color: rgba(var(--color-brand-rgb), 0.48);
+  border-color: rgba(var(--color-accent-rgb), 0.42);
   background:
-    linear-gradient(135deg, rgba(var(--color-brand-rgb), 0.16), rgba(var(--color-accent-rgb), 0.1)),
-    var(--surface-control-hover);
-  color: var(--color-text-primary);
+    linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.16), rgba(var(--color-brand-rgb), 0.08)),
+    color-mix(in srgb, rgba(var(--color-accent-rgb), 0.06) 68%, var(--surface-panel));
+  color: var(--color-accent);
   box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text-on-surface) 7%, transparent);
 }
 
@@ -699,11 +709,32 @@
   font-size: var(--type-body-small-size);
 }
 
+.inlineCategoryFilters {
+  display: grid;
+  gap: var(--finance-space-sm);
+}
+
+.categoryRailScroller,
+.subcategoryRailScroller {
+  margin: 0 calc(var(--finance-space-xs) * -1);
+  padding: 0 var(--finance-space-xs);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.categoryRailScroller::-webkit-scrollbar,
+.subcategoryRailScroller::-webkit-scrollbar {
+  display: none;
+}
+
 .categoryRail,
 .subcategoryRail {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: var(--finance-space-sm);
+  width: max-content;
+  min-width: 100%;
 }
 
 .categoryToken,
@@ -711,8 +742,8 @@
   display: inline-flex;
   align-items: center;
   gap: var(--finance-space-xs);
-  min-height: 2.85rem;
-  padding: 0.65rem 0.9rem;
+  min-height: 2.6rem;
+  padding: 0.56rem 0.82rem;
   border: 1px solid var(--surface-border);
   border-radius: 999px;
   background:
@@ -725,6 +756,7 @@
     border-color 160ms ease,
     background 160ms ease,
     box-shadow 160ms ease;
+  white-space: nowrap;
 }
 
 .categoryToken:hover,
@@ -739,6 +771,7 @@
   background:
     linear-gradient(135deg, color-mix(in srgb, var(--category-accent) 18%, transparent), var(--surface-panel-soft)),
     var(--surface-panel);
+  color: var(--category-accent);
   box-shadow: var(--shadow-surface);
 }
 
@@ -758,6 +791,37 @@
   line-height: 1.1;
 }
 
+.subcategoryStack {
+  display: grid;
+  gap: var(--finance-space-xs);
+  padding-top: var(--finance-space-2xs);
+}
+
+.subcategoryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--finance-space-sm);
+}
+
+.subcategoryLabel {
+  color: color-mix(in srgb, var(--category-accent) 62%, var(--text-on-surface-soft));
+  font-size: var(--type-caption-size);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.subcategoryReset {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--text-on-surface-muted);
+  font-size: var(--type-body-small-size);
+  font-weight: 600;
+  cursor: pointer;
+}
+
 .subcategoryIconWrap {
   display: inline-flex;
   align-items: center;
@@ -774,6 +838,23 @@
 .subcategoryIcon {
   width: 1rem;
   height: 1rem;
+}
+
+.subcategoryToken {
+  min-height: 2.55rem;
+  padding: 0.5rem 0.78rem;
+  background: color-mix(in srgb, var(--category-accent) 6%, var(--surface-panel-soft));
+}
+
+.subcategoryTokenActive {
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--category-accent) 14%, transparent), var(--surface-panel-soft)),
+    var(--surface-panel);
+}
+
+.subcategoryTokenText {
+  font-size: var(--type-caption-size);
+  font-weight: 700;
 }
 
 .hero > .listItem {
@@ -835,7 +916,7 @@
 .segmentWrap {
   display: grid;
   padding: var(--finance-space-xs);
-  border: 1px solid var(--surface-border);
+  border: 1px solid color-mix(in srgb, rgba(var(--color-accent-rgb), 0.24) 72%, var(--surface-border));
   border-radius: 24px;
   background: var(--surface-panel-soft);
 }
@@ -846,7 +927,7 @@
 
 .segmentWrap ion-segment-button {
   --color: var(--text-on-surface-soft);
-  --color-checked: var(--color-text-primary);
+  --color-checked: var(--color-accent);
   --indicator-color: transparent;
   min-height: 46px;
   border-radius: 18px;
@@ -855,6 +936,7 @@
 .segmentWrap ion-segment-button::part(native) {
   border: 1px solid transparent;
   border-radius: 18px;
+  font-weight: 600;
   transition:
     background-color var(--transition-base),
     border-color var(--transition-base),
@@ -863,15 +945,15 @@
 }
 
 .segmentWrap ion-segment-button:hover::part(native) {
-  border-color: var(--surface-border);
-  background: var(--surface-control-hover);
+  border-color: color-mix(in srgb, rgba(var(--color-accent-rgb), 0.2) 70%, var(--surface-border));
+  background: color-mix(in srgb, rgba(var(--color-accent-rgb), 0.08) 70%, var(--surface-panel));
 }
 
 .segmentWrap ion-segment-button.segment-button-checked::part(native) {
-  border-color: rgba(var(--color-brand-rgb), 0.48);
+  border-color: rgba(var(--color-accent-rgb), 0.42);
   background:
-    linear-gradient(135deg, rgba(var(--color-brand-rgb), 0.16), rgba(var(--color-accent-rgb), 0.1)),
-    var(--surface-control-hover);
+    linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.16), rgba(var(--color-brand-rgb), 0.08)),
+    color-mix(in srgb, rgba(var(--color-accent-rgb), 0.06) 68%, var(--surface-panel));
   box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text-on-surface) 7%, transparent);
 }
 
@@ -994,6 +1076,38 @@
 .list {
   display: grid;
   gap: var(--finance-space-md);
+}
+
+.transactionDayGroups {
+  display: grid;
+  gap: var(--finance-space-md);
+}
+
+.transactionDaySection {
+  display: grid;
+  gap: var(--finance-space-xs);
+}
+
+.transactionDayLabel {
+  margin: 0;
+  padding-inline: 0.25rem;
+  color: var(--text-on-surface-muted);
+  font-size: var(--type-caption-size);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.transactionGroupCard {
+  display: grid;
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid var(--surface-border);
+  border-radius: 18px;
+  background:
+    var(--surface-highlight),
+    var(--surface-panel-soft);
+  box-shadow: var(--shadow-surface);
 }
 
 .infiniteSentinel {

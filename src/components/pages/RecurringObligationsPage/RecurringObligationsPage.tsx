@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
-import { IonContent, IonIcon, IonLabel, IonSegment, IonSegmentButton } from '@ionic/react';
-import { addOutline } from 'ionicons/icons';
+import { IonContent, IonIcon } from '@ionic/react';
+import { addOutline, funnelOutline, optionsOutline } from 'ionicons/icons';
 import { AppLayout } from '../../templates/AppLayout';
+import { useAppToolbar } from '../../templates/AppLayout/AppLayoutContext';
 import { BreadcrumbTrail } from '../../organisms/BreadcrumbTrail';
 import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
@@ -10,7 +11,6 @@ import { ErrorState } from '../../molecules/ErrorState';
 import { EmptyState } from '../../molecules/EmptyState';
 import { ConfirmModal } from '../../molecules/ConfirmModal';
 import { CrudModal } from '../../molecules/CrudModal';
-import { ListToolbar } from '../../molecules/ListToolbar';
 import { AppliedFiltersBar } from '../../molecules/AppliedFiltersBar';
 import { SortSheet } from '../../molecules/SortSheet';
 import { RecurringObligationComposer } from '../../organisms/RecurringObligationComposer';
@@ -19,6 +19,7 @@ import { IncomeSourceComposer } from '../../organisms/IncomeSourceComposer';
 import { IncomeSourceSlidingCard } from '../../organisms/IncomeSourceSlidingCard';
 import { useToast } from '../../../hooks/useToast';
 import { financeService } from '../../../services/financeService';
+import { getCategoryDisplayName } from '../../../utils/categoryLabels';
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import type {
   CategoryResource,
@@ -223,7 +224,11 @@ export const RecurringObligationsContent = () => {
     () =>
       categories.map((category) => ({
         id: String(category.id),
-        name: category.attributes.name ?? 'Sin categoría',
+        name: getCategoryDisplayName({
+          name: category.attributes.name,
+          code: category.attributes.code,
+          type: category.attributes.category_type,
+        }),
         color: category.attributes.color ?? 'var(--color-brand)',
       })),
     [categories],
@@ -258,6 +263,74 @@ export const RecurringObligationsContent = () => {
     () => incomeChips.filter((chip) => chip.key !== 'q').length,
     [incomeChips],
   );
+  const toolbar = useMemo(() => {
+    if (!detailsOpen) return null;
+
+    if (activeView === 'income') {
+      return {
+        title: 'Ingresos recurrentes',
+        subtitle: 'Fuentes que sostienen el mes',
+        searchPlaceholder: 'Nombre',
+        searchValue: incomeFilters.q ?? '',
+        resultLabel: `${incomeSources.length} resultados`,
+        onSearchChange: (q: string) => setIncomeFilters((current) => ({ ...current, q })),
+        actions: [
+          {
+            key: 'sort-income',
+            label: 'Ordenar',
+            icon: <IonIcon icon={optionsOutline} />,
+            onClick: () => setIncomeSortOpen(true),
+          },
+          {
+            key: 'filter-income',
+            label: 'Filtrar',
+            icon: <IonIcon icon={funnelOutline} />,
+            onClick: () => setIncomeFiltersVisible((visible) => !visible),
+            badgeCount: incomeActiveFilterCount,
+            active: incomeFiltersVisible,
+          },
+        ],
+      };
+    }
+
+    return {
+      title: 'Obligaciones recurrentes',
+      subtitle: 'Compromisos que vuelven cada mes',
+      searchPlaceholder: 'Nombre',
+      searchValue: obligationFilters.q ?? '',
+      resultLabel: `${obligations.length} resultados`,
+      onSearchChange: (q: string) => setObligationFilters((current) => ({ ...current, q })),
+      actions: [
+        {
+          key: 'sort-obligations',
+          label: 'Ordenar',
+          icon: <IonIcon icon={optionsOutline} />,
+          onClick: () => setSortOpen(true),
+        },
+        {
+          key: 'filter-obligations',
+          label: 'Filtrar',
+          icon: <IonIcon icon={funnelOutline} />,
+          onClick: () => setObligationFiltersVisible((visible) => !visible),
+          badgeCount: obligationActiveFilterCount,
+          active: obligationFiltersVisible,
+        },
+      ],
+    };
+  }, [
+    activeView,
+    detailsOpen,
+    incomeActiveFilterCount,
+    incomeFilters.q,
+    incomeFiltersVisible,
+    incomeSources.length,
+    obligationActiveFilterCount,
+    obligationFilters.q,
+    obligationFiltersVisible,
+    obligations.length,
+  ]);
+
+  useAppToolbar(toolbar);
 
   const debtById = useMemo(
     () => new Map(debts.map((debt) => [debt.id, debt])),
@@ -462,46 +535,34 @@ export const RecurringObligationsContent = () => {
         ) : null}
 
         {detailsOpen ? (
-          <>
-            {loading ? <Spinner size="lg" /> : null}
+          <div className={styles.detailStage}>
+            {loading ? <div className={styles.centeredState}><Spinner size="lg" /></div> : null}
             {error ? <ErrorState message={error} onRetry={() => void load()} /> : null}
             <BreadcrumbTrail items={[
               { label: 'Recurrentes', onClick: () => setDetailsOpen(false) },
               { label: activeView === 'income' ? 'Ingresos' : 'Obligaciones' },
             ]} />
-            <div className={styles.detailStageHeader}>
-              <div className={styles.detailStageCopy}>
-                <h3 className={styles.detailStageTitle}>Detalle recurrente</h3>
-                <p className={styles.detailStageText}>Aquí vives entre filtros, segmentación y cards. La vista inicial ya respondió la pregunta principal.</p>
+            <div className={styles.detailHeaderActions}>
+              <div className={styles.detailTabBar} role="tablist" aria-label="Vista de recurrentes">
+                <button
+                  type="button"
+                  className={`${styles.detailTabBtn} ${activeView === 'obligations' ? styles.detailTabBtnActive : ''}`}
+                  onClick={() => setActiveView('obligations')}
+                >
+                  Obligaciones
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.detailTabBtn} ${activeView === 'income' ? styles.detailTabBtnActive : ''}`}
+                  onClick={() => setActiveView('income')}
+                >
+                  Ingresos
+                </button>
               </div>
             </div>
-            <section className={styles.segmentWrap}>
-              <IonSegment value={activeView} onIonChange={(event) => setActiveView((event.detail.value as 'income' | 'obligations') ?? 'obligations')}>
-                <IonSegmentButton value="obligations">
-                  <IonLabel>Obligaciones</IonLabel>
-                </IonSegmentButton>
-                <IonSegmentButton value="income">
-                  <IonLabel>Ingresos</IonLabel>
-                </IonSegmentButton>
-              </IonSegment>
-            </section>
             {activeView === 'income' ? (
-              <section className={styles.panel}>
-              <h3 className={styles.panelTitle}>Fuentes de ingreso</h3>
+              <>
               <div className={styles.detailPanel}>
-                <ListToolbar
-                  searchLabel="Buscar ingresos"
-                  searchPlaceholder="Nombre"
-                  searchValue={incomeFilters.q ?? ''}
-                  resultLabel={`${incomeSources.length} resultados`}
-                  activeFilterCount={incomeActiveFilterCount}
-                  onSearchChange={(q) => {
-                    const next = { ...incomeFilters, q };
-                    setIncomeFilters(next);
-                  }}
-                  onOpenSort={() => setIncomeSortOpen(true)}
-                  onOpenFilters={() => setIncomeFiltersVisible((visible) => !visible)}
-                />
                 {incomeFiltersVisible ? (
                   <div className={styles.filterPanel}>
                     <div className={styles.inlineFilters}>
@@ -554,24 +615,10 @@ export const RecurringObligationsContent = () => {
                   ))}
                 </div>
               )}
-              </section>
+              </>
             ) : (
-              <section className={styles.panel}>
-              <h3 className={styles.panelTitle}>Obligaciones recurrentes</h3>
+              <>
               <div className={styles.detailPanel}>
-                <ListToolbar
-                  searchLabel="Buscar recurrentes"
-                  searchPlaceholder="Nombre"
-                  searchValue={obligationFilters.q ?? ''}
-                  resultLabel={`${obligations.length} resultados`}
-                  activeFilterCount={obligationActiveFilterCount}
-                  onSearchChange={(q) => {
-                    const next = { ...obligationFilters, q };
-                    setObligationFilters(next);
-                  }}
-                  onOpenSort={() => setSortOpen(true)}
-                  onOpenFilters={() => setObligationFiltersVisible((visible) => !visible)}
-                />
                 {obligationFiltersVisible ? (
                   <div className={styles.filterPanel}>
                     <div className={styles.inlineFilters}>
@@ -663,9 +710,9 @@ export const RecurringObligationsContent = () => {
                   ))}
                 </div>
               )}
-              </section>
+              </>
             )}
-          </>
+          </div>
         ) : null}
       </section>
 

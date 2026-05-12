@@ -1,5 +1,5 @@
 import { IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding } from '@ionic/react';
-import { createOutline, trashOutline } from 'ionicons/icons';
+import { cashOutline, createOutline, trashOutline } from 'ionicons/icons';
 import type { IncomeSource } from '../../../types/finance.types';
 import { cadenceLabel, classificationLabel, incomeWindowLabel, reliabilityLabel } from '../../../utils/incomeProfile';
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
@@ -14,22 +14,24 @@ export interface IncomeSourceSlidingCardProps {
 export const IncomeSourceSlidingCard = ({ source, onEdit, onDelete }: IncomeSourceSlidingCardProps) => (
   <IonItemSliding className={styles.sliding}>
     <IonItem className={styles.item} lines="none">
-      <div className={styles.card}>
+      <div className={styles.card} style={{ '--cat-color': 'var(--color-income)' } as React.CSSProperties}>
+        <div className={styles.iconWrap} aria-hidden="true">
+          <IonIcon icon={cashOutline} className={styles.iconGlyph} />
+        </div>
         <div className={styles.primary}>
-          <div className={styles.header}>
-            <span className={styles.meta}>{incomeWindowLabel(source.attributes)}</span>
+          <div className={styles.chipRow}>
             <span className={`${styles.classification} ${styles[`cls_${source.attributes.classification ?? 'base'}`]}`}>
               {classificationLabel(source.attributes.classification, source.attributes.is_variable)}
             </span>
           </div>
           <strong className={styles.name}>{source.attributes.name}</strong>
           <span className={styles.meta}>
-            {cadenceLabel(source.attributes.cadence)} · {reliabilityLabel(source.attributes.reliability_score)}
+            {incomeWindowLabel(source.attributes)} · {cadenceLabel(source.attributes.cadence)} · {reliabilityLabel(source.attributes.reliability_score)}
           </span>
         </div>
         <div className={styles.secondary}>
-          <span className={styles.label}>Mensual esperado</span>
           <strong className={styles.amount}>{formatCurrencyCompact(source.attributes.expected_amount)}</strong>
+          <span className={styles.label}>Mensual esperado</span>
         </div>
       </div>
     </IonItem>

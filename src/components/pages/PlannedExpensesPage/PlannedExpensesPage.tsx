@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { IonContent, IonIcon } from '@ionic/react';
-import { addOutline } from 'ionicons/icons';
+import { addOutline, funnelOutline, optionsOutline } from 'ionicons/icons';
 import { AppLayout } from '../../templates/AppLayout';
+import { useAppToolbar } from '../../templates/AppLayout/AppLayoutContext';
 import { BreadcrumbTrail } from '../../organisms/BreadcrumbTrail';
 import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
@@ -9,13 +10,13 @@ import { SelectInput } from '../../atoms/SelectInput';
 import { ErrorState } from '../../molecules/ErrorState';
 import { EmptyState } from '../../molecules/EmptyState';
 import { CrudModal } from '../../molecules/CrudModal';
-import { ListToolbar } from '../../molecules/ListToolbar';
 import { AppliedFiltersBar } from '../../molecules/AppliedFiltersBar';
 import { SortSheet } from '../../molecules/SortSheet';
 import { PlannedExpenseComposer } from '../../organisms/PlannedExpenseComposer';
 import { PlannedExpenseSlidingCard } from '../../organisms/PlannedExpenseSlidingCard';
 import { useToast } from '../../../hooks/useToast';
 import { financeService } from '../../../services/financeService';
+import { getCategoryDisplayName } from '../../../utils/categoryLabels';
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import type {
   CategoryResource,
@@ -104,7 +105,11 @@ export const PlannedExpensesContent = () => {
   const categoryOptions = useMemo(
     () =>
       categories.map((category) => ({
-        label: category.attributes.name ?? 'Sin categoría',
+        label: getCategoryDisplayName({
+          name: category.attributes.name,
+          code: category.attributes.code,
+          type: category.attributes.category_type,
+        }),
         value: String(category.id),
       })),
     [categories],
@@ -168,6 +173,44 @@ export const PlannedExpensesContent = () => {
     () => appliedChips.filter((chip) => chip.key !== 'q').length,
     [appliedChips],
   );
+  const toolbar = useMemo(
+    () => (
+      detailsOpen
+        ? {
+            title: activeTab === 'pockets' ? 'Bolsillos' : 'Planeado',
+            subtitle: activeTab === 'pockets' ? 'Fondos para gastos futuros' : 'Gastos futuros previsibles',
+            searchPlaceholder: activeTab === 'planned' ? 'SOAT, viaje, mantenimiento' : undefined,
+            searchValue: activeTab === 'planned' ? (filters.q ?? '') : undefined,
+            resultLabel: activeTab === 'planned' ? `${plannedExpenses.length} resultados` : undefined,
+            onSearchChange: activeTab === 'planned'
+              ? (q: string) => setFilters((current) => ({ ...current, q }))
+              : undefined,
+            actions: activeTab === 'planned'
+              ? [
+                  {
+                    key: 'sort',
+                    label: 'Ordenar',
+                    icon: <IonIcon icon={optionsOutline} />,
+                    onClick: () => setSortOpen(true),
+                  },
+                  {
+                    key: 'filters',
+                    label: 'Filtrar',
+                    icon: <IonIcon icon={funnelOutline} />,
+                    onClick: () => setFiltersVisible((visible) => !visible),
+                    badgeCount: activeFilterCount,
+                    active: filtersVisible,
+                  },
+                ]
+              : [],
+          }
+        : null
+    ),
+    [activeFilterCount, activeTab, detailsOpen, filters.q, filtersVisible, plannedExpenses.length],
+  );
+
+  useAppToolbar(toolbar);
+
   const removeChip = (key: string) => {
     setFilters((current) => ({ ...current, [key]: '' }));
   };
@@ -224,10 +267,6 @@ export const PlannedExpensesContent = () => {
                 { label: activeTab === 'pockets' ? 'Bolsillos' : 'Detalle' },
               ]} />
               <div className={styles.detailStageHeader}>
-                <div className={styles.detailStageCopy}>
-                  <h3 className={styles.detailStageTitle}>Detalle de planeados</h3>
-                  <p className={styles.detailStageText}>Aquí viven los gastos futuros y los bolsillos que los fondean mes a mes.</p>
-                </div>
                 <div className={styles.detailHeaderActions}>
                   <div className={styles.detailTabBar} role="tablist" aria-label="Vista de planeados">
                     <button
@@ -249,17 +288,6 @@ export const PlannedExpensesContent = () => {
               </div>
               {activeTab === 'planned' ? (
                 <div className={styles.detailPanel}>
-                  <ListToolbar
-                    searchLabel="Buscar gastos planeados"
-                    searchPlaceholder="SOAT, viaje, mantenimiento"
-                    searchValue={filters.q ?? ''}
-                    resultLabel={`${plannedExpenses.length} resultados`}
-                    activeFilterCount={activeFilterCount}
-                    onSearchChange={(q) => setFilters((current) => ({ ...current, q }))}
-                    onOpenSort={() => setSortOpen(true)}
-                    onOpenFilters={() => setFiltersVisible((visible) => !visible)}
-                  />
-
                   {filtersVisible ? (
                     <div className={styles.filterPanel}>
                       <div className={styles.inlineFilters}>
@@ -320,7 +348,7 @@ export const PlannedExpensesContent = () => {
             </div>
           ) : null}
 
-          {loading ? <Spinner size="lg" /> : null}
+          {loading ? <div className={styles.centeredState}><Spinner size="lg" /></div> : null}
           {error ? <ErrorState message={error} onRetry={() => void load()} /> : null}
           {!loading && !error && activeTab === 'planned' && !plannedExpenses.length ? (
             <EmptyState

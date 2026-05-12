@@ -193,33 +193,6 @@
   margin-top: var(--space-2);
 }
 
-.heroActions button {
-  flex: 0 0 auto;
-  min-height: auto;
-  padding: 0.9rem 1.25rem;
-  border-radius: 18px;
-  letter-spacing: 0.04em;
-  text-transform: none;
-  font-size: var(--text-sm);
-  box-shadow: none;
-}
-
-.heroActions button:first-child {
-  background: linear-gradient(135deg, rgba(var(--color-brand-rgb), 0.96), rgba(187, 139, 49, 0.96));
-  color: var(--text-on-accent);
-}
-
-.heroActions button:last-child {
-  background: rgba(255, 255, 255, 0.01);
-  border-color: rgba(var(--color-brand-rgb), 0.24);
-  color: var(--color-text-primary);
-}
-
-.heroActions button:last-child:hover {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(var(--color-brand-rgb), 0.38);
-}
-
 .categorySection {
   display: grid;
   gap: var(--space-4);

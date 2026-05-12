@@ -3,6 +3,7 @@ import { closeCircleOutline, createOutline, trashOutline } from 'ionicons/icons'
 import { Badge } from '../../atoms/Badge';
 import type { RecurringObligation } from '../../../types/finance.types';
 import { resolveNamedIcon } from '../BudgetWizard/iconRegistry';
+import { normalizeFlexibleLabel } from '../../../utils/categoryLabels';
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import styles from './RecurringObligationSlidingCard.module.css';
 
@@ -47,7 +48,7 @@ export const RecurringObligationSlidingCard = ({
               {attrs.category_name && (
                 <span className={styles.catChip}>
                   <span className={styles.catDot} />
-                  {attrs.category_name}
+                  {normalizeFlexibleLabel(attrs.category_name)}
                 </span>
               )}
               {attrs.subcategory_name && (

@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { IonContent, IonIcon } from '@ionic/react';
-import { addOutline } from 'ionicons/icons';
+import { addOutline, funnelOutline, optionsOutline } from 'ionicons/icons';
 import { AppLayout } from '../../templates/AppLayout';
+import { useAppToolbar } from '../../templates/AppLayout/AppLayoutContext';
 import { BreadcrumbTrail } from '../../organisms/BreadcrumbTrail';
 import { Button } from '../../atoms/Button';
 import { Spinner } from '../../atoms/Spinner';
@@ -11,7 +12,6 @@ import { ErrorState } from '../../molecules/ErrorState';
 import { EmptyState } from '../../molecules/EmptyState';
 import { ConfirmModal } from '../../molecules/ConfirmModal';
 import { CrudModal } from '../../molecules/CrudModal';
-import { ListToolbar } from '../../molecules/ListToolbar';
 import { AppliedFiltersBar } from '../../molecules/AppliedFiltersBar';
 import { SortSheet } from '../../molecules/SortSheet';
 import { DebtComposer } from '../../organisms/DebtComposer';
@@ -145,6 +145,39 @@ export const DebtsContent = () => {
     () => appliedChips.filter((chip) => chip.key !== 'q').length,
     [appliedChips],
   );
+  const toolbar = useMemo(
+    () => (
+      detailsOpen
+        ? {
+            title: 'Deudas',
+            subtitle: 'Detalle y seguimiento',
+            searchPlaceholder: 'Nombre de deuda',
+            searchValue: filters.q ?? '',
+            resultLabel: `${metrics.totalCount} resultados`,
+            onSearchChange: (q: string) => setFilters((current) => ({ ...current, q })),
+            actions: [
+              {
+                key: 'sort',
+                label: 'Ordenar',
+                icon: <IonIcon icon={optionsOutline} />,
+                onClick: () => setSortOpen(true),
+              },
+              {
+                key: 'filters',
+                label: 'Filtrar',
+                icon: <IonIcon icon={funnelOutline} />,
+                onClick: () => setFiltersVisible((visible) => !visible),
+                badgeCount: activeFilterCount,
+                active: filtersVisible,
+              },
+            ],
+          }
+        : null
+    ),
+    [activeFilterCount, detailsOpen, filters.q, filtersVisible, metrics.totalCount],
+  );
+
+  useAppToolbar(toolbar);
 
   const linkedDebtIdForObligation = (obligation: RecurringObligation) => {
     if (obligation.attributes.source_type === 'Debt' && obligation.attributes.source_id) {
@@ -368,27 +401,7 @@ export const DebtsContent = () => {
               { label: 'Deudas', onClick: () => setDetailsOpen(false) },
               { label: 'Detalle' },
             ]} />
-            <div className={styles.detailStageHeader}>
-              <div className={styles.detailStageCopy}>
-                <h3 className={styles.detailStageTitle}>Detalle de deudas</h3>
-                <p className={styles.detailStageText}>La edición, los filtros y el listado completo viven aquí, no debajo del resumen inicial.</p>
-              </div>
-            </div>
             <div className={styles.detailPanel}>
-            <ListToolbar
-              searchLabel="Buscar deudas"
-              searchPlaceholder="Nombre de deuda"
-              searchValue={filters.q ?? ''}
-              resultLabel={`${metrics.totalCount} resultados`}
-              activeFilterCount={activeFilterCount}
-              onSearchChange={(q) => {
-                const next = { ...filters, q };
-                setFilters(next);
-              }}
-              onOpenSort={() => setSortOpen(true)}
-              onOpenFilters={() => setFiltersVisible((visible) => !visible)}
-            />
-
             {filtersVisible ? (
               <div className={styles.filterPanel}>
                 <div className={styles.inlineFilters}>
@@ -421,7 +434,7 @@ export const DebtsContent = () => {
           </div>
         ) : null}
 
-        {loading ? <Spinner size="lg" /> : null}
+        {loading ? <div className={styles.centeredState}><Spinner size="lg" /></div> : null}
         {error ? <ErrorState message={error} onRetry={() => void load()} /> : null}
         {!loading && !error && !debts.length ? (
           <EmptyState

@@ -63,6 +63,57 @@
   min-width: 0;
 }
 
+.greetingCopy {
+  display: grid;
+  gap: 0.04rem;
+  min-width: 0;
+}
+
+.greetingLead {
+  color: var(--text-on-surface-muted);
+  font-size: var(--type-label-size);
+  font-weight: var(--font-medium);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.greetingName {
+  color: var(--text-on-surface);
+  font-size: clamp(1.15rem, 1.1rem + 0.45vw, 1.45rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 0.98;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.contextualCopy {
+  display: none;
+  gap: 0.12rem;
+  min-width: 0;
+}
+
+.contextualSubtitle {
+  color: var(--text-on-surface-muted);
+  font-size: var(--type-label-size);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.contextualTitle {
+  color: var(--text-on-surface);
+  font-size: var(--type-section-title-size);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .menuButton {
   display: none;
   align-items: center;
@@ -110,6 +161,92 @@
   min-width: 0;
 }
 
+.actionsContextual {
+  gap: 0.45rem;
+}
+
+.actionWrap {
+  position: relative;
+}
+
+.actionCount {
+  position: absolute;
+  top: -0.2rem;
+  right: -0.12rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.05rem;
+  height: 1.05rem;
+  padding: 0 0.25rem;
+  border-radius: 999px;
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+  font-size: var(--type-caption-size);
+  font-weight: 800;
+}
+
+.searchShell {
+  display: flex;
+  align-items: center;
+  width: 2.5rem;
+  min-width: 2.5rem;
+  height: 2.5rem;
+  overflow: hidden;
+  border: 1px solid var(--surface-border);
+  border-radius: 999px;
+  background: var(--surface-control);
+  transition:
+    width 220ms ease,
+    border-color 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.searchShellOpen {
+  width: min(44vw, 16rem);
+  border-color: rgba(var(--color-brand-rgb), 0.22);
+  background:
+    linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.1), rgba(var(--color-brand-rgb), 0.08)),
+    var(--surface-panel);
+  box-shadow: var(--shadow-surface);
+}
+
+.searchToggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: 0 0 2.5rem;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--text-on-surface-soft);
+  cursor: pointer;
+}
+
+.searchInput {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--color-text-primary);
+  opacity: 0;
+  padding: 0 0.8rem 0 0.1rem;
+  font-size: var(--type-body-size);
+  transition: opacity 160ms ease;
+}
+
+.searchInput::placeholder {
+  color: var(--text-on-surface-muted);
+}
+
+.searchShellOpen .searchInput {
+  opacity: 1;
+}
+
 .nav {
   gap: var(--space-3);
 }
@@ -134,10 +271,19 @@
     align-items: center;
     gap: 0.75rem;
     padding: 12px 14px;
-    border-radius: 18px;
-    background:
-      linear-gradient(180deg, color-mix(in srgb, var(--text-on-surface) 7%, transparent), color-mix(in srgb, var(--text-on-surface) 2%, transparent)),
-      var(--surface-header-mobile);
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+
+  .header::before {
+    display: none;
+  }
+
+  .headerContextual {
+    min-height: 64px;
   }
 
   .brandBlock {
@@ -148,8 +294,17 @@
     min-width: 0;
   }
 
+  .brandBlockContextual {
+    align-items: center;
+  }
+
   .brandIdentity {
     min-width: 0;
+  }
+
+  .brandIdentityContextual {
+    gap: 0;
+    width: 100%;
   }
 
   .menuButton {
@@ -166,6 +321,69 @@
   .nav,
   .actions :global(button) {
     display: none;
+  }
+
+  .greetingCopy {
+    gap: 0;
+  }
+
+  .greetingLead {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-on-surface-soft);
+  }
+
+  .greetingName {
+    font-size: clamp(1.2rem, 1.02rem + 0.7vw, 1.55rem);
+  }
+
+  .headerContextual .brandCopy,
+  .headerContextual .mobileProfileLink {
+    display: none;
+  }
+
+  .headerContextual .contextualCopy {
+    display: grid;
+    flex: 1 1 auto;
+  }
+
+  .headerContextual .brandIdentityContextual {
+    gap: 0.7rem;
+  }
+
+  .headerContextual .actionsContextual {
+    display: flex;
+  }
+
+  .headerContextual .actionsContextual :global(button) {
+    display: inline-flex;
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: 12px;
+    border-color: var(--surface-border-soft);
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--text-on-surface) 4%, transparent), color-mix(in srgb, var(--text-on-surface) 2%, transparent)),
+      var(--surface-control);
+    box-shadow: none;
+    transform: none;
+  }
+
+  .headerContextual .searchShell {
+    width: 2.4rem;
+    min-width: 2.4rem;
+    height: 2.4rem;
+    border-radius: 12px;
+    border-color: var(--surface-border-soft);
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--text-on-surface) 4%, transparent), color-mix(in srgb, var(--text-on-surface) 2%, transparent)),
+      var(--surface-control);
+    box-shadow: none;
+  }
+
+  .headerContextual .searchToggle {
+    width: 2.4rem;
+    height: 2.4rem;
+    flex-basis: 2.4rem;
   }
 
   .actions {
@@ -199,5 +417,10 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  .headerContextual .searchShellOpen {
+    width: min(46vw, 12rem);
+    border-radius: 999px;
   }
 }

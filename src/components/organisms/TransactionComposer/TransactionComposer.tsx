@@ -1,5 +1,6 @@
 import { IonIcon } from '@ionic/react';
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { cardOutline, cashOutline, walletOutline } from 'ionicons/icons';
 import { Button } from '../../atoms/Button';
 import { DateInput } from '../../atoms/DateInput';
 import { NumberInput } from '../../atoms/NumberInput';
@@ -7,6 +8,7 @@ import { SelectInput } from '../../atoms/SelectInput';
 import { TextInput } from '../../atoms/TextInput';
 import { AddSubcategorySheet } from '../BudgetWizard/AddSubcategorySheet';
 import { resolveNamedIcon } from '../BudgetWizard/iconRegistry';
+import { getCategoryDisplayName } from '../../../utils/categoryLabels';
 import type {
   CategoryResource,
   PaymentSource,
@@ -28,10 +30,10 @@ const transactionStatusOptions = [
   { label: 'Pendiente', value: 'pending' },
 ];
 
-const PAYMENT_SOURCE_OPTIONS: { value: PaymentSource; label: string }[] = [
-  { value: 'credit_card', label: 'Tarjeta de crédito' },
-  { value: 'debit',       label: 'Débito / Nequi' },
-  { value: 'cash',        label: 'Efectivo' },
+const PAYMENT_SOURCE_OPTIONS: { value: PaymentSource; label: string; icon: string }[] = [
+  { value: 'credit_card', label: 'Tarjeta de crédito', icon: cardOutline },
+  { value: 'debit', label: 'Débito / Nequi', icon: walletOutline },
+  { value: 'cash', label: 'Efectivo', icon: cashOutline },
 ];
 
 interface TransactionComposerValues {
@@ -251,7 +253,7 @@ export const TransactionComposer = ({
             <div className={styles.spanTwo}>
               <p className={styles.fieldLabel}>Medio de pago *</p>
               <div className={styles.paymentSourceRow}>
-                {PAYMENT_SOURCE_OPTIONS.map(({ value, label }) => (
+                {PAYMENT_SOURCE_OPTIONS.map(({ value, label, icon }) => (
                   <button
                     key={value}
                     type="button"
@@ -265,8 +267,11 @@ export const TransactionComposer = ({
                         paymentSource: current.paymentSource === value ? null : value,
                       }))
                     }
+                    aria-label={label}
+                    title={label}
+                    aria-pressed={values.paymentSource === value}
                   >
-                    {label}
+                    <IonIcon icon={icon} className={styles.paymentSourceIcon} aria-hidden="true" />
                   </button>
                 ))}
               </div>
@@ -315,7 +320,7 @@ export const TransactionComposer = ({
                   }
                 >
                   <span className={styles.categorySwatch} />
-                  <span className={styles.categoryTokenText}>{category.attributes.name ?? 'Sin categoría'}</span>
+                  <span className={styles.categoryTokenText}>{getCategoryDisplayName({ name: category.attributes.name, code: category.attributes.code, type: category.attributes.category_type })}</span>
                 </button>
               );
             })}
@@ -377,7 +382,7 @@ export const TransactionComposer = ({
           isOpen={subcategorySheetOpen}
           onClose={() => setSubcategorySheetOpen(false)}
           categoryCode={selectedCategory.attributes.code ?? 'unknown'}
-          categoryName={selectedCategory.attributes.name ?? 'Categoría'}
+          categoryName={getCategoryDisplayName({ name: selectedCategory.attributes.name, code: selectedCategory.attributes.code, type: selectedCategory.attributes.category_type, fallback: 'Categoría' })}
           categoryId={String(selectedCategory.id)}
           onCreated={(sub) => {
             setLocalCategories((current) =>
