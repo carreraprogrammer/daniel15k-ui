@@ -138,7 +138,7 @@ export const AppRouter = () => {
         <ProtectedRoute exact path="/planned-expenses" component={PlannedExpensesPage} />
         <ProtectedRoute exact path="/recurring" component={RecurringObligationsPage} />
         <ProtectedRoute exact path="/budgets" component={BudgetsPage} />
-        <ProtectedRoute exact path="/budgets/detail/:categoryType" component={BudgetDetailPage} />
+        <ProtectedRoute exact path="/gaveta/:categoryType" component={BudgetDetailPage} />
         <ProtectedRoute exact path="/budgets/:year/:month" component={BudgetsPage} />
         <ProtectedRoute exact path="/savings-goals" component={SavingsGoalsPage} />
         <ProtectedRoute exact path="/profile" component={ProfilePage} />

@@ -302,7 +302,7 @@ export const DashboardContent = () => {
                       const cfg = catConfig(cat.category_type);
                       const pct = cat.budget > 0 ? Math.min((cat.spent / cat.budget) * 100, 100) : 0;
                       const over = cat.spent > cat.budget && cat.budget > 0;
-                      const detailPath = `/budgets/detail/${cat.category_type}`;
+                      const detailPath = `/gaveta/${cat.category_type}`;
                       return (
                         <div
                           key={cat.category_id}

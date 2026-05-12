@@ -152,7 +152,7 @@ export const BudgetDetailPage = () => {
       <IonContent>
         <div className={styles.scroll}>
           <BreadcrumbTrail items={[
-            { label: 'Presupuestos', onClick: () => history.push('/budgets') },
+            { label: 'Presupuesto', onClick: () => history.goBack() },
             { label: cfg.name },
           ]} />
 
