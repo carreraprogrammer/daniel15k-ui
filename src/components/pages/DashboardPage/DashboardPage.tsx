@@ -23,7 +23,7 @@ const getFirstName = (name?: string | null) => {
 };
 
 export const DashboardContent = () => {
-  const { summary, insight, obligations, completeness, loading, error, reload } = useDashboardData();
+  const { summary, insight, completeness, loading, error, reload } = useDashboardData();
   const history = useHistory();
 
   const runway = summary?.cash_flow_runway;
@@ -39,18 +39,16 @@ export const DashboardContent = () => {
   const today = new Date();
   const dayMonthFmt = new Intl.DateTimeFormat('es-CO', { day: 'numeric', month: 'short' });
 
-  const nextCycleDay = obligations.length > 0
-    ? Math.min(...obligations.map(o => Number(o.attributes.due_day)).filter(n => Number.isFinite(n) && n > 0))
-    : null;
-  const nextCycleDate = nextCycleDay && nextCycleDay > today.getDate()
-    ? new Date(today.getFullYear(), today.getMonth(), nextCycleDay)
+  const nextIncomeDayNum = runway?.next_income_day ?? null;
+  const nextCycleDate = nextIncomeDayNum
+    ? new Date(today.getFullYear(), today.getMonth(), nextIncomeDayNum)
     : new Date(today.getFullYear(), today.getMonth() + 1, 0);
   const todayLabel = dayMonthFmt.format(today);
   const nextCycleLabel = dayMonthFmt.format(nextCycleDate);
-  const temporalPct = Math.min(
-    Math.round((today.getDate() / nextCycleDate.getDate()) * 100),
-    100,
-  );
+  const daysToIncome = runway?.days_to_next_income ?? null;
+  const temporalPct = daysToIncome !== null && nextIncomeDayNum !== null
+    ? Math.min(Math.round(((nextIncomeDayNum - daysToIncome) / nextIncomeDayNum) * 100), 100)
+    : Math.min(Math.round((today.getDate() / nextCycleDate.getDate()) * 100), 100);
 
   const commitmentGap = runway?.commitment_gap ?? null;
   const balance = runway?.confirmed_balance ?? summary?.balance.net_balance ?? summary?.balance.balance_confirmed ?? 0;
