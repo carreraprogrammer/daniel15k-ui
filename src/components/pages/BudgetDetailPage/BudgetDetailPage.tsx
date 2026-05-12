@@ -39,25 +39,27 @@ const ArcChart = ({ pct, color, spent, limit }: { pct: number; color: string; sp
   const offset = ARC_LEN - ARC_LEN * Math.min(pct / 100, 1);
   return (
     <div className={styles.arcWrap}>
-      <svg width="220" height="200" viewBox="0 0 220 200">
-        <path d="M30 160 A90 90 0 0 1 190 160" stroke="var(--surface-panel-soft)" strokeWidth="14" fill="none" strokeLinecap="round" />
-        <path
-          d="M30 160 A90 90 0 0 1 190 160"
-          stroke={color}
-          strokeWidth="14"
-          fill="none"
-          strokeLinecap="round"
-          strokeDasharray={ARC_LEN}
-          strokeDashoffset={offset}
-          style={{ transition: 'stroke-dashoffset 700ms ease' }}
-        />
-        <text x="110" y="170" textAnchor="middle" style={{ fontSize: 11, fill: 'var(--text-on-surface-muted)', fontFamily: 'var(--font-mono)' }}>
-          {formatCurrencyCompact(limit)} plan
-        </text>
-      </svg>
       <div className={styles.arcBig}>
         <div className={styles.arcNum}>{formatCurrencyCompact(spent)}</div>
         <div className={styles.arcSub}>{Math.round(pct)}% del plan</div>
+      </div>
+      <div className={styles.arcFigure}>
+        <svg width="220" height="110" viewBox="0 0 220 120">
+          <path d="M20 110 A90 90 0 0 1 200 110" stroke="var(--surface-border)" strokeWidth="14" fill="none" strokeLinecap="round" />
+          <path
+            d="M20 110 A90 90 0 0 1 200 110"
+            stroke={color}
+            strokeWidth="14"
+            fill="none"
+            strokeLinecap="round"
+            strokeDasharray={ARC_LEN}
+            strokeDashoffset={offset}
+            style={{ transition: 'stroke-dashoffset 700ms ease' }}
+          />
+          <text x="110" y="118" textAnchor="middle" style={{ fontSize: 11, fill: 'var(--text-on-surface-muted)', fontFamily: 'var(--font-mono)' }}>
+            {formatCurrencyCompact(limit)} plan
+          </text>
+        </svg>
       </div>
     </div>
   );
