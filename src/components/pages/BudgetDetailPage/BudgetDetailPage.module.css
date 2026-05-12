@@ -1,58 +1,105 @@
-.scroll {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding: 16px 16px 120px;
+/* ── Page shell ──────────────────────────────────────────────────────────────── */
+
+.page {
+  --background: var(--color-bg-primary);
 }
 
-/* ── Arc section ─────────────────────────────────────────────────────────── */
+/* ── Topbar ──────────────────────────────────────────────────────────────────── */
 
-.arcSection {
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(var(--ion-safe-area-top, 44px) + 12px) 20px 14px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--color-bg-primary);
+}
+
+.iconBtn {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: var(--surface-panel-soft);
+  border: 1px solid var(--surface-border);
+  display: grid;
+  place-items: center;
+  color: var(--color-text-primary);
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.topbarCenter {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
-  padding: 24px 20px 20px;
-  border: 1px solid var(--surface-border);
-  border-radius: 24px;
-  background: var(--surface-panel-soft);
+  gap: 2px;
 }
+
+.topbarEyebrow {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-on-surface-muted);
+  letter-spacing: 0.02em;
+}
+
+.topbarTitle {
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  letter-spacing: -0.01em;
+}
+
+/* ── Scroll ──────────────────────────────────────────────────────────────────── */
+
+.scroll {
+  padding: 0 16px 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ── Arc ─────────────────────────────────────────────────────────────────────── */
 
 .arcWrap {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  height: 200px;
+  display: grid;
+  place-items: center;
+  margin: 8px 0 4px;
 }
 
-.arcCenter {
+.arcBig {
   position: absolute;
-  bottom: 0;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   text-align: center;
 }
 
-.arcAmount {
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: var(--color-text-primary);
-  font-variant-numeric: tabular-nums;
+.arcNum {
+  font-family: var(--font-display);
+  font-size: 42px;
+  font-weight: 600;
   letter-spacing: -0.03em;
-  line-height: 1.1;
+  color: var(--color-text-primary);
+  line-height: 1;
 }
 
-.arcPct {
+.arcSub {
   font-size: 12px;
   color: var(--text-on-surface-muted);
-  margin-top: 2px;
+  margin-top: 4px;
 }
+
+/* ── Stats row ───────────────────────────────────────────────────────────────── */
 
 .statsRow {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
-  width: 100%;
 }
 
 .stat {
@@ -60,9 +107,9 @@
   flex-direction: column;
   gap: 3px;
   padding: 10px 12px;
+  background: var(--surface-panel-soft);
   border: 1px solid var(--surface-border-muted);
   border-radius: 14px;
-  background: var(--surface-panel-soft);
 }
 
 .statLabel {
@@ -82,29 +129,29 @@
 .statPos { color: #1A9E4A; }
 .statNeg { color: #C0392B; }
 
-/* ── Insight card ────────────────────────────────────────────────────────── */
+/* ── Insight ─────────────────────────────────────────────────────────────────── */
 
-.insightCard {
+.insight {
   display: flex;
   align-items: flex-start;
   gap: 12px;
   padding: 14px 16px;
-  border: 1px solid var(--cat-color, var(--surface-border));
+  background: var(--surface-panel-soft);
+  border: 1px solid var(--surface-border);
   border-radius: 18px;
-  background: var(--cat-soft, var(--surface-panel-soft));
-  opacity: 0.95;
 }
 
 .insightIcon {
-  width: 32px;
-  height: 32px;
-  flex: 0 0 32px;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
   border-radius: 10px;
   background: var(--cat-soft);
+  border: 1px solid var(--cat-color);
   color: var(--cat-color);
   display: grid;
   place-items: center;
-  font-size: 15px;
+  font-size: 16px;
 }
 
 .insightBody { flex: 1; min-width: 0; }
@@ -123,30 +170,30 @@
   line-height: 1.45;
 }
 
-/* ── Section header ──────────────────────────────────────────────────────── */
+/* ── Section head ────────────────────────────────────────────────────────────── */
 
 .secHead {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   margin: 4px 2px 0;
 }
 
 .secTitle {
   margin: 0;
-  font-size: 1rem;
+  font-family: var(--font-display);
+  font-size: 18px;
   font-weight: 600;
-  color: var(--color-text-primary);
   letter-spacing: -0.01em;
+  color: var(--color-text-primary);
 }
 
-/* ── Transactions ────────────────────────────────────────────────────────── */
+/* ── Transactions ────────────────────────────────────────────────────────────── */
 
-.txnList {
+.txnGroup {
+  background: var(--surface-panel-soft);
   border: 1px solid var(--surface-border);
   border-radius: 18px;
   overflow: hidden;
-  background: var(--surface-panel-soft);
 }
 
 .txnRow {
@@ -164,7 +211,7 @@
   left: 58px;
   right: 14px;
   height: 1px;
-  background: var(--surface-border-muted);
+  background: var(--surface-border-soft);
 }
 
 .txnIcon {
@@ -208,13 +255,25 @@
 
 .txnAmtIncome { color: #1A9E4A; }
 
-/* ── States ──────────────────────────────────────────────────────────────── */
+/* ── States ──────────────────────────────────────────────────────────────────── */
 
 .center {
   display: flex;
   justify-content: center;
   padding: 32px 0;
 }
+
+.spinner {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--surface-border);
+  border-top-color: var(--color-brand);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
 
 .empty {
   text-align: center;

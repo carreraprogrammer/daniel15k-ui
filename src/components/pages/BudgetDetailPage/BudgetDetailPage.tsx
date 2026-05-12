@@ -1,4 +1,4 @@
-import { IonContent, IonIcon } from '@ionic/react';
+import { IonContent, IonIcon, IonPage } from '@ionic/react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import {
   homeOutline,
@@ -8,11 +8,10 @@ import {
   giftOutline,
   flashOutline,
   sparklesOutline,
+  chevronBackOutline,
+  optionsOutline,
 } from 'ionicons/icons';
 import { useEffect, useMemo, useState } from 'react';
-import { AppLayout } from '../../templates/AppLayout';
-import { BreadcrumbTrail } from '../../organisms/BreadcrumbTrail';
-import { Spinner } from '../../atoms/Spinner';
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import { financeService } from '../../../services/financeService';
 import type { BurnRateCategory, Transaction } from '../../../types/finance.types';
@@ -34,31 +33,31 @@ const catConfig = (code: string | null | undefined) =>
 
 // ── Arc chart ─────────────────────────────────────────────────────────────────
 
-const ARC_LENGTH = 283; // half-circle arc length for r=90
+const ARC_LEN = 283;
 
 const ArcChart = ({ pct, color, spent, limit }: { pct: number; color: string; spent: number; limit: number }) => {
-  const fill = ARC_LENGTH - ARC_LENGTH * Math.min(pct / 100, 1);
+  const offset = ARC_LEN - ARC_LEN * Math.min(pct / 100, 1);
   return (
     <div className={styles.arcWrap}>
-      <svg width="220" height="130" viewBox="0 0 220 160">
-        <path d="M20 150 A90 90 0 0 1 200 150" stroke="rgba(255,255,255,0.07)" strokeWidth="14" fill="none" strokeLinecap="round" />
+      <svg width="220" height="200" viewBox="0 0 220 200">
+        <path d="M30 160 A90 90 0 0 1 190 160" stroke="var(--surface-panel-soft)" strokeWidth="14" fill="none" strokeLinecap="round" />
         <path
-          d="M20 150 A90 90 0 0 1 200 150"
+          d="M30 160 A90 90 0 0 1 190 160"
           stroke={color}
           strokeWidth="14"
           fill="none"
           strokeLinecap="round"
-          strokeDasharray={ARC_LENGTH}
-          strokeDashoffset={fill}
+          strokeDasharray={ARC_LEN}
+          strokeDashoffset={offset}
           style={{ transition: 'stroke-dashoffset 700ms ease' }}
         />
-        <text x="110" y="148" textAnchor="middle" style={{ fontSize: 11, fill: 'rgba(255,255,255,0.45)', fontFamily: 'monospace' }}>
+        <text x="110" y="170" textAnchor="middle" style={{ fontSize: 11, fill: 'var(--text-on-surface-muted)', fontFamily: 'var(--font-mono)' }}>
           {formatCurrencyCompact(limit)} plan
         </text>
       </svg>
-      <div className={styles.arcCenter}>
-        <div className={styles.arcAmount}>{formatCurrencyCompact(spent)}</div>
-        <div className={styles.arcPct}>{Math.round(pct)}% del plan</div>
+      <div className={styles.arcBig}>
+        <div className={styles.arcNum}>{formatCurrencyCompact(spent)}</div>
+        <div className={styles.arcSub}>{Math.round(pct)}% del plan</div>
       </div>
     </div>
   );
@@ -148,20 +147,31 @@ export const BudgetDetailPage = () => {
     : null;
 
   return (
-    <AppLayout title={cfg.name}>
-      <IonContent>
+    <IonPage>
+      <IonContent
+        className={styles.page}
+        style={{ '--cat-color': cfg.color, '--cat-soft': cfg.soft } as React.CSSProperties}
+      >
+        {/* Topbar */}
+        <div className={styles.topbar}>
+          <button type="button" className={styles.iconBtn} onClick={() => history.goBack()}>
+            <IonIcon icon={chevronBackOutline} />
+          </button>
+          <div className={styles.topbarCenter}>
+            <span className={styles.topbarEyebrow}>Gaveta</span>
+            <span className={styles.topbarTitle}>{cfg.name}</span>
+          </div>
+          <div className={styles.iconBtn}>
+            <IonIcon icon={optionsOutline} />
+          </div>
+        </div>
+
+        {/* Scroll content */}
         <div className={styles.scroll}>
-          <BreadcrumbTrail items={[
-            { label: 'Presupuesto', onClick: () => history.goBack() },
-            { label: cfg.name },
-          ]} />
 
           {/* Arc */}
           {category ? (
-            <div
-              className={styles.arcSection}
-              style={{ '--cat-color': cfg.color, '--cat-soft': cfg.soft } as React.CSSProperties}
-            >
+            <>
               <ArcChart pct={pct} color={cfg.color} spent={category.spent} limit={category.budget} />
 
               <div className={styles.statsRow}>
@@ -180,15 +190,12 @@ export const BudgetDetailPage = () => {
                   </span>
                 </div>
               </div>
-            </div>
+            </>
           ) : null}
 
           {/* Projection insight */}
           {projection !== null && category ? (
-            <div
-              className={styles.insightCard}
-              style={{ '--cat-color': cfg.color, '--cat-soft': cfg.soft } as React.CSSProperties}
-            >
+            <div className={styles.insight}>
               <div className={styles.insightIcon}><IonIcon icon={sparklesOutline} /></div>
               <div className={styles.insightBody}>
                 <p className={styles.insightTitle}>Si seguís a este ritmo…</p>
@@ -208,17 +215,17 @@ export const BudgetDetailPage = () => {
           </div>
 
           {loading ? (
-            <div className={styles.center}><Spinner size="md" /></div>
+            <div className={styles.center}><span className={styles.spinner} /></div>
           ) : filtered.length === 0 ? (
             <div className={styles.empty}>Nada en esta gaveta este mes.</div>
           ) : (
-            <div className={styles.txnList}>
+            <div className={styles.txnGroup}>
               {filtered.map((tx) => <TxnRow key={tx.id} tx={tx} cfg={cfg} />)}
             </div>
           )}
 
         </div>
       </IonContent>
-    </AppLayout>
+    </IonPage>
   );
 };
