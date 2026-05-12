@@ -1,6 +1,7 @@
 import { api } from './api';
 import type {
   AgentInsight,
+  NightAnalysis,
   AgentUiEvent,
   Budget,
   BudgetLineItem,
@@ -95,9 +96,19 @@ export const financeService = {
     return data as SummaryResponse;
   },
 
-  async fetchCurrentInsight(month = defaultMonth, year = defaultYear): Promise<AgentInsight | null> {
-    const { data } = await api.get('/api/v1/agent_insights/current', { params: { month, year } });
+  async fetchLatestInsight(): Promise<AgentInsight | null> {
+    const { data } = await api.get('/api/v1/agent_insights/latest');
     return (data as { data: AgentInsight | null }).data ?? null;
+  },
+
+  async updateInsightStatus(id: number, status: 'seen' | 'actioned' | 'dismissed'): Promise<AgentInsight> {
+    const { data } = await api.patch(`/api/v1/agent_insights/${id}`, { status });
+    return (data as { data: AgentInsight }).data;
+  },
+
+  async fetchNightAnalysisByDate(date: string): Promise<NightAnalysis | null> {
+    const { data } = await api.get(`/api/v1/night_analyses/${date}`);
+    return (data as { data: NightAnalysis | null }).data ?? null;
   },
 
   async fetchTransactions(params: TransactionQueryParams = {}): Promise<JsonApiCollection<Transaction>> {

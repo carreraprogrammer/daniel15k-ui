@@ -808,33 +808,61 @@ export interface BudgetPlanDraft {
   mode: 'conservative' | 'expected';
 }
 
-// ── Agent Insights — recomendaciones diarias ─────────────────────────────────
-
-export interface AgentInsightSignal {
-  type: 'warn' | 'info' | 'ok';
-  category: string;
-  message: string;
-}
-
-export interface AgentInsightRecommendations {
-  primary_action: string;
-  safe_to_deploy_suggested: number;
-  rationale: string;
-}
+// ── Agent Insights — coaching card polimórfica ────────────────────────────────
 
 export interface AgentInsight {
   id: number;
   account_id: number;
-  period_month: number;
-  period_year: number;
+  insightable_type: string;
+  insightable_id: number;
+  insight_kind: 'tip' | 'congratulation' | 'alert' | 'proposal' | 'achievement';
+  title: string;
+  body: string;
+  status: 'new' | 'seen' | 'actioned' | 'dismissed';
+  agent_reasoning: string | null;
   generated_at: string;
-  key_metrics_snapshot: Record<string, unknown>;
-  recommendations: AgentInsightRecommendations;
-  reasoning: string;
-  signals: AgentInsightSignal[];
-  safe_to_deploy_amount: number | null;
-  trigger_reason: string | null;
-  stale: boolean;
+  created_at: string;
+}
+
+// ── Night Analysis — análisis nocturno con pre-contextualización ──────────────
+
+export interface NightAnalysisTransactionContext {
+  matched: Array<{
+    transaction_id: number;
+    obligation_name: string;
+    amount: number;
+    expected_amount: number;
+    delta: number;
+  }>;
+  unmatched: Array<{
+    transaction_id: number;
+    concept: string;
+    amount: number;
+    category_type: string;
+  }>;
+}
+
+export interface NightAnalysisCategoryAlert {
+  category_type: string;
+  spent: number;
+  budget: number;
+  pct_used: number;
+  vs_rolling_avg_pct: number | null;
+  status: 'on_track' | 'near_limit' | 'over';
+}
+
+export interface NightAnalysis {
+  id: number;
+  account_id: number;
+  analysis_date: string;
+  health_status: 'comfortable' | 'warning' | 'critical';
+  commitment_gap: number;
+  daily_burn: number;
+  days_to_next_income: number | null;
+  category_alerts: NightAnalysisCategoryAlert[];
+  transactions_context: NightAnalysisTransactionContext;
+  agent_reasoning: string | null;
+  agent_insight: AgentInsight | null;
   created_at: string;
 }
 

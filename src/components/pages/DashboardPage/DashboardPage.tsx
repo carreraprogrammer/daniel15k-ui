@@ -9,7 +9,11 @@ import {
   giftOutline,
   flashOutline,
   chevronForwardOutline,
+  trophyOutline,
+  warningOutline,
+  ribbonOutline,
 } from 'ionicons/icons';
+import type { AgentInsight } from '../../../types/finance.types';
 import { AppLayout } from '../../templates/AppLayout';
 import { Spinner } from '../../atoms/Spinner';
 import { ErrorState } from '../../molecules/ErrorState';
@@ -95,6 +99,25 @@ const getFirstName = (name?: string | null) => {
   if (!name) return '';
 
   return name.trim().split(/\s+/u)[0] ?? '';
+};
+
+const insightTitle = (kind?: AgentInsight['insight_kind'] | null): string => {
+  switch (kind) {
+    case 'congratulation': return '¡Buenas noticias!';
+    case 'alert':          return 'Atención';
+    case 'proposal':       return 'Tu coach propone';
+    case 'achievement':    return 'Logro desbloqueado';
+    default:               return 'Una sugerencia de tu coach';
+  }
+};
+
+const insightIcon = (kind?: AgentInsight['insight_kind'] | null): string => {
+  switch (kind) {
+    case 'congratulation': return trophyOutline;
+    case 'alert':          return warningOutline;
+    case 'achievement':    return ribbonOutline;
+    default:               return sparklesOutline;
+  }
 };
 
 export const DashboardContent = () => {
@@ -243,19 +266,24 @@ export const DashboardContent = () => {
               ) : null}
 
               {/* ── ZONA 1 — Insight del agente ───────────────────────────── */}
-              <div className={styles.insightCard}>
+              <div
+                className={styles.insightCard}
+                role="button"
+                tabIndex={0}
+                onClick={() => insight?.generated_at && history.push(`/analisis/${insight.generated_at.slice(0, 10)}`, { insight })}
+                onKeyDown={(e) => e.key === 'Enter' && insight?.generated_at && history.push(`/analisis/${insight.generated_at.slice(0, 10)}`, { insight })}
+              >
                 <div className={styles.insightCardIcon}>
-                  <IonIcon icon={sparklesOutline} />
+                  <IonIcon icon={insightIcon(insight?.insight_kind)} />
                 </div>
                 <div className={styles.insightCardBody}>
-                  <p className={styles.insightCardTitle}>Una sugerencia tuya</p>
+                  <p className={styles.insightCardTitle}>{insightTitle(insight?.insight_kind)}</p>
                   <p className={styles.insightCardText}>
-                    {insight?.recommendations?.primary_action ?? 'El análisis nocturno de tu coach aparecerá aquí.'}
+                    {insight?.body ?? 'El análisis nocturno de tu coach aparecerá aquí.'}
                   </p>
                   <div className={styles.insightCardMeta}>
                     <span>Análisis nocturno</span>
-                    <span>·</span>
-                    <span>Ver razonamiento</span>
+                    {insight?.status === 'new' ? <span className={styles.insightNewDot} /> : null}
                   </div>
                 </div>
               </div>

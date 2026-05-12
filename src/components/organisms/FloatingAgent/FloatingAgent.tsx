@@ -6,6 +6,7 @@ import { AvatarNucleus } from '../../atoms/AvatarNucleus'
 import { useAuthStore } from '../../../store/authStore'
 import { useProgressStore } from '../../../store/progressStore'
 import { ChatPortal } from '../../pages/ChatPage/ChatPage'
+import { financeService } from '../../../services/financeService'
 import styles from './FloatingAgent.module.css'
 
 type Point = {
@@ -85,6 +86,7 @@ export const FloatingAgent = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
   const { data, loading, fetchProgress, getEffectiveLevel } = useProgressStore()
   const [isOpen, setIsOpen] = useState(false)
+  const [hasNewInsight, setHasNewInsight] = useState(false)
   const [position, setPosition] = useState<Point | null>(readStoredPosition)
   const [isDragging, setIsDragging] = useState(false)
   const positionRef = useRef<Point | null>(position)
@@ -100,7 +102,11 @@ export const FloatingAgent = () => {
   })
 
   useEffect(() => {
-    if (isAuthenticated) fetchProgress()
+    if (!isAuthenticated) return
+    fetchProgress()
+    financeService.fetchLatestInsight()
+      .then((i) => setHasNewInsight(i?.status === 'new'))
+      .catch(() => {})
   }, [fetchProgress, isAuthenticated])
 
   const level = getEffectiveLevel()
@@ -243,6 +249,7 @@ export const FloatingAgent = () => {
               <AvatarNucleus seed={seed} level={level} size={metrics.avatarSize} />
             </span>
             <span className={styles.glowBadge} aria-hidden="true" />
+            {hasNewInsight ? <span className={styles.insightDot} aria-hidden="true" /> : null}
           </button>
         </div>,
         document.body

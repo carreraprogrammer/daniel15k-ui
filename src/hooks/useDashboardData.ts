@@ -41,7 +41,7 @@ export const useDashboardData = () => {
         financeService.fetchRecurringObligations(),
         financeService.fetchTransactions({ page: 1, per_page: 50, sort_by: 'date', sort_dir: 'desc' }),
         financeService.fetchCategories(),
-        financeService.fetchCurrentInsight().catch(() => null),
+        financeService.fetchLatestInsight().catch(() => null),
         financeService.fetchCompleteness().catch(() => null),
         financeService.fetchMilestones().catch(() => []),
       ]);

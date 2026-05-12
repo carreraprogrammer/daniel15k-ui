@@ -179,6 +179,16 @@
   font-size: var(--type-caption-size);
 }
 
+.insightNewDot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-error, #E74C3C);
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
 /* ── Hero card ────────────────────────────────────────────────────────────── */
 
 .planBanner {
