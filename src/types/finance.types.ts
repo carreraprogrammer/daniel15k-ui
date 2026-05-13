@@ -823,6 +823,7 @@ export interface AgentInsight {
   agent_reasoning: string | null;
   generated_at: string;
   created_at: string;
+  analysis_date?: string;
 }
 
 // ── Night Analysis — análisis nocturno con pre-contextualización ──────────────

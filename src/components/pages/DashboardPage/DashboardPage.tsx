@@ -271,13 +271,15 @@ export const DashboardContent = () => {
                 role="button"
                 tabIndex={0}
                 onClick={() => {
-                  const date = insight?.generated_at?.slice(0, 10)
+                  const date = insight?.analysis_date
+                    ?? insight?.generated_at?.slice(0, 10)
                     ?? new Date().toISOString().slice(0, 10);
                   history.push(`/analisis/${date}`, { insight });
                 }}
                 onKeyDown={(e) => {
                   if (e.key !== 'Enter') return;
-                  const date = insight?.generated_at?.slice(0, 10)
+                  const date = insight?.analysis_date
+                    ?? insight?.generated_at?.slice(0, 10)
                     ?? new Date().toISOString().slice(0, 10);
                   history.push(`/analisis/${date}`, { insight });
                 }}
