@@ -270,8 +270,17 @@ export const DashboardContent = () => {
                 className={styles.insightCard}
                 role="button"
                 tabIndex={0}
-                onClick={() => insight?.generated_at && history.push(`/analisis/${insight.generated_at.slice(0, 10)}`, { insight })}
-                onKeyDown={(e) => e.key === 'Enter' && insight?.generated_at && history.push(`/analisis/${insight.generated_at.slice(0, 10)}`, { insight })}
+                onClick={() => {
+                  const date = insight?.generated_at?.slice(0, 10)
+                    ?? new Date().toISOString().slice(0, 10);
+                  history.push(`/analisis/${date}`, { insight });
+                }}
+                onKeyDown={(e) => {
+                  if (e.key !== 'Enter') return;
+                  const date = insight?.generated_at?.slice(0, 10)
+                    ?? new Date().toISOString().slice(0, 10);
+                  history.push(`/analisis/${date}`, { insight });
+                }}
               >
                 <div className={styles.insightCardIcon}>
                   <IonIcon icon={insightIcon(insight?.insight_kind)} />

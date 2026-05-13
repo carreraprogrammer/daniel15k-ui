@@ -61,7 +61,7 @@ export const NightAnalysisDetailPage = () => {
   }, [date]);
 
   const insight = analysis?.agent_insight ?? location.state?.insight ?? null;
-  const health = analysis ? HEALTH_LABELS[analysis.health_status] : null;
+  const health = analysis ? HEALTH_LABELS[analysis.health_status] ?? null : null;
 
   return (
     <IonPage className={styles.page}>
@@ -80,11 +80,9 @@ export const NightAnalysisDetailPage = () => {
         <div className={styles.stack}>
           {loading ? (
             <div className={styles.emptyState}>Cargando análisis…</div>
-          ) : !analysis ? (
-            <div className={styles.emptyState}>No hay análisis para esta fecha.</div>
           ) : (
             <>
-              {/* ── Insight card ─────────────────────────────────────────── */}
+              {/* ── Insight card — visible aunque no haya NightAnalysis completo */}
               {insight ? (
                 <div className={styles.insightCard}>
                   <div className={styles.insightIcon}>
@@ -96,6 +94,11 @@ export const NightAnalysisDetailPage = () => {
                   </div>
                 </div>
               ) : null}
+
+              {!analysis ? (
+                <div className={styles.emptyState}>Sin datos de contexto para esta fecha.</div>
+              ) : (
+                <>
 
               {/* ── Estado financiero ────────────────────────────────────── */}
               <div className={styles.section}>
@@ -203,6 +206,8 @@ export const NightAnalysisDetailPage = () => {
                   </div>
                 </div>
               ) : null}
+                </>
+              )}
             </>
           )}
         </div>
