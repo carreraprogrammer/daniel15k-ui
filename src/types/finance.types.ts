@@ -842,6 +842,15 @@ export interface NightAnalysisTransactionContext {
     amount: number;
     category_type: string;
   }>;
+  needs_review?: Array<{
+    transaction_id: number;
+    concept: string;
+    amount: number;
+    date: string;
+    reason: 'no_classification' | 'deduplication_risk' | 'possible_debt';
+    suggested_subcategory_code?: string;
+    notes?: string;
+  }>;
 }
 
 export interface NightAnalysisCategoryAlert {

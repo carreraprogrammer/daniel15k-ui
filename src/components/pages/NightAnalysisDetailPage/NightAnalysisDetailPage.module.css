@@ -294,3 +294,104 @@
   font-size: 12px;
   color: var(--text-on-surface-muted);
 }
+
+/* ── Needs review ─────────────────────────────────────────────────────────────── */
+
+.reviewList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.reviewCard {
+  padding: 14px;
+  border-radius: 12px;
+  background: var(--surface-panel-soft);
+  border: 1px solid rgba(201, 152, 10, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.reviewHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.reviewIcon {
+  font-size: 18px;
+  color: #C9980A;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.reviewInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.reviewConcept {
+  font-size: var(--type-body-size, 15px);
+  font-weight: 500;
+  color: var(--text-on-surface);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reviewMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reviewAmt {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-on-surface);
+}
+
+.reviewDate {
+  font-size: 12px;
+  color: var(--text-on-surface-muted);
+}
+
+.reviewReason {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: rgba(201, 152, 10, 0.14);
+  color: #C9980A;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.reviewNotes {
+  font-size: 13px;
+  color: var(--text-on-surface-muted);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.reviewActions {
+  display: flex;
+  gap: 8px;
+}
+
+.reviewDismissBtn {
+  flex: 1;
+  padding: 9px 0;
+  border-radius: 10px;
+  background: var(--surface-border);
+  border: none;
+  color: var(--text-on-surface-muted);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}

@@ -9,6 +9,9 @@ import {
   ribbonOutline,
   checkmarkCircleOutline,
   alertCircleOutline,
+  helpCircleOutline,
+  copyOutline,
+  cardOutline,
 } from 'ionicons/icons';
 import { financeService } from '../../../services/financeService';
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
@@ -45,12 +48,32 @@ const formatDate = (iso: string): string => {
     .format(new Date(y, m - 1, d));
 };
 
+type ReviewReason = 'no_classification' | 'deduplication_risk' | 'possible_debt';
+
+const REVIEW_REASON_LABELS: Record<ReviewReason, string> = {
+  no_classification:  'Sin clasificar',
+  deduplication_risk: 'Posible duplicado',
+  possible_debt:      'Posible deuda',
+};
+
+const reviewIcon = (reason: ReviewReason): string => {
+  switch (reason) {
+    case 'deduplication_risk': return copyOutline;
+    case 'possible_debt':      return cardOutline;
+    default:                   return helpCircleOutline;
+  }
+};
+
 export const NightAnalysisDetailPage = () => {
   const { date } = useParams<{ date: string }>();
   const history = useHistory();
   const location = useLocation<{ insight?: AgentInsight }>();
   const [analysis, setAnalysis] = useState<NightAnalysis | null>(null);
   const [loading, setLoading] = useState(true);
+  const [dismissedReviews, setDismissedReviews] = useState<Set<number>>(new Set());
+
+  const dismissReview = (id: number) =>
+    setDismissedReviews((prev) => new Set(prev).add(id));
 
   useEffect(() => {
     setLoading(true);
@@ -168,6 +191,51 @@ export const NightAnalysisDetailPage = () => {
                   </div>
                 </div>
               ) : null}
+
+              {/* ── Para revisar ─────────────────────────────────────────── */}
+              {(() => {
+                const pending = (analysis.transactions_context.needs_review ?? [])
+                  .filter((r) => !dismissedReviews.has(r.transaction_id));
+                return pending.length > 0 ? (
+                  <div className={styles.section}>
+                    <h3 className={styles.sectionTitle}>El agente necesita tu ayuda</h3>
+                    <div className={styles.reviewList}>
+                      {pending.map((r) => (
+                        <div key={r.transaction_id} className={styles.reviewCard}>
+                          <div className={styles.reviewHeader}>
+                            <IonIcon
+                              icon={reviewIcon(r.reason as ReviewReason)}
+                              className={styles.reviewIcon}
+                            />
+                            <div className={styles.reviewInfo}>
+                              <span className={styles.reviewConcept}>{r.concept}</span>
+                              <div className={styles.reviewMeta}>
+                                <span className={styles.reviewAmt}>{formatCurrencyCompact(r.amount)}</span>
+                                <span className={styles.reviewDate}>{r.date}</span>
+                              </div>
+                            </div>
+                            <span className={styles.reviewReason}>
+                              {REVIEW_REASON_LABELS[r.reason as ReviewReason] ?? r.reason}
+                            </span>
+                          </div>
+                          {r.notes ? (
+                            <p className={styles.reviewNotes}>{r.notes}</p>
+                          ) : null}
+                          <div className={styles.reviewActions}>
+                            <button
+                              type="button"
+                              className={styles.reviewDismissBtn}
+                              onClick={() => dismissReview(r.transaction_id)}
+                            >
+                              Descartar
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null;
+              })()}
 
               {/* ── Alertas de categoría ─────────────────────────────────── */}
               {analysis.category_alerts.filter((a) => a.pct_used > 50).length > 0 ? (
