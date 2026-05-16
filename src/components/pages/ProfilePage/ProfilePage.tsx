@@ -8,6 +8,7 @@ import { useAccentStore, ACCENT_PRESETS } from '../../../store/accentStore';
 import { useProgressStore, LEVEL_NAMES } from '../../../store/progressStore';
 import { AvatarNucleus } from '../../atoms/AvatarNucleus';
 import { api } from '../../../services/api';
+import { adminService, type AdminAccount } from '../../../services/adminService';
 import { DataState } from '../../molecules/DataState/DataState';
 import { DynamicForm } from '../../organisms/DynamicForm';
 import { AppLayout } from '../../templates/AppLayout';
@@ -47,6 +48,31 @@ export const ProfileContent = () => {
   const [contextLoading, setContextLoading] = useState(true);
   const [contextError, setContextError] = useState<string | null>(null);
   const [avatarSampleUserId, setAvatarSampleUserId] = useState('1');
+  const startImpersonation = useAuthStore((state) => state.startImpersonation);
+  const [accounts, setAccounts] = useState<AdminAccount[]>([]);
+  const [accountsLoading, setAccountsLoading] = useState(false);
+  const [impersonatingId, setImpersonatingId] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!user?.superAdmin) return;
+    setAccountsLoading(true);
+    adminService.getAccounts()
+      .then(({ data }) => setAccounts(data.data))
+      .catch(() => { /* silencioso — no bloquea el perfil */ })
+      .finally(() => setAccountsLoading(false));
+  }, [user?.superAdmin]);
+
+  const handleImpersonate = async (account: AdminAccount) => {
+    setImpersonatingId(account.id);
+    try {
+      const { data } = await adminService.impersonate(account.id);
+      startImpersonation(data.data.access_token, { id: account.id, name: account.name, email: account.email });
+    } catch {
+      showError('No pude impersonar esta cuenta.');
+    } finally {
+      setImpersonatingId(null);
+    }
+  };
 
   useEffect(() => {
     fetchProgress();
@@ -233,6 +259,37 @@ export const ProfileContent = () => {
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {user?.superAdmin && (
+              <div className={styles.preferenceBlock}>
+                <div>
+                  <span className={styles.metaLabel}>Herramientas</span>
+                  <strong>Impersonar usuario</strong>
+                </div>
+                {accountsLoading && (
+                  <span className={styles.controlLabel}>Cargando cuentas...</span>
+                )}
+                {accounts.filter((a) => a.user_id !== user.id).map((account) => (
+                  <div key={account.id} className={styles.impersonateRow}>
+                    <div className={styles.impersonateInfo}>
+                      <strong>{account.name}</strong>
+                      <span>{account.email}</span>
+                    </div>
+                    <button
+                      type="button"
+                      className={styles.impersonateBtn}
+                      onClick={() => void handleImpersonate(account)}
+                      disabled={impersonatingId === account.id}
+                    >
+                      {impersonatingId === account.id ? 'Entrando...' : 'Ver como'}
+                    </button>
+                  </div>
+                ))}
+                {!accountsLoading && accounts.filter((a) => a.user_id !== user.id).length === 0 && (
+                  <span className={styles.controlLabel}>No hay otras cuentas.</span>
+                )}
               </div>
             )}
 

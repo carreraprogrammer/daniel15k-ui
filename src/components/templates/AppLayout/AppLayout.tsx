@@ -3,6 +3,7 @@ import { IonIcon, IonPage } from '@ionic/react';
 import { closeOutline, logOutOutline, personCircleOutline } from 'ionicons/icons';
 import { NavLink, Link, useLocation } from 'react-router-dom';
 import { Header } from '../../organisms/Header';
+import { ImpersonationBanner } from '../../molecules/ImpersonationBanner/ImpersonationBanner';
 import { BrandMark } from '../../atoms/BrandMark';
 import { BreadcrumbTrail, type BreadcrumbItem } from '../../organisms/BreadcrumbTrail';
 import { CompletenessIndicator } from '../../molecules/CompletenessIndicator';
@@ -81,6 +82,7 @@ export const AppLayout = ({ title, children }: { title: string; children: ReactN
         <div ref={shellRef} className={styles.shell}>
           <div className={styles.backdrop} aria-hidden="true" />
           <div ref={headerRef} className={styles.headerSlot}>
+            <ImpersonationBanner />
             <Header currentSection={title} toolbar={toolbar} />
             <BreadcrumbTrail items={breadcrumbs} />
           </div>

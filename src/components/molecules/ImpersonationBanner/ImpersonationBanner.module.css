@@ -1,0 +1,37 @@
+.banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 8px 16px;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  border-radius: 14px;
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.label {
+  font-size: var(--type-label-size);
+  color: var(--color-text-secondary);
+}
+
+.label strong {
+  color: var(--color-text-primary);
+}
+
+.returnBtn {
+  flex-shrink: 0;
+  padding: 5px 14px;
+  border: 1px solid rgba(245, 158, 11, 0.5);
+  border-radius: 10px;
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--color-text-primary);
+  font-size: var(--type-label-size);
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease;
+}
+
+.returnBtn:hover {
+  background: rgba(245, 158, 11, 0.25);
+}
