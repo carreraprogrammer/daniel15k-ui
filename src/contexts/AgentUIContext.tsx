@@ -21,6 +21,7 @@ interface AgentUIState {
   sessionId: string | null;
   status: ChatStatus;
   events: AgentUiEvent[];
+  dataVersion: number;
 }
 
 type AgentReplyType =
@@ -35,6 +36,7 @@ const initialState: AgentUIState = {
   sessionId: null,
   status: 'idle',
   events: [],
+  dataVersion: 0,
 };
 
 // ─── Actions ──────────────────────────────────────────────────────────────────
@@ -45,6 +47,7 @@ type AgentUIAction =
   | { type: 'CHAT_ERROR' }
   | { type: 'EVENTS_RECEIVED'; payload: AgentUiEvent[] }
   | { type: 'EVENT_CONSUMED'; payload: { id: number } }
+  | { type: 'DATA_CHANGED' }
   | { type: 'RESET' };
 
 function reducer(state: AgentUIState, action: AgentUIAction): AgentUIState {
@@ -65,6 +68,8 @@ function reducer(state: AgentUIState, action: AgentUIAction): AgentUIState {
     }
     case 'EVENT_CONSUMED':
       return { ...state, events: state.events.filter((e) => e.id !== action.payload.id) };
+    case 'DATA_CHANGED':
+      return { ...state, dataVersion: state.dataVersion + 1 };
     case 'RESET':
       return initialState;
     default:
@@ -84,6 +89,7 @@ interface AgentUIContextValue {
   ) => Promise<void>;
   consume: (id: number) => Promise<void>;
   reset: () => void;
+  dataVersion: number;
 }
 
 const AgentUIContext = createContext<AgentUIContextValue | null>(null);
@@ -130,10 +136,20 @@ export function AgentUIProvider({ children }: { children: ReactNode }) {
       if (!pending.length) return;
 
       const navigateEvents = pending.filter((e) => e.event_type === 'navigate');
-      const uiEvents = pending.filter((e) => e.event_type !== 'navigate');
+      const dataChangedEvents = pending.filter((e) => e.event_type === 'data_changed');
+      const uiEvents = pending.filter(
+        (e) => e.event_type !== 'navigate' && e.event_type !== 'data_changed',
+      );
 
       for (const ev of navigateEvents) {
         void handleNavigateEvent(ev);
+      }
+
+      for (const ev of dataChangedEvents) {
+        void financeService.consumeAgentEvent(ev.id).catch(() => null);
+      }
+      if (dataChangedEvents.length > 0) {
+        dispatch({ type: 'DATA_CHANGED' });
       }
 
       if (uiEvents.length > 0) {
@@ -207,7 +223,7 @@ export function AgentUIProvider({ children }: { children: ReactNode }) {
   }, [stopPolling]);
 
   return (
-    <AgentUIContext.Provider value={{ state, startChat, reply, consume, reset }}>
+    <AgentUIContext.Provider value={{ state, startChat, reply, consume, reset, dataVersion: state.dataVersion }}>
       {children}
     </AgentUIContext.Provider>
   );

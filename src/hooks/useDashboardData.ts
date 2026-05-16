@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { financeService } from '../services/financeService';
+import { useAgentUI } from '../contexts/AgentUIContext';
 import type { AgentInsight, CategoryResource, CompletenessResponse, Debt, RecurringObligation, SummaryResponse, Transaction, UserMilestone } from '../types/finance.types';
 import { buildCategoryLookup, buildBehaviorSignals, summarizeBehavior } from '../utils/financeBehavior';
 
@@ -62,6 +63,12 @@ export const useDashboardData = () => {
   useEffect(() => {
     void load();
   }, [load]);
+
+  const { dataVersion } = useAgentUI();
+  useEffect(() => {
+    if (dataVersion > 0) void load();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataVersion]);
 
   const categoryLookup = useMemo(() => buildCategoryLookup(categories), [categories]);
   const behaviorSummary = useMemo(

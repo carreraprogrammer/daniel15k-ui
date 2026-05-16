@@ -21,6 +21,30 @@ export interface BurnRateSubcategory {
   spent: number;
 }
 
+export type FinancialBehavior =
+  | 'fixed_once'
+  | 'fixed_recurring'
+  | 'variable_linear'
+  | 'variable_spiky'
+  | 'savings_goal'
+  | 'debt_payment';
+
+export type FinancialMetricKind =
+  | 'month_end_projection'
+  | 'payment_status'
+  | 'goal_progress'
+  | 'debt_progress'
+  | 'spiky_context';
+
+export interface FinancialPrimaryMetric {
+  kind: FinancialMetricKind;
+  status: 'comfortable' | 'warning' | 'critical';
+  title: string;
+  body: string;
+  value: number;
+  budget?: number;
+}
+
 export interface BurnRateCategory {
   category: string;
   category_type: string;
@@ -29,6 +53,8 @@ export interface BurnRateCategory {
   spent: number;
   projected: number;
   pct: number;
+  behavior?: FinancialBehavior;
+  primary_metric?: FinancialPrimaryMetric;
   on_track: boolean;
   alert: string | null;
   subcategories?: BurnRateSubcategory[];
@@ -307,6 +333,8 @@ export interface Transaction {
     income_source_id?: number | null;
     sinking_fund_id?: number | null;
     metadata?: Record<string, unknown> | null;
+    created_at?: string;
+    updated_at?: string;
   };
   relationships?: {
     category?: {
@@ -710,6 +738,8 @@ export interface CurrentPlanSubcategory {
   budgeted: number;
   spent: number;
   projected: number;
+  behavior?: FinancialBehavior;
+  primary_metric?: FinancialPrimaryMetric;
   signal_kind?: 'positive' | 'neutral' | 'attention';
   signal_label?: string;
   signal_detail?: string;
@@ -723,6 +753,8 @@ export interface CurrentPlanCategory {
   budgeted: number;
   spent: number;
   projected: number;
+  behavior?: FinancialBehavior;
+  primary_metric?: FinancialPrimaryMetric;
   signal_kind?: 'positive' | 'neutral' | 'attention';
   signal_label?: string;
   signal_detail?: string;
@@ -887,7 +919,8 @@ export type AgentUiEventType =
   | 'request_confirmation'
   | 'show_category_selector'
   | 'show_amount_editor'
-  | 'navigate';
+  | 'navigate'
+  | 'data_changed';
 
 export interface MonthlyPlanDraft {
   month: number;
