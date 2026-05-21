@@ -1,4 +1,5 @@
 import { IonIcon } from '@ionic/react';
+import { createOutline } from 'ionicons/icons';
 import { useState } from 'react';
 import type { WizardCategory, WizardSubcategory } from '../../../types/finance.types';
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
@@ -177,8 +178,9 @@ export const BudgetCategoryStep = ({
                         className={styles.editBtn}
                         onClick={() => startEdit(sub.code, amount)}
                         aria-label={`Editar monto de ${sub.name}`}
+                        title={`Editar monto de ${sub.name}`}
                       >
-                        Editar
+                        <IonIcon icon={createOutline} className={styles.editIcon} aria-hidden="true" />
                       </button>
                     )}
                   </>

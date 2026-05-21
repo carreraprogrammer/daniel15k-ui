@@ -408,30 +408,33 @@
 
 .subcategoryCard {
   display: grid;
-  gap: 0.95rem;
-  padding: var(--space-4);
-  border-radius: 22px;
+  padding: var(--space-3);
+  border-radius: 18px;
   background: var(--surface-panel-soft);
   border: 1px solid var(--surface-border);
 }
 
+.subcategoryCardButton {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.subcategoryCompact {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--space-3);
+}
+
 .subcategoryCardUnaccounted {
-  border-style: dashed;
-  border-color: rgba(241, 180, 76, 0.28);
-  background: rgba(241, 180, 76, 0.04);
-}
-
-.subcategoryTop {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-3);
-}
-
-.subcategoryIdentity {
-  display: flex;
-  gap: var(--space-3);
-  min-width: 0;
+  border-color: var(--surface-border);
+  background: var(--surface-panel-soft);
 }
 
 .subcategoryIconWrap {
@@ -453,7 +456,6 @@
 
 .subcategoryCopy {
   display: grid;
-  gap: 0.2rem;
   min-width: 0;
 }
 
@@ -463,59 +465,23 @@
   font-family: var(--font-sans);
   font-size: var(--text-base);
   font-weight: var(--font-semibold);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.subcategoryMeta {
-  margin: 0;
-  color: var(--text-on-surface-soft);
-  font-family: var(--font-sans);
-  font-size: var(--text-xs);
-}
-
-.subcategorySignal {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.28rem 0.5rem;
-  border-radius: 999px;
-  background: var(--surface-control);
-  color: var(--text-on-surface-soft);
-  font-family: var(--font-sans);
-  font-size: var(--type-caption-size);
+.subcategoryPrimaryValue {
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
   font-weight: var(--font-semibold);
   white-space: nowrap;
 }
 
-.subcategorySignalDot {
-  width: 0.52rem;
-  height: 0.52rem;
-  border-radius: 999px;
-  background: currentColor;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--text-on-surface) 4%, transparent);
-}
-
-.subcategorySignalLabel {
-  display: inline-block;
-  max-width: 6.25rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.subcategorySignalPositive {
-  background: rgba(34, 197, 94, 0.12);
-  color: var(--color-success);
-}
-
-.subcategorySignalAttention {
-  background: rgba(241, 180, 76, 0.12);
-  color: var(--color-warning);
-}
-
-.subcategoryStats {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.9rem;
-  margin: 0;
+.subcategoryChevron {
+  flex-shrink: 0;
+  color: var(--subcategory-accent);
+  font-size: var(--type-body-size);
 }
 
 .emptySubcategories {
@@ -576,13 +542,11 @@
 }
 
 @media (max-width: 720px) {
-  .categoryStats,
-  .subcategoryStats {
+  .categoryStats {
     grid-template-columns: 1fr;
   }
 
-  .categoryToggle,
-  .subcategoryTop {
+  .categoryToggle {
     flex-direction: column;
   }
 

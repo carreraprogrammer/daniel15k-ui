@@ -26,8 +26,11 @@ import type {
   CurrentPlan,
   MonthlyPlanHistory,
   SummaryResponse,
+  Transaction,
+  FinancialPrimaryMetric,
 } from '../../../types/finance.types';
 import { getCategoryDisplayName, normalizeFlexibleLabel } from '../../../utils/categoryLabels';
+import { buildCategoryLookup } from '../../../utils/financeBehavior';
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import styles from '../FinancePage.module.css';
 
@@ -67,6 +70,14 @@ const planStatusLabel = (plan: MonthlyPlanHistory): string => {
   return plan.status;
 };
 
+const primaryMetricValueLabel = (metric: FinancialPrimaryMetric): string => {
+  if (metric.kind === 'goal_progress' || metric.kind === 'spiky_context' || metric.kind === 'debt_progress') {
+    return `${Math.round(metric.value)}%`;
+  }
+
+  return formatCurrencyCompact(metric.value);
+};
+
 // ── Types ──────────────────────────────────────────────────────────────────────
 
 const initialFilters: BudgetQueryParams = {
@@ -86,6 +97,7 @@ export const BudgetsContent = () => {
   const [currentPlan, setCurrentPlan] = useState<CurrentPlan | null>(null);
   const [planHistory, setPlanHistory] = useState<MonthlyPlanHistory[]>([]);
   const [categories, setCategories] = useState<CategoryResource[]>([]);
+  const [periodTransactions, setPeriodTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [closingPlanId, setClosingPlanId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -131,7 +143,7 @@ export const BudgetsContent = () => {
     setLoading(true);
     setError(null);
     try {
-      const [budgetsResponse, summaryResponse, categoriesResponse, currentPlanResponse, monthlyPlansResponse] =
+      const [budgetsResponse, summaryResponse, categoriesResponse, currentPlanResponse, monthlyPlansResponse, transactionsResponse] =
         await Promise.all([
           financeService.fetchBudgets({
             ...filters,
@@ -142,12 +154,20 @@ export const BudgetsContent = () => {
           financeService.fetchCategories(),
           financeService.fetchCurrentPlan(selectedPeriod),
           financeService.getMonthlyPlans(),
+          financeService.fetchTransactions({
+            month: selectedPeriod.month,
+            year: selectedPeriod.year,
+            per_page: 500,
+            sort_by: 'date',
+            sort_dir: 'desc',
+          }),
         ]);
       setBudgets(budgetsResponse.data);
       setSummary(summaryResponse);
       setCurrentPlan(currentPlanResponse);
       setCategories(categoriesResponse.data);
       setPlanHistory(monthlyPlansResponse.data ?? []);
+      setPeriodTransactions(transactionsResponse.data);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : 'No fue posible cargar los presupuestos.',
@@ -242,6 +262,7 @@ export const BudgetsContent = () => {
       })),
     [categories],
   );
+  const categoryLookup = useMemo(() => buildCategoryLookup(categories), [categories]);
   const currentPlanWithCategoryColors = useMemo(() => {
     if (!currentPlan) return null;
 
@@ -370,11 +391,17 @@ export const BudgetsContent = () => {
                       </div>
                       <div>
                         <div className={styles.focusValue}>
-                          {topRisk ? formatCurrencyCompact(topRisk.projected) : '—'}
+                          {topRisk?.primary_metric
+                            ? primaryMetricValueLabel(topRisk.primary_metric)
+                            : topRisk
+                              ? formatCurrencyCompact(topRisk.projected)
+                              : '—'}
                         </div>
                         <p className={styles.focusCaption}>
-                          {topRisk
-                            ? `Proyección actual de ${topRisk.category}`
+                          {topRisk?.primary_metric
+                            ? topRisk.primary_metric.title
+                            : topRisk
+                              ? `Proyección actual de ${topRisk.category}`
                             : 'Sin burn rate visible todavía'}
                         </p>
                       </div>
@@ -404,8 +431,8 @@ export const BudgetsContent = () => {
                         />
                       </div>
                       <p className={styles.focusSupportText}>
-                        {formatCurrencyCompact(topRisk.spent)} gastados de {formatCurrencyCompact(topRisk.budget)};
-                        proyectado a {formatCurrencyCompact(topRisk.projected)}.
+                        {topRisk.primary_metric?.body ??
+                          `${formatCurrencyCompact(topRisk.spent)} gastados de ${formatCurrencyCompact(topRisk.budget)}; proyectado a ${formatCurrencyCompact(topRisk.projected)}.`}
                       </p>
                     </section>
                   ) : null}
@@ -470,11 +497,12 @@ export const BudgetsContent = () => {
                 <>
                   {currentPlanWithCategoryColors && Array.isArray(currentPlanWithCategoryColors.categories) && currentPlanWithCategoryColors.categories.length > 0 ? (
                     <div className={styles.detailPanel}>
-                      {currentPlanWithCategoryColors.categories.map((cat, index) => (
+                      {currentPlanWithCategoryColors.categories.map((cat) => (
                         <CategoryGroup
                           key={cat.code ?? cat.name ?? 'unknown'}
                           category={cat}
-                          defaultExpanded={index === 0}
+                          transactions={periodTransactions}
+                          categoryLookup={categoryLookup}
                         />
                       ))}
                     </div>
@@ -548,7 +576,10 @@ export const BudgetsContent = () => {
                                   </span>
                                   {burnRate ? (
                                     <span className={styles.listMeta}>
-                                      Proyectado {formatCurrencyCompact(burnRate.projected)}
+                                      {burnRate.primary_metric?.title ?? 'Proyectado'}{' '}
+                                      {burnRate.primary_metric
+                                        ? primaryMetricValueLabel(burnRate.primary_metric)
+                                        : formatCurrencyCompact(burnRate.projected)}
                                     </span>
                                   ) : null}
                                 </div>

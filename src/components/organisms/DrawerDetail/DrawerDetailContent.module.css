@@ -1,0 +1,256 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.arcWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 8px 0 4px;
+}
+
+.arcBig {
+  text-align: center;
+}
+
+.arcNum {
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: var(--color-text-primary);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.arcSub {
+  font-size: 13px;
+  color: var(--text-on-surface-muted);
+  margin-top: 6px;
+}
+
+.arcFigure {
+  margin-top: -8px;
+}
+
+.arcPath {
+  transition: stroke-dashoffset 700ms ease;
+}
+
+.arcLimit {
+  font-size: 11px;
+  fill: var(--text-on-surface-muted);
+  font-family: var(--font-mono);
+}
+
+.statsRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 12px;
+  background: var(--surface-panel-soft);
+  border: 1px solid var(--surface-border-muted);
+  border-radius: 14px;
+}
+
+.statLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-on-surface-muted);
+  letter-spacing: 0.03em;
+}
+
+.statValue {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.statPositive {
+  color: #1A9E4A;
+}
+
+.statNegative {
+  color: #C0392B;
+}
+
+.insight {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--surface-panel-soft);
+  border: 1px solid var(--surface-border);
+  border-radius: 18px;
+}
+
+.insightIcon {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  border-radius: 10px;
+  background: var(--drawer-soft);
+  border: 1px solid var(--drawer-color);
+  color: var(--drawer-color);
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+}
+
+.insightBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.insightTitle {
+  margin: 0 0 3px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.insightText {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-on-surface-soft);
+  line-height: 1.45;
+}
+
+.secHead {
+  display: flex;
+  align-items: center;
+  margin: 4px 2px 0;
+}
+
+.secTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--color-text-primary);
+}
+
+.txnGroup {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: var(--surface-panel-soft);
+  border: 1px solid var(--surface-border);
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.txnRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  position: relative;
+}
+
+.txnRow + .txnRow::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 58px;
+  right: 14px;
+  height: 1px;
+  background: var(--surface-border-soft);
+}
+
+.txnIcon {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  border-radius: 10px;
+  background: var(--drawer-soft);
+  color: var(--drawer-color);
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+}
+
+.txnBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.txnName {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.txnMeta {
+  font-size: 11.5px;
+  color: var(--text-on-surface-muted);
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.txnAmt {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.txnAmtIncome {
+  color: #1A9E4A;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  padding: 32px 0;
+}
+
+.spinner {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--surface-border);
+  border-top-color: var(--color-brand);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.empty {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--text-on-surface-muted);
+  font-size: 14px;
+  background: var(--surface-panel-soft);
+  border: 1px solid var(--surface-border);
+  border-radius: 18px;
+}
+
+@media (max-width: 720px) {
+  .statsRow {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,11 +1,14 @@
 import { useMemo, useState, type CSSProperties } from 'react';
 import { IonIcon } from '@ionic/react';
 import { alertCircleOutline, chevronDownOutline, chevronForwardOutline } from 'ionicons/icons';
-import type { CurrentPlan, CurrentPlanCategory, CurrentPlanSubcategory } from '../../../types/finance.types';
+import type { CurrentPlan, CurrentPlanCategory, CurrentPlanSubcategory, Transaction } from '../../../types/finance.types';
 import { Button } from '../../atoms/Button';
 import { CurrencyValue } from '../../atoms/CurrencyValue';
+import { SheetModal } from '../../molecules/SheetModal';
+import { DrawerDetailContent, type DrawerDetailTransaction } from '../DrawerDetail';
 import { resolveNamedIcon } from '../BudgetWizard/iconRegistry';
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
+import type { CategoryLookupItem } from '../../../utils/financeBehavior';
 import styles from './ActivePlanView.module.css';
 
 const clampPct = (value: number): number => Math.max(0, Math.min(Math.round(value), 999));
@@ -95,12 +98,40 @@ const resolveBudgetAccent = (categoryCode: string, explicitColor?: string | null
   return `var(--color-${categoryCode})`;
 };
 
-const SubcategoryCard = ({ sub, accentColor }: { sub: CurrentPlanSubcategory; accentColor: string }) => {
-  const budgeted = sub.budgeted ?? 0;
+const paymentLabel = (src: string | null | undefined): string => {
+  if (src === 'credit_card') return 'Crédito';
+  if (src === 'debit') return 'Débito';
+  if (src === 'cash') return 'Efectivo';
+  return '';
+};
+
+const buildTransactionRow = (tx: Transaction, icon: string, metaPrefix?: string): DrawerDetailTransaction => {
+  const attr = tx.attributes;
+  const label = attr.concept || attr.product || 'Movimiento sin nombre';
+  const meta = [metaPrefix, attr.date, paymentLabel(attr.payment_source)]
+    .filter(Boolean)
+    .join(' · ');
+
+  return {
+    id: tx.id,
+    name: label,
+    meta,
+    amount: attr.amount,
+    icon,
+    isIncome: attr.transaction_type === 'income',
+  };
+};
+
+const SubcategoryCard = ({
+  sub,
+  accentColor,
+  onOpen,
+}: {
+  sub: CurrentPlanSubcategory;
+  accentColor: string;
+  onOpen: () => void;
+}) => {
   const spent = sub.spent ?? 0;
-  const remaining = budgeted - spent;
-  const pct = budgeted > 0 ? clampPct((spent / budgeted) * 100) : 0;
-  const isOver = spent > budgeted;
   const signalTitle = sub.signal_detail ?? sub.signal_label ?? 'Sin señal adicional';
 
   return (
@@ -109,83 +140,228 @@ const SubcategoryCard = ({ sub, accentColor }: { sub: CurrentPlanSubcategory; ac
       style={{ '--subcategory-accent': accentColor } as CSSProperties}
       title={signalTitle}
     >
-      <div className={styles.subcategoryTop}>
-        <div className={styles.subcategoryIdentity}>
+      <button
+        type="button"
+        className={styles.subcategoryCardButton}
+        onClick={onOpen}
+        aria-label={`Ver desglose de ${sub.name ?? sub.code ?? 'subcategoría'}`}
+      >
+        <div className={styles.subcategoryCompact}>
           <span className={styles.subcategoryIconWrap}>
             <IonIcon icon={resolveNamedIcon(sub.icon)} className={styles.subcategoryIcon} />
           </span>
           <div className={styles.subcategoryCopy}>
             <h4 className={styles.subcategoryName}>{sub.name ?? sub.code ?? 'Sin nombre'}</h4>
-            <p className={styles.subcategoryMeta}>
-              <CurrencyValue amount={spent} mode="compact" /> de{' '}
-              <CurrencyValue amount={budgeted} mode="compact" />
-            </p>
           </div>
-        </div>
-        <span
-          className={[
-            styles.subcategorySignal,
-            signalClassFor(sub.signal_kind, styles.subcategorySignalPositive, styles.subcategorySignalAttention),
-          ].filter(Boolean).join(' ')}
-          title={signalTitle}
-          aria-label={sub.signal_label ?? signalTitle}
-        >
-          <span className={styles.subcategorySignalDot} />
-          <span className={styles.subcategorySignalLabel}>
-            {buildCompactSignalLabel(sub.signal_kind, sub.signal_label)}
-          </span>
-        </span>
-      </div>
-
-      <div className={styles.subcategoryRail} aria-hidden="true">
-        <div
-          className={[styles.subcategoryRailFill, isOver ? styles.subcategoryRailFillWarn : ''].filter(Boolean).join(' ')}
-          style={{ width: `${Math.min(pct, 100)}%` }}
-        />
-      </div>
-
-      <dl className={styles.subcategoryStats}>
-        <div className={styles.subcategoryStat}>
-          <dt>Presupuesto</dt>
-          <dd>
-            <CurrencyValue amount={budgeted} mode="compact" />
-          </dd>
-        </div>
-        <div className={styles.subcategoryStat}>
-          <dt>Gastado</dt>
-          <dd>
+          <strong className={styles.subcategoryPrimaryValue} title={signalTitle}>
             <CurrencyValue amount={spent} mode="compact" />
-          </dd>
+          </strong>
+          <IonIcon icon={chevronForwardOutline} className={styles.subcategoryChevron} />
         </div>
-        <div className={styles.subcategoryStat}>
-          <dt>Restante</dt>
-          <dd className={remaining < 0 ? styles.negativeValue : ''}>
-            <CurrencyValue amount={remaining} mode="compact" />
-          </dd>
-        </div>
-      </dl>
+      </button>
     </article>
   );
+};
+
+interface SubcategoryDetailModalProps {
+  isOpen: boolean;
+  subcategory: CurrentPlanSubcategory | null;
+  accentColor: string;
+  categorySpent: number;
+  transactions: Transaction[];
+  onClose: () => void;
+}
+
+interface PlanlessDetailModalProps {
+  isOpen: boolean;
+  amount: number;
+  categorySpent: number;
+  expenses: PlanlessExpense[];
+  onClose: () => void;
+}
+
+const PlanlessDetailModal = ({
+  isOpen,
+  amount,
+  categorySpent,
+  expenses,
+  onClose,
+}: PlanlessDetailModalProps) => {
+  const categoryShare = categorySpent > 0 ? clampPct((amount / categorySpent) * 100) : 0;
+  const rows = expenses.map((expense) => (
+    buildTransactionRow(expense.tx, alertCircleOutline, expense.subcategoryName)
+  ));
+
+  return (
+    <SheetModal isOpen={isOpen} title="Sin presupuesto" onClose={onClose} height="tall">
+      <DrawerDetailContent
+        color="var(--color-warning)"
+        soft="rgba(201,152,10,0.16)"
+        spent={amount}
+        pct={categoryShare}
+        limit={null}
+        arcCaption={`${categoryShare}% de la categoría`}
+        stats={[
+          { label: 'Gastado', value: formatCurrencyCompact(amount) },
+          { label: 'Presupuesto', value: '—' },
+          { label: 'Movimientos', value: expenses.length },
+        ]}
+        insightTitle="Fuera del plan"
+        insightText="Este bloque agrupa subcategorías con gasto este mes que no tenían línea asignada."
+        transactions={rows}
+        emptyText="No hay movimientos detallados para este bloque."
+      />
+    </SheetModal>
+  );
+};
+
+const SubcategoryDetailModal = ({
+  isOpen,
+  subcategory,
+  accentColor,
+  categorySpent,
+  transactions,
+  onClose,
+}: SubcategoryDetailModalProps) => {
+  if (!subcategory) return null;
+
+  const budgeted = subcategory.budgeted ?? 0;
+  const spent = subcategory.spent ?? 0;
+  const remaining = budgeted - spent;
+  const pct = budgeted > 0 ? clampPct((spent / budgeted) * 100) : 0;
+  const categoryShare = categorySpent > 0 ? clampPct((spent / categorySpent) * 100) : 0;
+  const isOver = spent > budgeted;
+  const rows = transactions.map((tx) => buildTransactionRow(tx, resolveNamedIcon(subcategory.icon)));
+  const primaryMetric = subcategory.primary_metric;
+
+  return (
+    <SheetModal isOpen={isOpen} title={subcategory.name ?? subcategory.code ?? 'Subcategoría'} onClose={onClose} height="tall">
+      <DrawerDetailContent
+        color={accentColor}
+        soft="color-mix(in srgb, var(--drawer-color) 16%, transparent)"
+        spent={spent}
+        pct={pct}
+        limit={budgeted}
+        stats={[
+          { label: 'Gastado', value: formatCurrencyCompact(spent) },
+          { label: 'Presupuesto', value: formatCurrencyCompact(budgeted) },
+          {
+            label: primaryMetric?.kind === 'payment_status' ? 'Pendiente' : 'Disponible',
+            value: primaryMetric?.kind === 'payment_status'
+              ? formatCurrencyCompact(primaryMetric.value)
+              : formatCurrencyCompact(Math.abs(remaining)),
+            tone: remaining < 0 || primaryMetric?.status === 'critical' ? 'negative' : 'positive',
+          },
+        ]}
+        insightTitle={primaryMetric?.title ?? "Dentro de esta categoría"}
+        insightText={primaryMetric?.body ?? (
+          <>
+            Esta subcategoría consume <strong>{categoryShare}%</strong> del gasto total de la categoría.
+            {isOver ? ` Está por encima del plan por ${formatCurrencyCompact(spent - budgeted)}.` : ` Te queda margen de ${formatCurrencyCompact(Math.max(remaining, 0))}.`}
+          </>
+        )}
+        transactions={rows}
+        emptyText="No hay movimientos registrados en esta subcategoría este mes."
+      />
+    </SheetModal>
+  );
+};
+
+interface PlanlessExpense {
+  tx: Transaction;
+  subcategoryName: string;
+}
+
+const transactionSubcategoryId = (tx: Transaction): string | null => {
+  const relationshipId = tx.relationships?.subcategory?.data?.id;
+  if (relationshipId) return String(relationshipId);
+  const attributeId = tx.attributes.subcategory_id;
+  return attributeId == null ? null : String(attributeId);
+};
+
+const transactionCategoryType = (
+  tx: Transaction,
+  categoryLookup: Record<string, CategoryLookupItem>,
+): string | null => {
+  const subcategoryId = transactionSubcategoryId(tx);
+  if (subcategoryId && categoryLookup[`subcategory:${subcategoryId}`]?.categoryType) {
+    return categoryLookup[`subcategory:${subcategoryId}`].categoryType;
+  }
+
+  const relationshipCategoryId = tx.relationships?.category?.data?.id;
+  if (relationshipCategoryId && categoryLookup[`category:${relationshipCategoryId}`]?.categoryType) {
+    return categoryLookup[`category:${relationshipCategoryId}`].categoryType;
+  }
+
+  return tx.attributes.category_type ?? null;
+};
+
+const transactionSubcategoryName = (
+  tx: Transaction,
+  categoryLookup: Record<string, CategoryLookupItem>,
+): string => {
+  const subcategoryId = transactionSubcategoryId(tx);
+  if (!subcategoryId) return 'Sin subcategoría';
+  return categoryLookup[`subcategory:${subcategoryId}`]?.subcategoryName ?? `Subcategoría ${subcategoryId}`;
 };
 
 export interface CategoryGroupProps {
   category: CurrentPlanCategory;
   defaultExpanded?: boolean;
+  transactions?: Transaction[];
+  categoryLookup?: Record<string, CategoryLookupItem>;
 }
 
-export const CategoryGroup = ({ category, defaultExpanded = false }: CategoryGroupProps) => {
+export const CategoryGroup = ({ category, defaultExpanded = false, transactions = [], categoryLookup = {} }: CategoryGroupProps) => {
   const [expanded, setExpanded] = useState(defaultExpanded);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<CurrentPlanSubcategory | null>(null);
+  const [planlessOpen, setPlanlessOpen] = useState(false);
   const totalBudgeted = category.budgeted ?? 0;
   const totalSpent = category.spent ?? 0;
   const categoryCode = category.code ?? 'unknown';
   const categoryName = category.name ?? 'Sin categoría';
   const categoryIcon = category.icon ?? 'ellipseOutline';
   const subcategories = category.subcategories ?? [];
+  const accountedSpent = subcategories.reduce((sum, s) => sum + (s.spent ?? 0), 0);
   const spentPct = totalBudgeted > 0 ? clampPct((totalSpent / totalBudgeted) * 100) : 0;
   const remaining = totalBudgeted - totalSpent;
   const statusLabel = buildStatusLabel(category);
   const colorVar = resolveBudgetAccent(categoryCode, category.color);
   const isOverSpent = totalSpent > totalBudgeted;
+  const budgetedSubcategoryIds = new Set(
+    subcategories
+      .map((sub) => sub.id)
+      .filter((id): id is number => typeof id === 'number')
+      .map(String),
+  );
+  const planlessExpenses = transactions.flatMap((tx): PlanlessExpense[] => {
+    const attr = tx.attributes;
+    if (attr.transaction_type === 'income') return [];
+    if (transactionCategoryType(tx, categoryLookup) !== categoryCode) return [];
+
+    const subcategoryId = transactionSubcategoryId(tx);
+    if (subcategoryId && budgetedSubcategoryIds.has(subcategoryId)) return [];
+
+    return [{
+      tx,
+      subcategoryName: transactionSubcategoryName(tx, categoryLookup),
+    }];
+  });
+  const visibleUnaccountedSpent = Math.max(
+    totalSpent - accountedSpent,
+    planlessExpenses.reduce((sum, expense) => sum + (expense.tx.attributes.amount ?? 0), 0),
+  );
+  const hasSubcategoryCards = subcategories.length > 0 || visibleUnaccountedSpent > 0;
+  const transactionsBySubcategory = new Map<string, Transaction[]>();
+  transactions.forEach((tx) => {
+    if (tx.attributes.transaction_type === 'income') return;
+    if (transactionCategoryType(tx, categoryLookup) !== categoryCode) return;
+    const subcategoryId = transactionSubcategoryId(tx);
+    if (!subcategoryId) return;
+    const current = transactionsBySubcategory.get(subcategoryId) ?? [];
+    current.push(tx);
+    transactionsBySubcategory.set(subcategoryId, current);
+  });
 
   return (
     <section
@@ -263,57 +439,43 @@ export const CategoryGroup = ({ category, defaultExpanded = false }: CategoryGro
             </div>
           </dl>
 
-          {subcategories.length > 0 ? (
+          {hasSubcategoryCards ? (
             <div className={styles.subcategoryGrid}>
               {subcategories.map((sub) => (
                 <SubcategoryCard
                   key={sub.id ?? sub.code ?? sub.name}
                   sub={sub}
                   accentColor={colorVar}
+                  onOpen={() => setSelectedSubcategory(sub)}
                 />
               ))}
-              {(() => {
-                const accountedSpent = subcategories.reduce((sum, s) => sum + (s.spent ?? 0), 0);
-                const unaccountedSpent = totalSpent - accountedSpent;
-                if (unaccountedSpent <= 0) return null;
-                return (
-                  <article
-                    className={`${styles.subcategoryCard} ${styles.subcategoryCardUnaccounted}`}
-                    style={{ '--subcategory-accent': 'var(--color-warning)' } as CSSProperties}
-                    title="Gasto sin línea de presupuesto asignada"
+              {visibleUnaccountedSpent > 0 ? (
+                <article
+                  className={`${styles.subcategoryCard} ${styles.subcategoryCardUnaccounted}`}
+                  style={{ '--subcategory-accent': 'var(--color-warning)' } as CSSProperties}
+                  title="Gasto sin línea de presupuesto asignada"
+                >
+                  <button
+                    type="button"
+                    className={styles.subcategoryCardButton}
+                    onClick={() => setPlanlessOpen(true)}
+                    aria-label="Ver desglose de gastos sin presupuesto"
                   >
-                    <div className={styles.subcategoryTop}>
-                      <div className={styles.subcategoryIdentity}>
-                        <span className={styles.subcategoryIconWrap}>
-                          <IonIcon icon={alertCircleOutline} className={styles.subcategoryIcon} />
-                        </span>
-                        <div className={styles.subcategoryCopy}>
-                          <h4 className={styles.subcategoryName}>Sin presupuesto</h4>
-                          <p className={styles.subcategoryMeta}>Gasto fuera del plan</p>
-                        </div>
-                      </div>
-                      <span className={`${styles.subcategorySignal} ${styles.subcategorySignalAttention}`}>
-                        <span className={styles.subcategorySignalDot} />
-                        <span className={styles.subcategorySignalLabel}>Revisar</span>
+                    <div className={styles.subcategoryCompact}>
+                      <span className={styles.subcategoryIconWrap}>
+                        <IonIcon icon={alertCircleOutline} className={styles.subcategoryIcon} />
                       </span>
+                      <div className={styles.subcategoryCopy}>
+                        <h4 className={styles.subcategoryName}>Sin presupuesto</h4>
+                      </div>
+                      <strong className={styles.subcategoryPrimaryValue}>
+                        <CurrencyValue amount={visibleUnaccountedSpent} mode="compact" />
+                      </strong>
+                      <IonIcon icon={chevronForwardOutline} className={styles.subcategoryChevron} />
                     </div>
-                    <dl className={styles.subcategoryStats}>
-                      <div className={styles.subcategoryStat}>
-                        <dt>Presupuesto</dt>
-                        <dd>—</dd>
-                      </div>
-                      <div className={styles.subcategoryStat}>
-                        <dt>Gastado</dt>
-                        <dd><CurrencyValue amount={unaccountedSpent} mode="compact" /></dd>
-                      </div>
-                      <div className={styles.subcategoryStat}>
-                        <dt>Restante</dt>
-                        <dd>—</dd>
-                      </div>
-                    </dl>
-                  </article>
-                );
-              })()}
+                  </button>
+                </article>
+              ) : null}
             </div>
           ) : (
             <div className={styles.emptySubcategories}>
@@ -322,6 +484,21 @@ export const CategoryGroup = ({ category, defaultExpanded = false }: CategoryGro
           )}
         </div>
       ) : null}
+      <SubcategoryDetailModal
+        isOpen={Boolean(selectedSubcategory)}
+        subcategory={selectedSubcategory}
+        accentColor={colorVar}
+        categorySpent={totalSpent}
+        transactions={selectedSubcategory?.id == null ? [] : transactionsBySubcategory.get(String(selectedSubcategory.id)) ?? []}
+        onClose={() => setSelectedSubcategory(null)}
+      />
+      <PlanlessDetailModal
+        isOpen={planlessOpen}
+        amount={visibleUnaccountedSpent}
+        categorySpent={totalSpent}
+        expenses={planlessExpenses}
+        onClose={() => setPlanlessOpen(false)}
+      />
     </section>
   );
 };

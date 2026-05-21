@@ -30,7 +30,7 @@ const insightIcon = (kind?: AgentInsight['insight_kind'] | null): string => {
 const CAT_NAMES: Record<string, string> = {
   committed:     'Comprometido',
   necessary:     'Necesario',
-  discretionary: 'Discrecional',
+  discretionary: 'Flexible',
   investment:    'Inversión',
   social:        'Social',
   income:        'Ingreso',

@@ -35,7 +35,7 @@ const getGreetingByHour = (hour: number) => {
 const CAT_CONFIG: Record<string, { name: string; color: string; soft: string; icon: string }> = {
   committed:     { name: 'Comprometido', color: '#C0392B', soft: 'rgba(192,57,43,0.16)',   icon: homeOutline },
   necessary:     { name: 'Necesario',    color: '#D4732A', soft: 'rgba(212,115,42,0.16)',  icon: cartOutline },
-  discretionary: { name: 'Discrecional', color: '#C9980A', soft: 'rgba(201,152,10,0.16)',  icon: heartOutline },
+  discretionary: { name: 'Flexible',     color: '#C9980A', soft: 'rgba(201,152,10,0.16)',  icon: heartOutline },
   investment:    { name: 'Inversión',    color: '#1A9E4A', soft: 'rgba(26,158,74,0.16)',   icon: bookOutline },
   social:        { name: 'Social',       color: '#8A4FD8', soft: 'rgba(138,79,216,0.16)',  icon: giftOutline },
   income:        { name: 'Ingreso',      color: '#0E96AD', soft: 'rgba(14,150,173,0.16)',  icon: flashOutline },

@@ -69,10 +69,47 @@ const resolveTransactionDate = (transaction: Transaction) => {
     return new Date(Number(localMatch[3]), Number(localMatch[2]) - 1, Number(localMatch[1]));
   }
 
+  const localDayMonthMatch = rawDate.match(/^(\d{1,2})\/(\d{1,2})$/);
+  if (localDayMonthMatch) {
+    const period = transactionPeriod(transaction);
+    return new Date(period.year, Number(localDayMonthMatch[2]) - 1, Number(localDayMonthMatch[1]));
+  }
+
   return new Date(rawDate);
 };
 
 const startOfDay = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+const transactionDateTime = (transaction: Transaction) => {
+  const date = resolveTransactionDate(transaction);
+  if (Number.isNaN(date.getTime())) return null;
+  return startOfDay(date).getTime();
+};
+
+const compareTransactionsByDate = (
+  a: Transaction,
+  b: Transaction,
+  direction: 'asc' | 'desc',
+) => {
+  const aTime = transactionDateTime(a);
+  const bTime = transactionDateTime(b);
+
+  if (aTime !== null && bTime !== null && aTime !== bTime) {
+    return direction === 'asc' ? aTime - bTime : bTime - aTime;
+  }
+
+  if (aTime !== null && bTime === null) return -1;
+  if (aTime === null && bTime !== null) return 1;
+
+  const aCreated = new Date(a.attributes.created_at ?? '').getTime();
+  const bCreated = new Date(b.attributes.created_at ?? '').getTime();
+
+  if (!Number.isNaN(aCreated) && !Number.isNaN(bCreated) && aCreated !== bCreated) {
+    return direction === 'asc' ? aCreated - bCreated : bCreated - aCreated;
+  }
+
+  return 0;
+};
 
 const formatTransactionDayLabel = (transaction: Transaction) => {
   const date = resolveTransactionDate(transaction);
@@ -252,8 +289,11 @@ export const TransactionsContent = () => {
   const groupedTransactions = useMemo(() => {
     const groups: Array<{ key: string; label: string; items: Transaction[] }> = [];
     const indexByKey = new Map<string, number>();
+    const orderedTransactions = filters.sort_by === 'date'
+      ? [...transactions].sort((a, b) => compareTransactionsByDate(a, b, filters.sort_dir ?? 'desc'))
+      : transactions;
 
-    transactions.forEach((transaction) => {
+    orderedTransactions.forEach((transaction) => {
       const date = resolveTransactionDate(transaction);
       const key = Number.isNaN(date.getTime()) ? transaction.attributes.date : startOfDay(date).toISOString();
       const existingIndex = indexByKey.get(key);
@@ -272,7 +312,7 @@ export const TransactionsContent = () => {
     });
 
     return groups;
-  }, [transactions]);
+  }, [filters.sort_by, filters.sort_dir, transactions]);
   const activeFilterCount = useMemo(
     () => visibleAppliedChips.filter((chip) => chip.key !== 'q').length + (selectedCategoryId ? 1 : 0),
     [selectedCategoryId, visibleAppliedChips],

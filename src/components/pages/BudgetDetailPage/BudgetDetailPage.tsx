@@ -15,6 +15,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import { financeService } from '../../../services/financeService';
 import type { BurnRateCategory, Transaction } from '../../../types/finance.types';
+import { DrawerDetailContent, type DrawerDetailTransaction } from '../../organisms/DrawerDetail';
 import styles from './BudgetDetailPage.module.css';
 
 // ── Config ────────────────────────────────────────────────────────────────────
@@ -22,7 +23,7 @@ import styles from './BudgetDetailPage.module.css';
 const CAT_CONFIG: Record<string, { name: string; color: string; soft: string; icon: string }> = {
   committed:     { name: 'Comprometido', color: '#C0392B', soft: 'rgba(192,57,43,0.16)',   icon: homeOutline },
   necessary:     { name: 'Necesario',    color: '#D4732A', soft: 'rgba(212,115,42,0.16)',  icon: cartOutline },
-  discretionary: { name: 'Discrecional', color: '#C9980A', soft: 'rgba(201,152,10,0.16)',  icon: heartOutline },
+  discretionary: { name: 'Flexible',     color: '#C9980A', soft: 'rgba(201,152,10,0.16)',  icon: heartOutline },
   investment:    { name: 'Inversión',    color: '#1A9E4A', soft: 'rgba(26,158,74,0.16)',   icon: bookOutline },
   social:        { name: 'Social',       color: '#8A4FD8', soft: 'rgba(138,79,216,0.16)',  icon: giftOutline },
   income:        { name: 'Ingreso',      color: '#0E96AD', soft: 'rgba(14,150,173,0.16)',  icon: flashOutline },
@@ -30,40 +31,6 @@ const CAT_CONFIG: Record<string, { name: string; color: string; soft: string; ic
 
 const catConfig = (code: string | null | undefined) =>
   CAT_CONFIG[code ?? ''] ?? { name: code ?? '—', color: '#5B7280', soft: 'rgba(91,114,128,0.16)', icon: flashOutline };
-
-// ── Arc chart ─────────────────────────────────────────────────────────────────
-
-const ARC_LEN = 283;
-
-const ArcChart = ({ pct, color, spent, limit }: { pct: number; color: string; spent: number; limit: number }) => {
-  const offset = ARC_LEN - ARC_LEN * Math.min(pct / 100, 1);
-  return (
-    <div className={styles.arcWrap}>
-      <div className={styles.arcBig}>
-        <div className={styles.arcNum}>{formatCurrencyCompact(spent)}</div>
-        <div className={styles.arcSub}>{Math.round(pct)}% del plan</div>
-      </div>
-      <div className={styles.arcFigure}>
-        <svg width="220" height="110" viewBox="0 0 220 120">
-          <path d="M20 110 A90 90 0 0 1 200 110" stroke="var(--surface-border)" strokeWidth="14" fill="none" strokeLinecap="round" />
-          <path
-            d="M20 110 A90 90 0 0 1 200 110"
-            stroke={color}
-            strokeWidth="14"
-            fill="none"
-            strokeLinecap="round"
-            strokeDasharray={ARC_LEN}
-            strokeDashoffset={offset}
-            style={{ transition: 'stroke-dashoffset 700ms ease' }}
-          />
-          <text x="110" y="118" textAnchor="middle" style={{ fontSize: 11, fill: 'var(--text-on-surface-muted)', fontFamily: 'var(--font-mono)' }}>
-            {formatCurrencyCompact(limit)} plan
-          </text>
-        </svg>
-      </div>
-    </div>
-  );
-};
 
 // ── Transaction row ───────────────────────────────────────────────────────────
 
@@ -88,22 +55,18 @@ const paymentLabel = (src: string | null | undefined) => {
   return '';
 };
 
-const TxnRow = ({ tx, cfg }: { tx: Transaction; cfg: { color: string; soft: string; icon: string } }) => {
+const buildTxn = (tx: Transaction, icon: string): DrawerDetailTransaction => {
   const attr = tx.attributes;
-  const isIncome = attr.transaction_type === 'income';
   const meta = [txnDayLabel(attr.date), paymentLabel(attr.payment_source)].filter(Boolean).join(' · ');
-  return (
-    <div className={styles.txnRow} style={{ '--cat-color': cfg.color, '--cat-soft': cfg.soft } as React.CSSProperties}>
-      <div className={styles.txnIcon}><IonIcon icon={cfg.icon} /></div>
-      <div className={styles.txnBody}>
-        <div className={styles.txnName}>{attr.concept || attr.product}</div>
-        {meta ? <div className={styles.txnMeta}>{meta}</div> : null}
-      </div>
-      <div className={`${styles.txnAmt} ${isIncome ? styles.txnAmtIncome : ''}`}>
-        {isIncome ? '+' : '−'}{formatCurrencyCompact(attr.amount)}
-      </div>
-    </div>
-  );
+
+  return {
+    id: tx.id,
+    name: attr.concept || attr.product || 'Movimiento sin nombre',
+    meta,
+    amount: attr.amount,
+    icon,
+    isIncome: attr.transaction_type === 'income',
+  };
 };
 
 // ── Page ──────────────────────────────────────────────────────────────────────
@@ -147,6 +110,11 @@ export const BudgetDetailPage = () => {
   const projection = category && daysElapsed > 0
     ? Math.round((category.spent / daysElapsed) * 30)
     : null;
+  const primaryMetric = category?.primary_metric;
+  const detailTransactions = useMemo(
+    () => filtered.map((tx) => buildTxn(tx, cfg.icon)),
+    [filtered, cfg.icon],
+  );
 
   return (
     <IonPage>
@@ -168,64 +136,40 @@ export const BudgetDetailPage = () => {
           </div>
         </div>
 
-        {/* Scroll content */}
         <div className={styles.scroll}>
-
-          {/* Arc */}
           {category ? (
-            <>
-              <ArcChart pct={pct} color={cfg.color} spent={category.spent} limit={category.budget} />
-
-              <div className={styles.statsRow}>
-                <div className={styles.stat}>
-                  <span className={styles.statLabel}>Gastado</span>
-                  <span className={styles.statValue}>{formatCurrencyCompact(category.spent)}</span>
-                </div>
-                <div className={styles.stat}>
-                  <span className={styles.statLabel}>Presupuesto</span>
-                  <span className={styles.statValue}>{formatCurrencyCompact(category.budget)}</span>
-                </div>
-                <div className={styles.stat}>
-                  <span className={styles.statLabel}>Disponible</span>
-                  <span className={`${styles.statValue} ${category.spent > category.budget ? styles.statNeg : styles.statPos}`}>
-                    {formatCurrencyCompact(Math.abs(category.budget - category.spent))}
-                  </span>
-                </div>
-              </div>
-            </>
-          ) : null}
-
-          {/* Projection insight */}
-          {projection !== null && category ? (
-            <div className={styles.insight}>
-              <div className={styles.insightIcon}><IonIcon icon={sparklesOutline} /></div>
-              <div className={styles.insightBody}>
-                <p className={styles.insightTitle}>Si seguís a este ritmo…</p>
-                <p className={styles.insightText}>
+            <DrawerDetailContent
+              color={cfg.color}
+              soft={cfg.soft}
+              spent={category.spent}
+              pct={pct}
+              limit={category.budget}
+              stats={[
+                { label: 'Gastado', value: formatCurrencyCompact(category.spent) },
+                { label: 'Presupuesto', value: formatCurrencyCompact(category.budget) },
+                {
+                  label: primaryMetric?.kind === 'payment_status' ? 'Pendiente' : 'Disponible',
+                  value: primaryMetric?.kind === 'payment_status'
+                    ? formatCurrencyCompact(primaryMetric.value)
+                    : formatCurrencyCompact(Math.abs(category.budget - category.spent)),
+                  tone: category.spent > category.budget || primaryMetric?.status === 'critical' ? 'negative' : 'positive',
+                },
+              ]}
+              insightTitle={primaryMetric?.title ?? (projection !== null ? 'Si seguís a este ritmo…' : undefined)}
+              insightIcon={sparklesOutline}
+              insightText={primaryMetric?.body ?? (projection !== null ? (
+                <>
                   Cerrás el mes en <strong>{formatCurrencyCompact(projection)}</strong>.{' '}
                   {projection > category.budget
                     ? `Te vas a pasar por ${formatCurrencyCompact(projection - category.budget)}.`
                     : `Te queda margen de ${formatCurrencyCompact(category.budget - projection)}.`}
-                </p>
-              </div>
-            </div>
+                </>
+              ) : undefined)}
+              transactions={detailTransactions}
+              loading={loading}
+              emptyText="Nada en esta gaveta este mes."
+            />
           ) : null}
-
-          {/* Transactions */}
-          <div className={styles.secHead}>
-            <h3 className={styles.secTitle}>Movimientos</h3>
-          </div>
-
-          {loading ? (
-            <div className={styles.center}><span className={styles.spinner} /></div>
-          ) : filtered.length === 0 ? (
-            <div className={styles.empty}>Nada en esta gaveta este mes.</div>
-          ) : (
-            <div className={styles.txnGroup}>
-              {filtered.map((tx) => <TxnRow key={tx.id} tx={tx} cfg={cfg} />)}
-            </div>
-          )}
-
         </div>
       </IonContent>
     </IonPage>
