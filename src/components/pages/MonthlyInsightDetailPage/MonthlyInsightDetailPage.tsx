@@ -15,6 +15,7 @@ import { StatusStrip } from '../../molecules/StatusStrip/StatusStrip';
 import { CategoryPressureCard } from '../../molecules/CategoryPressureCard/CategoryPressureCard';
 import { ReasoningAccordion } from '../../molecules/ReasoningAccordion/ReasoningAccordion';
 import { InsightTabBar } from '../../molecules/InsightTabBar/InsightTabBar';
+import { Spinner } from '../../atoms/Spinner';
 import type { CategoryType } from '../../molecules/CategoryPressureCard/CategoryPressureCard';
 import styles from './MonthlyInsightDetailPage.module.css';
 
@@ -80,6 +81,8 @@ export const MonthlyInsightDetailPage = () => {
 
   const m = Number(month);
   const y = Number(year);
+  const now = new Date();
+  const isCurrent = m === now.getMonth() + 1 && y === now.getFullYear();
 
   useEffect(() => {
     setLoading(true);
@@ -100,12 +103,16 @@ export const MonthlyInsightDetailPage = () => {
 
   const score = summary ? computeScore(categories, netBalance) : null;
 
-  const coachBody = overCategories.length > 0
-    ? `Cerraste ${MONTH_NAMES[m]} con ${overCategories.length} gaveta${overCategories.length > 1 ? 's' : ''} sobre presupuesto. La balanza ${netBalance >= 0 ? 'dio positiva' : 'quedó en rojo'}.`
-    : `Cerraste ${MONTH_NAMES[m]} dentro del plan. El balance neto fue ${formatCurrencyCompact(netBalance)}.`;
+  const coachBody = isCurrent
+    ? overCategories.length > 0
+      ? `Llevas ${overCategories.length} gaveta${overCategories.length > 1 ? 's' : ''} sobre presupuesto en ${MONTH_NAMES[m]}. El balance va ${netBalance >= 0 ? 'en positivo' : 'en rojo'}.`
+      : `Vas bien en ${MONTH_NAMES[m]} — todas las gavetas dentro del plan. Balance acumulado: ${formatCurrencyCompact(netBalance)}.`
+    : overCategories.length > 0
+      ? `Cerraste ${MONTH_NAMES[m]} con ${overCategories.length} gaveta${overCategories.length > 1 ? 's' : ''} sobre presupuesto. La balanza ${netBalance >= 0 ? 'dio positiva' : 'quedó en rojo'}.`
+      : `Cerraste ${MONTH_NAMES[m]} dentro del plan. El balance neto fue ${formatCurrencyCompact(netBalance)}.`;
 
-  const incomeActual = summary?.balance.income_confirmed ?? 0;
-  const expenseActual = summary?.balance.expense_confirmed ?? 0;
+  const debtPayments = summary?.balance.debt_payments_confirmed ?? 0;
+  const sfContributions = summary?.balance.sinking_fund_contributions ?? 0;
 
   const nextMonth = m === 12 ? 1 : m + 1;
   const nextYear = m === 12 ? y + 1 : y;
@@ -120,7 +127,7 @@ export const MonthlyInsightDetailPage = () => {
           <IonIcon icon={chevronBackOutline} />
         </button>
         <div className={styles.crumb}>
-          <span className={styles.crumbKind}>Cierre de mes</span>
+          <span className={styles.crumbKind}>{isCurrent ? 'Mes en curso' : 'Cierre de mes'}</span>
           <span className={styles.crumbDate}>{MONTH_NAMES[m]} {y}</span>
         </div>
         <div className={styles.iconBtn} style={{ visibility: 'hidden' }} />
@@ -129,7 +136,7 @@ export const MonthlyInsightDetailPage = () => {
       <IonContent className={styles.content}>
         <div className={styles.scroll}>
           {loading ? (
-            <div className={styles.empty}>Cargando cierre…</div>
+            <div className={styles.loader}><Spinner size="lg" /></div>
           ) : !summary ? (
             <div className={styles.empty}>Sin datos para {MONTH_NAMES[m]} {y}.</div>
           ) : (
@@ -151,9 +158,13 @@ export const MonthlyInsightDetailPage = () => {
                       {underCategories.length} de {categories.length} gavetas en verde
                     </div>
                     <div className={styles.scoreFoot}>
-                      {netBalance >= 0
-                        ? `Terminaste con ${formatCurrencyCompact(netBalance)} de margen.`
-                        : `Cerraste ${formatCurrencyCompact(Math.abs(netBalance))} en rojo.`}
+                      {isCurrent
+                        ? netBalance >= 0
+                          ? `Llevas ${formatCurrencyCompact(netBalance)} de margen acumulado.`
+                          : `Vas ${formatCurrencyCompact(Math.abs(netBalance))} en rojo por ahora.`
+                        : netBalance >= 0
+                          ? `Terminaste con ${formatCurrencyCompact(netBalance)} de margen.`
+                          : `Cerraste ${formatCurrencyCompact(Math.abs(netBalance))} en rojo.`}
                     </div>
                   </div>
                 </div>
@@ -170,6 +181,14 @@ export const MonthlyInsightDetailPage = () => {
                   value: `${overCategories.length}`,
                   tone: overCategories.length > 0 ? 'bad' : undefined,
                 },
+                ...(debtPayments > 0 ? [{
+                  label: 'Abonos deuda',
+                  value: formatCurrencyCompact(debtPayments),
+                }] : []),
+                ...(sfContributions > 0 ? [{
+                  label: 'A bolsillos',
+                  value: formatCurrencyCompact(sfContributions),
+                }] : []),
                 {
                   label: 'Balance',
                   value: formatCurrencyCompact(netBalance),
@@ -262,7 +281,9 @@ export const MonthlyInsightDetailPage = () => {
                 <p className={styles.ctaTitle}>{ctaTitle}</p>
                 <p className={styles.ctaBody}>
                   {overCategories.length > 0
-                    ? `${MONTH_NAMES[m]} dejó patrones claros. Ajusta el plan para el próximo mes.`
+                    ? isCurrent
+                      ? `Todavía puedes corregir el rumbo en lo que queda de ${MONTH_NAMES[m]}.`
+                      : `${MONTH_NAMES[m]} dejó patrones claros. Ajusta el plan para el próximo mes.`
                     : `Llevas una racha sólida. Revisa si hay algo que optimizar.`}
                 </p>
                 <button

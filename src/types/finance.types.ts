@@ -3,6 +3,8 @@ export interface SummaryBalance {
   income_pending: number;
   expense_confirmed: number;
   expense_pending: number;
+  debt_payments_confirmed: number;
+  sinking_fund_contributions: number;
   balance_confirmed: number;
   balance_total: number;
   carryover_from_previous_month: number;

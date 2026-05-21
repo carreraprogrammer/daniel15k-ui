@@ -14,6 +14,7 @@ import { CoachNote } from '../../molecules/CoachNote/CoachNote';
 import { StatusStrip } from '../../molecules/StatusStrip/StatusStrip';
 import { ReasoningAccordion } from '../../molecules/ReasoningAccordion/ReasoningAccordion';
 import { InsightTabBar } from '../../molecules/InsightTabBar/InsightTabBar';
+import { Spinner } from '../../atoms/Spinner';
 import styles from './YearlyInsightDetailPage.module.css';
 
 const MONTH_ABBR = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
@@ -47,14 +48,16 @@ const YearChart = ({ monthly }: { monthly: number[] }) => {
 
 // ── Derived lessons from yearly data ──────────────────────────────────────
 
-function deriveLessons(monthly: number[], summaries: (SummaryResponse | null)[]): Array<{ title: string; text: string }> {
+function deriveLessons(monthly: number[], summaries: (SummaryResponse | null)[], isCurrent: boolean): Array<{ title: string; text: string }> {
   const lessons: Array<{ title: string; text: string }> = [];
   const nonZero = monthly.map((v, i) => ({ v, i })).filter((x) => x.v > 0);
   if (nonZero.length === 0) return lessons;
 
   const peak = nonZero.reduce((a, b) => (b.v > a.v ? b : a));
   lessons.push({
-    title: `Tu mes más caro fue ${MONTH_NAMES[peak.i + 1]}.`,
+    title: isCurrent
+      ? `Tu mes más caro hasta ahora es ${MONTH_NAMES[peak.i + 1]}.`
+      : `Tu mes más caro fue ${MONTH_NAMES[peak.i + 1]}.`,
     text: `Gastaste ${formatCurrencyCompact(peak.v)} — un pico respecto al resto del año. Vale la pena planearlo de antemano.`,
   });
 
@@ -74,7 +77,9 @@ function deriveLessons(monthly: number[], summaries: (SummaryResponse | null)[])
 
   if (mostVolatile) {
     lessons.push({
-      title: `${mostVolatile.name} fue tu categoría más difícil.`,
+      title: isCurrent
+        ? `${mostVolatile.name} es tu categoría más difícil.`
+        : `${mostVolatile.name} fue tu categoría más difícil.`,
       text: `Se pasó del presupuesto ${mostVolatile.over} ${mostVolatile.over === 1 ? 'mes' : 'meses'} del año. Es la zona donde más hay que defender.`,
     });
   }
@@ -83,7 +88,9 @@ function deriveLessons(monthly: number[], summaries: (SummaryResponse | null)[])
   const totalExpense = summaries.reduce((a, s) => a + (s?.balance.expense_confirmed ?? 0), 0);
   const netYearly = totalIncome - totalExpense;
   lessons.push({
-    title: netYearly >= 0 ? 'Terminaste el año en positivo.' : 'El año cerró en negativo.',
+    title: isCurrent
+      ? netYearly >= 0 ? 'El año va en positivo.' : 'El año va en negativo por ahora.'
+      : netYearly >= 0 ? 'Terminaste el año en positivo.' : 'El año cerró en negativo.',
     text: netYearly >= 0
       ? `Tu balance neto fue ${formatCurrencyCompact(netYearly)}. Cada mes que terminas en verde construye margen.`
       : `Tu balance neto fue ${formatCurrencyCompact(netYearly)}. Identifica qué meses pesaron más para ajustar el plan.`,
@@ -98,6 +105,7 @@ export const YearlyInsightDetailPage = () => {
   const { year } = useParams<{ year: string }>();
   const history = useHistory();
   const y = Number(year);
+  const isCurrent = y === new Date().getFullYear();
 
   const [summaries, setSummaries] = useState<(SummaryResponse | null)[]>([]);
   const [milestones, setMilestones] = useState<UserMilestone[]>([]);
@@ -116,6 +124,9 @@ export const YearlyInsightDetailPage = () => {
   const monthly = summaries.map((s) => s?.balance.expense_confirmed ?? 0);
   const totalIncome = summaries.reduce((a, s) => a + (s?.balance.income_confirmed ?? 0), 0);
   const totalExpense = summaries.reduce((a, s) => a + (s?.balance.expense_confirmed ?? 0), 0);
+  const totalDebtPayments = summaries.reduce((a, s) => a + (s?.balance.debt_payments_confirmed ?? 0), 0);
+  const totalSfContributions = summaries.reduce((a, s) => a + (s?.balance.sinking_fund_contributions ?? 0), 0);
+  const totalConsumption = totalExpense - totalDebtPayments - totalSfContributions;
   const netYearly = totalIncome - totalExpense;
   const hasData = monthly.some((v) => v > 0);
 
@@ -123,12 +134,16 @@ export const YearlyInsightDetailPage = () => {
     ? monthly.indexOf(Math.max(...monthly))
     : -1;
 
-  const lessons = deriveLessons(monthly, summaries);
+  const lessons = deriveLessons(monthly, summaries, isCurrent);
 
   const coachBody = hasData
-    ? netYearly >= 0
-      ? `Fue un año con balance positivo. Guardaste ${formatCurrencyCompact(netYearly)} en el acumulado.`
-      : `El año cerró en rojo por ${formatCurrencyCompact(Math.abs(netYearly))}. Los datos te muestran dónde ajustar.`
+    ? isCurrent
+      ? netYearly >= 0
+        ? `Llevas un año positivo — ${formatCurrencyCompact(netYearly)} acumulados hasta hoy.`
+        : `El año va en rojo por ${formatCurrencyCompact(Math.abs(netYearly))}. Todavía hay tiempo para ajustar.`
+      : netYearly >= 0
+        ? `Fue un año con balance positivo. Guardaste ${formatCurrencyCompact(netYearly)} en el acumulado.`
+        : `El año cerró en rojo por ${formatCurrencyCompact(Math.abs(netYearly))}. Los datos te muestran dónde ajustar.`
     : `Aún no hay suficientes datos para analizar ${y}.`;
 
   return (
@@ -138,7 +153,7 @@ export const YearlyInsightDetailPage = () => {
           <IonIcon icon={chevronBackOutline} />
         </button>
         <div className={styles.crumb}>
-          <span className={styles.crumbKind}>Año cerrado</span>
+          <span className={styles.crumbKind}>{isCurrent ? 'Año en curso' : 'Año cerrado'}</span>
           <span className={styles.crumbDate}>{y}</span>
         </div>
         <div className={styles.iconBtn} style={{ visibility: 'hidden' }} />
@@ -147,17 +162,24 @@ export const YearlyInsightDetailPage = () => {
       <IonContent className={styles.content}>
         <div className={styles.scroll}>
           {loading ? (
-            <div className={styles.empty}>Cargando resumen del año…</div>
+            <div className={styles.loader}><Spinner size="lg" /></div>
           ) : (
             <>
               <CoachNote
                 body={coachBody}
-                meta={[`31 de diciembre · ${y}`, `${summaries.filter(Boolean).length} meses con datos`]}
+                meta={[
+                  isCurrent
+                    ? `Al día de hoy · ${y}`
+                    : `31 de diciembre · ${y}`,
+                  `${summaries.filter(Boolean).length} meses con datos`,
+                ]}
               />
 
               <StatusStrip cells={[
                 { label: 'Ingresado', value: formatCurrencyCompact(totalIncome) },
-                { label: 'Gastado', value: formatCurrencyCompact(totalExpense) },
+                { label: 'Consumo', value: formatCurrencyCompact(totalConsumption) },
+                ...(totalDebtPayments > 0 ? [{ label: 'Abonos deuda', value: formatCurrencyCompact(totalDebtPayments) }] : []),
+                ...(totalSfContributions > 0 ? [{ label: 'A bolsillos', value: formatCurrencyCompact(totalSfContributions) }] : []),
                 { label: 'Balance', value: formatCurrencyCompact(netYearly), tone: netYearly < 0 ? 'bad' : undefined },
               ]} />
 
@@ -230,16 +252,22 @@ export const YearlyInsightDetailPage = () => {
               <div className={styles.cta}>
                 <div className={styles.ctaEyebrow}>
                   <IonIcon icon={flagOutline} className={styles.ctaIcon} />
-                  <span>Tu plan para {y + 1}</span>
+                  <span>{isCurrent ? `Cierra bien ${y}` : `Tu plan para ${y + 1}`}</span>
                 </div>
                 <p className={styles.ctaTitle}>
-                  {netYearly >= 0
-                    ? 'Construye sobre lo que funcionó'
-                    : 'Ajusta lo que más pesó este año'}
+                  {isCurrent
+                    ? netYearly >= 0
+                      ? 'Sigue construyendo sobre lo que funciona'
+                      : 'Todavía puedes ajustar el rumbo este año'
+                    : netYearly >= 0
+                      ? 'Construye sobre lo que funcionó'
+                      : 'Ajusta lo que más pesó este año'}
                 </p>
                 <p className={styles.ctaBody}>
                   {peakMonthIdx >= 0
-                    ? `${MONTH_NAMES[peakMonthIdx + 1]} fue tu mes más caro. Si lo planeas con antelación, llegas tranquilo.`
+                    ? isCurrent
+                      ? `${MONTH_NAMES[peakMonthIdx + 1]} es tu mes más caro hasta ahora. Planifica los meses que quedan con eso en mente.`
+                      : `${MONTH_NAMES[peakMonthIdx + 1]} fue tu mes más caro. Si lo planeas con antelación, llegas tranquilo.`
                     : 'Empieza el año con un plan claro y un presupuesto ajustado a tu realidad.'}
                 </p>
                 <button
@@ -247,7 +275,7 @@ export const YearlyInsightDetailPage = () => {
                   className={styles.ctaBtn}
                   onClick={() => history.push('/budgets')}
                 >
-                  Diseñar plan {y + 1} <IonIcon icon={chevronForwardOutline} />
+                  {isCurrent ? `Ver plan de ${y}` : `Diseñar plan ${y + 1}`} <IonIcon icon={chevronForwardOutline} />
                 </button>
               </div>
 
