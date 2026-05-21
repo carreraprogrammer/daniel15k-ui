@@ -339,7 +339,8 @@ export const DashboardContent = () => {
 
                     <div className={styles.monthPayList}>
                       {pending.map((item) => {
-                        const overdue = item.due_day != null && item.due_day < today;
+                        const hasPartialPayment = item.covered_amount > 0;
+                        const overdue = item.due_day != null && item.due_day < today && !hasPartialPayment;
                         const daysAway = item.due_day != null ? item.due_day - today : null;
                         return (
                           <div key={item.id} className={styles.monthPayRow}>
@@ -351,7 +352,13 @@ export const DashboardContent = () => {
                               </div>
                             </div>
                             <div className={`${styles.monthPayWhen} ${overdue ? styles.monthPayWhenWarn : ''}`}>
-                              {overdue ? 'vencida' : daysAway != null && daysAway > 0 ? `en ${daysAway}d` : 'hoy'}
+                              {overdue
+                                ? 'vencida'
+                                : hasPartialPayment
+                                ? `${formatCurrencyCompact(item.remaining_amount)} restante`
+                                : daysAway != null && daysAway > 0
+                                ? `en ${daysAway}d`
+                                : 'hoy'}
                             </div>
                           </div>
                         );
