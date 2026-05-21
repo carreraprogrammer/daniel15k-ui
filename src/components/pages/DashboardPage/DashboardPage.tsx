@@ -164,12 +164,14 @@ export const DashboardContent = () => {
     ? '#C9980A'
     : 'var(--color-error)';
 
+  const nextIncomeLabel = runway?.next_income_classification === 'base' ? 'quincena' : 'próximo ingreso';
+
   const heroPhrase = !runway?.health_status
     ? 'Sin datos de flujo.'
     : runway.health_status === 'comfortable'
     ? 'Vas relajado.'
     : runway.health_status === 'warning'
-    ? 'Vas justo hasta la quincena.'
+    ? `Vas justo hasta el ${nextIncomeLabel}.`
     : 'Estás en rojo.';
 
   const heroSubtitle = !runway?.health_status
@@ -210,7 +212,7 @@ export const DashboardContent = () => {
                 <div className={styles.heroZeroTemporal}>
                   <div className={styles.heroZeroTemporalDates}>
                     <span>Hoy · {todayLabel}</span>
-                    <span>Quincena · {nextCycleLabel}</span>
+                    <span>{runway?.next_income_classification === 'base' ? 'Quincena' : 'Próximo ingreso'} · {nextCycleLabel}</span>
                   </div>
                   <div className={styles.pressureTrack} role="progressbar" aria-valuenow={temporalPct} aria-valuemin={0} aria-valuemax={100}>
                     <div className={styles.heroZeroTemporalFill} style={{ width: `${temporalPct}%` }} />
@@ -226,7 +228,7 @@ export const DashboardContent = () => {
                       </span>
                     </div>
                     <div className={styles.heroZeroNumberItem}>
-                      <span className={styles.heroZeroNumberLabel}>Margen hasta la quincena</span>
+                      <span className={styles.heroZeroNumberLabel}>Margen hasta el {nextIncomeLabel}</span>
                       <span className={styles.heroZeroNumberAccent}>
                         {formatCurrencyCompact(runway.commitment_gap ?? 0)}
                       </span>

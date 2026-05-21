@@ -138,6 +138,8 @@ export interface CashFlowRunway {
   daily_necessary_burn: number;
   days_to_next_income: number | null;
   next_income_day: number | null;
+  next_income_classification: 'base' | 'variable' | 'seasonal' | 'one_time' | null;
+  next_income_name: string | null;
   committed_before_next_income: number;
   committed_obligations: CashFlowRunwayObligation[];
   runway_days: number;
