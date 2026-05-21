@@ -1,0 +1,40 @@
+.bar {
+  position: sticky;
+  bottom: calc(var(--ion-safe-area-bottom, 0px) + var(--space-4));
+  left: 50%;
+  transform: translateX(-50%);
+  width: fit-content;
+
+  display: flex;
+  gap: var(--space-1);
+  background: var(--surface-panel-soft);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-full);
+  padding: var(--space-1);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  z-index: var(--z-raised);
+
+  /* Sit above content but below app tabbar */
+  margin: var(--space-5) auto 0;
+}
+
+.btn {
+  background: transparent;
+  border: none;
+  padding: 8px 18px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-on-surface-muted);
+  cursor: pointer;
+  transition: background 150ms ease, color 150ms ease;
+  white-space: nowrap;
+}
+
+.btn.active {
+  background: var(--color-brand);
+  color: var(--text-on-accent);
+}

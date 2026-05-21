@@ -14,6 +14,7 @@ import { CoachNote } from '../../molecules/CoachNote/CoachNote';
 import { StatusStrip } from '../../molecules/StatusStrip/StatusStrip';
 import { CategoryPressureCard } from '../../molecules/CategoryPressureCard/CategoryPressureCard';
 import { ReasoningAccordion } from '../../molecules/ReasoningAccordion/ReasoningAccordion';
+import { InsightTabBar } from '../../molecules/InsightTabBar/InsightTabBar';
 import type { CategoryType } from '../../molecules/CategoryPressureCard/CategoryPressureCard';
 import styles from './MonthlyInsightDetailPage.module.css';
 
@@ -279,6 +280,8 @@ export const MonthlyInsightDetailPage = () => {
               ) : null}
             </>
           )}
+
+          <InsightTabBar active="mensual" month={m} year={y} />
         </div>
       </IonContent>
     </IonPage>

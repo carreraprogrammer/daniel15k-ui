@@ -13,6 +13,7 @@ import type { SummaryResponse, UserMilestone } from '../../../types/finance.type
 import { CoachNote } from '../../molecules/CoachNote/CoachNote';
 import { StatusStrip } from '../../molecules/StatusStrip/StatusStrip';
 import { ReasoningAccordion } from '../../molecules/ReasoningAccordion/ReasoningAccordion';
+import { InsightTabBar } from '../../molecules/InsightTabBar/InsightTabBar';
 import styles from './YearlyInsightDetailPage.module.css';
 
 const MONTH_ABBR = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
@@ -256,6 +257,8 @@ export const YearlyInsightDetailPage = () => {
               ) : null}
             </>
           )}
+
+          <InsightTabBar active="anual" year={y} />
         </div>
       </IonContent>
     </IonPage>

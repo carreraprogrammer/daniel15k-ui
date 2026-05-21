@@ -17,6 +17,7 @@ import { CoachNote } from '../../molecules/CoachNote/CoachNote';
 import { StatusStrip } from '../../molecules/StatusStrip/StatusStrip';
 import { CategoryPressureCard } from '../../molecules/CategoryPressureCard/CategoryPressureCard';
 import { ReasoningAccordion } from '../../molecules/ReasoningAccordion/ReasoningAccordion';
+import { InsightTabBar } from '../../molecules/InsightTabBar/InsightTabBar';
 import type { CategoryType } from '../../molecules/CategoryPressureCard/CategoryPressureCard';
 import styles from './NightAnalysisDetailPage.module.css';
 
@@ -153,6 +154,16 @@ export const NightAnalysisDetailPage = () => {
   const matched = analysis?.transactions_context.matched ?? [];
   const unmatched = analysis?.transactions_context.unmatched ?? [];
   const pressureAlerts = (analysis?.category_alerts ?? []).filter((a) => a.pct_used > 50);
+
+  // Derive month/year from date param for tab navigation (YYYY-MM-DD or DD/MM)
+  const tabDate = date;
+  const parsedDate = (() => {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(date)) return new Date(date);
+    const [d2, m2] = date.split('/').map(Number);
+    return new Date(new Date().getFullYear(), m2 - 1, d2);
+  })();
+  const tabMonth = parsedDate.getMonth() + 1;
+  const tabYear = parsedDate.getFullYear();
 
   return (
     <IonPage className={styles.page}>
@@ -305,6 +316,7 @@ export const NightAnalysisDetailPage = () => {
               )}
             </>
           )}
+          <InsightTabBar active="nocturno" date={tabDate} month={tabMonth} year={tabYear} />
         </div>
       </IonContent>
     </IonPage>
