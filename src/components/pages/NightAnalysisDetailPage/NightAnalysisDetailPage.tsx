@@ -3,29 +3,24 @@ import { useEffect, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import {
   chevronBackOutline,
-  sparklesOutline,
-  trophyOutline,
-  warningOutline,
-  ribbonOutline,
-  checkmarkCircleOutline,
-  alertCircleOutline,
-  helpCircleOutline,
+  optionsOutline,
+  checkmarkOutline,
   copyOutline,
   cardOutline,
+  helpCircleOutline,
+  cartOutline,
 } from 'ionicons/icons';
 import { financeService } from '../../../services/financeService';
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
-import type { AgentInsight, NightAnalysis } from '../../../types/finance.types';
+import type { AgentInsight, NightAnalysis, NightAnalysisTransactionContext } from '../../../types/finance.types';
+import { CoachNote } from '../../molecules/CoachNote/CoachNote';
+import { StatusStrip } from '../../molecules/StatusStrip/StatusStrip';
+import { CategoryPressureCard } from '../../molecules/CategoryPressureCard/CategoryPressureCard';
+import { ReasoningAccordion } from '../../molecules/ReasoningAccordion/ReasoningAccordion';
+import type { CategoryType } from '../../molecules/CategoryPressureCard/CategoryPressureCard';
 import styles from './NightAnalysisDetailPage.module.css';
 
-const insightIcon = (kind?: AgentInsight['insight_kind'] | null): string => {
-  switch (kind) {
-    case 'congratulation': return trophyOutline;
-    case 'alert':          return warningOutline;
-    case 'achievement':    return ribbonOutline;
-    default:               return sparklesOutline;
-  }
-};
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 const CAT_NAMES: Record<string, string> = {
   committed:     'Comprometido',
@@ -36,33 +31,103 @@ const CAT_NAMES: Record<string, string> = {
   income:        'Ingreso',
 };
 
-const HEALTH_LABELS: Record<string, { label: string; cls: string }> = {
-  comfortable: { label: 'Tranquilo',  cls: styles.healthComfortable },
-  warning:     { label: 'Justo',      cls: styles.healthWarning },
-  critical:    { label: 'En rojo',    cls: styles.healthCritical },
+const HEALTH_LABELS: Record<string, { label: string; tone: 'warn' | 'bad' | undefined }> = {
+  comfortable: { label: 'Tranquilo',  tone: undefined },
+  warning:     { label: 'Justo',      tone: 'warn' },
+  critical:    { label: 'En rojo',    tone: 'bad' },
 };
 
 const formatDate = (iso: string): string => {
   const [y, m, d] = iso.split('-').map(Number);
-  return new Intl.DateTimeFormat('es-CO', { day: 'numeric', month: 'long', year: 'numeric' })
-    .format(new Date(y, m - 1, d));
+  const date = new Date(y, m - 1, d);
+  return new Intl.DateTimeFormat('es-CO', { day: 'numeric', month: 'long', weekday: 'long' }).format(date);
 };
 
-type ReviewReason = 'no_classification' | 'deduplication_risk' | 'possible_debt';
-
-const REVIEW_REASON_LABELS: Record<ReviewReason, string> = {
-  no_classification:  'Sin clasificar',
-  deduplication_risk: 'Posible duplicado',
-  possible_debt:      'Posible deuda',
+const formatTime = (iso: string): string => {
+  return new Intl.DateTimeFormat('es-CO', { hour: 'numeric', minute: '2-digit', hour12: true }).format(new Date(iso));
 };
 
-const reviewIcon = (reason: ReviewReason): string => {
-  switch (reason) {
-    case 'deduplication_risk': return copyOutline;
-    case 'possible_debt':      return cardOutline;
-    default:                   return helpCircleOutline;
-  }
+type ReviewItem = NonNullable<NightAnalysisTransactionContext['needs_review']>[number];
+
+const REVIEW_ASK: Record<ReviewItem['reason'], string> = {
+  no_classification:  'No supe en qué gaveta ponerlo. ¿Me ayudas a clasificarlo?',
+  deduplication_risk: 'Esto se parece mucho a un movimiento que ya tenías registrado.',
+  possible_debt:      'Esto parece un pago de deuda. ¿Lo vinculo a una deuda?',
 };
+
+const reviewIconMap: Record<ReviewItem['reason'], string> = {
+  no_classification:  helpCircleOutline,
+  deduplication_risk: copyOutline,
+  possible_debt:      cardOutline,
+};
+
+// ── ReviewCard ────────────────────────────────────────────────────────────────
+
+interface ReviewCardProps {
+  item: ReviewItem;
+  onDismiss: (id: number) => void;
+}
+
+const ReviewCard = ({ item, onDismiss }: ReviewCardProps) => {
+  const reasonClass =
+    item.reason === 'deduplication_risk' ? styles.reviewIconDedup :
+    item.reason === 'possible_debt'      ? styles.reviewIconDebt : '';
+
+  return (
+    <div className={styles.reviewCard}>
+      <div className={styles.reviewHead}>
+        <div className={`${styles.reviewIcon} ${reasonClass}`}>
+          <IonIcon icon={reviewIconMap[item.reason]} />
+        </div>
+        <div className={styles.reviewInfo}>
+          <span className={styles.reviewConcept}>{item.concept}</span>
+          <span className={styles.reviewMeta}>
+            {formatCurrencyCompact(item.amount)} · {item.date}
+          </span>
+        </div>
+      </div>
+
+      <div className={styles.reviewAsk}>
+        {item.notes ?? REVIEW_ASK[item.reason]}
+      </div>
+
+      <div className={styles.reviewActions}>
+        {item.reason === 'no_classification' && (
+          <>
+            <button type="button" className={styles.btnPrimary}>
+              <IonIcon icon={checkmarkOutline} /> Clasificar
+            </button>
+            <button type="button" className={styles.btnGhost} onClick={() => onDismiss(item.transaction_id)}>
+              Descartar
+            </button>
+          </>
+        )}
+        {item.reason === 'deduplication_risk' && (
+          <>
+            <button type="button" className={styles.btnPrimary}>
+              <IonIcon icon={checkmarkOutline} /> Es duplicado
+            </button>
+            <button type="button" className={styles.btnGhost} onClick={() => onDismiss(item.transaction_id)}>
+              Son distintos
+            </button>
+          </>
+        )}
+        {item.reason === 'possible_debt' && (
+          <>
+            <button type="button" className={styles.btnPrimary}>
+              <IonIcon icon={checkmarkOutline} /> Vincular
+            </button>
+            <button type="button" className={styles.btnGhost} onClick={() => onDismiss(item.transaction_id)}>
+              No, es otra cosa
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ── Page ──────────────────────────────────────────────────────────────────────
 
 export const NightAnalysisDetailPage = () => {
   const { date } = useParams<{ date: string }>();
@@ -70,210 +135,172 @@ export const NightAnalysisDetailPage = () => {
   const location = useLocation<{ insight?: AgentInsight }>();
   const [analysis, setAnalysis] = useState<NightAnalysis | null>(null);
   const [loading, setLoading] = useState(true);
-  const [dismissedReviews, setDismissedReviews] = useState<Set<number>>(new Set());
+  const [dismissed, setDismissed] = useState<Set<number>>(new Set());
 
-  const dismissReview = (id: number) =>
-    setDismissedReviews((prev) => new Set(prev).add(id));
+  const dismiss = (id: number) => setDismissed((prev) => new Set(prev).add(id));
 
   useEffect(() => {
     setLoading(true);
     financeService.fetchNightAnalysisByDate(date)
-      .then((data) => setAnalysis(data))
+      .then(setAnalysis)
       .catch(() => setAnalysis(null))
       .finally(() => setLoading(false));
   }, [date]);
 
   const insight = analysis?.agent_insight ?? location.state?.insight ?? null;
-  const health = analysis ? HEALTH_LABELS[analysis.health_status] ?? null : null;
+  const health = analysis ? HEALTH_LABELS[analysis.health_status] : null;
+  const reviews = (analysis?.transactions_context.needs_review ?? []).filter((r) => !dismissed.has(r.transaction_id));
+  const matched = analysis?.transactions_context.matched ?? [];
+  const unmatched = analysis?.transactions_context.unmatched ?? [];
+  const pressureAlerts = (analysis?.category_alerts ?? []).filter((a) => a.pct_used > 50);
 
   return (
     <IonPage className={styles.page}>
+      {/* Header */}
       <div className={styles.topbar}>
         <button type="button" className={styles.iconBtn} onClick={() => history.goBack()}>
           <IonIcon icon={chevronBackOutline} />
         </button>
-        <div className={styles.topbarCenter}>
-          <span className={styles.topbarTitle}>Análisis nocturno</span>
-          {date ? <span className={styles.topbarDate}>{formatDate(date)}</span> : null}
+        <div className={styles.crumb}>
+          <span className={styles.crumbKind}>Análisis nocturno</span>
+          {date ? <span className={styles.crumbDate}>{formatDate(date)}</span> : null}
         </div>
-        <div className={styles.iconBtn} style={{ visibility: 'hidden' }} />
+        <div className={styles.iconBtn} style={{ visibility: 'hidden' }}>
+          <IonIcon icon={optionsOutline} />
+        </div>
       </div>
 
       <IonContent className={styles.content}>
-        <div className={styles.stack}>
+        <div className={styles.scroll}>
+
           {loading ? (
-            <div className={styles.emptyState}>Cargando análisis…</div>
+            <div className={styles.empty}>Cargando análisis…</div>
           ) : (
             <>
-              {/* ── Insight card — visible aunque no haya NightAnalysis completo */}
+              {/* Coach note */}
               {insight ? (
-                <div className={styles.insightCard}>
-                  <div className={styles.insightIcon}>
-                    <IonIcon icon={insightIcon(insight.insight_kind)} />
-                  </div>
-                  <div className={styles.insightBody}>
-                    <p className={styles.insightTitle}>{insight.title}</p>
-                    <p className={styles.insightText}>{insight.body}</p>
-                  </div>
-                </div>
+                <CoachNote
+                  body={insight.body}
+                  meta={[
+                    `Generado a las ${formatTime(insight.generated_at)}`,
+                    ...(reviews.length > 0 ? [`${reviews.length} movimiento${reviews.length > 1 ? 's' : ''} esperan tu ayuda`] : []),
+                  ]}
+                />
+              ) : null}
+
+              {/* Status strip */}
+              {analysis ? (
+                <StatusStrip cells={[
+                  { label: 'Estado', value: health?.label ?? '—', tone: health?.tone },
+                  { label: 'Margen', value: formatCurrencyCompact(analysis.commitment_gap) },
+                  { label: 'Ritmo', value: `${formatCurrencyCompact(analysis.daily_burn)}/día` },
+                ]} />
               ) : null}
 
               {!analysis ? (
-                <div className={styles.emptyState}>Sin datos de contexto para esta fecha.</div>
+                <div className={styles.empty}>Sin datos de contexto para esta fecha.</div>
               ) : (
                 <>
-
-              {/* ── Estado financiero ────────────────────────────────────── */}
-              <div className={styles.section}>
-                <h3 className={styles.sectionTitle}>Estado financiero</h3>
-                <div className={styles.metricsRow}>
-                  {health ? (
-                    <div className={`${styles.metricChip} ${health.cls}`}>
-                      <span className={styles.metricLabel}>Estado</span>
-                      <span className={styles.metricValue}>{health.label}</span>
-                    </div>
+                  {/* Needs review — action-first */}
+                  {reviews.length > 0 ? (
+                    <>
+                      <div className={styles.secHead}>
+                        <h3 className={styles.secTitle}>Necesito tu ayuda</h3>
+                        <span className={styles.secMeta}>{reviews.length} pendientes</span>
+                      </div>
+                      <div className={styles.helpBlock}>
+                        <div className={styles.helpIntro}>
+                          <div className={styles.helpIcon} aria-hidden="true" />
+                          <div className={styles.helpText}>
+                            <p className={styles.helpTitle}>
+                              No entendí {reviews.length} movimiento{reviews.length > 1 ? 's' : ''}.
+                            </p>
+                            <p className={styles.helpSub}>
+                              Si los aclarás ahora, mañana mi análisis va a ser más exacto. Te toma menos de un minuto.
+                            </p>
+                          </div>
+                        </div>
+                        {reviews.map((r) => <ReviewCard key={r.transaction_id} item={r} onDismiss={dismiss} />)}
+                      </div>
+                    </>
                   ) : null}
-                  <div className={styles.metricChip}>
-                    <span className={styles.metricLabel}>Margen</span>
-                    <span className={styles.metricValue}>
-                      {formatCurrencyCompact(analysis.commitment_gap)}
-                    </span>
-                  </div>
-                  <div className={styles.metricChip}>
-                    <span className={styles.metricLabel}>Ritmo diario</span>
-                    <span className={styles.metricValue}>
-                      {formatCurrencyCompact(analysis.daily_burn)}/día
-                    </span>
-                  </div>
-                </div>
-              </div>
 
-              {/* ── Transacciones esperadas ──────────────────────────────── */}
-              {analysis.transactions_context.matched.length > 0 ? (
-                <div className={styles.section}>
-                  <h3 className={styles.sectionTitle}>Gastos esperados</h3>
-                  <div className={styles.txnList}>
-                    {analysis.transactions_context.matched.map((tx) => (
-                      <div key={tx.transaction_id} className={styles.txnRowMatched}>
-                        <IonIcon icon={checkmarkCircleOutline} className={styles.txnMatchIcon} />
-                        <div className={styles.txnInfo}>
-                          <span className={styles.txnName}>{tx.obligation_name}</span>
-                          {Math.abs(tx.delta) / tx.expected_amount > 0.05 ? (
-                            <span className={styles.txnDelta}>
-                              {tx.delta > 0 ? '+' : ''}{formatCurrencyCompact(tx.delta)} vs esperado
-                            </span>
-                          ) : null}
-                        </div>
-                        <span className={styles.txnAmt}>{formatCurrencyCompact(tx.amount)}</span>
+                  {/* Matched obligations */}
+                  {matched.length > 0 ? (
+                    <>
+                      <div className={styles.secHead}>
+                        <h3 className={styles.secTitle}>Lo que esperaba ver</h3>
+                        <span className={styles.secMeta}>{matched.length} cumplidos</span>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
-
-              {/* ── Gastos a revisar ─────────────────────────────────────── */}
-              {analysis.transactions_context.unmatched.length > 0 ? (
-                <div className={styles.section}>
-                  <h3 className={styles.sectionTitle}>Gastos del día</h3>
-                  <div className={styles.txnList}>
-                    {analysis.transactions_context.unmatched.map((tx) => (
-                      <div key={tx.transaction_id} className={styles.txnRow}>
-                        <IonIcon icon={alertCircleOutline} className={styles.txnUnmatchIcon} />
-                        <div className={styles.txnInfo}>
-                          <span className={styles.txnName}>{tx.concept}</span>
-                          <span className={styles.txnCat}>
-                            {CAT_NAMES[tx.category_type] ?? tx.category_type}
-                          </span>
-                        </div>
-                        <span className={styles.txnAmt}>{formatCurrencyCompact(tx.amount)}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
-
-              {/* ── Para revisar ─────────────────────────────────────────── */}
-              {(() => {
-                const pending = (analysis.transactions_context.needs_review ?? [])
-                  .filter((r) => !dismissedReviews.has(r.transaction_id));
-                return pending.length > 0 ? (
-                  <div className={styles.section}>
-                    <h3 className={styles.sectionTitle}>El agente necesita tu ayuda</h3>
-                    <div className={styles.reviewList}>
-                      {pending.map((r) => (
-                        <div key={r.transaction_id} className={styles.reviewCard}>
-                          <div className={styles.reviewHeader}>
-                            <IonIcon
-                              icon={reviewIcon(r.reason as ReviewReason)}
-                              className={styles.reviewIcon}
-                            />
-                            <div className={styles.reviewInfo}>
-                              <span className={styles.reviewConcept}>{r.concept}</span>
-                              <div className={styles.reviewMeta}>
-                                <span className={styles.reviewAmt}>{formatCurrencyCompact(r.amount)}</span>
-                                <span className={styles.reviewDate}>{r.date}</span>
-                              </div>
+                      <div className={styles.list}>
+                        {matched.map((m) => (
+                          <div key={m.transaction_id} className={styles.row}>
+                            <div className={styles.rowIconCheck}>
+                              <IonIcon icon={checkmarkOutline} />
                             </div>
-                            <span className={styles.reviewReason}>
-                              {REVIEW_REASON_LABELS[r.reason as ReviewReason] ?? r.reason}
-                            </span>
+                            <div className={styles.rowBody}>
+                              <span className={styles.rowName}>{m.obligation_name}</span>
+                              {Math.abs(m.delta) / m.expected_amount > 0.05 ? (
+                                <span className={styles.rowMeta}>
+                                  {m.delta > 0 ? '+' : ''}{formatCurrencyCompact(m.delta)} vs esperado
+                                </span>
+                              ) : null}
+                            </div>
+                            <span className={styles.rowAmt}>{formatCurrencyCompact(m.amount)}</span>
                           </div>
-                          {r.notes ? (
-                            <p className={styles.reviewNotes}>{r.notes}</p>
-                          ) : null}
-                          <div className={styles.reviewActions}>
-                            <button
-                              type="button"
-                              className={styles.reviewDismissBtn}
-                              onClick={() => dismissReview(r.transaction_id)}
-                            >
-                              Descartar
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ) : null;
-              })()}
+                        ))}
+                      </div>
+                    </>
+                  ) : null}
 
-              {/* ── Alertas de categoría ─────────────────────────────────── */}
-              {analysis.category_alerts.filter((a) => a.pct_used > 50).length > 0 ? (
-                <div className={styles.section}>
-                  <h3 className={styles.sectionTitle}>Cómo van las gavetas</h3>
-                  <div className={styles.alertList}>
-                    {analysis.category_alerts
-                      .filter((a) => a.pct_used > 50)
-                      .map((alert) => (
-                        <div key={alert.category_type} className={styles.alertRow}>
-                          <div className={styles.alertHeader}>
-                            <span className={styles.alertName}>
-                              {CAT_NAMES[alert.category_type] ?? alert.category_type}
-                            </span>
-                            <span className={`${styles.alertBadge} ${
-                              alert.status === 'over'       ? styles.alertOver :
-                              alert.status === 'near_limit' ? styles.alertNear : ''
-                            }`}>
-                              {alert.pct_used}%
-                            </span>
+                  {/* Unmatched transactions */}
+                  {unmatched.length > 0 ? (
+                    <>
+                      <div className={styles.secHead}>
+                        <h3 className={styles.secTitle}>Otros movimientos del día</h3>
+                      </div>
+                      <div className={styles.list}>
+                        {unmatched.map((u) => (
+                          <div key={u.transaction_id} className={styles.row}>
+                            <div className={styles.rowIconWarn}>
+                              <IonIcon icon={cartOutline} />
+                            </div>
+                            <div className={styles.rowBody}>
+                              <span className={styles.rowName}>{u.concept}</span>
+                              <span className={styles.rowMeta}>{CAT_NAMES[u.category_type] ?? u.category_type}</span>
+                            </div>
+                            <span className={styles.rowAmt}>{formatCurrencyCompact(u.amount)}</span>
                           </div>
-                          <div className={styles.alertBar}>
-                            <div
-                              className={`${styles.alertBarFill} ${
-                                alert.status === 'over' ? styles.alertBarOver : ''
-                              }`}
-                              style={{ width: `${Math.min(alert.pct_used, 100)}%` }}
-                            />
-                          </div>
-                          <div className={styles.alertAmounts}>
-                            <span>{formatCurrencyCompact(alert.spent)} gastado</span>
-                            <span>de {formatCurrencyCompact(alert.budget)}</span>
-                          </div>
-                        </div>
-                      ))}
-                  </div>
-                </div>
-              ) : null}
+                        ))}
+                      </div>
+                    </>
+                  ) : null}
+
+                  {/* Category pressure */}
+                  {pressureAlerts.length > 0 ? (
+                    <>
+                      <div className={styles.secHead}>
+                        <h3 className={styles.secTitle}>Gavetas con presión</h3>
+                      </div>
+                      <div className={styles.pressureList}>
+                        {pressureAlerts.map((a) => (
+                          <CategoryPressureCard
+                            key={a.category_type}
+                            name={CAT_NAMES[a.category_type] ?? a.category_type}
+                            pct={a.pct_used}
+                            spent={a.spent}
+                            limit={a.budget}
+                            category={a.category_type as CategoryType}
+                          />
+                        ))}
+                      </div>
+                    </>
+                  ) : null}
+
+                  {/* Reasoning */}
+                  {analysis.agent_reasoning ? (
+                    <ReasoningAccordion text={analysis.agent_reasoning} />
+                  ) : null}
                 </>
               )}
             </>

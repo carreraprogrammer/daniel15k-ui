@@ -23,6 +23,7 @@ import { RecurringObligationsPage } from '../components/pages/RecurringObligatio
 import { BudgetsPage } from '../components/pages/BudgetsPage';
 import { BudgetDetailPage } from '../components/pages/BudgetDetailPage/BudgetDetailPage';
 import { NightAnalysisDetailPage } from '../components/pages/NightAnalysisDetailPage/NightAnalysisDetailPage';
+import { MonthlyInsightDetailPage } from '../components/pages/MonthlyInsightDetailPage/MonthlyInsightDetailPage';
 import { SavingsGoalsPage } from '../components/pages/SavingsGoalsPage';
 import { QuickCapturePage } from '../components/pages/QuickCapturePage';
 import { getLastAuthPath } from '../utils/navigation';
@@ -141,6 +142,7 @@ export const AppRouter = () => {
         <ProtectedRoute exact path="/budgets" component={BudgetsPage} />
         <ProtectedRoute exact path="/gaveta/:categoryType" component={BudgetDetailPage} />
         <ProtectedRoute exact path="/analisis/:date" component={NightAnalysisDetailPage} />
+        <ProtectedRoute exact path="/planes/:year/:month" component={MonthlyInsightDetailPage} />
         <ProtectedRoute exact path="/budgets/:year/:month" component={BudgetsPage} />
         <ProtectedRoute exact path="/savings-goals" component={SavingsGoalsPage} />
         <ProtectedRoute exact path="/profile" component={ProfilePage} />

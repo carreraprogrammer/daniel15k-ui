@@ -1,0 +1,320 @@
+.page {
+  --background: var(--color-bg-primary);
+}
+
+/* ── Header ───────────────────────────────────────────────────────────────── */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: calc(var(--ion-safe-area-top, 44px) + 12px) var(--space-4) 12px;
+  position: sticky;
+  top: 0;
+  z-index: var(--z-raised);
+  background: var(--color-bg-primary);
+}
+
+.iconBtn {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-md);
+  background: var(--surface-panel-soft);
+  border: 1px solid var(--surface-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-on-surface);
+  font-size: 20px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.crumb {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.crumbKind {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-on-surface-muted);
+}
+
+.crumbDate {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-on-surface);
+}
+
+/* ── Content ──────────────────────────────────────────────────────────────── */
+
+.content {
+  --background: var(--color-bg-primary);
+}
+
+.scroll {
+  padding: 0 var(--space-5) calc(var(--ion-safe-area-bottom, 20px) + var(--space-10));
+}
+
+.empty {
+  padding: var(--space-12) 0;
+  text-align: center;
+  color: var(--text-on-surface-muted);
+  font-size: var(--type-body-size);
+}
+
+/* ── Score card ───────────────────────────────────────────────────────────── */
+
+.scoreCard {
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+  background: var(--surface-panel-soft);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.ring { flex-shrink: 0; }
+
+.ringTrack { stroke: var(--surface-border); }
+
+.ringFill { stroke: var(--color-brand); }
+
+.scoreBody { flex: 1; }
+
+.scoreNum {
+  font-family: var(--font-display);
+  font-size: 38px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: var(--text-on-surface);
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.scoreMax {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-on-surface-muted);
+}
+
+.scoreDelta {
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  color: var(--text-on-surface-muted);
+  margin-top: var(--space-1);
+}
+
+/* ── Section headers ──────────────────────────────────────────────────────── */
+
+.secHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: var(--space-6) 0 12px;
+}
+
+.secTitle {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-on-surface);
+  margin: 0;
+}
+
+.secMeta {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-on-surface-muted);
+}
+
+/* ── Category pressure list ───────────────────────────────────────────────── */
+
+.pressureList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* ── Medal list ───────────────────────────────────────────────────────────── */
+
+.medalList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.medal {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 12px 14px;
+  background: var(--surface-panel-soft);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-lg);
+}
+
+.medalIcon {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--color-brand), var(--color-necessary));
+  color: var(--text-on-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.medalBody { flex: 1; min-width: 0; }
+
+.medalName {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-on-surface);
+  margin: 0;
+}
+
+.medalWhen {
+  font-size: 11.5px;
+  color: var(--text-on-surface-muted);
+  margin: 2px 0 0;
+}
+
+.medalArrow {
+  font-size: 14px;
+  color: var(--text-on-surface-muted);
+  flex-shrink: 0;
+}
+
+/* ── Simple list ──────────────────────────────────────────────────────────── */
+
+.list {
+  background: var(--surface-panel-soft);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 12px 14px;
+  position: relative;
+}
+
+.row + .row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 14px;
+  right: 14px;
+  height: 1px;
+  background: var(--surface-border-soft);
+}
+
+.rowBody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rowName {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-on-surface);
+}
+
+.rowMeta {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--text-on-surface-muted);
+}
+
+.rowAmt {
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-on-surface);
+  flex-shrink: 0;
+}
+
+/* ── CTA card ─────────────────────────────────────────────────────────────── */
+
+.cta {
+  margin-top: var(--space-6);
+  background:
+    radial-gradient(120% 80% at 50% -30%, rgba(var(--color-brand-rgb), 0.14), transparent 60%),
+    var(--surface-panel-soft);
+  border: 1px solid rgba(var(--color-brand-rgb), 0.28);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.ctaEyebrow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--color-brand);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ctaIcon {
+  font-size: 16px;
+}
+
+.ctaTitle {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-on-surface);
+  margin: 0;
+}
+
+.ctaBody {
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  color: var(--text-on-surface-soft);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.ctaBtn {
+  background: var(--color-brand);
+  color: var(--text-on-accent);
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: 13px var(--space-4);
+  font-family: var(--font-sans);
+  font-size: 14.5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  cursor: pointer;
+}
