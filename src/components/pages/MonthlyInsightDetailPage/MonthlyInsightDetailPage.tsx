@@ -3,9 +3,9 @@ import { useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import {
   chevronBackOutline,
-  flameOutline,
   chevronForwardOutline,
   flagOutline,
+  flameOutline,
 } from 'ionicons/icons';
 import { financeService } from '../../../services/financeService';
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
@@ -17,21 +17,10 @@ import { ReasoningAccordion } from '../../molecules/ReasoningAccordion/Reasoning
 import type { CategoryType } from '../../molecules/CategoryPressureCard/CategoryPressureCard';
 import styles from './MonthlyInsightDetailPage.module.css';
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
 const MONTH_NAMES = [
   '', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
 ];
-
-const CAT_NAMES: Record<string, string> = {
-  committed:     'Comprometido',
-  necessary:     'Necesario',
-  discretionary: 'Flexible',
-  investment:    'Inversión',
-  social:        'Social',
-  income:        'Ingreso',
-};
 
 const MILESTONE_LABELS: Record<string, string> = {
   first_transaction:           'Primera transacción registrada',
@@ -45,7 +34,7 @@ const MILESTONE_LABELS: Record<string, string> = {
   plan_confirmed:              'Plan mensual confirmado',
 };
 
-// ── Score ring ────────────────────────────────────────────────────────────────
+// ── Score ring ─────────────────────────────────────────────────────────────
 
 const ScoreRing = ({ value, size = 86 }: { value: number; size?: number }) => {
   const r = (size - 8) / 2;
@@ -66,7 +55,20 @@ const ScoreRing = ({ value, size = 86 }: { value: number; size?: number }) => {
   );
 };
 
-// ── Page ──────────────────────────────────────────────────────────────────────
+// ── Helpers ────────────────────────────────────────────────────────────────
+
+type BurnCategory = NonNullable<SummaryResponse['burn_rate']>['categories'][number];
+
+function computeScore(categories: BurnCategory[], netBalance: number): number {
+  if (!categories || categories.length === 0) return 0;
+  const over = categories.filter((c) => c.pct > 100).length;
+  const warn = categories.filter((c) => c.pct > 80 && c.pct <= 100).length;
+  let score = 100 - over * 12 - warn * 4;
+  if (netBalance > 0) score += 5;
+  return Math.min(100, Math.max(0, Math.round(score)));
+}
+
+// ── Page ──────────────────────────────────────────────────────────────────
 
 export const MonthlyInsightDetailPage = () => {
   const { month, year } = useParams<{ month: string; year: string }>();
@@ -84,37 +86,34 @@ export const MonthlyInsightDetailPage = () => {
       financeService.fetchSummary(m, y),
       financeService.fetchMilestones(),
     ])
-      .then(([s, ms]) => {
-        setSummary(s);
-        setMilestones(ms);
-      })
+      .then(([s, ms]) => { setSummary(s); setMilestones(ms); })
       .catch(() => { setSummary(null); setMilestones([]); })
       .finally(() => setLoading(false));
   }, [m, y]);
 
-  const insight = summary?.monthly_plan ? null : null; // future: monthly agent_insight
   const categories = summary?.burn_rate?.categories ?? [];
-  const pressureCategories = categories.filter((c) => c.pct > 50);
+  const overCategories = categories.filter((c) => c.pct > 100);
+  const underCategories = categories.filter((c) => c.pct <= 100);
   const savings = summary?.savings_goals ?? [];
-
-  // Score from execution_snapshot if available (backend may inject financial_score)
-  const score = (summary as any)?.financial_score as number | undefined;
-
-  // Balance stats
-  const incomeActual = summary?.balance.income_confirmed ?? 0;
-  const expenseActual = summary?.balance.expense_confirmed ?? 0;
   const netBalance = summary?.balance.net_balance ?? 0;
 
-  // Month agent insight body
-  const coachBody = insight
-    ? (insight as any).body
-    : categories.some((c) => c.pct > 100)
-      ? `${MONTH_NAMES[m]} tuvo ${categories.filter((c) => c.pct > 100).length} gaveta${categories.filter((c) => c.pct > 100).length > 1 ? 's' : ''} sobre presupuesto. Revisá el detalle para el próximo mes.`
-      : `Cerraste ${MONTH_NAMES[m]} con tu flujo bajo control. El balance neto fue ${formatCurrencyCompact(netBalance)}.`;
+  const score = summary ? computeScore(categories, netBalance) : null;
+
+  const coachBody = overCategories.length > 0
+    ? `Cerraste ${MONTH_NAMES[m]} con ${overCategories.length} gaveta${overCategories.length > 1 ? 's' : ''} sobre presupuesto. La balanza ${netBalance >= 0 ? 'dio positiva' : 'quedó en rojo'}.`
+    : `Cerraste ${MONTH_NAMES[m]} dentro del plan. El balance neto fue ${formatCurrencyCompact(netBalance)}.`;
+
+  const incomeActual = summary?.balance.income_confirmed ?? 0;
+  const expenseActual = summary?.balance.expense_confirmed ?? 0;
+
+  const nextMonth = m === 12 ? 1 : m + 1;
+  const nextYear = m === 12 ? y + 1 : y;
+  const ctaTitle = overCategories.length > 0
+    ? `Ajusta ${overCategories.map((c) => c.category).join(' y ')} para ${MONTH_NAMES[nextMonth]}`
+    : `Sigue el plan de ${MONTH_NAMES[nextMonth]}`;
 
   return (
     <IonPage className={styles.page}>
-      {/* Header */}
       <div className={styles.topbar}>
         <button type="button" className={styles.iconBtn} onClick={() => history.goBack()}>
           <IonIcon icon={chevronBackOutline} />
@@ -134,47 +133,63 @@ export const MonthlyInsightDetailPage = () => {
             <div className={styles.empty}>Sin datos para {MONTH_NAMES[m]} {y}.</div>
           ) : (
             <>
-              {/* Coach note */}
               <CoachNote
                 body={coachBody}
-                meta={[`Generado el 1 de ${MONTH_NAMES[m + 1] ?? 'enero'}`]}
+                meta={[`Generado el 1 de ${MONTH_NAMES[nextMonth]}`]}
               />
 
-              {/* Score + status strip */}
-              {score != null ? (
+              {/* Score card */}
+              {score != null && (
                 <div className={styles.scoreCard}>
                   <ScoreRing value={score} />
                   <div className={styles.scoreBody}>
                     <div className={styles.scoreNum}>
                       {score}<span className={styles.scoreMax}>/100</span>
                     </div>
-                    <div className={styles.scoreDelta}>Puntaje financiero del mes</div>
+                    <div className={styles.scoreDelta}>
+                      {underCategories.length} de {categories.length} gavetas en verde
+                    </div>
+                    <div className={styles.scoreFoot}>
+                      {netBalance >= 0
+                        ? `Terminaste con ${formatCurrencyCompact(netBalance)} de margen.`
+                        : `Cerraste ${formatCurrencyCompact(Math.abs(netBalance))} en rojo.`}
+                    </div>
                   </div>
                 </div>
-              ) : null}
+              )}
 
               <StatusStrip cells={[
-                { label: 'Ingresado', value: formatCurrencyCompact(incomeActual) },
-                { label: 'Gastado', value: formatCurrencyCompact(expenseActual) },
-                { label: 'Balance', value: formatCurrencyCompact(netBalance), tone: netBalance < 0 ? 'bad' : undefined },
+                {
+                  label: 'Gavetas ok',
+                  value: `${underCategories.length}`,
+                  delta: categories.length > 0 ? `de ${categories.length}` : undefined,
+                },
+                {
+                  label: 'Se pasaron',
+                  value: `${overCategories.length}`,
+                  tone: overCategories.length > 0 ? 'bad' : undefined,
+                },
+                {
+                  label: 'Balance',
+                  value: formatCurrencyCompact(netBalance),
+                  tone: netBalance < 0 ? 'bad' : undefined,
+                },
               ]} />
 
-              {/* Category pressure */}
-              {pressureCategories.length > 0 ? (
+              {/* Category breakdown */}
+              {categories.length > 0 && (
                 <>
                   <div className={styles.secHead}>
                     <h3 className={styles.secTitle}>Tus gavetas</h3>
-                    {categories.filter((c) => c.pct > 100).length > 0 ? (
-                      <span className={styles.secMeta}>
-                        {categories.filter((c) => c.pct > 100).length} se pasaron
-                      </span>
-                    ) : null}
+                    {overCategories.length > 0 && (
+                      <span className={styles.secMeta}>{overCategories.length} se pasaron</span>
+                    )}
                   </div>
                   <div className={styles.pressureList}>
-                    {pressureCategories.map((cat) => (
+                    {categories.map((cat) => (
                       <CategoryPressureCard
                         key={cat.category_type}
-                        name={CAT_NAMES[cat.category_type] ?? cat.category}
+                        name={cat.category}
                         pct={cat.pct}
                         spent={cat.spent}
                         limit={cat.budget}
@@ -183,10 +198,10 @@ export const MonthlyInsightDetailPage = () => {
                     ))}
                   </div>
                 </>
-              ) : null}
+              )}
 
               {/* Milestones */}
-              {milestones.length > 0 ? (
+              {milestones.length > 0 && (
                 <>
                   <div className={styles.secHead}>
                     <h3 className={styles.secTitle}>Logros del mes</h3>
@@ -203,7 +218,7 @@ export const MonthlyInsightDetailPage = () => {
                             {MILESTONE_LABELS[ms.code] ?? ms.code}
                           </p>
                           <p className={styles.medalWhen}>
-                            {new Intl.DateTimeFormat('es-CO', { day: 'numeric', month: 'short' }).format(new Date(ms.achieved_at))}
+                            {new Intl.DateTimeFormat('es-CO', { day: 'numeric', month: 'long' }).format(new Date(ms.achieved_at))}
                           </p>
                         </div>
                         <IonIcon icon={chevronForwardOutline} className={styles.medalArrow} />
@@ -211,10 +226,10 @@ export const MonthlyInsightDetailPage = () => {
                     ))}
                   </div>
                 </>
-              ) : null}
+              )}
 
               {/* Savings goals */}
-              {savings.length > 0 ? (
+              {savings.length > 0 && (
                 <>
                   <div className={styles.secHead}>
                     <h3 className={styles.secTitle}>Metas de ahorro</h3>
@@ -222,8 +237,7 @@ export const MonthlyInsightDetailPage = () => {
                   <div className={styles.list}>
                     {savings.map((g, i) => {
                       const pct = g.target_amount > 0
-                        ? Math.round((g.current_amount / g.target_amount) * 100)
-                        : 0;
+                        ? Math.round((g.current_amount / g.target_amount) * 100) : 0;
                       return (
                         <div key={i} className={styles.row}>
                           <div className={styles.rowBody}>
@@ -236,28 +250,30 @@ export const MonthlyInsightDetailPage = () => {
                     })}
                   </div>
                 </>
-              ) : null}
+              )}
 
               {/* CTA next month */}
               <div className={styles.cta}>
                 <div className={styles.ctaEyebrow}>
                   <IonIcon icon={flagOutline} className={styles.ctaIcon} />
-                  <span>Propuesta para {MONTH_NAMES[m === 12 ? 1 : m + 1]}</span>
+                  <span>Propuesta para {MONTH_NAMES[nextMonth]}</span>
                 </div>
-                <p className={styles.ctaTitle}>Revisá el plan del próximo mes</p>
+                <p className={styles.ctaTitle}>{ctaTitle}</p>
                 <p className={styles.ctaBody}>
-                  Ajustá tus gavetas basado en cómo te fue este mes.
+                  {overCategories.length > 0
+                    ? `${MONTH_NAMES[m]} dejó patrones claros. Ajusta el plan para el próximo mes.`
+                    : `Llevas una racha sólida. Revisa si hay algo que optimizar.`}
                 </p>
                 <button
                   type="button"
                   className={styles.ctaBtn}
-                  onClick={() => history.push('/budgets')}
+                  onClick={() => history.push(`/budgets/${nextYear}/${nextMonth}`)}
                 >
-                  Ver plan del mes <IonIcon icon={chevronForwardOutline} />
+                  Revisar plan de {MONTH_NAMES[nextMonth]} <IonIcon icon={chevronForwardOutline} />
                 </button>
               </div>
 
-              {/* Reasoning — use agent reasoning from a plan insight if available */}
+              {/* Reasoning */}
               {(summary as any)?.agent_reasoning ? (
                 <ReasoningAccordion text={(summary as any).agent_reasoning} />
               ) : null}

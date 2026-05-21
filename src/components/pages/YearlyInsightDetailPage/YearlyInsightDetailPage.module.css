@@ -71,60 +71,6 @@
   font-size: var(--type-body-size);
 }
 
-/* ── Score card ───────────────────────────────────────────────────────────── */
-
-.scoreCard {
-  display: flex;
-  gap: var(--space-4);
-  align-items: center;
-  background: var(--surface-panel-soft);
-  border: 1px solid var(--surface-border);
-  border-radius: var(--radius-xl);
-  padding: var(--space-4);
-  margin-top: var(--space-4);
-}
-
-.ring { flex-shrink: 0; }
-
-.ringTrack { stroke: var(--surface-border); }
-
-.ringFill { stroke: var(--color-brand); }
-
-.scoreBody { flex: 1; }
-
-.scoreNum {
-  font-family: var(--font-display);
-  font-size: 38px;
-  font-weight: 600;
-  letter-spacing: -0.03em;
-  color: var(--text-on-surface);
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
-}
-
-.scoreMax {
-  font-family: var(--font-mono);
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-on-surface-muted);
-}
-
-.scoreDelta {
-  font-family: var(--font-sans);
-  font-size: 12.5px;
-  color: var(--color-investment);
-  font-weight: 500;
-  margin-top: var(--space-1);
-}
-
-.scoreFoot {
-  font-family: var(--font-sans);
-  font-size: 13px;
-  color: var(--text-on-surface-soft);
-  margin-top: var(--space-1);
-}
-
 /* ── Section headers ──────────────────────────────────────────────────────── */
 
 .secHead {
@@ -149,12 +95,115 @@
   color: var(--text-on-surface-muted);
 }
 
-/* ── Category pressure list ───────────────────────────────────────────────── */
+/* ── Year bar chart ───────────────────────────────────────────────────────── */
 
-.pressureList {
+.chartWrap {
+  background: var(--surface-panel-soft);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-4) var(--space-4) var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.yearChart {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.yearBars {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  height: 80px;
+  gap: 5px;
+}
+
+.yearBar {
+  flex: 1;
+  border-radius: 4px 4px 2px 2px;
+  background: linear-gradient(180deg, var(--color-brand), color-mix(in srgb, var(--color-brand) 30%, transparent));
+  min-width: 0;
+  transition: opacity 150ms ease;
+}
+
+.yearBar:hover {
+  opacity: 0.8;
+}
+
+.yearMonths {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-on-surface-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.chartCaption {
+  font-family: var(--font-sans);
+  font-size: 11.5px;
+  color: var(--text-on-surface-muted);
+  text-align: center;
+  margin: 0;
+}
+
+/* ── Lesson list ──────────────────────────────────────────────────────────── */
+
+.lessonList {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+}
+
+.lesson {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--surface-panel-soft);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-lg);
+}
+
+.lessonNum {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-brand) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-brand) 35%, transparent);
+  color: var(--color-brand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.lessonBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.lessonTitle {
+  font-family: var(--font-display);
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text-on-surface);
+  letter-spacing: -0.01em;
+  margin: 0 0 4px;
+}
+
+.lessonText {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--text-on-surface-soft);
+  line-height: 1.45;
+  margin: 0;
 }
 
 /* ── Medal list ───────────────────────────────────────────────────────────── */
@@ -195,6 +244,7 @@
   font-weight: 600;
   color: var(--text-on-surface);
   margin: 0;
+  text-transform: capitalize;
 }
 
 .medalWhen {
@@ -209,69 +259,14 @@
   flex-shrink: 0;
 }
 
-/* ── Simple list ──────────────────────────────────────────────────────────── */
-
-.list {
-  background: var(--surface-panel-soft);
-  border: 1px solid var(--surface-border);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-}
-
-.row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: 12px 14px;
-  position: relative;
-}
-
-.row + .row::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 14px;
-  right: 14px;
-  height: 1px;
-  background: var(--surface-border-soft);
-}
-
-.rowBody {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.rowName {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-on-surface);
-}
-
-.rowMeta {
-  font-family: var(--font-mono);
-  font-size: 11.5px;
-  color: var(--text-on-surface-muted);
-}
-
-.rowAmt {
-  font-family: var(--font-mono);
-  font-size: 13.5px;
-  font-weight: 500;
-  color: var(--text-on-surface);
-  flex-shrink: 0;
-}
-
 /* ── CTA card ─────────────────────────────────────────────────────────────── */
 
 .cta {
   margin-top: var(--space-6);
   background:
-    radial-gradient(120% 80% at 50% -30%, rgba(var(--color-brand-rgb), 0.14), transparent 60%),
+    radial-gradient(120% 80% at 50% -30%, color-mix(in srgb, var(--color-brand) 14%, transparent), transparent 60%),
     var(--surface-panel-soft);
-  border: 1px solid rgba(var(--color-brand-rgb), 0.28);
+  border: 1px solid color-mix(in srgb, var(--color-brand) 28%, transparent);
   border-radius: var(--radius-xl);
   padding: var(--space-5);
   display: flex;
