@@ -309,9 +309,9 @@ export const DashboardContent = () => {
                 if (items.length === 0) return null;
 
                 const today = new Date().getDate();
-                const paid    = items.filter((i) => i.status === 'covered');
-                const pending = items.filter((i) => i.status !== 'covered');
-                const totalPending = pending.reduce((a, i) => a + i.remaining_amount, 0);
+                const paid    = items.filter((i) => i.covered_amount > 0);
+                const pending = items.filter((i) => i.covered_amount === 0);
+                const totalPending = pending.reduce((a, i) => a + i.expected_amount, 0);
                 const totalPaid    = paid.reduce((a, i) => a + i.covered_amount, 0);
 
                 return (
@@ -339,8 +339,7 @@ export const DashboardContent = () => {
 
                     <div className={styles.monthPayList}>
                       {pending.map((item) => {
-                        const hasPartialPayment = item.covered_amount > 0;
-                        const overdue = item.due_day != null && item.due_day < today && !hasPartialPayment;
+                        const overdue = item.due_day != null && item.due_day < today;
                         const daysAway = item.due_day != null ? item.due_day - today : null;
                         return (
                           <div key={item.id} className={styles.monthPayRow}>
@@ -354,8 +353,6 @@ export const DashboardContent = () => {
                             <div className={`${styles.monthPayWhen} ${overdue ? styles.monthPayWhenWarn : ''}`}>
                               {overdue
                                 ? 'vencida'
-                                : hasPartialPayment
-                                ? `${formatCurrencyCompact(item.remaining_amount)} restante`
                                 : daysAway != null && daysAway > 0
                                 ? `en ${daysAway}d`
                                 : 'hoy'}
@@ -364,19 +361,23 @@ export const DashboardContent = () => {
                         );
                       })}
 
-                      {showPaid && paid.map((item) => (
-                        <div key={item.id} className={`${styles.monthPayRow} ${styles.monthPayRowPaid}`}>
-                          <div className={`${styles.monthPayDot} ${styles.monthPayDotPaid}`}>
-                            <IonIcon icon={checkmarkOutline} />
-                          </div>
-                          <div className={styles.monthPayBody}>
-                            <div className={`${styles.monthPayName} ${styles.monthPayNamePaid}`}>{item.name}</div>
-                            <div className={styles.monthPayMeta}>
-                              {item.due_day ? `día ${item.due_day}` : '—'} · {formatCurrencyCompact(item.expected_amount)}
+                      {showPaid && paid.map((item) => {
+                        const amountDiffers = Math.abs(item.covered_amount - item.expected_amount) > 100;
+                        return (
+                          <div key={item.id} className={`${styles.monthPayRow} ${styles.monthPayRowPaid}`}>
+                            <div className={`${styles.monthPayDot} ${styles.monthPayDotPaid}`}>
+                              <IonIcon icon={checkmarkOutline} />
+                            </div>
+                            <div className={styles.monthPayBody}>
+                              <div className={`${styles.monthPayName} ${styles.monthPayNamePaid}`}>{item.name}</div>
+                              <div className={styles.monthPayMeta}>
+                                {item.due_day ? `día ${item.due_day}` : '—'} · {formatCurrencyCompact(item.covered_amount)}
+                                {amountDiffers ? ` (estimado ${formatCurrencyCompact(item.expected_amount)})` : ''}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
 
                       {paid.length > 0 ? (
                         <button
