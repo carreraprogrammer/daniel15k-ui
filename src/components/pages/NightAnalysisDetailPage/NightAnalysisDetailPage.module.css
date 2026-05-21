@@ -62,7 +62,8 @@
 }
 
 .scroll {
-  padding: 0 var(--space-5) calc(var(--ion-safe-area-bottom, 20px) + var(--space-10));
+  /* Extra bottom padding to clear the fixed InsightTabBar pill (~60px) */
+  padding: 0 var(--space-5) calc(var(--ion-safe-area-bottom, 20px) + 80px);
 }
 
 .empty {

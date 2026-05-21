@@ -61,7 +61,7 @@
 }
 
 .scroll {
-  padding: 0 var(--space-5) calc(var(--ion-safe-area-bottom, 20px) + var(--space-10));
+  padding: 0 var(--space-5) calc(var(--ion-safe-area-bottom, 20px) + 80px);
 }
 
 .empty {

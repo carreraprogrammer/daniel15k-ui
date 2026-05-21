@@ -316,9 +316,9 @@ export const NightAnalysisDetailPage = () => {
               )}
             </>
           )}
-          <InsightTabBar active="nocturno" date={tabDate} month={tabMonth} year={tabYear} />
         </div>
       </IonContent>
+      <InsightTabBar active="nocturno" date={tabDate} month={tabMonth} year={tabYear} />
     </IonPage>
   );
 };

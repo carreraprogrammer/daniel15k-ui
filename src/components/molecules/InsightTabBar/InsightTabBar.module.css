@@ -1,5 +1,5 @@
 .bar {
-  position: sticky;
+  position: fixed;
   bottom: calc(var(--ion-safe-area-bottom, 0px) + var(--space-4));
   left: 50%;
   transform: translateX(-50%);
@@ -7,7 +7,7 @@
 
   display: flex;
   gap: var(--space-1);
-  background: var(--surface-panel-soft);
+  background: color-mix(in srgb, var(--surface-panel-soft) 85%, transparent);
   border: 1px solid var(--surface-border);
   border-radius: var(--radius-full);
   padding: var(--space-1);
@@ -15,9 +15,6 @@
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   z-index: var(--z-raised);
-
-  /* Sit above content but below app tabbar */
-  margin: var(--space-5) auto 0;
 }
 
 .btn {

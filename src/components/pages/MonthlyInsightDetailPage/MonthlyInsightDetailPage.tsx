@@ -281,9 +281,9 @@ export const MonthlyInsightDetailPage = () => {
             </>
           )}
 
-          <InsightTabBar active="mensual" month={m} year={y} />
         </div>
       </IonContent>
+      <InsightTabBar active="mensual" month={m} year={y} />
     </IonPage>
   );
 };

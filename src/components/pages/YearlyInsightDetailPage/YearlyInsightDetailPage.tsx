@@ -258,9 +258,9 @@ export const YearlyInsightDetailPage = () => {
             </>
           )}
 
-          <InsightTabBar active="anual" year={y} />
         </div>
       </IonContent>
+      <InsightTabBar active="anual" year={y} />
     </IonPage>
   );
 };
