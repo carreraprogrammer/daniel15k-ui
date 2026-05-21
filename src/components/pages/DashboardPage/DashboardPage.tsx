@@ -1,4 +1,5 @@
 import { IonContent, IonIcon } from '@ionic/react';
+import { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
   sparklesOutline,
@@ -12,6 +13,8 @@ import {
   trophyOutline,
   warningOutline,
   ribbonOutline,
+  checkmarkOutline,
+  chevronDownOutline,
 } from 'ionicons/icons';
 import type { AgentInsight } from '../../../types/finance.types';
 import { AppLayout } from '../../templates/AppLayout';
@@ -123,6 +126,7 @@ const insightIcon = (kind?: AgentInsight['insight_kind'] | null): string => {
 export const DashboardContent = () => {
   const { summary, insight, completeness, loading, error, reload, monthTransactions } = useDashboardData();
   const history = useHistory();
+  const [showPaid, setShowPaid] = useState(false);
 
   const runway = summary?.cash_flow_runway;
   const hasPlanPendingConfirmation = completeness?.pending_confirmation?.includes('monthly_plan') ?? false;
@@ -298,6 +302,92 @@ export const DashboardContent = () => {
                   </div>
                 </div>
               </div>
+
+              {/* ── ZONA 1.5 — Este mes (obligaciones recurrentes) ────────── */}
+              {(() => {
+                const items = summary.month_execution?.recurring_obligations?.items ?? [];
+                if (items.length === 0) return null;
+
+                const today = new Date().getDate();
+                const paid    = items.filter((i) => i.status === 'covered');
+                const pending = items.filter((i) => i.status !== 'covered');
+                const totalPending = pending.reduce((a, i) => a + i.remaining_amount, 0);
+                const totalPaid    = paid.reduce((a, i) => a + i.covered_amount, 0);
+
+                return (
+                  <>
+                    <div className={styles.secHead}>
+                      <h3 className={styles.secHeadTitle}>Este mes</h3>
+                      <span className={styles.secHeadBadge}>
+                        {paid.length} de {items.length} pagados
+                      </span>
+                    </div>
+
+                    <div className={styles.monthPaySummary}>
+                      <div className={styles.monthPayStat}>
+                        <span className={styles.monthPayStatLabel}>Te falta</span>
+                        <span className={styles.monthPayStatValue}>{formatCurrencyCompact(totalPending)}</span>
+                      </div>
+                      <span className={styles.monthPaySep} />
+                      <div className={styles.monthPayStat}>
+                        <span className={styles.monthPayStatLabel}>Pagaste</span>
+                        <span className={`${styles.monthPayStatValue} ${styles.monthPayStatPaid}`}>
+                          {formatCurrencyCompact(totalPaid)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className={styles.monthPayList}>
+                      {pending.map((item) => {
+                        const overdue = item.due_day != null && item.due_day < today;
+                        const daysAway = item.due_day != null ? item.due_day - today : null;
+                        return (
+                          <div key={item.id} className={styles.monthPayRow}>
+                            <div className={`${styles.monthPayDot} ${overdue ? styles.monthPayDotWarn : ''}`} />
+                            <div className={styles.monthPayBody}>
+                              <div className={styles.monthPayName}>{item.name}</div>
+                              <div className={styles.monthPayMeta}>
+                                {item.due_day ? `día ${item.due_day}` : '—'} · {formatCurrencyCompact(item.expected_amount)}
+                              </div>
+                            </div>
+                            <div className={`${styles.monthPayWhen} ${overdue ? styles.monthPayWhenWarn : ''}`}>
+                              {overdue ? 'vencida' : daysAway != null && daysAway > 0 ? `en ${daysAway}d` : 'hoy'}
+                            </div>
+                          </div>
+                        );
+                      })}
+
+                      {showPaid && paid.map((item) => (
+                        <div key={item.id} className={`${styles.monthPayRow} ${styles.monthPayRowPaid}`}>
+                          <div className={`${styles.monthPayDot} ${styles.monthPayDotPaid}`}>
+                            <IonIcon icon={checkmarkOutline} />
+                          </div>
+                          <div className={styles.monthPayBody}>
+                            <div className={`${styles.monthPayName} ${styles.monthPayNamePaid}`}>{item.name}</div>
+                            <div className={styles.monthPayMeta}>
+                              {item.due_day ? `día ${item.due_day}` : '—'} · {formatCurrencyCompact(item.expected_amount)}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+
+                      {paid.length > 0 ? (
+                        <button
+                          type="button"
+                          className={styles.monthPayToggle}
+                          onClick={() => setShowPaid((s) => !s)}
+                        >
+                          {showPaid ? 'Ocultar pagadas' : `Ver ${paid.length} pagada${paid.length > 1 ? 's' : ''}`}
+                          <IonIcon
+                            icon={chevronDownOutline}
+                            className={`${styles.monthPayChev} ${showPaid ? styles.monthPayChevOpen : ''}`}
+                          />
+                        </button>
+                      ) : null}
+                    </div>
+                  </>
+                );
+              })()}
 
               {/* ── ZONA 2 — Tu mes en pocas líneas ───────────────────────── */}
               {(summary.balance || runway) ? (
