@@ -150,6 +150,7 @@ export const NightAnalysisDetailPage = () => {
   const history = useHistory();
   const location = useLocation<{ insight?: AgentInsight }>();
   const [analysis, setAnalysis] = useState<NightAnalysis | null>(null);
+  const [allReviews, setAllReviews] = useState<ReviewItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [dismissed, setDismissed] = useState<Set<number>>(new Set());
 
@@ -183,15 +184,18 @@ export const NightAnalysisDetailPage = () => {
 
   useEffect(() => {
     setLoading(true);
-    financeService.fetchNightAnalysisByDate(date)
-      .then(setAnalysis)
-      .catch(() => setAnalysis(null))
+    Promise.all([
+      financeService.fetchNightAnalysisByDate(date),
+      financeService.fetchNeedsReview(),
+    ])
+      .then(([a, r]) => { setAnalysis(a); setAllReviews(r); })
+      .catch(() => { setAnalysis(null); setAllReviews([]); })
       .finally(() => setLoading(false));
   }, [date]);
 
   const insight = analysis?.agent_insight ?? location.state?.insight ?? null;
   const health = analysis ? HEALTH_LABELS[analysis.health_status] : null;
-  const reviews = (analysis?.transactions_context.needs_review ?? []).filter((r) => !dismissed.has(r.transaction_id));
+  const reviews = allReviews.filter((r) => !dismissed.has(r.transaction_id));
   const matched = analysis?.transactions_context.matched ?? [];
   const unmatched = analysis?.transactions_context.unmatched ?? [];
   const pressureAlerts = (analysis?.category_alerts ?? []).filter((a) => a.pct_used > 50);

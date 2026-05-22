@@ -37,6 +37,7 @@ import type {
   TransactionQueryParams,
   TransactionUpdatePayload,
   WizardData,
+  NightAnalysisTransactionContext,
 } from '../types/finance.types';
 
 const now = new Date();
@@ -109,6 +110,11 @@ export const financeService = {
   async fetchNightAnalysisByDate(date: string): Promise<NightAnalysis | null> {
     const { data } = await api.get(`/api/v1/night_analyses/${date}`);
     return (data as { data: NightAnalysis | null }).data ?? null;
+  },
+
+  async fetchNeedsReview(): Promise<NonNullable<NightAnalysisTransactionContext['needs_review']>> {
+    const { data } = await api.get('/api/v1/transactions/needs_review');
+    return (data as { data: NightAnalysisTransactionContext['needs_review'] }).data ?? [];
   },
 
   async fetchTransactions(params: TransactionQueryParams = {}): Promise<JsonApiCollection<Transaction>> {
