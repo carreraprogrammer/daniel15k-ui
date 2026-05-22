@@ -108,6 +108,7 @@ export const BudgetsContent = () => {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [planModalOpen, setPlanModalOpen] = useState(false);
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [wizardIsEditMode, setWizardIsEditMode] = useState(false);
 
   // Wizard save state
   const [wizardSaving, setWizardSaving] = useState(false);
@@ -213,6 +214,14 @@ export const BudgetsContent = () => {
   };
 
   const handleOpenWizard = () => {
+    setWizardIsEditMode(false);
+    setWizardError(null);
+    setWizardSuccess(false);
+    setWizardOpen(true);
+  };
+
+  const handleOpenWizardForEdit = () => {
+    setWizardIsEditMode(true);
     setWizardError(null);
     setWizardSuccess(false);
     setWizardOpen(true);
@@ -358,7 +367,7 @@ export const BudgetsContent = () => {
                 <div className={styles.budgetHeroSurface}>
                   <ActivePlanView
                     currentPlan={currentPlanWithCategoryColors}
-                    onEditPlan={handleOpenWizard}
+                    onEditPlan={handleOpenWizardForEdit}
                     onExploreDetail={() => setDetailsOpen(true)}
                   />
 
@@ -674,6 +683,8 @@ export const BudgetsContent = () => {
           onComplete={(draft: BudgetPlanDraft) => void handleWizardComplete(draft)}
           wizardData={wizardData ?? undefined}
           month={month}
+          hasPlanHistory={planHistory.length > 0}
+          isEditMode={wizardIsEditMode}
           existingMode={currentPlan?.mode}
         />
 

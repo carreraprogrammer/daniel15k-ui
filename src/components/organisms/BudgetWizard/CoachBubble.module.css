@@ -1,0 +1,54 @@
+.bubble {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  border-radius: 18px;
+  border-top-left-radius: 6px;
+  border: 1px solid rgba(var(--color-brand-rgb), 0.25);
+  background: rgba(255,255,255,0.03);
+}
+
+.bubble[data-tone='warn'] {
+  border-color: rgba(212,115,42,0.35);
+  background: rgba(212,115,42,0.08);
+}
+
+.bubble[data-tone='tense'] {
+  border-color: rgba(192,57,43,0.35);
+  background: rgba(192,57,43,0.08);
+}
+
+.dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  background: radial-gradient(60% 60% at 30% 25%, rgba(255,255,255,0.5), transparent 60%), var(--color-brand, #E6B656);
+  color: rgba(0,0,0,0.8);
+  border: 1px solid rgba(var(--color-brand-rgb), 0.4);
+}
+
+.dot[data-pulse='true'] {
+  animation: orbBreathe 3.2s ease-in-out infinite;
+}
+
+@keyframes orbBreathe {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.06); opacity: 0.88; }
+}
+
+.text {
+  flex: 1;
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--color-text-primary);
+}
+
+.text b,
+.text strong {
+  font-weight: 600;
+}

@@ -1,0 +1,201 @@
+.card {
+  background: var(--surface-1, rgba(255,255,255,0.04));
+  border: 1px solid var(--line, rgba(255,255,255,0.08));
+  border-radius: 16px;
+  padding: 12px 14px;
+  transition: opacity 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.highlighted {
+  border-color: var(--cat-c);
+  box-shadow: 0 0 0 3px var(--cat-s);
+}
+
+.faded {
+  opacity: 0.5;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.clickable:hover {
+  background: rgba(255,255,255,0.06);
+}
+
+/* ── Header row ─────────────────────────────────── */
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--cat-s);
+  color: var(--cat-c);
+  border: 1px solid var(--cat-c);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  font-family: var(--font-display, var(--font-sans));
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.nameRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+}
+
+.hint {
+  font-size: 11.5px;
+  color: var(--color-text-secondary);
+  margin-top: 2px;
+  font-family: var(--font-sans);
+  line-height: 1.35;
+}
+
+.badge {
+  font-family: var(--font-mono, monospace);
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.badge[data-kind='up'] {
+  background: rgba(26,158,74,0.16);
+  color: #1A9E4A;
+}
+
+.badge[data-kind='down'] {
+  background: rgba(192,57,43,0.16);
+  color: #C0392B;
+}
+
+.amount {
+  font-family: var(--font-mono, monospace);
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.amount[data-state='empty'] {
+  color: var(--color-text-disabled, rgba(255,255,255,0.25));
+}
+
+.checkmark {
+  margin-left: 6px;
+  color: #1A9E4A;
+  font-size: 11px;
+}
+
+/* ── Slider ─────────────────────────────────────── */
+
+.sliderWrap {
+  margin-top: 12px;
+}
+
+.sliderTrack {
+  position: relative;
+  height: 24px;
+}
+
+.sliderTrack::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 0;
+  right: 0;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+}
+
+.sliderFill {
+  position: absolute;
+  top: 10px;
+  left: 0;
+  height: 4px;
+  background: var(--cat-c);
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.priorMarker {
+  position: absolute;
+  top: 5px;
+  width: 2px;
+  height: 14px;
+  background: rgba(255,255,255,0.25);
+  border-radius: 1px;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.sliderThumb {
+  position: absolute;
+  top: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--cat-c);
+  border: 3px solid rgba(11,11,14,0.9);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  pointer-events: none;
+}
+
+.sliderInput {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  margin: 0;
+}
+
+.sliderChips {
+  margin-top: 8px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.sliderChip {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.05);
+  color: var(--color-text-secondary);
+  border: 1px solid rgba(255,255,255,0.08);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.sliderChip:hover {
+  background: rgba(255,255,255,0.1);
+  color: var(--color-text-primary);
+}

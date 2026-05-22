@@ -1,0 +1,89 @@
+.card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid color-mix(in srgb, var(--tradeoff-color) 40%, transparent);
+  border-radius: 16px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tag {
+  font-family: var(--font-mono, monospace);
+  font-size: 10.5px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--tradeoff-color) 13%, transparent);
+  color: var(--tradeoff-color);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.cost {
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.title {
+  font-family: var(--font-display, var(--font-sans));
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+.body {
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+}
+
+.chooseBtn {
+  flex: 1;
+  padding: 9px 10px;
+  border-radius: 11px;
+  background: var(--tradeoff-color);
+  color: #fff;
+  border: none;
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.chooseBtn:hover {
+  opacity: 0.88;
+}
+
+.whyBtn {
+  padding: 9px 12px;
+  border-radius: 11px;
+  background: rgba(255,255,255,0.05);
+  color: var(--color-text-secondary);
+  border: 1px solid rgba(255,255,255,0.08);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.whyBtn:hover {
+  background: rgba(255,255,255,0.09);
+}
