@@ -1,0 +1,143 @@
+.row {
+  padding: 11px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  background: transparent;
+}
+
+.rowSystem {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.bullet {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.25);
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+
+.bulletWarn {
+  background: var(--color-warning);
+}
+
+.copy {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.nameRow {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.name {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.autoTag {
+  font-family: var(--font-mono, monospace);
+  font-size: 9.5px;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.hint {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  line-height: 1.35;
+}
+
+.hintWarn {
+  color: var(--color-warning);
+}
+
+.valueCol {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.amtRow {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.delta {
+  font-family: var(--font-mono, monospace);
+  font-size: var(--text-xs);
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(var(--color-brand-rgb), 0.15);
+  color: var(--color-brand);
+  font-weight: 600;
+}
+
+.amt {
+  font-family: var(--font-mono, monospace);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-family: var(--font-mono, monospace);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+
+.chipIcon {
+  font-size: 9px;
+}
+
+.chip_success {
+  background: rgba(26, 158, 74, 0.12);
+  color: #1A9E4A;
+  border-color: rgba(26, 158, 74, 0.25);
+}
+
+.chip_brand {
+  background: rgba(var(--color-brand-rgb), 0.12);
+  color: var(--color-brand);
+  border-color: rgba(var(--color-brand-rgb), 0.25);
+}
+
+.chip_warn {
+  background: transparent;
+  color: var(--color-warning);
+  border-color: var(--color-warning);
+}
+
+.chip_muted {
+  background: transparent;
+  color: var(--color-text-secondary);
+  border-color: var(--color-text-secondary);
+}
+
+.chipDashed {
+  border-style: dashed;
+  background: transparent !important;
+}
