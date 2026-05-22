@@ -37,7 +37,9 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  padding: clamp(1rem, 1.8vw, 1.4rem) clamp(1rem, 1.8vw, 1.4rem) clamp(0.75rem, 1.2vw, 1rem);
+  padding-top: max(clamp(1rem, 1.8vw, 1.4rem), env(safe-area-inset-top, 0px));
+  padding-inline: clamp(1rem, 1.8vw, 1.4rem);
+  padding-bottom: clamp(0.75rem, 1.2vw, 1rem);
   border-bottom: 1px solid rgba(255,255,255,0.07);
 }
 

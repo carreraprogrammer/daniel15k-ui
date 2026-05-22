@@ -86,6 +86,15 @@ export const FloatingAgent = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
   const { data, loading, fetchProgress, getEffectiveLevel } = useProgressStore()
   const [isOpen, setIsOpen] = useState(false)
+  const [wizardOpen, setWizardOpen] = useState(() => document.body.hasAttribute('data-wizard-open'))
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setWizardOpen(document.body.hasAttribute('data-wizard-open'))
+    })
+    observer.observe(document.body, { attributes: true, attributeFilter: ['data-wizard-open'] })
+    return () => observer.disconnect()
+  }, [])
   const [hasNewInsight, setHasNewInsight] = useState(false)
   const [position, setPosition] = useState<Point | null>(readStoredPosition)
   const [isDragging, setIsDragging] = useState(false)
@@ -237,7 +246,7 @@ export const FloatingAgent = () => {
       )}
 
       {createPortal(
-        <div className={styles.anchor} style={{ ...style, display: isOpen ? 'none' : 'block' }}>
+        <div className={styles.anchor} style={{ ...style, display: (isOpen || wizardOpen) ? 'none' : 'block' }}>
           <button
             className={`${styles.bubble} ${isDragging ? styles.bubbleDragging : ''}`}
             onClick={handleClick}

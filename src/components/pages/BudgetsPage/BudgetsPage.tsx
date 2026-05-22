@@ -109,6 +109,7 @@ export const BudgetsContent = () => {
   const [planModalOpen, setPlanModalOpen] = useState(false);
   const [wizardOpen, setWizardOpen] = useState(false);
   const [wizardIsEditMode, setWizardIsEditMode] = useState(false);
+  const [wizardAdjustCategory, setWizardAdjustCategory] = useState<string | undefined>(undefined);
 
   // Wizard save state
   const [wizardSaving, setWizardSaving] = useState(false);
@@ -195,11 +196,16 @@ export const BudgetsContent = () => {
     setWizardSaving(true);
     setWizardError(null);
     try {
-      const plan = await financeService.generateMonthlyPlanForWizard({ mode: draft.mode });
-      await financeService.confirmMonthlyPlanWithLines(plan.id, draft.lines);
+      if (wizardIsEditMode && currentPlan) {
+        // Adjusting existing plan — update lines directly, no regeneration
+        await financeService.confirmMonthlyPlanWithLines(currentPlan.id, draft.lines);
+      } else {
+        // Creating or re-planning — generate a fresh plan then confirm it
+        const plan = await financeService.generateMonthlyPlanForWizard({ mode: draft.mode });
+        await financeService.confirmMonthlyPlanWithLines(plan.id, draft.lines);
+      }
       setWizardOpen(false);
       setWizardSuccess(true);
-      // Reload page data so ActivePlanView and burn-rate card reflect the new plan
       void load();
     } catch (err) {
       setWizardError(
@@ -207,7 +213,6 @@ export const BudgetsContent = () => {
           ? err.message
           : 'No fue posible guardar el plan. Intentá de nuevo.',
       );
-      // Keep wizard open so the user can retry
     } finally {
       setWizardSaving(false);
     }
@@ -220,8 +225,9 @@ export const BudgetsContent = () => {
     setWizardOpen(true);
   };
 
-  const handleOpenWizardForEdit = () => {
+  const handleOpenWizardForEdit = (categoryCode?: string) => {
     setWizardIsEditMode(true);
+    setWizardAdjustCategory(categoryCode);
     setWizardError(null);
     setWizardSuccess(false);
     setWizardOpen(true);
@@ -512,6 +518,10 @@ export const BudgetsContent = () => {
                           category={cat}
                           transactions={periodTransactions}
                           categoryLookup={categoryLookup}
+                          onAdjust={(code) => {
+                            setDetailsOpen(false);
+                            handleOpenWizardForEdit(code);
+                          }}
                         />
                       ))}
                     </div>
@@ -685,6 +695,7 @@ export const BudgetsContent = () => {
           month={month}
           hasPlanHistory={planHistory.length > 0}
           isEditMode={wizardIsEditMode}
+          adjustCategoryCode={wizardAdjustCategory}
           existingMode={currentPlan?.mode}
         />
 

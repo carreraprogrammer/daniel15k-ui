@@ -155,6 +155,16 @@ export const BudgetWizardModal = ({
   adjustCategoryCode,
   existingMode,
 }: BudgetWizardModalProps) => {
+  // Signal to FloatingAgent (and any portal-rendered overlay) to hide when wizard is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.setAttribute('data-wizard-open', 'true');
+    } else {
+      document.body.removeAttribute('data-wizard-open');
+    }
+    return () => document.body.removeAttribute('data-wizard-open');
+  }, [isOpen]);
+
   const incomeNeedsSetup = wizardData?.income.needs_setup === true;
   const mode = detectMode(hasPlanHistory, isEditMode, incomeNeedsSetup);
   const categories = wizardData?.categories ?? [];

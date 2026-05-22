@@ -310,9 +310,10 @@ export interface CategoryGroupProps {
   defaultExpanded?: boolean;
   transactions?: Transaction[];
   categoryLookup?: Record<string, CategoryLookupItem>;
+  onAdjust?: (categoryCode: string) => void;
 }
 
-export const CategoryGroup = ({ category, defaultExpanded = false, transactions = [], categoryLookup = {} }: CategoryGroupProps) => {
+export const CategoryGroup = ({ category, defaultExpanded = false, transactions = [], categoryLookup = {}, onAdjust }: CategoryGroupProps) => {
   const [expanded, setExpanded] = useState(defaultExpanded);
   const [selectedSubcategory, setSelectedSubcategory] = useState<CurrentPlanSubcategory | null>(null);
   const [planlessOpen, setPlanlessOpen] = useState(false);
@@ -414,30 +415,41 @@ export const CategoryGroup = ({ category, defaultExpanded = false, transactions 
 
       {expanded ? (
         <div className={styles.categoryBody}>
-          <dl className={styles.categoryStats}>
-            <div className={styles.categoryStat}>
-              <dt>Presupuesto</dt>
-              <dd>
-                <CurrencyValue amount={totalBudgeted} mode="compact" />
-              </dd>
-            </div>
-            <div className={styles.categoryStat}>
-              <dt>Gastado</dt>
-              <dd>
-                <CurrencyValue amount={totalSpent} mode="compact" />
-              </dd>
-            </div>
-            <div className={styles.categoryStat}>
-              <dt>Restante</dt>
-              <dd className={remaining < 0 ? styles.negativeValue : ''}>
-                <CurrencyValue amount={remaining} mode="compact" />
-              </dd>
-            </div>
-            <div className={styles.categoryStat}>
-              <dt>Estado</dt>
-              <dd>{statusLabel}</dd>
-            </div>
-          </dl>
+          <div className={styles.categoryStatsRow}>
+            <dl className={styles.categoryStats}>
+              <div className={styles.categoryStat}>
+                <dt>Presupuesto</dt>
+                <dd>
+                  <CurrencyValue amount={totalBudgeted} mode="compact" />
+                </dd>
+              </div>
+              <div className={styles.categoryStat}>
+                <dt>Gastado</dt>
+                <dd>
+                  <CurrencyValue amount={totalSpent} mode="compact" />
+                </dd>
+              </div>
+              <div className={styles.categoryStat}>
+                <dt>Restante</dt>
+                <dd className={remaining < 0 ? styles.negativeValue : ''}>
+                  <CurrencyValue amount={remaining} mode="compact" />
+                </dd>
+              </div>
+              <div className={styles.categoryStat}>
+                <dt>Estado</dt>
+                <dd>{statusLabel}</dd>
+              </div>
+            </dl>
+            {onAdjust && (
+              <button
+                type="button"
+                className={styles.adjustBtn}
+                onClick={() => onAdjust(categoryCode)}
+              >
+                Ajustar
+              </button>
+            )}
+          </div>
 
           {hasSubcategoryCards ? (
             <div className={styles.subcategoryGrid}>
@@ -505,7 +517,7 @@ export const CategoryGroup = ({ category, defaultExpanded = false, transactions 
 
 interface ActivePlanViewProps {
   currentPlan: CurrentPlan | null;
-  onEditPlan: () => void;
+  onEditPlan: (categoryCode?: string) => void;
   onExploreDetail?: () => void;
 }
 
