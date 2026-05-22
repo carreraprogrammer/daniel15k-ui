@@ -287,6 +287,10 @@ export const financeService = {
     await api.patch(`/api/v1/transactions/${id}`, payload);
   },
 
+  async confirmTransaction(id: string): Promise<void> {
+    await api.patch(`/api/v1/transactions/${id}`, { status: 'confirmed' });
+  },
+
   async deleteTransaction(id: string): Promise<void> {
     await api.delete(`/api/v1/transactions/${id}`);
   },

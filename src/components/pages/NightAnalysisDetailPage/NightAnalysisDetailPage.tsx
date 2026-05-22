@@ -5,10 +5,13 @@ import {
   chevronBackOutline,
   optionsOutline,
   checkmarkOutline,
+  checkmarkDoneOutline,
   copyOutline,
   cardOutline,
   helpCircleOutline,
   cartOutline,
+  createOutline,
+  trashOutline,
 } from 'ionicons/icons';
 import { financeService } from '../../../services/financeService';
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
@@ -18,6 +21,7 @@ import { StatusStrip } from '../../molecules/StatusStrip/StatusStrip';
 import { CategoryPressureCard } from '../../molecules/CategoryPressureCard/CategoryPressureCard';
 import { ReasoningAccordion } from '../../molecules/ReasoningAccordion/ReasoningAccordion';
 import { InsightTabBar } from '../../molecules/InsightTabBar/InsightTabBar';
+import { Spinner } from '../../atoms/Spinner';
 import type { CategoryType } from '../../molecules/CategoryPressureCard/CategoryPressureCard';
 import styles from './NightAnalysisDetailPage.module.css';
 
@@ -50,35 +54,64 @@ const formatTime = (iso: string): string => {
 
 type ReviewItem = NonNullable<NightAnalysisTransactionContext['needs_review']>[number];
 
-const REVIEW_ASK: Record<ReviewItem['reason'], string> = {
-  no_classification:  'No supe en qué gaveta ponerlo. ¿Me ayudas a clasificarlo?',
-  deduplication_risk: 'Esto se parece mucho a un movimiento que ya tenías registrado.',
-  possible_debt:      'Esto parece un pago de deuda. ¿Lo vinculo a una deuda?',
+const REVIEW_LABEL: Record<ReviewItem['reason'], string> = {
+  unconfirmed:        'El agente no estaba seguro si este movimiento era real.',
+  no_classification:  'No supe en qué gaveta ponerlo.',
+  deduplication_risk: 'Esto se parece a un movimiento que ya tenías registrado.',
+  possible_debt:      'Esto parece un pago de deuda no registrado.',
 };
 
-const reviewIconMap: Record<ReviewItem['reason'], string> = {
+const PRIMARY_LABEL: Record<ReviewItem['reason'], { label: string; icon: string }> = {
+  unconfirmed:        { label: 'Confirmar',      icon: checkmarkDoneOutline },
+  no_classification:  { label: 'Editar',         icon: createOutline },
+  deduplication_risk: { label: 'Eliminar este',  icon: trashOutline },
+  possible_debt:      { label: 'Editar',         icon: createOutline },
+};
+
+const SECONDARY_LABEL: Record<ReviewItem['reason'], string> = {
+  unconfirmed:        'Editar',
+  no_classification:  'Descartar',
+  deduplication_risk: 'Son distintos',
+  possible_debt:      'Descartar',
+};
+
+const REVIEW_ICON: Record<ReviewItem['reason'], string> = {
+  unconfirmed:        checkmarkDoneOutline,
   no_classification:  helpCircleOutline,
   deduplication_risk: copyOutline,
   possible_debt:      cardOutline,
+};
+
+const ICON_CLASS: Record<ReviewItem['reason'], string> = {
+  unconfirmed:        '',
+  no_classification:  '',
+  deduplication_risk: styles.reviewIconDedup,
+  possible_debt:      styles.reviewIconDebt,
 };
 
 // ── ReviewCard ────────────────────────────────────────────────────────────────
 
 interface ReviewCardProps {
   item: ReviewItem;
-  onDismiss: (id: number) => void;
+  onPrimary: (item: ReviewItem) => Promise<void>;
+  onSecondary: (id: number) => void;
 }
 
-const ReviewCard = ({ item, onDismiss }: ReviewCardProps) => {
-  const reasonClass =
-    item.reason === 'deduplication_risk' ? styles.reviewIconDedup :
-    item.reason === 'possible_debt'      ? styles.reviewIconDebt : '';
+const ReviewCard = ({ item, onPrimary, onSecondary }: ReviewCardProps) => {
+  const [loading, setLoading] = useState(false);
+
+  const handlePrimary = async () => {
+    setLoading(true);
+    try { await onPrimary(item); } finally { setLoading(false); }
+  };
+
+  const primary = PRIMARY_LABEL[item.reason];
 
   return (
     <div className={styles.reviewCard}>
       <div className={styles.reviewHead}>
-        <div className={`${styles.reviewIcon} ${reasonClass}`}>
-          <IonIcon icon={reviewIconMap[item.reason]} />
+        <div className={`${styles.reviewIcon} ${ICON_CLASS[item.reason]}`}>
+          <IonIcon icon={REVIEW_ICON[item.reason]} />
         </div>
         <div className={styles.reviewInfo}>
           <span className={styles.reviewConcept}>{item.concept}</span>
@@ -89,40 +122,22 @@ const ReviewCard = ({ item, onDismiss }: ReviewCardProps) => {
       </div>
 
       <div className={styles.reviewAsk}>
-        {item.notes ?? REVIEW_ASK[item.reason]}
+        {item.notes ?? REVIEW_LABEL[item.reason]}
       </div>
 
       <div className={styles.reviewActions}>
-        {item.reason === 'no_classification' && (
-          <>
-            <button type="button" className={styles.btnPrimary}>
-              <IonIcon icon={checkmarkOutline} /> Clasificar
-            </button>
-            <button type="button" className={styles.btnGhost} onClick={() => onDismiss(item.transaction_id)}>
-              Descartar
-            </button>
-          </>
-        )}
-        {item.reason === 'deduplication_risk' && (
-          <>
-            <button type="button" className={styles.btnPrimary}>
-              <IonIcon icon={checkmarkOutline} /> Es duplicado
-            </button>
-            <button type="button" className={styles.btnGhost} onClick={() => onDismiss(item.transaction_id)}>
-              Son distintos
-            </button>
-          </>
-        )}
-        {item.reason === 'possible_debt' && (
-          <>
-            <button type="button" className={styles.btnPrimary}>
-              <IonIcon icon={checkmarkOutline} /> Vincular
-            </button>
-            <button type="button" className={styles.btnGhost} onClick={() => onDismiss(item.transaction_id)}>
-              No, es otra cosa
-            </button>
-          </>
-        )}
+        <button
+          type="button"
+          className={`${styles.btnPrimary} ${item.reason === 'deduplication_risk' ? styles.btnDanger : ''}`}
+          onClick={handlePrimary}
+          disabled={loading}
+        >
+          {loading ? <Spinner size="sm" /> : <IonIcon icon={primary.icon} />}
+          {primary.label}
+        </button>
+        <button type="button" className={styles.btnGhost} onClick={() => onSecondary(item.transaction_id)}>
+          {SECONDARY_LABEL[item.reason]}
+        </button>
       </div>
     </div>
   );
@@ -139,6 +154,32 @@ export const NightAnalysisDetailPage = () => {
   const [dismissed, setDismissed] = useState<Set<number>>(new Set());
 
   const dismiss = (id: number) => setDismissed((prev) => new Set(prev).add(id));
+
+  const handlePrimary = async (item: ReviewItem) => {
+    const id = String(item.transaction_id);
+    switch (item.reason) {
+      case 'unconfirmed':
+        await financeService.confirmTransaction(id);
+        dismiss(item.transaction_id);
+        break;
+      case 'deduplication_risk':
+        await financeService.deleteTransaction(id);
+        dismiss(item.transaction_id);
+        break;
+      case 'no_classification':
+      case 'possible_debt':
+        history.push('/transactions');
+        break;
+    }
+  };
+
+  const handleSecondary = (item: ReviewItem) => {
+    if (item.reason === 'unconfirmed') {
+      history.push('/transactions');
+    } else {
+      dismiss(item.transaction_id);
+    }
+  };
 
   useEffect(() => {
     setLoading(true);
@@ -185,7 +226,7 @@ export const NightAnalysisDetailPage = () => {
         <div className={styles.scroll}>
 
           {loading ? (
-            <div className={styles.empty}>Cargando análisis…</div>
+            <div className={styles.loader}><Spinner size="lg" /></div>
           ) : (
             <>
               {/* Coach note */}
@@ -231,7 +272,14 @@ export const NightAnalysisDetailPage = () => {
                             </p>
                           </div>
                         </div>
-                        {reviews.map((r) => <ReviewCard key={r.transaction_id} item={r} onDismiss={dismiss} />)}
+                        {reviews.map((r) => (
+                          <ReviewCard
+                            key={r.transaction_id}
+                            item={r}
+                            onPrimary={handlePrimary}
+                            onSecondary={() => handleSecondary(r)}
+                          />
+                        ))}
                       </div>
                     </>
                   ) : null}

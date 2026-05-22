@@ -66,6 +66,13 @@
   padding: 0 var(--space-5) calc(var(--ion-safe-area-bottom, 20px) + 80px);
 }
 
+.loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+}
+
 .empty {
   padding: var(--space-12) 0;
   text-align: center;
@@ -240,6 +247,17 @@
   justify-content: center;
   gap: 6px;
   cursor: pointer;
+}
+
+.btnDanger {
+  background: color-mix(in srgb, var(--color-error) 12%, transparent);
+  color: var(--color-error);
+  border: 1px solid color-mix(in srgb, var(--color-error) 22%, transparent);
+}
+
+.btnPrimary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .btnGhost {

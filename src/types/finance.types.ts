@@ -883,7 +883,7 @@ export interface NightAnalysisTransactionContext {
     concept: string;
     amount: number;
     date: string;
-    reason: 'no_classification' | 'deduplication_risk' | 'possible_debt';
+    reason: 'no_classification' | 'deduplication_risk' | 'possible_debt' | 'unconfirmed';
     suggested_subcategory_code?: string;
     notes?: string;
   }>;
