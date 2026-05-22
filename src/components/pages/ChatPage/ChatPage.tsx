@@ -4,6 +4,7 @@ import { useAgentUI } from '../../../contexts/AgentUIContext'
 import { AvatarNucleus } from '../../atoms/AvatarNucleus'
 import { useProgressStore } from '../../../store/progressStore'
 import { formatCurrencyCompact } from '../../../utils/formatCurrency'
+import { financeService } from '../../../services/financeService'
 import type {
   AgentUiEvent,
   RequestConfirmationPayload,
@@ -18,6 +19,7 @@ import styles from './ChatPage.module.css'
 
 type ChatEntry =
   | { kind: 'user'; text: string; id: string }
+  | { kind: 'assistant-text'; text: string; id: string }
   | { kind: 'event'; event: AgentUiEvent; id: string }
 
 // ─── Markdown ─────────────────────────────────────────────────────────────────
@@ -244,12 +246,30 @@ export const ChatPage = ({ onClose, seed, level }: Props) => {
 
   const [history, setHistory] = useState<ChatEntry[]>([])
   const [input, setInput] = useState('')
+  const [historyLoaded, setHistoryLoaded] = useState(false)
   const seenEventIds = useRef(new Set<number>())
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
+  // Hydrate from DB on first open
+  useEffect(() => {
+    financeService.fetchChatHistory(30).then((msgs) => {
+      const entries: ChatEntry[] = msgs.map((m, i) => ({
+        kind: m.role === 'user' ? 'user' : 'assistant-text',
+        text: m.content,
+        id: `hist-${i}`,
+      } as ChatEntry))
+      setHistory(entries)
+    }).catch(() => {
+      // History load failed — start fresh, no blocker
+    }).finally(() => {
+      setHistoryLoaded(true)
+    })
+  }, [])
+
   // Capture incoming events into local history
   useEffect(() => {
+    if (!historyLoaded) return
     const newEntries: ChatEntry[] = []
     for (const event of state.events) {
       if (!seenEventIds.current.has(event.id)) {
@@ -260,7 +280,7 @@ export const ChatPage = ({ onClose, seed, level }: Props) => {
     if (newEntries.length > 0) {
       setHistory((prev) => [...prev, ...newEntries])
     }
-  }, [state.events])
+  }, [state.events, historyLoaded])
 
   // Auto-scroll
   useEffect(() => {
@@ -327,6 +347,14 @@ export const ChatPage = ({ onClose, seed, level }: Props) => {
             {entry.kind === 'user' ? (
               <div className={styles.userBubble}>
                 <p className={styles.userText}>{entry.text}</p>
+              </div>
+            ) : entry.kind === 'assistant-text' ? (
+              <div className={styles.agentRow}>
+                <div className={styles.agentContent}>
+                  <div className={styles.card}>
+                    <p className={styles.cardBody}>{renderMarkdown(entry.text)}</p>
+                  </div>
+                </div>
               </div>
             ) : (
               <div className={styles.agentRow}>

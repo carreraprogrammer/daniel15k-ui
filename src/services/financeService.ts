@@ -456,6 +456,11 @@ export const financeService = {
     return ((data as { data?: UserMilestone[] }).data ?? (Array.isArray(data) ? data : [])) as UserMilestone[];
   },
 
+  async fetchChatHistory(limit = 30): Promise<{ role: 'user' | 'assistant'; content: string; created_at: string }[]> {
+    const { data } = await api.get(`/api/v1/chat_messages?channel=app&limit=${limit}`);
+    return ((data as { data?: { role: 'user' | 'assistant'; content: string; created_at: string }[] }).data ?? []);
+  },
+
   async startWebChat(message: string): Promise<{ session_id: string }> {
     const { data } = await api.post('/api/v1/agents/chat', { message, source: 'web' });
     return data.data as { session_id: string };
