@@ -985,6 +985,95 @@
   color: var(--text-on-surface-muted);
 }
 
+/* ── Progress Strip — XP + Racha ─────────────────────────────────────────── */
+
+.progressStrip {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0;
+  padding: 0;
+  border: 1px solid var(--surface-border);
+  border-radius: 18px;
+  background: var(--surface-panel-soft);
+  overflow: hidden;
+}
+
+.progressStripLeft {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.9rem 1.1rem;
+}
+
+.progressStripLevelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.progressStripLevelName {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  letter-spacing: 0.01em;
+}
+
+.progressStripXpLabel {
+  color: var(--text-on-surface-muted);
+  font-size: var(--type-caption-size, 0.72rem);
+}
+
+.progressStripBar {
+  height: 4px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--surface-control-hover);
+}
+
+.progressStripBarFill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(var(--color-brand-rgb), 0.75), var(--color-brand));
+  transition: width 700ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.progressStripBarFillMax {
+  background: linear-gradient(90deg, #f59e0b, #f97316);
+}
+
+.progressStripStreak {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 0.9rem 1rem;
+  border-left: 1px solid var(--surface-border);
+  min-width: 72px;
+}
+
+.progressStripStreakVal {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.progressStripStreakIcon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.progressStripStreakLabel {
+  color: var(--text-on-surface-muted);
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
 /* ── Zone 3 — Gavetas ────────────────────────────────────────────────────── */
 
 .catList {

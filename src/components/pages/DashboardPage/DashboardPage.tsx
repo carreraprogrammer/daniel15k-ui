@@ -1,5 +1,5 @@
 import { IonContent, IonIcon } from '@ionic/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
   sparklesOutline,
@@ -23,6 +23,7 @@ import { ErrorState } from '../../molecules/ErrorState';
 import { useDashboardData } from '../../../hooks/useDashboardData';
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import { useAuthStore } from '../../../store/authStore';
+import { useProgressStore, LEVEL_NAMES } from '../../../store/progressStore';
 import type { Transaction } from '../../../types/finance.types';
 import pageStyles from '../FinancePage.module.css';
 import styles from './DashboardPage.module.css';
@@ -127,6 +128,9 @@ export const DashboardContent = () => {
   const { summary, insight, completeness, loading, error, reload, monthTransactions } = useDashboardData();
   const history = useHistory();
   const [showPaid, setShowPaid] = useState(false);
+
+  const { data: progressData, fetchProgress } = useProgressStore();
+  useEffect(() => { void fetchProgress(); }, [fetchProgress]);
 
   const runway = summary?.cash_flow_runway;
   const hasPlanPendingConfirmation = completeness?.pending_confirmation?.includes('monthly_plan') ?? false;
@@ -304,6 +308,48 @@ export const DashboardContent = () => {
                   </div>
                 </div>
               </div>
+
+              {/* ── ZONA 1.5b — XP + Racha ────────────────────────────────── */}
+              {progressData ? (() => {
+                const { level, xp, nextLevelXp, streakDays } = progressData;
+                const levelName = LEVEL_NAMES[level] ?? `Nivel ${level}`;
+                const isMaxLevel = nextLevelXp === null || nextLevelXp === 0;
+                const xpPct = isMaxLevel ? 100 : Math.min(Math.round((xp / nextLevelXp!) * 100), 100);
+                const xpLabel = isMaxLevel
+                  ? `${xp.toLocaleString('es-CO')} XP · Nivel máximo`
+                  : `${xp.toLocaleString('es-CO')} / ${nextLevelXp!.toLocaleString('es-CO')} XP`;
+
+                return (
+                  <div className={styles.progressStrip}>
+                    <div className={styles.progressStripLeft}>
+                      <div className={styles.progressStripLevelRow}>
+                        <span className={styles.progressStripLevelName}>Nivel {level} — {levelName}</span>
+                        <span className={styles.progressStripXpLabel}>{xpLabel}</span>
+                      </div>
+                      <div
+                        className={styles.progressStripBar}
+                        role="progressbar"
+                        aria-valuenow={xpPct}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                      >
+                        <div
+                          className={`${styles.progressStripBarFill} ${isMaxLevel ? styles.progressStripBarFillMax : ''}`}
+                          style={{ width: `${xpPct}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className={styles.progressStripStreak}>
+                      <span className={styles.progressStripStreakIcon}>🔥</span>
+                      <span className={styles.progressStripStreakVal}>{streakDays}</span>
+                      <span className={styles.progressStripStreakLabel}>
+                        {streakDays === 1 ? 'día' : 'días'}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })() : null}
 
               {/* ── ZONA 1.5 — Este mes (obligaciones recurrentes) ────────── */}
               {(() => {
