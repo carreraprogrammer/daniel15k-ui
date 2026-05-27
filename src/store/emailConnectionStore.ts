@@ -31,8 +31,12 @@ export const useEmailConnectionStore = create<EmailConnectionState>((set) => ({
     set({ loading: true, error: null })
     try {
       const { data } = await api.get('/api/v1/me/email_connection')
-      const d = data as { data: { connected: boolean } }
-      set({ connected: d.data.connected, loading: false })
+      const d = data as { data: { connected: boolean; bank_senders?: string[] } }
+      set({
+        connected: d.data.connected,
+        bankSenders: d.data.bank_senders ?? [],
+        loading: false,
+      })
     } catch {
       set({ loading: false, error: 'No se pudo verificar la conexión de correo.' })
     }
@@ -74,7 +78,10 @@ export const useEmailConnectionStore = create<EmailConnectionState>((set) => ({
 
   handleDeepLinkResult: (status: string, reason?: string | null) => {
     if (status === 'connected') {
+      // Re-fetch so bank_senders (empty on first connect) loads from the server
       set({ connected: true, error: null })
+      // Fire-and-forget — don't await; App.tsx will navigate to /profile anyway
+      useEmailConnectionStore.getState().fetchStatus()
     } else {
       const msg =
         reason === 'invalid_state'    ? 'El enlace expiró. Volvé a intentarlo.'
