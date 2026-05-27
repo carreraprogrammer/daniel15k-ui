@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { IonContent } from '@ionic/react';
 import { useToast } from '../../../hooks/useToast';
 import { useAuthStore } from '../../../store/authStore';
@@ -46,13 +46,17 @@ export const ProfileContent = () => {
   const { data: progressData, fetchProgress, setPreviewLevel, getEffectiveLevel } = useProgressStore();
   const {
     connected: gmailConnected,
+    bankSenders,
     loading: gmailLoading,
     actionLoading: gmailActionLoading,
     error: gmailError,
     fetchStatus: fetchGmailStatus,
     startOAuth,
     disconnect: disconnectGmail,
+    updateSenders,
   } = useEmailConnectionStore();
+  const [senderInput, setSenderInput] = useState('');
+  const senderInputRef = useRef<HTMLInputElement>(null);
   const { showError, showSuccess, toast } = useToast();
   const [financialContext, setFinancialContext] = useState<FinancialCtx | null>(null);
   const [contextLoading, setContextLoading] = useState(true);
@@ -387,9 +391,79 @@ export const ProfileContent = () => {
                     <span className={styles.gmailDot} />
                     <span className={styles.gmailStatusLabel}>Gmail conectado</span>
                   </div>
-                  <p className={styles.gmailDescription}>
-                    El agente nocturno analiza tus correos bancarios automáticamente.
-                  </p>
+
+                  {/* ── Remitentes bancarios ── */}
+                  <div className={styles.gmailSendersSection}>
+                    <span className={styles.controlLabel}>
+                      Correos bancarios
+                    </span>
+                    <p className={styles.gmailDescription}>
+                      {bankSenders.length === 0
+                        ? 'El agente detecta correos bancarios automáticamente por keywords. Podés agregar remitentes específicos para mejorar la precisión.'
+                        : 'El agente busca correos solo de estos remitentes. Si no encontrás un banco, borralo para volver al modo automático.'}
+                    </p>
+
+                    {/* Chips de remitentes */}
+                    {bankSenders.length > 0 && (
+                      <div className={styles.senderChips}>
+                        {bankSenders.map((s) => (
+                          <span key={s} className={styles.senderChip}>
+                            {s}
+                            <button
+                              type="button"
+                              className={styles.senderChipRemove}
+                              aria-label={`Quitar ${s}`}
+                              onClick={() => {
+                                const next = bankSenders.filter((x) => x !== s);
+                                void updateSenders(next);
+                              }}
+                            >
+                              ×
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Input para agregar */}
+                    <div className={styles.senderInputRow}>
+                      <input
+                        ref={senderInputRef}
+                        className={styles.senderInput}
+                        type="email"
+                        placeholder="alertas@mibanco.com"
+                        value={senderInput}
+                        onChange={(e) => setSenderInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ',') {
+                            e.preventDefault();
+                            const trimmed = senderInput.trim().toLowerCase();
+                            if (trimmed && !bankSenders.includes(trimmed)) {
+                              void updateSenders([...bankSenders, trimmed]);
+                              setSenderInput('');
+                            }
+                          }
+                        }}
+                        disabled={gmailActionLoading}
+                      />
+                      <button
+                        type="button"
+                        className={styles.senderAddBtn}
+                        disabled={!senderInput.trim() || gmailActionLoading}
+                        onClick={() => {
+                          const trimmed = senderInput.trim().toLowerCase();
+                          if (trimmed && !bankSenders.includes(trimmed)) {
+                            void updateSenders([...bankSenders, trimmed]);
+                            setSenderInput('');
+                            senderInputRef.current?.focus();
+                          }
+                        }}
+                      >
+                        Agregar
+                      </button>
+                    </div>
+                  </div>
+
                   <button
                     type="button"
                     className={styles.gmailDisconnectBtn}
@@ -402,8 +476,8 @@ export const ProfileContent = () => {
               ) : (
                 <>
                   <p className={styles.gmailDescription}>
-                    Conectá tu Gmail para que el agente detecte automáticamente los movimientos
-                    de Davivienda y Nequi cada noche.
+                    Conectá tu Gmail para que el agente detecte automáticamente tus movimientos
+                    bancarios cada noche — sin importar con qué banco trabajes.
                   </p>
                   <button
                     type="button"

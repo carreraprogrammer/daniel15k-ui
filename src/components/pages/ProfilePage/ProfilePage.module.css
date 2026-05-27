@@ -410,6 +410,109 @@
   font-weight: var(--font-semibold);
 }
 
+.gmailSendersSection {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.senderChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.senderChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: rgba(var(--color-brand-rgb), 0.12);
+  border: 1px solid rgba(var(--color-brand-rgb), 0.2);
+  color: var(--color-text-primary);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.senderChipRemove {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(var(--color-brand-rgb), 0.2);
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.12s ease;
+}
+
+.senderChipRemove:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.senderInputRow {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.senderInput {
+  flex: 1;
+  min-width: 0;
+  min-height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--surface-border-muted);
+  border-radius: 12px;
+  background: var(--surface-panel-soft);
+  color: var(--color-text-primary);
+  font-size: var(--text-xs);
+  outline: none;
+  transition: border-color 0.12s ease;
+}
+
+.senderInput:focus {
+  border-color: rgba(var(--color-brand-rgb), 0.48);
+  box-shadow: 0 0 0 3px rgba(var(--color-brand-rgb), 0.1);
+}
+
+.senderInput::placeholder {
+  color: var(--color-text-muted);
+}
+
+.senderAddBtn {
+  flex-shrink: 0;
+  padding: 0 14px;
+  min-height: 38px;
+  border: 1px solid rgba(var(--color-brand-rgb), 0.4);
+  border-radius: 12px;
+  background: rgba(var(--color-brand-rgb), 0.08);
+  color: rgba(var(--color-brand-rgb), 1);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+  transition: background 0.12s ease;
+  white-space: nowrap;
+}
+
+.senderAddBtn:hover:not(:disabled) {
+  background: rgba(var(--color-brand-rgb), 0.16);
+}
+
+.senderAddBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 @media (max-width: 900px) {
   .grid {
     grid-template-columns: 1fr;

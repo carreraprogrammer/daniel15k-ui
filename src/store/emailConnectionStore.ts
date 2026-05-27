@@ -4,21 +4,25 @@ import { api } from '../services/api'
 interface EmailConnectionState {
   /** null = todavía no cargado, true/false = conocido */
   connected: boolean | null
+  /** remitentes bancarios guardados — [] = modo keyword automático */
+  bankSenders: string[]
   /** cargando el status inicial */
   loading: boolean
-  /** operación en curso (conectar / desconectar) */
+  /** operación en curso (conectar / desconectar / guardar remitentes) */
   actionLoading: boolean
   error: string | null
 
   fetchStatus: () => Promise<void>
   startOAuth: () => Promise<void>
   disconnect: () => Promise<void>
+  updateSenders: (senders: string[]) => Promise<void>
   /** Llamar desde el deep-link handler con los params del redirect de Google */
   handleDeepLinkResult: (status: string, reason?: string | null) => void
 }
 
 export const useEmailConnectionStore = create<EmailConnectionState>((set) => ({
   connected: null,
+  bankSenders: [],
   loading: false,
   actionLoading: false,
   error: null,
@@ -51,9 +55,20 @@ export const useEmailConnectionStore = create<EmailConnectionState>((set) => ({
     set({ actionLoading: true, error: null })
     try {
       await api.delete('/api/v1/me/email_connection')
-      set({ connected: false, actionLoading: false })
+      set({ connected: false, bankSenders: [], actionLoading: false })
     } catch {
       set({ actionLoading: false, error: 'No se pudo desconectar Gmail.' })
+    }
+  },
+
+  updateSenders: async (senders: string[]) => {
+    set({ actionLoading: true, error: null })
+    try {
+      const { data } = await api.patch('/api/v1/me/email_connection/senders', { bank_senders: senders })
+      const d = data as { data: { bank_senders: string[] } }
+      set({ bankSenders: d.data.bank_senders, actionLoading: false })
+    } catch {
+      set({ actionLoading: false, error: 'No se pudo guardar los remitentes.' })
     }
   },
 
