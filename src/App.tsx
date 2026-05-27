@@ -3,6 +3,7 @@ import '@ionic/react/css/normalize.css';
 import '@ionic/react/css/structure.css';
 import '@ionic/react/css/typography.css';
 import '@ionic/react/css/display.css';
+import './theme/fonts.css';
 import './theme/tokens.css';
 import './theme/reset.css';
 import './theme/typography.css';
@@ -19,6 +20,7 @@ import { FloatingAgent } from './components/organisms/FloatingAgent';
 import { QuickCaptureShortcut } from './plugins/quickCaptureShortcut';
 import { applyThemeMode, getThemeMediaQuery, useThemeStore } from './store/themeStore';
 import { applyAccent, useAccentStore } from './store/accentStore';
+import { useEmailConnectionStore } from './store/emailConnectionStore';
 
 const openQuickCapture = (paymentSource?: string) => {
   const params = new URLSearchParams();
@@ -29,11 +31,21 @@ const openQuickCapture = (paymentSource?: string) => {
 const handleDeepLink = (rawUrl: string) => {
   try {
     const url = new URL(rawUrl);
-    const path = url.hostname === 'quick' || url.hostname === 'quick-capture'
-      ? '/quick'
-      : url.pathname;
+    const hostname = url.hostname;
+    const path = url.pathname;
 
-    if (path === '/quick' || path === '/quick-capture') {
+    // Gmail OAuth callback: daniel15k://auth/gmail?status=connected|error[&reason=...]
+    if (hostname === 'auth' && path === '/gmail') {
+      const status = url.searchParams.get('status') ?? 'error';
+      const reason = url.searchParams.get('reason');
+      useEmailConnectionStore.getState().handleDeepLinkResult(status, reason);
+      window.location.assign('/profile');
+      return;
+    }
+
+    // Quick capture: daniel15k://quick[?payment_source=...]
+    const normalizedPath = (hostname === 'quick' || hostname === 'quick-capture') ? '/quick' : path;
+    if (normalizedPath === '/quick' || normalizedPath === '/quick-capture') {
       openQuickCapture(url.searchParams.get('payment_source') ?? undefined);
     }
   } catch {

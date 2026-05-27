@@ -308,6 +308,108 @@
   cursor: not-allowed;
 }
 
+/* ── Gmail integration block ──────────────────────────────── */
+
+.gmailBlock {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--surface-border-muted);
+  border-radius: 18px;
+  background: var(--surface-control);
+}
+
+.gmailBlockHeader {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.gmailBlockHeader strong {
+  color: var(--color-text-primary);
+}
+
+.gmailStatus {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.gmailDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #34d399; /* emerald-400 */
+  flex-shrink: 0;
+  box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.2);
+}
+
+.gmailStatusLabel {
+  color: var(--color-text-primary);
+  font-size: var(--type-label-size);
+  font-weight: var(--font-semibold);
+}
+
+.gmailDescription {
+  margin: 0;
+  color: var(--text-on-surface-soft);
+  font-size: var(--type-label-size);
+  line-height: 1.6;
+}
+
+.gmailConnectBtn {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: 14px;
+  background: rgba(var(--color-brand-rgb), 1);
+  color: #fff;
+  font-size: var(--type-label-size);
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.gmailConnectBtn:hover:not(:disabled) {
+  opacity: 0.88;
+}
+
+.gmailConnectBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.gmailDisconnectBtn {
+  width: 100%;
+  min-height: 40px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--surface-border);
+  border-radius: 14px;
+  background: var(--surface-panel-soft);
+  color: var(--color-text-secondary);
+  font-size: var(--type-label-size);
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.gmailDisconnectBtn:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+}
+
+.gmailDisconnectBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.gmailError {
+  color: #ef4444;
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+}
+
 @media (max-width: 900px) {
   .grid {
     grid-template-columns: 1fr;

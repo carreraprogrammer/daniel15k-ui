@@ -6,6 +6,7 @@ import { Button } from '../../atoms/Button';
 import { useThemeStore, type ThemePreference } from '../../../store/themeStore';
 import { useAccentStore, ACCENT_PRESETS } from '../../../store/accentStore';
 import { useProgressStore, LEVEL_NAMES } from '../../../store/progressStore';
+import { useEmailConnectionStore } from '../../../store/emailConnectionStore';
 import { AvatarNucleus } from '../../atoms/AvatarNucleus';
 import { api } from '../../../services/api';
 import { adminService, type AdminAccount } from '../../../services/adminService';
@@ -43,6 +44,15 @@ export const ProfileContent = () => {
   const accentPreset = useAccentStore((state) => state.preset);
   const setAccentPreset = useAccentStore((state) => state.setPreset);
   const { data: progressData, fetchProgress, setPreviewLevel, getEffectiveLevel } = useProgressStore();
+  const {
+    connected: gmailConnected,
+    loading: gmailLoading,
+    actionLoading: gmailActionLoading,
+    error: gmailError,
+    fetchStatus: fetchGmailStatus,
+    startOAuth,
+    disconnect: disconnectGmail,
+  } = useEmailConnectionStore();
   const { showError, showSuccess, toast } = useToast();
   const [financialContext, setFinancialContext] = useState<FinancialCtx | null>(null);
   const [contextLoading, setContextLoading] = useState(true);
@@ -76,6 +86,7 @@ export const ProfileContent = () => {
 
   useEffect(() => {
     fetchProgress();
+    void fetchGmailStatus();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -360,6 +371,56 @@ export const ProfileContent = () => {
                 showError('No pude actualizar tu perfil.');
               }}
             />
+
+            {/* ── Gmail OAuth ── */}
+            <div className={styles.gmailBlock}>
+              <div className={styles.gmailBlockHeader}>
+                <span className={styles.eyebrow}>Integraciones</span>
+                <strong>Gmail</strong>
+              </div>
+
+              {gmailLoading ? (
+                <span className={styles.controlLabel}>Verificando...</span>
+              ) : gmailConnected === true ? (
+                <>
+                  <div className={styles.gmailStatus}>
+                    <span className={styles.gmailDot} />
+                    <span className={styles.gmailStatusLabel}>Gmail conectado</span>
+                  </div>
+                  <p className={styles.gmailDescription}>
+                    El agente nocturno analiza tus correos bancarios automáticamente.
+                  </p>
+                  <button
+                    type="button"
+                    className={styles.gmailDisconnectBtn}
+                    onClick={() => void disconnectGmail()}
+                    disabled={gmailActionLoading}
+                  >
+                    {gmailActionLoading ? 'Desconectando...' : 'Desconectar Gmail'}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p className={styles.gmailDescription}>
+                    Conectá tu Gmail para que el agente detecte automáticamente los movimientos
+                    de Davivienda y Nequi cada noche.
+                  </p>
+                  <button
+                    type="button"
+                    className={styles.gmailConnectBtn}
+                    onClick={() => void startOAuth()}
+                    disabled={gmailActionLoading}
+                  >
+                    {gmailActionLoading ? 'Abriendo...' : 'Conectar Gmail'}
+                  </button>
+                </>
+              )}
+
+              {gmailError != null && (
+                <span className={styles.gmailError}>{gmailError}</span>
+              )}
+            </div>
+
             {toast}
           </article>
 
