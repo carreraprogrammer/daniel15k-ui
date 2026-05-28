@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { Browser } from '@capacitor/browser'
 import { api } from '../services/api'
 
 interface EmailConnectionState {
@@ -47,8 +48,9 @@ export const useEmailConnectionStore = create<EmailConnectionState>((set) => ({
     try {
       const { data } = await api.post('/api/v1/auth/gmail')
       const d = data as { data: { authorization_url: string } }
-      // Abre el navegador del sistema (convención Capacitor para URLs externas)
-      window.open(d.data.authorization_url, '_system')
+      // Browser.open usa ASWebAuthenticationSession en iOS — maneja el deep-link
+      // de vuelta a la app automáticamente después de que Google aprueba.
+      await Browser.open({ url: d.data.authorization_url })
       set({ actionLoading: false })
     } catch {
       set({ actionLoading: false, error: 'No se pudo iniciar la conexión con Gmail.' })

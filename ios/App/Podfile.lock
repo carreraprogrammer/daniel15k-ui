@@ -9,6 +9,8 @@ PODS:
     - CapacitorCordova
   - CapacitorApp (8.0.1):
     - Capacitor
+  - CapacitorBrowser (8.0.3):
+    - Capacitor
   - CapacitorCordova (8.0.1)
   - CapacitorHaptics (8.0.1):
     - Capacitor
@@ -33,6 +35,7 @@ PODS:
 DEPENDENCIES:
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorApp (from `../../node_modules/@capacitor/app`)"
+  - "CapacitorBrowser (from `../../node_modules/@capacitor/browser`)"
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorHaptics (from `../../node_modules/@capacitor/haptics`)"
   - "CapacitorKeyboard (from `../../node_modules/@capacitor/keyboard`)"
@@ -52,6 +55,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/ios"
   CapacitorApp:
     :path: "../../node_modules/@capacitor/app"
+  CapacitorBrowser:
+    :path: "../../node_modules/@capacitor/browser"
   CapacitorCordova:
     :path: "../../node_modules/@capacitor/ios"
   CapacitorHaptics:
@@ -69,6 +74,7 @@ SPEC CHECKSUMS:
   AppAuth: d4f13a8fe0baf391b2108511793e4b479691fb73
   Capacitor: ff35b0f66370b84aa238251b35b91886a3207c16
   CapacitorApp: 942306cd1acf7774a00e89a3986af3a67c8cad7a
+  CapacitorBrowser: c987c73d09d8bd3b5ec13f06338b1e14d5d2be69
   CapacitorCordova: 0d65b9bb74e995dcecb9463f34f1af2aba6f955c
   CapacitorHaptics: 4df2c625445cef39b67ea635a21802bc92df3b82
   CapacitorKeyboard: 867eb4b3c901d9bb5c3d0c93b546185d52484e19
@@ -79,6 +85,6 @@ SPEC CHECKSUMS:
   GTMSessionFetcher: 3a63d75eecd6aa32c2fc79f578064e1214dfdec2
   SouthdevsCapacitorGoogleAuth: 6488c21faed47c2cf72404bfbfc0fe0e9af766bc
 
-PODFILE CHECKSUM: 0a1400ef5bc5224659eb6f7629148ac0ea3883ed
+PODFILE CHECKSUM: f550c3b158af1ec5f7583c8936129281fa7a4f25
 
 COCOAPODS: 1.16.2
