@@ -81,7 +81,7 @@ function reducer(state: AgentUIState, action: AgentUIAction): AgentUIState {
 
 interface AgentUIContextValue {
   state: AgentUIState;
-  startChat: (message: string) => Promise<boolean>;
+  startChat: (message: string, source?: string) => Promise<boolean>;
   reply: (
     eventId: number,
     type: AgentReplyType,
@@ -175,10 +175,10 @@ export function AgentUIProvider({ children }: { children: ReactNode }) {
   // ─── Public API ─────────────────────────────────────────────────────────────
 
   const startChat = useCallback(
-    async (message: string) => {
+    async (message: string, source = 'web') => {
       dispatch({ type: 'CHAT_LOADING' });
       try {
-        const result = await financeService.startWebChat(message);
+        const result = await financeService.startWebChat(message, source);
         dispatch({ type: 'CHAT_STARTED', payload: { sessionId: result.session_id } });
         startPolling();
         return true;

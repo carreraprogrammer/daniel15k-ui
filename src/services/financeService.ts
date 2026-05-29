@@ -461,8 +461,8 @@ export const financeService = {
     return ((data as { data?: { role: 'user' | 'assistant'; content: string; created_at: string }[] }).data ?? []);
   },
 
-  async startWebChat(message: string): Promise<{ session_id: string }> {
-    const { data } = await api.post('/api/v1/agents/chat', { message, source: 'web' });
+  async startWebChat(message: string, source = 'web'): Promise<{ session_id: string }> {
+    const { data } = await api.post('/api/v1/agents/chat', { message, source });
     return data.data as { session_id: string };
   },
 

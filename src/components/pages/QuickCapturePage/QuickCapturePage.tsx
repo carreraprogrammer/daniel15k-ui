@@ -109,7 +109,7 @@ export const QuickCapturePage = () => {
     setQuickError(null);
     setSaving(true);
 
-    const didStart = await startChat(buildAgentMessage(text, quickPaymentSource));
+    const didStart = await startChat(buildAgentMessage(text, quickPaymentSource), 'shortcut');
     setSaving(false);
 
     if (didStart) {

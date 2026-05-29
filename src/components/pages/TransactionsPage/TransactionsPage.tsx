@@ -17,6 +17,7 @@ import { TransactionSlidingCard } from '../../organisms/TransactionSlidingCard';
 import type { IncomeSource, RecurringObligation, SinkingFund, Transaction, TransactionCreatePayload, TransactionUpdatePayload } from '../../../types/finance.types';
 import { getCategoryDisplayName } from '../../../utils/categoryLabels';
 import { resolveTransactionCategory } from '../../../utils/financeBehavior';
+import { useAgentUI } from '../../../contexts/AgentUIContext';
 import { initialTransactionFilters, useTransactionsPage } from '../../../hooks/useTransactionsPage';
 import { formatCurrencyCompact, formatCurrencyFull } from '../../../utils/formatCurrency';
 import { financeService } from '../../../services/financeService';
@@ -113,6 +114,7 @@ const compareTransactionsByDate = (
 
 const formatTransactionDayLabel = (transaction: Transaction) => {
   const date = resolveTransactionDate(transaction);
+  if (Number.isNaN(date.getTime())) return transaction.attributes.date;
   const target = startOfDay(date);
   const today = startOfDay(new Date());
   const diffDays = Math.round((today.getTime() - target.getTime()) / 86_400_000);
@@ -197,6 +199,9 @@ export const TransactionsContent = () => {
     updateTransaction,
     deleteTransaction,
   } = useTransactionsPage();
+
+  const { dataVersion } = useAgentUI();
+  useEffect(() => { if (dataVersion > 0) void reload(); }, [dataVersion]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadLinkOptions = useCallback(async () => {
     setLinkOptionsLoading(true);

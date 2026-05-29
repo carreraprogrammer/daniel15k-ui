@@ -17,6 +17,7 @@ import {
   chevronDownOutline,
 } from 'ionicons/icons';
 import type { AgentInsight } from '../../../types/finance.types';
+import { useAgentUI } from '../../../contexts/AgentUIContext';
 import { AppLayout } from '../../templates/AppLayout';
 import { Spinner } from '../../atoms/Spinner';
 import { ErrorState } from '../../molecules/ErrorState';
@@ -128,6 +129,9 @@ export const DashboardContent = () => {
   const { summary, insight, completeness, loading, error, reload, monthTransactions } = useDashboardData();
   const history = useHistory();
   const [showPaid, setShowPaid] = useState(false);
+
+  const { dataVersion } = useAgentUI();
+  useEffect(() => { if (dataVersion > 0) void reload(); }, [dataVersion]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { data: progressData, fetchProgress } = useProgressStore();
   useEffect(() => { void fetchProgress(); }, [fetchProgress]);
