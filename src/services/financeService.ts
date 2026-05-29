@@ -279,6 +279,11 @@ export const financeService = {
     return normalizeCollection<CategoryResource['attributes']>(data) as JsonApiCollection<CategoryResource>;
   },
 
+  async fetchTransactionById(id: string): Promise<Transaction> {
+    const { data } = await api.get(`/api/v1/transactions/${id}`);
+    return normalizeSingle<Transaction['attributes']>(data) as Transaction;
+  },
+
   async createTransaction(payload: TransactionCreatePayload): Promise<Transaction> {
     const { data } = await api.post('/api/v1/transactions', payload);
     return normalizeSingle<Transaction['attributes']>(data) as Transaction;

@@ -15,7 +15,7 @@ import {
 } from 'ionicons/icons';
 import { financeService } from '../../../services/financeService';
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
-import type { AgentInsight, NightAnalysis, NightAnalysisTransactionContext } from '../../../types/finance.types';
+import type { AgentInsight, NightAnalysis, NightAnalysisTransactionContext, Transaction, CategoryResource, TransactionUpdatePayload } from '../../../types/finance.types';
 import { CoachNote } from '../../molecules/CoachNote/CoachNote';
 import { StatusStrip } from '../../molecules/StatusStrip/StatusStrip';
 import { CategoryPressureCard } from '../../molecules/CategoryPressureCard/CategoryPressureCard';
@@ -23,6 +23,8 @@ import { ReasoningAccordion } from '../../molecules/ReasoningAccordion/Reasoning
 import { InsightTabBar } from '../../molecules/InsightTabBar/InsightTabBar';
 import { Spinner } from '../../atoms/Spinner';
 import type { CategoryType } from '../../molecules/CategoryPressureCard/CategoryPressureCard';
+import { CrudModal } from '../../molecules/CrudModal';
+import { TransactionComposer } from '../../organisms/TransactionComposer/TransactionComposer';
 import styles from './NightAnalysisDetailPage.module.css';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -153,8 +155,21 @@ export const NightAnalysisDetailPage = () => {
   const [allReviews, setAllReviews] = useState<ReviewItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [dismissed, setDismissed] = useState<Set<number>>(new Set());
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+  const [categories, setCategories] = useState<CategoryResource[]>([]);
+  const [submitting, setSubmitting] = useState(false);
 
   const dismiss = (id: number) => setDismissed((prev) => new Set(prev).add(id));
+
+  const openEditModal = async (transactionId: number) => {
+    try {
+      const txn = await financeService.fetchTransactionById(String(transactionId));
+      setEditingTransaction(txn);
+    } catch {
+      // fallback: navigate if fetch fails
+      history.push('/transactions');
+    }
+  };
 
   const handlePrimary = async (item: ReviewItem) => {
     const id = String(item.transaction_id);
@@ -169,16 +184,27 @@ export const NightAnalysisDetailPage = () => {
         break;
       case 'no_classification':
       case 'possible_debt':
-        history.push('/transactions');
+        await openEditModal(item.transaction_id);
         break;
     }
   };
 
   const handleSecondary = (item: ReviewItem) => {
     if (item.reason === 'unconfirmed') {
-      history.push('/transactions');
+      openEditModal(item.transaction_id);
     } else {
       dismiss(item.transaction_id);
+    }
+  };
+
+  const handleUpdate = async (id: string, payload: TransactionUpdatePayload) => {
+    setSubmitting(true);
+    try {
+      await financeService.updateTransaction(id, payload);
+      setEditingTransaction(null);
+      if (editingTransaction) dismiss(editingTransaction.id as unknown as number);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -187,8 +213,13 @@ export const NightAnalysisDetailPage = () => {
     Promise.all([
       financeService.fetchNightAnalysisByDate(date),
       financeService.fetchNeedsReview(),
+      financeService.fetchCategories(),
     ])
-      .then(([a, r]) => { setAnalysis(a); setAllReviews(r); })
+      .then(([a, r, cats]) => {
+        setAnalysis(a);
+        setAllReviews(r);
+        setCategories(cats.data ?? []);
+      })
       .catch(() => { setAnalysis(null); setAllReviews([]); })
       .finally(() => setLoading(false));
   }, [date]);
@@ -371,6 +402,22 @@ export const NightAnalysisDetailPage = () => {
         </div>
       </IonContent>
       <InsightTabBar active="nocturno" date={tabDate} month={tabMonth} year={tabYear} />
+
+      <CrudModal
+        isOpen={Boolean(editingTransaction)}
+        title="Editar transacción"
+        subtitle="Ajusta contexto, clasificación y subcategoría."
+        onClose={() => setEditingTransaction(null)}
+      >
+        <TransactionComposer
+          transaction={editingTransaction}
+          categories={categories}
+          loading={submitting}
+          onCreate={async () => undefined}
+          onUpdate={handleUpdate}
+          onCancel={() => setEditingTransaction(null)}
+        />
+      </CrudModal>
     </IonPage>
   );
 };
