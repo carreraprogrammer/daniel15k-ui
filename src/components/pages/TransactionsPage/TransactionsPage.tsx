@@ -323,7 +323,8 @@ export const TransactionsContent = () => {
     [selectedCategoryId, visibleAppliedChips],
   );
   const monthBalance = metrics.incomeTotal - metrics.expenseTotal;
-  const realAvailable = summary?.cash_flow_runway?.confirmed_balance ?? summary?.balance.net_balance ?? monthBalance;
+  const carryover = summary?.balance.carryover_from_previous_month ?? 0;
+  const realAvailable = summary?.balance.net_balance ?? monthBalance;
   const linkPeriodOptions = useMemo(() => periodOptionsFor(linkingTransaction), [linkingTransaction]);
   const toolbar = useMemo(
     () => ({
@@ -587,21 +588,28 @@ export const TransactionsContent = () => {
                       </strong>
                     </div>
                   </div>
-                  <p className={styles.focusCaption}>
-                    Disponible real:{' '}
-                    <span className={realAvailable < 0 ? styles.statusWarn : styles.statusGood}>
-                      {formatCurrencyCompact(realAvailable)}
-                    </span>
-                    <span style={{ opacity: 0.5, fontSize: '0.75em', marginLeft: '4px' }}>
-                      (incluye saldo anterior)
-                    </span>
-                  </p>
-                  <p className={styles.focusCaption} style={{ marginTop: '4px' }}>
-                    Balance del mes:{' '}
-                    <span className={monthBalance < 0 ? styles.statusWarn : styles.statusGood}>
-                      {formatCurrencyCompact(monthBalance)}
-                    </span>
-                  </p>
+                  <div style={{ marginTop: '6px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    <p className={styles.focusCaption}>
+                      Balance del mes:{' '}
+                      <span className={monthBalance < 0 ? styles.statusWarn : styles.statusGood}>
+                        {formatCurrencyCompact(monthBalance)}
+                      </span>
+                    </p>
+                    {carryover !== 0 && (
+                      <p className={styles.focusCaption}>
+                        Saldo arrastrado:{' '}
+                        <span className={carryover < 0 ? styles.statusWarn : styles.statusGood}>
+                          {carryover > 0 ? '+' : ''}{formatCurrencyCompact(carryover)}
+                        </span>
+                      </p>
+                    )}
+                    <p className={styles.focusCaption} style={{ fontWeight: 600 }}>
+                      Disponible real:{' '}
+                      <span className={realAvailable < 0 ? styles.statusWarn : styles.statusGood}>
+                        {formatCurrencyCompact(realAvailable)}
+                      </span>
+                    </p>
+                  </div>
                 </div>
                 <div className={styles.focusMeta} style={{ alignSelf: 'start', justifyContent: 'flex-end' }}>
                   {metrics.pendingCount > 0 ? (
