@@ -96,7 +96,7 @@ const ICON_CLASS: Record<ReviewItem['reason'], string> = {
 interface ReviewCardProps {
   item: ReviewItem;
   onPrimary: (item: ReviewItem) => Promise<void>;
-  onSecondary: (id: number) => void;
+  onSecondary: (item: ReviewItem) => Promise<void>;
 }
 
 const ReviewCard = ({ item, onPrimary, onSecondary }: ReviewCardProps) => {
@@ -137,7 +137,7 @@ const ReviewCard = ({ item, onPrimary, onSecondary }: ReviewCardProps) => {
           {loading ? <Spinner size="sm" /> : <IonIcon icon={primary.icon} />}
           {primary.label}
         </button>
-        <button type="button" className={styles.btnGhost} onClick={() => onSecondary(item.transaction_id)}>
+        <button type="button" className={styles.btnGhost} onClick={() => void onSecondary(item)}>
           {SECONDARY_LABEL[item.reason]}
         </button>
       </div>
@@ -161,12 +161,19 @@ export const NightAnalysisDetailPage = () => {
 
   const dismiss = (id: number) => setDismissed((prev) => new Set(prev).add(id));
 
+  const refetchReviews = async () => {
+    try {
+      const r = await financeService.fetchNeedsReview();
+      setAllReviews(r);
+      setDismissed(new Set());
+    } catch { /* keep stale data */ }
+  };
+
   const openEditModal = async (transactionId: number) => {
     try {
       const txn = await financeService.fetchTransactionById(String(transactionId));
       setEditingTransaction(txn);
     } catch {
-      // fallback: navigate if fetch fails
       history.push('/transactions');
     }
   };
@@ -177,10 +184,12 @@ export const NightAnalysisDetailPage = () => {
       case 'unconfirmed':
         await financeService.confirmTransaction(id);
         dismiss(item.transaction_id);
+        void refetchReviews();
         break;
       case 'deduplication_risk':
         await financeService.deleteTransaction(id);
         dismiss(item.transaction_id);
+        void refetchReviews();
         break;
       case 'no_classification':
       case 'possible_debt':
@@ -189,11 +198,13 @@ export const NightAnalysisDetailPage = () => {
     }
   };
 
-  const handleSecondary = (item: ReviewItem) => {
+  const handleSecondary = async (item: ReviewItem) => {
     if (item.reason === 'unconfirmed') {
-      openEditModal(item.transaction_id);
+      void openEditModal(item.transaction_id);
     } else {
       dismiss(item.transaction_id);
+      await financeService.dismissTransactionFlag(String(item.transaction_id)).catch(() => null);
+      void refetchReviews();
     }
   };
 
@@ -202,7 +213,7 @@ export const NightAnalysisDetailPage = () => {
     try {
       await financeService.updateTransaction(id, payload);
       setEditingTransaction(null);
-      if (editingTransaction) dismiss(editingTransaction.id as unknown as number);
+      await refetchReviews();
     } finally {
       setSubmitting(false);
     }

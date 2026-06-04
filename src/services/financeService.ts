@@ -302,6 +302,12 @@ export const financeService = {
     await api.patch(`/api/v1/transactions/${id}`, { status: 'confirmed' });
   },
 
+  async dismissTransactionFlag(id: string): Promise<void> {
+    await api.patch(`/api/v1/transactions/${id}`, {
+      clarification_resolved_at: new Date().toISOString(),
+    });
+  },
+
   async deleteTransaction(id: string): Promise<void> {
     await api.delete(`/api/v1/transactions/${id}`);
   },
