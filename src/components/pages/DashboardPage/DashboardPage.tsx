@@ -24,7 +24,6 @@ import { ErrorState } from '../../molecules/ErrorState';
 import { useDashboardData } from '../../../hooks/useDashboardData';
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
 import { useAuthStore } from '../../../store/authStore';
-import { useProgressStore, LEVEL_NAMES } from '../../../store/progressStore';
 import type { Transaction } from '../../../types/finance.types';
 import pageStyles from '../FinancePage.module.css';
 import styles from './DashboardPage.module.css';
@@ -133,8 +132,6 @@ export const DashboardContent = () => {
   const { dataVersion } = useAgentUI();
   useEffect(() => { if (dataVersion > 0) void reload(); }, [dataVersion]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const { data: progressData, fetchProgress } = useProgressStore();
-  useEffect(() => { void fetchProgress(); }, [fetchProgress]);
 
   const runway = summary?.cash_flow_runway;
   const hasPlanPendingConfirmation = completeness?.pending_confirmation?.includes('monthly_plan') ?? false;
@@ -313,47 +310,60 @@ export const DashboardContent = () => {
                 </div>
               </div>
 
-              {/* ── ZONA 1.5b — XP + Racha ────────────────────────────────── */}
-              {progressData ? (() => {
-                const { level, xp, nextLevelXp, streakDays } = progressData;
-                const levelName = LEVEL_NAMES[level] ?? `Nivel ${level}`;
-                const isMaxLevel = nextLevelXp === null || nextLevelXp === 0;
-                const xpPct = isMaxLevel ? 100 : Math.min(Math.round((xp / nextLevelXp!) * 100), 100);
-                const xpLabel = isMaxLevel
-                  ? `${xp.toLocaleString('es-CO')} XP · Nivel máximo`
-                  : `${xp.toLocaleString('es-CO')} / ${nextLevelXp!.toLocaleString('es-CO')} XP`;
+              {/* ── ZONA 1.5b — Fondo de emergencia ──────────────────────── */}
+              {(() => {
+                const efGoal  = summary.savings_goals?.find(g => /emergencia|emergency/i.test(g.name));
+                const balance = efGoal?.current_amount ?? 0;
+                const plan    = summary.monthly_plan;
+                const bareBones = (plan?.recurring_obligations_total ?? 0) + (plan?.debt_minimums_total ?? 0);
+                const target1m  = bareBones;
+                const months    = bareBones > 0 ? balance / bareBones : 0;
+                const pct       = target1m > 0 ? Math.min(Math.round((balance / target1m) * 100), 100) : 0;
+
+                const EF_STATUS: Record<string, { label: string; chipBg: string; chipColor: string; barColor: string }> = {
+                  none:      { label: 'SIN FONDO',    chipBg: 'rgba(192,57,43,0.14)',   chipColor: '#C0392B', barColor: '#C0392B' },
+                  starter:   { label: 'STARTER',      chipBg: 'rgba(212,115,42,0.14)',  chipColor: '#D4732A', barColor: '#D4732A' },
+                  minimal:   { label: 'CONSTRUYENDO', chipBg: 'rgba(201,152,10,0.14)',  chipColor: '#B8860B', barColor: '#C9980A' },
+                  healthy:   { label: 'SALUDABLE',    chipBg: 'rgba(26,158,74,0.14)',   chipColor: '#1A9E4A', barColor: '#1A9E4A' },
+                  excellent: { label: 'ÓPTIMO',       chipBg: 'rgba(14,150,173,0.14)',  chipColor: '#0E96AD', barColor: '#0E96AD' },
+                };
+                const statusKey = months < 0.5 ? 'none' : months < 1 ? 'starter' : months < 3 ? 'minimal' : months < 6 ? 'healthy' : 'excellent';
+                const st = EF_STATUS[statusKey];
+
+                const subline = target1m > 0
+                  ? `${formatCurrencyCompact(balance)} / ${formatCurrencyCompact(target1m)} · 1 mes de cobertura`
+                  : 'Configura tu plan mensual para ver el objetivo';
 
                 return (
-                  <div className={styles.progressStrip}>
+                  <div
+                    className={styles.efStrip}
+                    style={{ '--ef-chip-bg': st.chipBg, '--ef-chip-color': st.chipColor, '--ef-bar-color': st.barColor } as React.CSSProperties}
+                    onClick={() => history.push('/savings-goals')}
+                  >
                     <div className={styles.progressStripLeft}>
-                      <div className={styles.progressStripLevelRow}>
-                        <span className={styles.progressStripLevelName}>Nivel {level} — {levelName}</span>
-                        <span className={styles.progressStripXpLabel}>{xpLabel}</span>
+                      <div className={styles.efHeaderRow}>
+                        <span className={styles.efLabel}>🛡 Fondo de emergencia</span>
+                        <span className={styles.efStatusChip}>{st.label}</span>
                       </div>
+                      <span className={styles.efSubline}>{subline}</span>
                       <div
-                        className={styles.progressStripBar}
+                        className={styles.efBar}
                         role="progressbar"
-                        aria-valuenow={xpPct}
+                        aria-valuenow={pct}
                         aria-valuemin={0}
                         aria-valuemax={100}
                       >
-                        <div
-                          className={`${styles.progressStripBarFill} ${isMaxLevel ? styles.progressStripBarFillMax : ''}`}
-                          style={{ width: `${xpPct}%` }}
-                        />
+                        <div className={styles.efBarFill} style={{ width: `${pct}%` }} />
                       </div>
                     </div>
 
-                    <div className={styles.progressStripStreak}>
-                      <span className={styles.progressStripStreakIcon}>🔥</span>
-                      <span className={styles.progressStripStreakVal}>{streakDays}</span>
-                      <span className={styles.progressStripStreakLabel}>
-                        {streakDays === 1 ? 'día' : 'días'}
-                      </span>
+                    <div className={styles.efMonthsPanel}>
+                      <span className={styles.efMonthsVal}>{months.toFixed(1)}</span>
+                      <span className={styles.efMonthsLabel}>meses</span>
                     </div>
                   </div>
                 );
-              })() : null}
+              })()}
 
               {/* ── ZONA 1.5 — Este mes (obligaciones recurrentes) ────────── */}
               {(() => {

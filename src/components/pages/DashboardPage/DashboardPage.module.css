@@ -1074,6 +1074,66 @@
   white-space: nowrap;
 }
 
+/* ── Emergency fund strip ────────────────────────────────────────────────── */
+
+.efStrip {
+  composes: progressStrip;
+}
+
+.efHeaderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.efLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  letter-spacing: 0.01em;
+}
+
+.efStatusChip {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--ef-chip-bg, rgba(192,57,43,0.14));
+  color: var(--ef-chip-color, #C0392B);
+}
+
+.efSubline {
+  color: var(--text-on-surface-muted);
+  font-size: var(--type-caption-size, 0.72rem);
+}
+
+.efBar {
+  composes: progressStripBar;
+}
+
+.efBarFill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--ef-bar-color, #C0392B);
+  transition: width 700ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.efMonthsPanel {
+  composes: progressStripStreak;
+}
+
+.efMonthsVal {
+  composes: progressStripStreakVal;
+  color: var(--ef-chip-color, #C0392B);
+}
+
+.efMonthsLabel {
+  composes: progressStripStreakLabel;
+}
+
 /* ── Zone 3 — Gavetas ────────────────────────────────────────────────────── */
 
 .catList {
