@@ -1,7 +1,9 @@
 .root {
   position: fixed;
-  bottom: 2rem;
-  left: 2rem;
+  /* Se ubica justo encima del tab bar usando la altura medida por AppRouter.
+     Fallback de 60px para el primer frame antes de que la variable sea seteada. */
+  bottom: calc(var(--app-viewport-tabbar-height, 60px) + 0.75rem);
+  left: 1.25rem;
   z-index: 150;
   display: flex;
   flex-direction: column;
@@ -235,8 +237,9 @@
 
 @media (max-width: 1024px) {
   .root {
-    bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
-    left: calc(1.25rem + env(safe-area-inset-left, 0px));
+    /* En mobile la variable ya incluye el safe-area-inset-bottom */
+    bottom: calc(var(--app-viewport-tabbar-height, 60px) + 0.5rem);
+    left: calc(1rem + env(safe-area-inset-left, 0px));
   }
 
   .panel {

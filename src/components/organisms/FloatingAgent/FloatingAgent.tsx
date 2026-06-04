@@ -35,17 +35,23 @@ function clampPoint(point: Point, bounds: DragBounds): Point {
   }
 }
 
+// Altura mínima garantizada del tab bar para evitar que el avatar se pise
+// cuando --app-viewport-tabbar-height todavía no fue medida por AppRouter.
+const TABBAR_FALLBACK_PX = 60
+
 function getViewportBounds(bubbleWidth: number, bubbleHeight: number): DragBounds {
   const w = window.innerWidth
   const h = window.innerHeight
   const tabBarH = parseFloat(
     getComputedStyle(document.documentElement).getPropertyValue('--app-viewport-tabbar-height') || '0',
   )
+  // Si la variable aún no fue seteada (race condition con AppRouter), usamos el fallback
+  const effectiveTabBarH = Number.isFinite(tabBarH) && tabBarH > 0 ? tabBarH : TABBAR_FALLBACK_PX
   return {
     left: DRAG_MARGIN,
     top: DRAG_MARGIN,
     right: Math.max(DRAG_MARGIN, w - bubbleWidth - DRAG_MARGIN),
-    bottom: Math.max(DRAG_MARGIN, h - bubbleHeight - (Number.isFinite(tabBarH) ? tabBarH : 0) - DRAG_MARGIN),
+    bottom: Math.max(DRAG_MARGIN, h - bubbleHeight - effectiveTabBarH - DRAG_MARGIN),
   }
 }
 
@@ -148,6 +154,19 @@ export const FloatingAgent = () => {
     return () => window.removeEventListener('resize', handleResize)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, metrics.bubbleWidth, metrics.bubbleHeight])
+
+  // Re-clamp cuando AppRouter actualiza --app-viewport-tabbar-height.
+  // Resuelve la race condition: el avatar se inicializa antes de que el tab bar
+  // sea medido, quedando con tabBarH=0 y pisando las tabs.
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      if (isOpen || dragRef.current.pointerId !== -1) return
+      syncPosition(positionRef.current)
+    })
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['style'] })
+    return () => observer.disconnect()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen])
 
   useEffect(() => {
     positionRef.current = position
