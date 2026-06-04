@@ -1,8 +1,8 @@
 .root {
   position: fixed;
-  /* Se ubica justo encima del tab bar usando la altura medida por AppRouter.
-     Fallback de 60px para el primer frame antes de que la variable sea seteada. */
-  bottom: calc(var(--app-viewport-tabbar-height, 60px) + 0.75rem);
+  /* Misma distancia desde el tab bar que el avatar flotante (DRAG_MARGIN = 12px).
+     Fallback de 60px para el primer frame antes de que AppRouter mida el tab bar. */
+  bottom: calc(var(--app-viewport-tabbar-height, 60px) + 12px);
   left: 1.25rem;
   z-index: 150;
   display: flex;
@@ -237,8 +237,7 @@
 
 @media (max-width: 1024px) {
   .root {
-    /* En mobile la variable ya incluye el safe-area-inset-bottom */
-    bottom: calc(var(--app-viewport-tabbar-height, 60px) + 0.5rem);
+    bottom: calc(var(--app-viewport-tabbar-height, 60px) + 12px);
     left: calc(1rem + env(safe-area-inset-left, 0px));
   }
 
