@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { IonIcon } from '@ionic/react';
 import { warningOutline } from 'ionicons/icons';
 import { Link } from 'react-router-dom';
@@ -70,57 +71,60 @@ export const CompletenessIndicator = () => {
 
   return (
     <>
-      <div className={styles.root} ref={panelRef}>
-        {open && (
-          <div className={styles.panel}>
-            <div className={styles.panelHeader}>
-              <IonIcon className={styles.panelIcon} icon={warningOutline} aria-hidden="true" />
-              <p className={styles.panelTitle}>Información incompleta</p>
+      {createPortal(
+        <div className={styles.root} ref={panelRef}>
+          {open && (
+            <div className={styles.panel}>
+              <div className={styles.panelHeader}>
+                <IonIcon className={styles.panelIcon} icon={warningOutline} aria-hidden="true" />
+                <p className={styles.panelTitle}>Información incompleta</p>
+              </div>
+              <ul className={styles.list}>
+                {gapDimensions.map(({ key, label, to, wizard, ctaLabel, blockedByDep, depLabel, status, message }) => (
+                  <li key={key} className={styles.item}>
+                    <div className={styles.itemHeader}>
+                      <span className={styles.itemLabel}>{label}</span>
+                      <span className={[styles.badge, styles[`badge_${status}`]].join(' ')}>
+                        {STATUS_LABEL[status] ?? status}
+                      </span>
+                    </div>
+                    {blockedByDep
+                      ? <p className={styles.itemDep}>Primero completa {depLabel}</p>
+                      : message && <p className={styles.itemMessage}>{message}</p>
+                    }
+                    {!blockedByDep && wizard === 'income_setup' && (
+                      <button
+                        type="button"
+                        className={styles.itemCta}
+                        onClick={() => { setOpen(false); setIncomeWizardOpen(true); }}
+                      >
+                        {ctaLabel}
+                      </button>
+                    )}
+                    {!blockedByDep && to && !wizard && (
+                      <Link to={to} className={styles.itemCta} onClick={() => setOpen(false)}>
+                        {ctaLabel}
+                      </Link>
+                    )}
+                  </li>
+                ))}
+              </ul>
             </div>
-            <ul className={styles.list}>
-              {gapDimensions.map(({ key, label, to, wizard, ctaLabel, blockedByDep, depLabel, status, message }) => (
-                <li key={key} className={styles.item}>
-                  <div className={styles.itemHeader}>
-                    <span className={styles.itemLabel}>{label}</span>
-                    <span className={[styles.badge, styles[`badge_${status}`]].join(' ')}>
-                      {STATUS_LABEL[status] ?? status}
-                    </span>
-                  </div>
-                  {blockedByDep
-                    ? <p className={styles.itemDep}>Primero completa {depLabel}</p>
-                    : message && <p className={styles.itemMessage}>{message}</p>
-                  }
-                  {!blockedByDep && wizard === 'income_setup' && (
-                    <button
-                      type="button"
-                      className={styles.itemCta}
-                      onClick={() => { setOpen(false); setIncomeWizardOpen(true); }}
-                    >
-                      {ctaLabel}
-                    </button>
-                  )}
-                  {!blockedByDep && to && !wizard && (
-                    <Link to={to} className={styles.itemCta} onClick={() => setOpen(false)}>
-                      {ctaLabel}
-                    </Link>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+          )}
 
-        <button
-          type="button"
-          className={styles.bubble}
-          onClick={() => setOpen((v) => !v)}
-          aria-label={`${gaps.length} datos incompletos`}
-        >
-          <span className={styles.pulseRing} />
-          <IonIcon className={styles.bubbleIcon} icon={warningOutline} aria-hidden="true" />
-          <span className={styles.bubbleCount}>{gaps.length}</span>
-        </button>
-      </div>
+          <button
+            type="button"
+            className={styles.bubble}
+            onClick={() => setOpen((v) => !v)}
+            aria-label={`${gaps.length} datos incompletos`}
+          >
+            <span className={styles.pulseRing} />
+            <IonIcon className={styles.bubbleIcon} icon={warningOutline} aria-hidden="true" />
+            <span className={styles.bubbleCount}>{gaps.length}</span>
+          </button>
+        </div>,
+        document.body
+      )}
 
       <IncomeSetupWizard
         isOpen={incomeWizardOpen}
