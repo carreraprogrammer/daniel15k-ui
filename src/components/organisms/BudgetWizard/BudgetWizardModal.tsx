@@ -7,8 +7,9 @@
 //  · ModeReplantear: one gaveta expanded + rest collapsed
 //  · ModeAjustar: focused category expanded with impact ripple
 //  · buildPlanLines uses subcatAmounts directly (no proportional split)
-import { useEffect, useState, type CSSProperties } from 'react';
-import { IonContent, IonModal } from '@ionic/react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { IonContent, IonIcon, IonModal } from '@ionic/react';
+import { resolveNamedIcon } from './iconRegistry';
 import type { BudgetLineItem, BudgetPlanDraft, WizardCategory, WizardData, WizardSubcategory } from '../../../types/finance.types';
 import { BrandMark } from '../../atoms/BrandMark';
 import { SubcatRow } from './SubcatRow';
@@ -30,6 +31,7 @@ interface BudgetWizardModalProps {
   isEditMode?: boolean;
   adjustCategoryCode?: string;
   existingMode?: 'conservative' | 'expected';
+  planConfirmedAt?: string;
 }
 
 // ── Colors ─────────────────────────────────────────────────────────────────────
@@ -129,9 +131,11 @@ interface GavetaExpandedLocalProps {
   cat: WizardCategory;
   subcatAmounts: Record<string, number>;
   highlight?: boolean;
+  onSetAmount?: (code: string, amt: number) => void;
+  planLocked?: boolean;
 }
 
-function GavetaExpandedLocal({ cat, subcatAmounts, highlight = false }: GavetaExpandedLocalProps) {
+function GavetaExpandedLocal({ cat, subcatAmounts, highlight = false, onSetAmount, planLocked = false }: GavetaExpandedLocalProps) {
   const col = CAT_COLORS[cat.code] ?? { c: '#7A6E5E', s: 'rgba(122,110,94,0.16)' };
   const total = catTotal(cat, subcatAmounts);
   return (
@@ -140,7 +144,7 @@ function GavetaExpandedLocal({ cat, subcatAmounts, highlight = false }: GavetaEx
       style={{ '--cat-c': col.c, '--cat-s': col.s } as CSSProperties}
     >
       <div className={styles.gavetaExpandedHeader}>
-        <div className={styles.gavetaExpandedIcon}>{cat.name[0]?.toUpperCase()}</div>
+        <div className={styles.gavetaExpandedIcon}><IonIcon icon={resolveNamedIcon(cat.icon)} /></div>
         <div className={styles.gavetaExpandedMeta}>
           <div className={styles.gavetaExpandedName}>
             {cat.name}
@@ -158,11 +162,13 @@ function GavetaExpandedLocal({ cat, subcatAmounts, highlight = false }: GavetaEx
           <SubcatRow
             key={sub.code}
             name={sub.name}
+            icon={sub.icon}
             amt={subcatAmounts[sub.code] ?? 0}
             source={toDisplaySource(sub)}
             confidence={sub.confidence}
             locked={sub.locked}
             hint={sub.edit_hint ?? null}
+            onSetAmount={onSetAmount && !planLocked ? (newAmt) => onSetAmount(sub.code, newAmt) : undefined}
           />
         ))}
       </div>
@@ -305,7 +311,7 @@ function buildTradeOffs(gap: number, categories: WizardCategory[], subcatAmounts
 export const BudgetWizardModal = ({
   isOpen, onClose, onComplete, wizardData, month,
   hasPlanHistory = false, isEditMode = false,
-  adjustCategoryCode, existingMode,
+  adjustCategoryCode, existingMode, planConfirmedAt,
 }: BudgetWizardModalProps) => {
 
   useEffect(() => {
@@ -323,13 +329,19 @@ export const BudgetWizardModal = ({
   const [subcatAmounts, setSubcatAmounts] = useState<Record<string, number>>({});
   const [activeIndex, setActiveIndex] = useState(0);
   const [expandedCode, setExpandedCode] = useState<string | null>(null);
+  const originalAmountsRef = useRef<Record<string, number>>({});
 
   useEffect(() => {
     if (!wizardData) return;
-    setSubcatAmounts(buildSubcatInit(wizardData.categories));
+    const init = buildSubcatInit(wizardData.categories);
+    setSubcatAmounts(init);
+    originalAmountsRef.current = init;
     setActiveIndex(0);
     if (mode === 'replantear' && wizardData.categories.length > 0) {
       setExpandedCode(wizardData.categories[0].code);
+    }
+    if (mode === 'ajustar') {
+      setExpandedCode(adjustCategoryCode ?? wizardData.categories[0]?.code ?? null);
     }
   }, [wizardData, mode]);
 
@@ -339,13 +351,22 @@ export const BudgetWizardModal = ({
   const noAlcanza = totalIncome > 0 && totalPlanned > totalIncome * 1.02;
   const gap = Math.max(0, totalPlanned - totalIncome);
 
-  const focusedCode = adjustCategoryCode ?? categories[0]?.code ?? '';
-  const focusedCategory = categories.find((c) => c.code === focusedCode) ?? categories[0] ?? null;
-  const focusedTotal = focusedCategory ? catTotal(focusedCategory, subcatAmounts) : 0;
-  const focusedPrior = focusedCategory?.suggested_total ?? 0;
+
+
+  const changesCount = Object.keys(subcatAmounts).filter(
+    (code) => subcatAmounts[code] !== (originalAmountsRef.current[code] ?? subcatAmounts[code])
+  ).length;
+
+  const isWithinGraceWindow = planConfirmedAt
+    ? Date.now() - new Date(planConfirmedAt).getTime() < 48 * 60 * 60 * 1000
+    : true;
 
   const setSub = (code: string, amt: number) =>
     setSubcatAmounts((prev) => ({ ...prev, [code]: Math.max(0, amt) }));
+
+  const discardChanges = () => {
+    setSubcatAmounts(originalAmountsRef.current);
+  };
 
   const handleSave = (overrideAmounts?: Record<string, number>) => {
     if (!wizardData) return;
@@ -379,7 +400,7 @@ export const BudgetWizardModal = ({
       keepContentsMounted
       style={{ '--border-radius': '0px', '--width': '100vw', '--height': '100dvh' }}
     >
-      <IonContent className={styles.content}>
+      <IonContent className={styles.content} scrollY={false}>
         <div className={styles.panel}>
           {!wizardData ? (
             <div className={styles.emptyState}>
@@ -394,7 +415,7 @@ export const BudgetWizardModal = ({
                   <BrandMark variant="monoline" size="md" />
                   <div className={styles.topbarCopy}>
                     <span className={styles.topbarEyebrow}>
-                      {mode === 'crear' ? 'Tu primer plan' : mode === 'ajustar' ? 'Ajustando' : 'Plan de'}
+                      {mode === 'crear' ? 'Tu primer plan' : mode === 'ajustar' ? 'Editando' : 'Plan de'}
                     </span>
                     <span className={styles.topbarTitle}>{formatMonthLabel(month)}</span>
                   </div>
@@ -502,6 +523,7 @@ export const BudgetWizardModal = ({
                                 cat={cat}
                                 subcatAmounts={subcatAmounts}
                                 highlight
+                                onSetAmount={setSub}
                               />
                               {lowSubs.length > 0 && (
                                 <LowConfBlock
@@ -569,6 +591,7 @@ export const BudgetWizardModal = ({
                                 cat={cat}
                                 subcatAmounts={subcatAmounts}
                                 highlight
+                                onSetAmount={setSub}
                               />
                               <button
                                 type="button"
@@ -592,51 +615,121 @@ export const BudgetWizardModal = ({
                     </div>
                   </div>
 
-                ) : (
-                  /* ── ModeAjustar v2: focused category expanded ── */
+                ) : isWithinGraceWindow ? (
+                  /* ── ModeAjustar · Frame E: editable within grace window ── */
                   <div className={styles.gavetas}>
-                    {focusedCategory && (
-                      <CoachBubble>
-                        {getCoachMessage('ajustar', focusedCategory)}
-                      </CoachBubble>
-                    )}
+                    {/* Grace ribbon */}
+                    <div className={styles.graceRibbon}>
+                      <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="var(--color-brand)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                      </svg>
+                      <span>Podés ajustar hasta <strong>48h después de firmar</strong>. Luego el plan queda firme.</span>
+                    </div>
 
-                    {focusedCategory && (
-                      <div className={styles.ripple}>
-                        <span className={styles.rippleDot} />
-                        <div className={styles.rippleText}>
-                          {focusedTotal > focusedPrior
-                            ? <>Subís ${fmtK(focusedTotal - focusedPrior)} sobre el plan. Colchón: <strong>${fmtK(colchon)}</strong>.</>
-                            : focusedTotal < focusedPrior
-                              ? <>Liberás ${fmtK(focusedPrior - focusedTotal)}. Colchón: <strong>${fmtK(colchon)}</strong>.</>
-                              : <>Sin cambio. Colchón: <strong>${fmtK(colchon)}</strong>.</>}
-                        </div>
+                    {/* Plan total + colchón */}
+                    <div className={styles.planSummary}>
+                      <div>
+                        <div className={styles.planSummaryLabel}>Plan total</div>
+                        <div className={styles.planSummaryValue}>${fmtK(totalPlanned)}</div>
+                        {changesCount > 0 && (
+                          <div className={styles.planSummaryDelta}>
+                            {totalPlanned > (categories.reduce((s, cat) => s + cat.subcategories.reduce((ss, sub) => ss + (originalAmountsRef.current[sub.code] ?? 0), 0), 0)) ? '+' : ''}
+                            {fmtK(totalPlanned - categories.reduce((s, cat) => s + cat.subcategories.reduce((ss, sub) => ss + (originalAmountsRef.current[sub.code] ?? 0), 0), 0))} vs firma
+                          </div>
+                        )}
                       </div>
-                    )}
+                      <div style={{ textAlign: 'right' }}>
+                        <div className={styles.planSummaryLabel}>Colchón</div>
+                        <div className={`${styles.planSummaryValue} ${styles.planColchon}`}>${fmtK(colchon)}</div>
+                      </div>
+                    </div>
 
-                    {focusedCategory && (
-                      <GavetaExpandedLocal
-                        cat={focusedCategory}
-                        subcatAmounts={subcatAmounts}
-                        highlight
-                      />
-                    )}
+                    <div className={styles.sectionHeader}>
+                      <span className={styles.sectionLabel}>Tus gavetas</span>
+                      <span className={styles.sectionHint}>toca para expandir</span>
+                    </div>
 
-                    <div className={styles.planRestLabel}>El resto del plan, intacto</div>
-                    <div className={styles.planRestList}>
-                      {categories
-                        .filter((c) => c.code !== focusedCode)
-                        .map((cat) => {
-                          const col = CAT_COLORS[cat.code] ?? { c: '#7A6E5E' };
-                          const total = catTotal(cat, subcatAmounts);
+                    <div className={styles.gavetaStack}>
+                      {categories.map((cat) => {
+                        const total = catTotal(cat, subcatAmounts);
+                        const isExpanded = expandedCode === cat.code;
+                        if (isExpanded) {
                           return (
-                            <div key={cat.code} className={styles.planRestItem}>
-                              <span className={styles.planRestDot} style={{ background: col.c }} />
-                              <span className={styles.planRestName}>{cat.name}</span>
-                              <span className={styles.planRestAmt}>${fmtK(total)}</span>
+                            <div key={cat.code}>
+                              <GavetaExpandedLocal
+                                cat={cat}
+                                subcatAmounts={subcatAmounts}
+                                highlight
+                                onSetAmount={setSub}
+                              />
+                              <button type="button" className={styles.collapseBtn} onClick={() => setExpandedCode(null)}>
+                                Colapsar
+                              </button>
                             </div>
                           );
-                        })}
+                        }
+                        return (
+                          <GavetaCollapsedRow
+                            key={cat.code}
+                            cat={cat}
+                            totalAmt={total}
+                            onClick={() => setExpandedCode(cat.code)}
+                          />
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                ) : (
+                  /* ── ModeAjustar · Frame F: locked after grace window ── */
+                  <div className={styles.gavetas}>
+                    <CoachBubble>
+                      Tu plan ya está firme. Las correcciones las miramos juntos al cierre del mes — esa es la idea, no editar al calor del momento.
+                    </CoachBubble>
+
+                    <div className={styles.planSummary}>
+                      <div>
+                        <div className={styles.planSummaryLabel}>Plan total</div>
+                        <div className={styles.planSummaryValue}>${fmtK(totalPlanned)}</div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <div className={styles.planSummaryLabel}>Colchón</div>
+                        <div className={`${styles.planSummaryValue} ${styles.planColchon}`}>${fmtK(colchon)}</div>
+                      </div>
+                    </div>
+
+                    <div className={styles.sectionHeader}>
+                      <span className={styles.sectionLabel}>Tus gavetas · solo lectura</span>
+                    </div>
+
+                    <div className={styles.gavetaStack}>
+                      {categories.map((cat) => {
+                        const total = catTotal(cat, subcatAmounts);
+                        const isExpanded = expandedCode === cat.code;
+                        if (isExpanded) {
+                          return (
+                            <div key={cat.code}>
+                              <GavetaExpandedLocal
+                                cat={cat}
+                                subcatAmounts={subcatAmounts}
+                                highlight
+                                planLocked
+                              />
+                              <button type="button" className={styles.collapseBtn} onClick={() => setExpandedCode(null)}>
+                                Colapsar
+                              </button>
+                            </div>
+                          );
+                        }
+                        return (
+                          <GavetaCollapsedRow
+                            key={cat.code}
+                            cat={cat}
+                            totalAmt={total}
+                            onClick={() => setExpandedCode(cat.code)}
+                          />
+                        );
+                      })}
                     </div>
                   </div>
                 )}
@@ -644,32 +737,52 @@ export const BudgetWizardModal = ({
 
               {/* ── Bottom composer ── */}
               <div className={styles.composer}>
-                {!noAlcanza && (
+                {!noAlcanza && mode !== 'ajustar' && (
                   <button
                     type="button"
                     className={styles.composerCta}
                     onClick={confirmAndAdvance}
                     disabled={!wizardData}
                   >
-                    {mode === 'ajustar'
-                      ? 'Guardar ajuste'
-                      : mode === 'replantear'
-                        ? 'Firmar plan'
-                        : isOnLastStep
-                          ? 'Confirmar plan'
-                          : 'Confirmar y seguir →'}
+                    {mode === 'replantear'
+                      ? 'Firmar plan'
+                      : isOnLastStep
+                        ? 'Confirmar plan'
+                        : 'Confirmar y seguir →'}
                   </button>
+                )}
+                {!noAlcanza && mode === 'ajustar' && isWithinGraceWindow && (
+                  <div className={styles.ajustarActions}>
+                    <button
+                      type="button"
+                      className={styles.discardBtn}
+                      onClick={() => { discardChanges(); onClose(); }}
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.composerCta}
+                      style={{ flex: 1.5 }}
+                      onClick={() => handleSave()}
+                      disabled={changesCount === 0}
+                    >
+                      {changesCount > 0 ? `Guardar ${changesCount} cambio${changesCount !== 1 ? 's' : ''}` : 'Sin cambios'}
+                    </button>
+                  </div>
                 )}
                 <div className={styles.composerInput}>
                   <input
                     type="text"
                     className={styles.composerTextField}
                     placeholder={
-                      mode === 'ajustar'
-                        ? 'O dile al coach el motivo…'
-                        : mode === 'replantear'
-                          ? 'Pedí cambios al plan…'
-                          : 'O escribime un estimado…'
+                      mode === 'ajustar' && !isWithinGraceWindow
+                        ? 'Si es urgente, cuéntale al coach…'
+                        : mode === 'ajustar'
+                          ? 'O pídele al coach que distribuya…'
+                          : mode === 'replantear'
+                            ? 'Pedí cambios al plan…'
+                            : 'O escribime un estimado…'
                     }
                     readOnly
                   />
