@@ -184,11 +184,36 @@
 }
 
 .fieldLabel {
+  display: block;
   margin: 0 0 0.5rem;
   color: var(--text-on-surface-muted);
   font-size: var(--type-label-size);
   font-weight: 600;
   letter-spacing: 0.04em;
+}
+
+.fieldHint {
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--color-text-disabled);
+}
+
+.dateInput {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border-radius: 12px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface-control);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  outline: none;
+  transition: border-color 0.15s;
+  color-scheme: dark;
+}
+
+.dateInput:focus {
+  border-color: var(--color-brand);
 }
 
 .paymentSourceRow {

@@ -546,6 +546,8 @@ export interface RecurringObligation {
     amount: number;
     due_day: number | null;
     active?: boolean;
+    end_date?: string | null;
+    temporary?: boolean;
     category_id?: number | null;
     category_name?: string | null;
     category_code?: string | null;
@@ -565,6 +567,7 @@ export interface RecurringObligationPayload {
   amount: number;
   due_day: number | '';
   active?: boolean;
+  end_date?: string | null;
   category_id?: number | null;
   subcategory_id?: number | null;
   source_type?: 'Debt' | 'Investment' | null;
@@ -773,6 +776,7 @@ export interface CurrentPlan {
   mode?: 'conservative' | 'expected';
   total_income: number;
   month_label?: string;
+  confirmed_at?: string | null;
   categories: CurrentPlanCategory[];
 }
 

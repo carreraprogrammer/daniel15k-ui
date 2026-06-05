@@ -3,14 +3,6 @@
   overflow: hidden;
 }
 
-.optionEdit,
-.optionDelete {
-  --color: var(--color-text-primary);
-  min-width: 72px;
-}
-
-.optionEdit   { --background: linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.16), rgba(var(--color-brand-rgb), 0.18)); }
-.optionDelete { --background: color-mix(in srgb, var(--color-error) 16%, transparent); }
 
 /* ── Card shell ─────────────────────────────────────────────────────────── */
 
@@ -137,6 +129,20 @@
   font-family: var(--font-sans);
   font-size: var(--type-caption-size);
   color: var(--color-text-disabled);
+}
+
+.temporaryChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.22rem 0.55rem;
+  border-radius: var(--radius-full);
+  border: 1px dashed color-mix(in srgb, var(--color-warning) 50%, transparent);
+  background: color-mix(in srgb, var(--color-warning) 8%, transparent);
+  font-family: var(--font-sans);
+  font-size: var(--type-caption-size);
+  font-weight: var(--font-medium);
+  color: var(--color-warning);
+  white-space: nowrap;
 }
 
 /* ── Secondary ──────────────────────────────────────────────────────────── */

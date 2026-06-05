@@ -15,6 +15,7 @@ interface Values {
   name: string;
   amount: number | '';
   dueDay: number | '';
+  endDate: string;
   categoryId: string;
   subcategoryId: string;
   active: string;
@@ -25,6 +26,7 @@ const emptyValues: Values = {
   name: '',
   amount: '',
   dueDay: '',
+  endDate: '',
   categoryId: '',
   subcategoryId: '',
   active: 'true',
@@ -40,6 +42,7 @@ const valuesFromObligation = (obligation: RecurringObligation | null): Values =>
     name: obligation.attributes.name,
     amount: obligation.attributes.amount,
     dueDay: obligation.attributes.due_day ?? '',
+    endDate: obligation.attributes.end_date ?? '',
     categoryId: obligation.attributes.category_id ? String(obligation.attributes.category_id) : '',
     subcategoryId: obligation.attributes.subcategory_id ? String(obligation.attributes.subcategory_id) : '',
     active: String(obligation.attributes.active ?? true),
@@ -101,6 +104,7 @@ export const RecurringObligationComposer = ({
       name: values.name.trim(),
       amount: Number(values.amount),
       due_day: values.dueDay,
+      end_date: values.endDate.trim() || null,
       category_id: values.categoryId === '' ? null : Number(values.categoryId),
       subcategory_id: values.subcategoryId === '' ? null : Number(values.subcategoryId),
       active: values.active === 'true',
@@ -168,6 +172,20 @@ export const RecurringObligationComposer = ({
               max={31}
               required
             />
+            <div className={styles.spanTwo}>
+              <label className={styles.fieldLabel} htmlFor="recurring-end-date">
+                Fecha de fin
+                <span className={styles.fieldHint}> — opcional. Para tratamientos, contratos o gastos con fecha de cierre.</span>
+              </label>
+              <input
+                id="recurring-end-date"
+                type="date"
+                className={styles.dateInput}
+                value={values.endDate}
+                min={new Date().toISOString().split('T')[0]}
+                onChange={(e) => setValues((current) => ({ ...current, endDate: e.target.value }))}
+              />
+            </div>
             <SelectInput
               name="recurring-active"
               label="Estado"

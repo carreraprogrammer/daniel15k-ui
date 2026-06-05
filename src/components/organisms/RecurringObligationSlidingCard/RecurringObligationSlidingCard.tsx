@@ -1,10 +1,11 @@
-import { IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding } from '@ionic/react';
-import { closeCircleOutline, createOutline, trashOutline } from 'ionicons/icons';
+import { IonIcon, IonItem, IonItemSliding } from '@ionic/react';
 import { Badge } from '../../atoms/Badge';
 import type { RecurringObligation } from '../../../types/finance.types';
 import { resolveNamedIcon } from '../BudgetWizard/iconRegistry';
 import { normalizeFlexibleLabel } from '../../../utils/categoryLabels';
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
+import { SlideActions } from '../../molecules/SlideActions';
+import type { SlideAction } from '../../molecules/SlideActions';
 import styles from './RecurringObligationSlidingCard.module.css';
 
 export interface RecurringObligationSlidingCardProps {
@@ -57,6 +58,11 @@ export const RecurringObligationSlidingCard = ({
               {linkedDebtLabel ? (
                 <span className={styles.linkChip}>{linkedDebtLabel}</span>
               ) : null}
+              {attrs.temporary && attrs.end_date && (
+                <span className={styles.temporaryChip}>
+                  hasta {new Date(attrs.end_date + 'T12:00:00').toLocaleDateString('es-CO', { month: 'short', year: 'numeric' })}
+                </span>
+              )}
               {!attrs.category_name && !attrs.subcategory_name && (
                 <span className={styles.subChip}>Sin categoría</span>
               )}
@@ -75,19 +81,13 @@ export const RecurringObligationSlidingCard = ({
         </div>
       </IonItem>
 
-      <IonItemOptions side="end">
-        {linkedDebtLabel && onUnlinkDebt ? (
-          <IonItemOption className={styles.optionEdit} onClick={() => onUnlinkDebt(obligation)}>
-            <IonIcon icon={closeCircleOutline} />
-          </IonItemOption>
-        ) : null}
-        <IonItemOption className={styles.optionEdit} onClick={() => onEdit(obligation)}>
-          <IonIcon icon={createOutline} />
-        </IonItemOption>
-        <IonItemOption className={styles.optionDelete} onClick={() => onDelete(obligation)}>
-          <IonIcon icon={trashOutline} />
-        </IonItemOption>
-      </IonItemOptions>
+      <SlideActions actions={[
+        ...(linkedDebtLabel && onUnlinkDebt
+          ? [{ type: 'unlink' as const, onPress: () => onUnlinkDebt(obligation) }] satisfies SlideAction[]
+          : []),
+        { type: 'edit',   onPress: () => onEdit(obligation) },
+        { type: 'delete', onPress: () => onDelete(obligation) },
+      ]} />
     </IonItemSliding>
   );
 };
