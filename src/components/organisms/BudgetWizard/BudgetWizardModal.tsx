@@ -349,8 +349,9 @@ export const BudgetWizardModal = ({
   const goalContribution = wizardData?.goal_contribution?.amount ?? 0;
   const goalLabel = wizardData?.goal_contribution?.label ?? 'Objetivo financiero';
   const goalPhase = wizardData?.goal_contribution?.phase;
-  const goalUnconfigured = ['debt_payoff', 'emergency_fund'].includes(goalPhase ?? '') &&
-    wizardData?.goal_contribution?.configured === false;
+  const goalIsSystemDerived = ['debt_payoff', 'emergency_fund'].includes(goalPhase ?? '') &&
+    wizardData?.goal_contribution?.configured === false &&
+    goalContribution > 0;
   const totalPlanned = categories.reduce((s, cat) => s + catTotal(cat, subcatAmounts), 0);
   const colchon = Math.max(0, totalIncome - totalPlanned - goalContribution);
   const noAlcanza = totalIncome > 0 && (totalPlanned + goalContribution) > totalIncome * 1.02;
@@ -502,14 +503,13 @@ export const BudgetWizardModal = ({
                 ) : mode === 'crear' ? (
                   /* ── ModeCrear v2: step through categories, expanded view ── */
                   <div className={styles.gavetas}>
-                    {goalUnconfigured && (
+                    {goalIsSystemDerived && (
                       <div className={styles.goalWarningBanner}>
-                        <span className={styles.goalWarningIcon}>⚠️</span>
+                        <span className={styles.goalWarningIcon}>🎯</span>
                         <div className={styles.goalWarningCopy}>
-                          <strong>Tu aporte a objetivo no está configurado.</strong>
-                          {' '}El plan no reserva nada para{' '}
-                          {goalPhase === 'debt_payoff' ? 'pago de deuda' : 'fondo de emergencia'}.
-                          Hablá con el agente primero.
+                          <strong>Aporte al objetivo calculado automáticamente.</strong>
+                          {' '}Ya desconté {goalPhase === 'debt_payoff' ? 'el aporte a tu deuda focal' : 'la cuota para tu fondo de emergencia'}{' '}
+                          antes de distribuir el historial.
                         </div>
                       </div>
                     )}
@@ -587,14 +587,13 @@ export const BudgetWizardModal = ({
                 ) : mode === 'replantear' ? (
                   /* ── ModeReplantear v2: plan summary + expanded/collapsed gavetas ── */
                   <div className={styles.gavetas}>
-                    {goalUnconfigured && (
+                    {goalIsSystemDerived && (
                       <div className={styles.goalWarningBanner}>
-                        <span className={styles.goalWarningIcon}>⚠️</span>
+                        <span className={styles.goalWarningIcon}>🎯</span>
                         <div className={styles.goalWarningCopy}>
-                          <strong>Tu aporte a objetivo no está configurado.</strong>
-                          {' '}Este plan usa tu historial completo sin reservar nada para{' '}
-                          {goalPhase === 'debt_payoff' ? 'pago de deuda' : 'fondo de emergencia'}.
-                          Hablá con el agente para definir cuánto comprometer este mes.
+                          <strong>Aporte al objetivo calculado automáticamente.</strong>
+                          {' '}Ya desconté {goalPhase === 'debt_payoff' ? 'el aporte a tu deuda focal' : 'la cuota para tu fondo de emergencia'}{' '}
+                          antes de distribuir el historial. Confirmalo con el agente para fijarlo.
                         </div>
                       </div>
                     )}
