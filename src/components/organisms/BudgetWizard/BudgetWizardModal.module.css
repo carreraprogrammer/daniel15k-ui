@@ -781,6 +781,34 @@
   flex-shrink: 0;
 }
 
+/* ── Goal unconfigured warning banner ───────────── */
+
+.goalWarningBanner {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  background: rgba(245, 158, 11, 0.10);
+  border: 1.5px solid rgba(245, 158, 11, 0.40);
+  border-radius: 14px;
+}
+
+.goalWarningIcon {
+  font-size: 1rem;
+  flex-shrink: 0;
+  line-height: 1.4;
+}
+
+.goalWarningCopy {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--color-text-primary);
+}
+
+.goalWarningCopy strong {
+  color: #B45309;
+}
+
 /* ── Goal committed row ─────────────────────────── */
 
 .goalCommittedRow {
