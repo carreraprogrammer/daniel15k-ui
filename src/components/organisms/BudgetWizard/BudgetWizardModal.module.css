@@ -15,10 +15,11 @@
 .content {
   --background: transparent;
   --color: var(--color-text-primary);
+  --overflow: hidden;
 }
 
 .panel {
-  min-height: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
 }
@@ -27,7 +28,8 @@
   flex: 1;
   display: grid;
   grid-template-rows: auto 1fr auto;
-  min-height: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
 /* ── Top bar ─────────────────────────────────────── */
@@ -140,6 +142,7 @@
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+  min-height: 0;
 }
 
 .gavetas {
@@ -641,14 +644,12 @@
   width: 36px;
   height: 36px;
   border-radius: 11px;
-  background: var(--cat-c);
-  color: #fff;
+  background: var(--cat-s);
+  color: var(--cat-c);
   display: grid;
   place-items: center;
   flex-shrink: 0;
-  font-family: var(--font-display, var(--font-sans));
-  font-weight: 700;
-  font-size: 16px;
+  font-size: 18px;
 }
 
 .gavetaExpandedMeta {
@@ -780,6 +781,57 @@
   flex-shrink: 0;
 }
 
+/* ── Goal committed row ─────────────────────────── */
+
+.goalCommittedRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1.5px solid rgba(245, 158, 11, 0.28);
+  border-radius: 14px;
+}
+
+.goalCommittedDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  flex-shrink: 0;
+  background: #F59E0B;
+}
+
+.goalCommittedName {
+  flex: 1;
+  min-width: 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.goalCommittedAmt {
+  font-family: var(--font-mono, monospace);
+  font-size: 14px;
+  font-weight: 600;
+  color: #B45309;
+  flex-shrink: 0;
+}
+
+.goalCommittedChip {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(245, 158, 11, 0.18);
+  color: #B45309;
+  flex-shrink: 0;
+}
+
 /* ── LowConfBlock ────────────────────────────────── */
 
 .lowConfBlock {
@@ -896,6 +948,66 @@
 .collapseBtn:hover {
   background: rgba(255,255,255,0.07);
   color: var(--color-text-primary);
+}
+
+/* ── Grace ribbon ──────────────────────────────── */
+
+.graceRibbon {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 14px;
+  background: rgba(var(--color-brand-rgb), 0.08);
+  border: 1px solid rgba(var(--color-brand-rgb), 0.22);
+  border-radius: 12px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: var(--color-text-primary);
+  line-height: 1.4;
+}
+
+.graceRibbon svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* ── Section header ────────────────────────────── */
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+}
+
+/* ── Ajustar actions ───────────────────────────── */
+
+.ajustarActions {
+  display: flex;
+  gap: 8px;
+}
+
+.discardBtn {
+  flex: 1;
+  padding: 0.95rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text-secondary);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* ── Plan summary delta ────────────────────────── */
+
+.planSummaryDelta {
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  color: var(--color-brand);
+  font-weight: 600;
+  margin-top: 2px;
 }
 
 /* ── Mobile adjustments ──────────────────────────── */

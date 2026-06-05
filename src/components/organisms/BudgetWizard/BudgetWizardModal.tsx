@@ -346,10 +346,12 @@ export const BudgetWizardModal = ({
   }, [wizardData, mode]);
 
   // ── Derived ────────────────────────────────────────────────────────────────
+  const goalContribution = wizardData?.goal_contribution?.amount ?? 0;
+  const goalLabel = wizardData?.goal_contribution?.label ?? 'Objetivo financiero';
   const totalPlanned = categories.reduce((s, cat) => s + catTotal(cat, subcatAmounts), 0);
-  const colchon = Math.max(0, totalIncome - totalPlanned);
-  const noAlcanza = totalIncome > 0 && totalPlanned > totalIncome * 1.02;
-  const gap = Math.max(0, totalPlanned - totalIncome);
+  const colchon = Math.max(0, totalIncome - totalPlanned - goalContribution);
+  const noAlcanza = totalIncome > 0 && (totalPlanned + goalContribution) > totalIncome * 1.02;
+  const gap = Math.max(0, (totalPlanned + goalContribution) - totalIncome);
 
 
 
@@ -512,6 +514,14 @@ export const BudgetWizardModal = ({
                     </div>
 
                     <div className={styles.gavetaStack}>
+                      {goalContribution > 0 && (
+                        <div className={styles.goalCommittedRow}>
+                          <span className={styles.goalCommittedDot} />
+                          <span className={styles.goalCommittedName}>{goalLabel}</span>
+                          <span className={styles.goalCommittedAmt}>${fmtK(goalContribution)}</span>
+                          <span className={styles.goalCommittedChip}>comprometido</span>
+                        </div>
+                      )}
                       {categories.map((cat, i) => {
                         const total = catTotal(cat, subcatAmounts);
 
@@ -581,6 +591,14 @@ export const BudgetWizardModal = ({
                     </div>
 
                     <div className={styles.gavetaStack}>
+                      {goalContribution > 0 && (
+                        <div className={styles.goalCommittedRow}>
+                          <span className={styles.goalCommittedDot} />
+                          <span className={styles.goalCommittedName}>{goalLabel}</span>
+                          <span className={styles.goalCommittedAmt}>${fmtK(goalContribution)}</span>
+                          <span className={styles.goalCommittedChip}>comprometido</span>
+                        </div>
+                      )}
                       {categories.map((cat) => {
                         const total = catTotal(cat, subcatAmounts);
                         const isExpanded = expandedCode === cat.code;

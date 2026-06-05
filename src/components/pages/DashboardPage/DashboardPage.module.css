@@ -1134,6 +1134,115 @@
   composes: progressStripStreakLabel;
 }
 
+/* ── Goal contribution card ──────────────────────────────────────────────── */
+
+.goalCard {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  border: 1.5px solid rgba(245, 158, 11, 0.35);
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(217, 119, 6, 0.04) 100%);
+  box-shadow: 0 2px 12px rgba(245, 158, 11, 0.12);
+  cursor: default;
+}
+
+.goalCard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(ellipse 70% 50% at 50% -20%, rgba(245, 158, 11, 0.18), transparent 65%);
+  pointer-events: none;
+}
+
+.goalCardLeft {
+  display: grid;
+  gap: 0.45rem;
+  padding: 1rem 1.1rem;
+}
+
+.goalCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.goalCardLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  letter-spacing: 0.01em;
+}
+
+.goalCardChip {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(245, 158, 11, 0.18);
+  color: #B45309;
+}
+
+.goalCardSubline {
+  color: var(--text-on-surface-muted);
+  font-size: var(--type-caption-size, 0.72rem);
+  line-height: 1.4;
+}
+
+.goalCardBar {
+  height: 4px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(245, 158, 11, 0.18);
+}
+
+.goalCardBarFill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #F59E0B, #D97706);
+  transition: width 700ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.goalCardPanel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 1rem;
+  border-left: 1px solid rgba(245, 158, 11, 0.25);
+  min-width: 72px;
+}
+
+.goalCardPanelIcon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.goalCardPanelVal {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #B45309;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.goalCardPanelLabel {
+  color: var(--text-on-surface-muted);
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
 /* ── Zone 3 — Gavetas ────────────────────────────────────────────────────── */
 
 .catList {

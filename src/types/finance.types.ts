@@ -84,6 +84,7 @@ export interface FinancialContextSummary {
   strategy: string;
   monthly_surplus_estimate: number;
   recommended_action: string | null;
+  monthly_goal_contribution?: number | null;
 }
 
 export interface SummaryMonthlyPlan {
@@ -466,6 +467,7 @@ export interface Debt {
     status: string;
     payoff_date?: string | null;
     notes?: string | null;
+    interest_last_applied_on?: string | null;
   };
 }
 
@@ -720,6 +722,8 @@ export interface BudgetProposal {
     obligations_total: number;
     debt_minimums_total: number;
     sinking_funds_total: number;
+    goal_contribution?: number;
+    goal_contribution_label?: string | null;
     total: number;
     by_category?: Record<string, { total: number; items: { name: string }[] }>;
   };
@@ -835,6 +839,12 @@ export interface WizardData {
     edit_hint?: string;
   };
   categories: WizardCategory[];
+  goal_contribution?: {
+    amount: number;
+    label: string | null;
+    phase: string | null;
+    configured: boolean;
+  };
 }
 
 export interface BudgetLineItem {

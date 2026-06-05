@@ -310,6 +310,89 @@ export const DashboardContent = () => {
                 </div>
               </div>
 
+              {/* ── ZONA 1.5a — Objetivo financiero comprometido ─────────── */}
+              {(() => {
+                const phase = summary.financial_context?.phase;
+                const goalAmount = summary.financial_context?.monthly_goal_contribution ?? 0;
+                if (!goalAmount || !['debt_payoff', 'emergency_fund'].includes(phase ?? '')) return null;
+
+                if (phase === 'debt_payoff') {
+                  const focal = summary.debts?.recommended_payment;
+                  const remaining = focal?.balance ?? 0;
+                  const monthsToPayoff = goalAmount > 0 && remaining > 0
+                    ? Math.ceil(remaining / goalAmount)
+                    : null;
+                  const subline = focal
+                    ? `${focal.name} · ${formatCurrencyCompact(remaining)} restantes`
+                    : 'Aporte mensual comprometido a pago de deuda';
+
+                  return (
+                    <div className={styles.goalCard} onClick={() => history.push('/debts')}>
+                      <div className={styles.goalCardLeft}>
+                        <div className={styles.goalCardHeader}>
+                          <span className={styles.goalCardLabel}>🎯 Pago de deudas</span>
+                          <span className={styles.goalCardChip}>COMPROMETIDO</span>
+                        </div>
+                        <span className={styles.goalCardSubline}>{subline}</span>
+                        <div className={styles.goalCardBar}>
+                          <div
+                            className={styles.goalCardBarFill}
+                            style={{ width: monthsToPayoff ? `${Math.min(100, Math.round((1 / monthsToPayoff) * 100))}%` : '5%' }}
+                          />
+                        </div>
+                      </div>
+                      <div className={styles.goalCardPanel}>
+                        <span className={styles.goalCardPanelIcon}>📅</span>
+                        {monthsToPayoff ? (
+                          <span className={styles.goalCardPanelVal}>{monthsToPayoff}</span>
+                        ) : (
+                          <span className={styles.goalCardPanelVal}>{formatCurrencyCompact(goalAmount)}</span>
+                        )}
+                        <span className={styles.goalCardPanelLabel}>{monthsToPayoff ? 'meses' : '/mes'}</span>
+                      </div>
+                    </div>
+                  );
+                }
+
+                // emergency_fund
+                const efGoalSummary = summary.savings_goals?.find(g => /emergencia|emergency/i.test(g.name));
+                const efCurrent = efGoalSummary?.current_amount ?? 0;
+                const plan = summary.monthly_plan;
+                const efTarget = (plan?.recurring_obligations_total ?? 0) + (plan?.debt_minimums_total ?? 0);
+                const efRemaining = Math.max(efTarget - efCurrent, 0);
+                const monthsToEf = goalAmount > 0 && efRemaining > 0
+                  ? Math.ceil(efRemaining / goalAmount)
+                  : null;
+                const efPct = efTarget > 0 ? Math.min(Math.round((efCurrent / efTarget) * 100), 100) : 0;
+                const sublineEf = efTarget > 0
+                  ? `${formatCurrencyCompact(efCurrent)} / ${formatCurrencyCompact(efTarget)} · 1 mes de cobertura`
+                  : 'Aporte mensual comprometido a fondo de emergencia';
+
+                return (
+                  <div className={styles.goalCard} onClick={() => history.push('/savings-goals')}>
+                    <div className={styles.goalCardLeft}>
+                      <div className={styles.goalCardHeader}>
+                        <span className={styles.goalCardLabel}>🛡 Fondo de emergencia</span>
+                        <span className={styles.goalCardChip}>COMPROMETIDO</span>
+                      </div>
+                      <span className={styles.goalCardSubline}>{sublineEf}</span>
+                      <div className={styles.goalCardBar}>
+                        <div className={styles.goalCardBarFill} style={{ width: `${efPct}%` }} />
+                      </div>
+                    </div>
+                    <div className={styles.goalCardPanel}>
+                      <span className={styles.goalCardPanelIcon}>📅</span>
+                      {monthsToEf ? (
+                        <span className={styles.goalCardPanelVal}>{monthsToEf}</span>
+                      ) : (
+                        <span className={styles.goalCardPanelVal}>{formatCurrencyCompact(goalAmount)}</span>
+                      )}
+                      <span className={styles.goalCardPanelLabel}>{monthsToEf ? 'meses' : '/mes'}</span>
+                    </div>
+                  </div>
+                );
+              })()}
+
               {/* ── ZONA 1.5b — Fondo de emergencia ──────────────────────── */}
               {(() => {
                 const efGoal  = summary.savings_goals?.find(g => /emergencia|emergency/i.test(g.name));
