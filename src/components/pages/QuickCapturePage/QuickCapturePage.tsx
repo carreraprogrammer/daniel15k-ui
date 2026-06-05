@@ -21,7 +21,7 @@ const PAYMENT_SOURCE_LABEL: Record<PaymentSource, string> = {
 };
 
 const PAYMENT_SOURCE_TONE: Record<PaymentSource, string> = {
-  credit_card: 'Crédito. Lo dejo pendiente.',
+  credit_card: 'Crédito. Sale del flujo.',
   debit: 'Débito. Sale de caja.',
   cash: 'Efectivo. Sin ruido.',
 };
@@ -43,9 +43,8 @@ const buildAgentMessage = (text: string, paymentSource: PaymentSource) => {
     'Registro rapido desde shortcut de la app.',
     `Medio de pago ya seleccionado por el usuario: ${paymentLabel} (${paymentSource}).`,
     'Usa el mismo comportamiento del agente de Telegram para clasificar y registrar el gasto.',
-    paymentSource === 'credit_card' ? 'Si registras una transaccion, usa credit_card_status="pending".' : null,
     `Mensaje del usuario: ${text}`,
-  ].filter(Boolean).join('\n');
+  ].join('\n');
 };
 
 export const QuickCapturePage = () => {
