@@ -4,7 +4,6 @@ import { lockClosedOutline, trophyOutline, chevronForwardOutline, arrowBackOutli
 import { resolveNamedIcon } from './iconRegistry';
 import type { BudgetLineItem, BudgetPlanDraft, WizardCategory, WizardData, WizardSubcategory } from '../../../types/finance.types';
 import { BrandMark } from '../../atoms/BrandMark';
-import { TradeOffCard } from './TradeOffCard';
 import styles from './BudgetWizardModal.module.css';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -92,51 +91,6 @@ function sliderMax(sub: WizardSubcategory): number {
   return Math.max(Math.round((s * 3) / 50_000) * 50_000, 500_000);
 }
 
-function buildTradeOffs(gap: number, categories: WizardCategory[], subcatAmounts: Record<string, number>) {
-  const getTotal = (code: string) =>
-    catTotal(categories.find((c) => c.code === code) ?? ({ subcategories: [] } as unknown as WizardCategory), subcatAmounts);
-
-  const discTotal = getTotal('discretionary');
-  const socialTotal = getTotal('social');
-  const investTotal = getTotal('investment');
-
-  const scaleCategory = (code: string, factor: number): Record<string, number> => {
-    const cat = categories.find((c) => c.code === code);
-    if (!cat) return {};
-    const result: Record<string, number> = {};
-    for (const sub of cat.subcategories) {
-      if (!sub.locked) result[sub.code] = Math.round((subcatAmounts[sub.code] ?? 0) * factor);
-    }
-    return result;
-  };
-
-  return [
-    {
-      tag: 'Camino A',
-      title: 'Reducir Discrecional y Social este mes',
-      body: `Cortamos ${fmtK(Math.round(discTotal * 0.3))} de elección y ${fmtK(Math.round(socialTotal * 0.3))} de social. Cubrimos sin tocar lo importante.`,
-      cost: '1 mes ajustado',
-      color: '#C9980A',
-      action: () => ({ ...scaleCategory('discretionary', 0.7), ...scaleCategory('social', 0.7) }),
-    },
-    {
-      tag: 'Camino B',
-      title: 'Reducir meta de inversión este mes',
-      body: `Bajamos la meta de inversión ${fmtK(Math.round(investTotal * 0.4))} por este mes. Cubrís el gap sin tocar gastos de vida.`,
-      cost: 'un mes sin avanzar en meta',
-      color: '#8A4FD8',
-      action: () => scaleCategory('investment', 0.6),
-    },
-    {
-      tag: 'Camino C',
-      title: 'Buscar ingreso extra este mes',
-      body: `Necesitás ${fmtK(gap)} extra. Un freelance, hora extra, o adelantar cobro pendiente podría cubrir el gap.`,
-      cost: 'esfuerzo extra',
-      color: '#0E96AD',
-      action: () => ({}),
-    },
-  ];
-}
 
 // ── LowConfBlock ───────────────────────────────────────────────────────────────
 
@@ -801,8 +755,6 @@ export const BudgetWizardModal = ({
   const effectiveGoal = goalContribution + goalExtra;
   const totalPlanned = categories.reduce((s, cat) => s + catTotal(cat, subcatAmounts), 0);
   const porAsignar = totalIncome - effectiveGoal - totalPlanned;
-  const noAlcanza = totalIncome > 0 && porAsignar < -(totalIncome * 0.02);
-  const gap = Math.max(0, -porAsignar);
 
   const changesCount = Object.keys(subcatAmounts).filter(
     (code) => subcatAmounts[code] !== (originalAmountsRef.current[code] ?? subcatAmounts[code])
@@ -948,32 +900,8 @@ export const BudgetWizardModal = ({
                   ))}
                 </div>
 
-                {noAlcanza && (
-                  <div className={styles.tradeOffSection}>
-                    <div className={styles.coachLine}>
-                      <div className={styles.coachDot}>!</div>
-                      <div className={styles.coachText}>
-                        Tu presupuesto supera el ingreso en {fmt(gap)}. Elegí un camino o ajustá manualmente tocando cualquier categoría.
-                      </div>
-                    </div>
-                    {buildTradeOffs(gap, categories, subcatAmounts).map((t) => (
-                      <TradeOffCard
-                        key={t.tag}
-                        tag={t.tag}
-                        title={t.title}
-                        body={t.body}
-                        cost={t.cost}
-                        color={t.color}
-                        onChoose={() => {
-                          const changes = t.action();
-                          setSubcatAmounts((prev) => ({ ...prev, ...changes }));
-                        }}
-                      />
-                    ))}
-                  </div>
-                )}
 
-                {mode === 'replantear' && !noAlcanza && (
+                {mode === 'replantear' && (
                   <div className={styles.coachLine} style={{ margin: '14px 16px 0' }}>
                     <div className={styles.coachDot}>✦</div>
                     <div className={styles.coachText}>
