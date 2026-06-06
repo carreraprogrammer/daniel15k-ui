@@ -60,11 +60,17 @@ function detectMode(hasPlanHistory: boolean, isEditMode: boolean, incomeNeedsSet
   return 'crear';
 }
 
+// subcatAmounts is keyed by "catCode:subCode" to avoid collisions when the same
+// sub.code exists in multiple categories (e.g. "ejercicio" in both necessary + investment).
+function subKey(catCode: string, subCode: string): string {
+  return `${catCode}:${subCode}`;
+}
+
 function buildSubcatInit(categories: WizardCategory[]): Record<string, number> {
   const init: Record<string, number> = {};
   for (const cat of categories) {
     for (const sub of cat.subcategories) {
-      init[sub.code] = sub.suggested_amount;
+      init[subKey(cat.code, sub.code)] = sub.suggested_amount;
     }
   }
   return init;
@@ -74,7 +80,7 @@ function buildPlanLines(categories: WizardCategory[], subcatAmounts: Record<stri
   const lines: BudgetLineItem[] = [];
   for (const cat of categories) {
     for (const sub of cat.subcategories) {
-      const amt = subcatAmounts[sub.code] ?? 0;
+      const amt = subcatAmounts[subKey(cat.code, sub.code)] ?? 0;
       if (amt > 0) lines.push({ subcategory_code: sub.code, amount: amt });
     }
   }
@@ -82,7 +88,7 @@ function buildPlanLines(categories: WizardCategory[], subcatAmounts: Record<stri
 }
 
 function catTotal(cat: WizardCategory, subcatAmounts: Record<string, number>): number {
-  return cat.subcategories.reduce((s, sub) => s + (subcatAmounts[sub.code] ?? 0), 0);
+  return cat.subcategories.reduce((s, sub) => s + (subcatAmounts[subKey(cat.code, sub.code)] ?? 0), 0);
 }
 
 function sliderMax(sub: WizardSubcategory): number {
@@ -103,12 +109,13 @@ const LOW_CONF_MAGNITUDES = [
 ];
 
 interface LowConfBlockProps {
+  catCode: string;
   lowSubs: WizardSubcategory[];
   subcatAmounts: Record<string, number>;
   onSetAmount: (code: string, amount: number) => void;
 }
 
-function LowConfBlock({ lowSubs, subcatAmounts, onSetAmount }: LowConfBlockProps) {
+function LowConfBlock({ catCode, lowSubs, subcatAmounts, onSetAmount }: LowConfBlockProps) {
   if (lowSubs.length === 0) return null;
   return (
     <div className={styles.lowConfBlock}>
@@ -116,7 +123,7 @@ function LowConfBlock({ lowSubs, subcatAmounts, onSetAmount }: LowConfBlockProps
         {lowSubs.length === 1 ? '1 cosa que no sé' : `${lowSubs.length} cosas que no sé`}
       </div>
       {lowSubs.map((sub) => {
-        const current = subcatAmounts[sub.code] ?? sub.suggested_amount;
+        const current = subcatAmounts[subKey(catCode, sub.code)] ?? sub.suggested_amount;
         return (
           <div key={sub.code} className={styles.lowConfItem}>
             <div className={styles.lowConfQuestion}>¿{sub.name} cómo va para ti?</div>
@@ -126,7 +133,7 @@ function LowConfBlock({ lowSubs, subcatAmounts, onSetAmount }: LowConfBlockProps
                   key={m.label}
                   type="button"
                   className={`${styles.lowConfChip} ${current === m.amt ? styles.lowConfChipActive : ''}`}
-                  onClick={() => onSetAmount(sub.code, m.amt)}
+                  onClick={() => onSetAmount(subKey(catCode, sub.code), m.amt)}
                 >
                   {m.label}
                 </button>
@@ -411,15 +418,16 @@ function FocusEditor({ cat, subcatAmounts, porAsignar, totalIncome, planLocked =
               key={sub.code}
               sub={sub}
               catColor={col.c}
-              amount={subcatAmounts[sub.code] ?? 0}
+              amount={subcatAmounts[subKey(cat.code, sub.code)] ?? 0}
               locked={sub.locked || planLocked}
-              onChange={(amt) => onSetSub(sub.code, amt)}
+              onChange={(amt) => onSetSub(subKey(cat.code, sub.code), amt)}
             />
           ))}
         </div>
 
         {!planLocked && (
           <LowConfBlock
+            catCode={cat.code}
             lowSubs={lowSubs}
             subcatAmounts={subcatAmounts}
             onSetAmount={onSetSub}
@@ -510,14 +518,15 @@ function WizardFlow({ cats, goalContribution, activeIndex, porAsignar, totalInco
               key={sub.code}
               sub={sub}
               catColor={col.c}
-              amount={subcatAmounts[sub.code] ?? 0}
+              amount={subcatAmounts[subKey(cat.code, sub.code)] ?? 0}
               locked={sub.locked}
-              onChange={(amt) => onSetSub(sub.code, amt)}
+              onChange={(amt) => onSetSub(subKey(cat.code, sub.code), amt)}
             />
           ))}
         </div>
 
         <LowConfBlock
+          catCode={cat.code}
           lowSubs={lowSubs}
           subcatAmounts={subcatAmounts}
           onSetAmount={onSetSub}
@@ -801,7 +810,7 @@ export const BudgetWizardModal = ({
     const share = Math.round(porAsignar / unlocked.length / 10_000) * 10_000;
     setSubcatAmounts((prev) => {
       const next = { ...prev };
-      unlocked.forEach((s) => { next[s.code] = (next[s.code] ?? 0) + share; });
+      unlocked.forEach((s) => { const k = subKey(catCode, s.code); next[k] = (next[k] ?? 0) + share; });
       return next;
     });
     setLeftoverOpen(false);
@@ -809,13 +818,17 @@ export const BudgetWizardModal = ({
 
   const splitEvenly = () => {
     if (porAsignar <= 0) return;
-    const allUnlocked: WizardSubcategory[] = [];
-    for (const cat of categories) allUnlocked.push(...cat.subcategories.filter((s) => !s.locked));
+    const allUnlocked: Array<{ catCode: string; sub: WizardSubcategory }> = [];
+    for (const cat of categories) {
+      for (const sub of cat.subcategories) {
+        if (!sub.locked) allUnlocked.push({ catCode: cat.code, sub });
+      }
+    }
     if (allUnlocked.length === 0) return;
     const share = Math.round(porAsignar / allUnlocked.length / 10_000) * 10_000;
     setSubcatAmounts((prev) => {
       const next = { ...prev };
-      allUnlocked.forEach((s) => { next[s.code] = (next[s.code] ?? 0) + share; });
+      allUnlocked.forEach(({ catCode: cc, sub: s }) => { const k = subKey(cc, s.code); next[k] = (next[k] ?? 0) + share; });
       return next;
     });
     setLeftoverOpen(false);
