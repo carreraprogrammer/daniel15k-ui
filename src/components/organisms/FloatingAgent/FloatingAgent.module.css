@@ -1,6 +1,6 @@
 .anchor {
   position: fixed;
-  z-index: 150;
+  z-index: calc(var(--z-modal) - 1);
   width: var(--agent-bubble-width);
   height: var(--agent-bubble-height);
   pointer-events: none;
