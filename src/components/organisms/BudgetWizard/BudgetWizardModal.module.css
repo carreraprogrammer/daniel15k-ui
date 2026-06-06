@@ -843,6 +843,21 @@
   transition: width 60ms linear;
 }
 
+.sliderThumb {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2.5px solid var(--cat-c);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+  transform: translateX(-50%);
+  pointer-events: none;
+  top: 50%;
+  margin-top: -11px;
+  transition: left 60ms linear;
+}
+
 .sliderInput {
   position: absolute;
   left: 0; right: 0;

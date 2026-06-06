@@ -332,6 +332,7 @@ function SliderRow({ sub, catColor, amount, locked = false, onChange }: SliderRo
       <div className={styles.sliderTrackWrap}>
         <div className={styles.sliderTrackBg} />
         <div className={styles.sliderTrackFill} style={{ width: `${fillPct}%` }} />
+        <div className={styles.sliderThumb} style={{ left: `${fillPct}%` }} />
         <input
           type="range"
           className={styles.sliderInput}
