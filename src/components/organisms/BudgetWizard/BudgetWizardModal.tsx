@@ -1,19 +1,9 @@
-// BudgetWizardModal v2 — aligned with real backend architecture.
-// Key changes vs v1:
-//  · subcatAmounts (per subcategory code) replaces gavetaAmounts (per category)
-//  · Gaveta is a navigable view (derived total), not a direct input
-//  · Subcategories visible with source + confidence chips (SubcatRow)
-//  · ModeCrear: step through categories, expanded view with low-confidence question block
-//  · ModeReplantear: one gaveta expanded + rest collapsed
-//  · ModeAjustar: focused category expanded with impact ripple
-//  · buildPlanLines uses subcatAmounts directly (no proportional split)
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { IonContent, IonIcon, IonModal } from '@ionic/react';
+import { lockClosedOutline, trophyOutline, chevronForwardOutline, arrowBackOutline, closeOutline, checkmarkOutline, sparklesOutline } from 'ionicons/icons';
 import { resolveNamedIcon } from './iconRegistry';
 import type { BudgetLineItem, BudgetPlanDraft, WizardCategory, WizardData, WizardSubcategory } from '../../../types/finance.types';
 import { BrandMark } from '../../atoms/BrandMark';
-import { SubcatRow } from './SubcatRow';
-import { CoachBubble } from './CoachBubble';
 import { TradeOffCard } from './TradeOffCard';
 import styles from './BudgetWizardModal.module.css';
 
@@ -36,20 +26,25 @@ interface BudgetWizardModalProps {
 
 // ── Colors ─────────────────────────────────────────────────────────────────────
 
-const CAT_COLORS: Record<string, { c: string; s: string }> = {
-  committed:     { c: '#C0392B', s: 'rgba(192,57,43,0.16)' },
-  necessary:     { c: '#D4732A', s: 'rgba(212,115,42,0.16)' },
-  discretionary: { c: '#C9980A', s: 'rgba(201,152,10,0.16)' },
-  investment:    { c: '#1A9E4A', s: 'rgba(26,158,74,0.16)' },
-  social:        { c: '#8A4FD8', s: 'rgba(138,79,216,0.16)' },
+const CAT_COLORS: Record<string, { c: string }> = {
+  committed:     { c: '#C0392B' },
+  necessary:     { c: '#D4732A' },
+  discretionary: { c: '#C9980A' },
+  investment:    { c: '#1A9E4A' },
+  social:        { c: '#8A4FD8' },
 };
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
 function fmtK(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1)}M`;
-  if (n >= 1_000) return `${Math.round(n / 1_000)}K`;
+  const abs = Math.abs(n);
+  if (abs >= 1_000_000) return `${(n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1)}M`;
+  if (abs >= 1_000) return `${Math.round(n / 1_000)}K`;
   return `${n}`;
+}
+
+function fmt(n: number): string {
+  return `$${fmtK(n)}`;
 }
 
 function formatMonthLabel(month: string): string {
@@ -91,174 +86,11 @@ function catTotal(cat: WizardCategory, subcatAmounts: Record<string, number>): n
   return cat.subcategories.reduce((s, sub) => s + (subcatAmounts[sub.code] ?? 0), 0);
 }
 
-function toDisplaySource(sub: WizardSubcategory): string {
-  const s = sub.source_of_truth ?? sub.source;
-  if (!s) return 'benchmarks';
-  if (s === 'recurring') return 'recurring_obligations';
-  if (s === 'planned_expense') return 'planned_expenses';
-  if (s === 'history') return 'transactions';
-  if (s === 'benchmark') return 'benchmarks';
-  return s;
+function sliderMax(sub: WizardSubcategory): number {
+  const s = sub.suggested_amount;
+  if (s === 0) return 2_000_000;
+  return Math.max(Math.round((s * 3) / 50_000) * 50_000, 500_000);
 }
-
-function getCoachMessage(mode: WizardMode, cat: WizardCategory | null): string {
-  if (mode === 'crear') {
-    if (!cat) return 'Revisa el resumen antes de confirmar el plan.';
-    const lockedCount = cat.subcategories.filter((s) => s.locked).length;
-    const lowCount = cat.subcategories.filter((s) => s.confidence === 'low').length;
-    if (cat.code === 'committed') {
-      return lockedCount > 0
-        ? `Encontré ${lockedCount} obligación${lockedCount !== 1 ? 'es' : ''} recurrente${lockedCount !== 1 ? 's' : ''} detectada${lockedCount !== 1 ? 's' : ''} automáticamente. El resto completalo con lo que ya prometiste.`
-        : 'Lo que ya prometiste — arriendo, créditos, seguros. Esto no cambia mes a mes.';
-    }
-    if (lowCount > 0) {
-      return `Armé ${cat.name.toLowerCase()} con lo que sé. Para ${lowCount} subcategoría${lowCount !== 1 ? 's' : ''} no tengo data tuya — usé un estimado de base. Ajustá si va alto o bajo.`;
-    }
-    return `Armé ${cat.name.toLowerCase()} con tu historial. Revisá que los montos van bien.`;
-  }
-  if (mode === 'replantear') {
-    return 'Te propongo el plan basado en tu historial. Tocá cualquier gaveta para ver el desglose y firmar cuando estés listo.';
-  }
-  if (mode === 'ajustar' && cat) {
-    return `Ajustá las subcategorías de ${cat.name.toLowerCase()}. Te muestro el impacto en tu colchón en tiempo real.`;
-  }
-  return '';
-}
-
-// ── GavetaExpandedLocal ────────────────────────────────────────────────────────
-
-interface GavetaExpandedLocalProps {
-  cat: WizardCategory;
-  subcatAmounts: Record<string, number>;
-  highlight?: boolean;
-  onSetAmount?: (code: string, amt: number) => void;
-  planLocked?: boolean;
-}
-
-function GavetaExpandedLocal({ cat, subcatAmounts, highlight = false, onSetAmount, planLocked = false }: GavetaExpandedLocalProps) {
-  const col = CAT_COLORS[cat.code] ?? { c: '#7A6E5E', s: 'rgba(122,110,94,0.16)' };
-  const total = catTotal(cat, subcatAmounts);
-  return (
-    <div
-      className={`${styles.gavetaExpanded} ${highlight ? styles.gavetaExpandedHighlight : ''}`}
-      style={{ '--cat-c': col.c, '--cat-s': col.s } as CSSProperties}
-    >
-      <div className={styles.gavetaExpandedHeader}>
-        <div className={styles.gavetaExpandedIcon}><IonIcon icon={resolveNamedIcon(cat.icon)} /></div>
-        <div className={styles.gavetaExpandedMeta}>
-          <div className={styles.gavetaExpandedName}>
-            {cat.name}
-            <span className={styles.gavetaExpandedSubCount}>· {cat.subcategories.length} sub</span>
-          </div>
-          <div className={styles.gavetaExpandedDesc}>{cat.description}</div>
-        </div>
-        <div className={styles.gavetaExpandedTotalCol}>
-          <div className={styles.gavetaExpandedTotalAmt}>${fmtK(total)}</div>
-          <div className={styles.gavetaExpandedTotalLabel}>suma de sub</div>
-        </div>
-      </div>
-      <div>
-        {cat.subcategories.map((sub) => (
-          <SubcatRow
-            key={sub.code}
-            name={sub.name}
-            icon={sub.icon}
-            amt={subcatAmounts[sub.code] ?? 0}
-            source={toDisplaySource(sub)}
-            confidence={sub.confidence}
-            locked={sub.locked}
-            hint={sub.edit_hint ?? null}
-            onSetAmount={onSetAmount && !planLocked ? (newAmt) => onSetAmount(sub.code, newAmt) : undefined}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ── GavetaCollapsedRow ─────────────────────────────────────────────────────────
-
-interface GavetaCollapsedRowProps {
-  cat: WizardCategory;
-  totalAmt: number;
-  hint?: string;
-  faded?: boolean;
-  onClick?: () => void;
-}
-
-function GavetaCollapsedRow({ cat, totalAmt, hint, faded = false, onClick }: GavetaCollapsedRowProps) {
-  const col = CAT_COLORS[cat.code] ?? { c: '#7A6E5E' };
-  return (
-    <button
-      type="button"
-      className={`${styles.gavetaCollapsed} ${faded ? styles.gavetaCollapsedFaded : ''}`}
-      onClick={onClick}
-      disabled={!onClick}
-    >
-      <span className={styles.gavetaCollapsedDot} style={{ background: col.c }} />
-      <div className={styles.gavetaCollapsedCopy}>
-        <span className={styles.gavetaCollapsedName}>
-          {cat.name}
-          <span className={styles.gavetaCollapsedSubCount}>· {cat.subcategories.length} sub</span>
-        </span>
-        {hint && <span className={styles.gavetaCollapsedHint}>{hint}</span>}
-      </div>
-      <span className={styles.gavetaCollapsedAmt}>${fmtK(totalAmt)}</span>
-      {onClick && <span className={styles.gavetaCollapsedChevron}>›</span>}
-    </button>
-  );
-}
-
-// ── LowConfBlock ───────────────────────────────────────────────────────────────
-
-const LOW_CONF_MAGNITUDES = [
-  { label: '$50K',  amt: 50_000 },
-  { label: '$100K', amt: 100_000 },
-  { label: '$200K', amt: 200_000 },
-  { label: '$400K', amt: 400_000 },
-  { label: 'No suelo gastar', amt: 0 },
-];
-
-interface LowConfBlockProps {
-  lowSubs: WizardSubcategory[];
-  subcatAmounts: Record<string, number>;
-  onSetAmount: (code: string, amount: number) => void;
-}
-
-function LowConfBlock({ lowSubs, subcatAmounts, onSetAmount }: LowConfBlockProps) {
-  if (lowSubs.length === 0) return null;
-  return (
-    <div className={styles.lowConfBlock}>
-      <div className={styles.lowConfTag}>
-        {lowSubs.length === 1 ? '1 cosa que no sé' : `${lowSubs.length} cosas que no sé`}
-      </div>
-      {lowSubs.map((sub) => {
-        const current = subcatAmounts[sub.code] ?? sub.suggested_amount;
-        return (
-          <div key={sub.code} className={styles.lowConfItem}>
-            <div className={styles.lowConfQuestion}>
-              ¿{sub.name} cómo va para ti?
-            </div>
-            <div className={styles.lowConfChips}>
-              {LOW_CONF_MAGNITUDES.map((m) => (
-                <button
-                  key={m.label}
-                  type="button"
-                  className={`${styles.lowConfChip} ${current === m.amt ? styles.lowConfChipActive : ''}`}
-                  onClick={() => onSetAmount(sub.code, m.amt)}
-                >
-                  {m.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-// ── TradeOff helpers ──────────────────────────────────────────────────────────
 
 function buildTradeOffs(gap: number, categories: WizardCategory[], subcatAmounts: Record<string, number>) {
   const getTotal = (code: string) =>
@@ -306,7 +138,610 @@ function buildTradeOffs(gap: number, categories: WizardCategory[], subcatAmounts
   ];
 }
 
-// ── Component ──────────────────────────────────────────────────────────────────
+// ── LowConfBlock ───────────────────────────────────────────────────────────────
+
+const LOW_CONF_MAGNITUDES = [
+  { label: '$50K',  amt: 50_000 },
+  { label: '$100K', amt: 100_000 },
+  { label: '$200K', amt: 200_000 },
+  { label: '$400K', amt: 400_000 },
+  { label: 'No suelo gastar', amt: 0 },
+];
+
+interface LowConfBlockProps {
+  lowSubs: WizardSubcategory[];
+  subcatAmounts: Record<string, number>;
+  onSetAmount: (code: string, amount: number) => void;
+}
+
+function LowConfBlock({ lowSubs, subcatAmounts, onSetAmount }: LowConfBlockProps) {
+  if (lowSubs.length === 0) return null;
+  return (
+    <div className={styles.lowConfBlock}>
+      <div className={styles.lowConfTag}>
+        {lowSubs.length === 1 ? '1 cosa que no sé' : `${lowSubs.length} cosas que no sé`}
+      </div>
+      {lowSubs.map((sub) => {
+        const current = subcatAmounts[sub.code] ?? sub.suggested_amount;
+        return (
+          <div key={sub.code} className={styles.lowConfItem}>
+            <div className={styles.lowConfQuestion}>¿{sub.name} cómo va para ti?</div>
+            <div className={styles.lowConfChips}>
+              {LOW_CONF_MAGNITUDES.map((m) => (
+                <button
+                  key={m.label}
+                  type="button"
+                  className={`${styles.lowConfChip} ${current === m.amt ? styles.lowConfChipActive : ''}`}
+                  onClick={() => onSetAmount(sub.code, m.amt)}
+                >
+                  {m.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── PorAsignarHero ─────────────────────────────────────────────────────────────
+
+interface PorAsignarHeroProps {
+  porAsignar: number;
+  totalIncome: number;
+  goalContribution: number;
+  totalPlanned: number;
+}
+
+function PorAsignarHero({ porAsignar, totalIncome, goalContribution, totalPlanned }: PorAsignarHeroProps) {
+  const isZero = porAsignar === 0;
+  const isOver = porAsignar < 0;
+  const allocated = goalContribution + totalPlanned;
+  const pct = totalIncome > 0 ? Math.min(allocated / totalIncome, 1) : 0;
+
+  const heroClass = [styles.hero, isZero ? styles.heroZero : isOver ? styles.heroOver : ''].filter(Boolean).join(' ');
+  const amtClass = [styles.heroAmount, isZero ? styles.heroAmtZero : isOver ? styles.heroAmtOver : ''].filter(Boolean).join(' ');
+  const statusClass = [styles.heroStatus, isZero ? styles.heroStatusZero : isOver ? styles.heroStatusOver : ''].filter(Boolean).join(' ');
+  const fillClass = [styles.heroMeterFill, isZero ? styles.heroMeterFull : isOver ? styles.heroMeterOver : ''].filter(Boolean).join(' ');
+
+  const statusText = isZero
+    ? '✓ Cada peso tiene destino'
+    : isOver
+    ? `Te pasaste ${fmt(-porAsignar)}`
+    : `${fmt(porAsignar)} por asignar`;
+
+  return (
+    <div className={heroClass}>
+      <div className={styles.heroEyebrow}>
+        <span className={styles.heroDot} />
+        Por asignar
+      </div>
+      <div className={amtClass}>
+        <span className={styles.heroCur}>$</span>
+        {fmtK(Math.abs(porAsignar))}
+      </div>
+      <div className={statusClass}>{statusText}</div>
+      <div className={styles.heroMeterWrap}>
+        <div className={fillClass} style={{ width: `${pct * 100}%` }} />
+      </div>
+      <div className={styles.heroFoot}>
+        <span>Ingreso {fmt(totalIncome)}</span>
+        <span>Asignado {fmt(allocated)}</span>
+      </div>
+    </div>
+  );
+}
+
+// ── StepPorAsignar (compact header for overlays) ───────────────────────────────
+
+interface StepPorAsignarProps {
+  porAsignar: number;
+  totalIncome: number;
+  allocated: number;
+  step?: string;
+}
+
+function StepPorAsignar({ porAsignar, totalIncome, allocated, step }: StepPorAsignarProps) {
+  const isZero = porAsignar === 0;
+  const isOver = porAsignar < 0;
+  const pct = totalIncome > 0 ? Math.min(allocated / totalIncome, 1) : 0;
+  const valClass = [styles.stepPorVal, isZero ? styles.stepPorValZero : isOver ? styles.stepPorValOver : ''].filter(Boolean).join(' ');
+  const fillClass = [styles.stepMeterFill, isZero ? styles.stepMeterFull : ''].filter(Boolean).join(' ');
+
+  return (
+    <div className={styles.stepPorAsignar}>
+      <span className={styles.stepPorLbl}>Por asignar</span>
+      <span className={valClass}>
+        <span className={styles.stepPorCur}>$</span>
+        {fmtK(Math.abs(porAsignar))}
+      </span>
+      {step && <span className={styles.stepCount}>{step}</span>}
+      <div className={styles.stepMeterWrap}>
+        <div className={fillClass} style={{ width: `${pct * 100}%` }} />
+      </div>
+    </div>
+  );
+}
+
+// ── GoalCard ───────────────────────────────────────────────────────────────────
+
+interface GoalCardProps {
+  amount: number;
+  label: string;
+  phase?: string | null;
+  totalIncome: number;
+}
+
+function GoalCard({ amount, label, phase, totalIncome }: GoalCardProps) {
+  const pct = totalIncome > 0 ? Math.min(amount / totalIncome, 1) : 0;
+  const phaseLabel = phase === 'emergency_fund' ? 'Fondo emergencia' : phase === 'debt_payoff' ? 'Pago deudas' : 'Objetivo';
+
+  return (
+    <div className={styles.goalCard}>
+      <div className={styles.goalRow}>
+        <div className={styles.goalGem}>
+          <IonIcon icon={trophyOutline} />
+        </div>
+        <div className={styles.goalBody}>
+          <div className={styles.goalName}>
+            {label}
+            <span className={styles.goalTag}>{phaseLabel}</span>
+          </div>
+          <div className={styles.goalWhy}>Separado antes de distribuir el resto</div>
+        </div>
+        <div className={styles.goalRight}>
+          <span className={styles.goalAmt}>{fmt(amount)}</span>
+          <IonIcon icon={lockClosedOutline} className={styles.goalLock} />
+        </div>
+      </div>
+      <div className={styles.goalProg}>
+        <div className={styles.goalProgFill} style={{ width: `${pct * 100}%` }} />
+      </div>
+      <div className={styles.goalMeta}>
+        <span>{(pct * 100).toFixed(0)}% del ingreso</span>
+        <span>{fmt(amount)} / mes</span>
+      </div>
+    </div>
+  );
+}
+
+// ── CategoryFlatRow ────────────────────────────────────────────────────────────
+
+interface CategoryFlatRowProps {
+  cat: WizardCategory;
+  subcatAmounts: Record<string, number>;
+  totalIncome: number;
+  onClick: () => void;
+}
+
+function CategoryFlatRow({ cat, subcatAmounts, totalIncome, onClick }: CategoryFlatRowProps) {
+  const col = CAT_COLORS[cat.code] ?? { c: '#7A6E5E' };
+  const total = catTotal(cat, subcatAmounts);
+  const pct = totalIncome > 0 ? Math.min(total / totalIncome, 1) : 0;
+  const subCount = cat.subcategories.length;
+
+  return (
+    <button
+      type="button"
+      className={styles.catRow}
+      style={{ '--cat-c': col.c } as CSSProperties}
+      onClick={onClick}
+    >
+      <div className={styles.catGem}>
+        <IonIcon icon={resolveNamedIcon(cat.icon)} />
+      </div>
+      <div className={styles.catMain}>
+        <div className={styles.catName}>{cat.name}</div>
+        <div className={styles.catWhy}>{cat.description}</div>
+      </div>
+      <div className={styles.catRight}>
+        <span className={styles.catAmt}>{fmt(total)}</span>
+        <span className={styles.catSubs}>{subCount} sub</span>
+      </div>
+      <div className={styles.catBarWrap}>
+        <div className={styles.catBar}>
+          <div className={styles.catBarFill} style={{ width: `${pct * 100}%` }} />
+        </div>
+      </div>
+    </button>
+  );
+}
+
+// ── SliderRow (subcategory slider editor) ──────────────────────────────────────
+
+interface SliderRowProps {
+  sub: WizardSubcategory;
+  catColor: string;
+  amount: number;
+  locked?: boolean;
+  onChange: (amt: number) => void;
+}
+
+function SliderRow({ sub, catColor, amount, locked = false, onChange }: SliderRowProps) {
+  const max = sliderMax(sub);
+  const step = max >= 1_000_000 ? 25_000 : 10_000;
+  const fillPct = max > 0 ? Math.min(amount / max, 1) * 100 : 0;
+
+  return (
+    <div
+      className={`${styles.sliderRow} ${locked ? styles.sliderRowLocked : ''}`}
+      style={{ '--cat-c': catColor } as CSSProperties}
+    >
+      <div className={styles.sliderHead}>
+        <div className={styles.sliderGem}>
+          <IonIcon icon={resolveNamedIcon(sub.icon)} />
+        </div>
+        <span className={styles.sliderName}>{sub.name}</span>
+        <span className={styles.sliderAmt}>{fmt(amount)}</span>
+      </div>
+      <div className={styles.sliderTrackWrap}>
+        <div className={styles.sliderTrackBg} />
+        <div className={styles.sliderTrackFill} style={{ width: `${fillPct}%` }} />
+        <input
+          type="range"
+          className={styles.sliderInput}
+          min={0}
+          max={max}
+          step={step}
+          value={amount}
+          disabled={locked}
+          onChange={(e) => onChange(Number(e.target.value))}
+        />
+      </div>
+      {sub.edit_hint && <div className={styles.sliderHint}>{sub.edit_hint}</div>}
+    </div>
+  );
+}
+
+// ── FocusEditor (full-screen category editor) ──────────────────────────────────
+
+interface FocusEditorProps {
+  cat: WizardCategory;
+  subcatAmounts: Record<string, number>;
+  porAsignar: number;
+  totalIncome: number;
+  planLocked?: boolean;
+  onSetSub: (code: string, amt: number) => void;
+  onClose: () => void;
+}
+
+function FocusEditor({ cat, subcatAmounts, porAsignar, totalIncome, planLocked = false, onSetSub, onClose }: FocusEditorProps) {
+  const col = CAT_COLORS[cat.code] ?? { c: '#7A6E5E' };
+  const total = catTotal(cat, subcatAmounts);
+  const allocated = totalIncome - porAsignar;
+  const lowSubs = cat.subcategories.filter((s) => s.confidence === 'low' && !s.locked);
+
+  return (
+    <div className={styles.stepOverlay} style={{ '--cat-c': col.c } as CSSProperties}>
+      <div className={styles.stepTop}>
+        <div className={styles.stepTopRow}>
+          <div className={styles.stepSlot}>
+            <button type="button" className={styles.stepIconBtn} onClick={onClose}>
+              <IonIcon icon={arrowBackOutline} />
+            </button>
+          </div>
+          <StepPorAsignar
+            porAsignar={porAsignar}
+            totalIncome={totalIncome}
+            allocated={allocated}
+          />
+          <div className={styles.stepSlot}>
+            {planLocked && (
+              <button type="button" className={styles.stepIconBtn} onClick={onClose}>
+                <IonIcon icon={closeOutline} />
+              </button>
+            )}
+          </div>
+        </div>
+        <div className={styles.stepMeterWrap} style={{ marginTop: 0, display: 'none' }} />
+      </div>
+
+      <div className={styles.stepBody}>
+        <div className={styles.stepId}>
+          <div className={styles.stepIdGem}>
+            <IonIcon icon={resolveNamedIcon(cat.icon)} />
+          </div>
+          <div className={styles.stepIdMeta}>
+            <div className={styles.stepIdName}>{cat.name}</div>
+            <div className={styles.stepIdDesc}>{cat.description}</div>
+          </div>
+          <div className={styles.stepIdTotal}>{fmt(total)}</div>
+        </div>
+
+        <div className={styles.stepKicker}>Subcategorías</div>
+        <div className={styles.stepSubs}>
+          {cat.subcategories.map((sub) => (
+            <SliderRow
+              key={sub.code}
+              sub={sub}
+              catColor={col.c}
+              amount={subcatAmounts[sub.code] ?? 0}
+              locked={sub.locked || planLocked}
+              onChange={(amt) => onSetSub(sub.code, amt)}
+            />
+          ))}
+        </div>
+
+        {!planLocked && (
+          <LowConfBlock
+            lowSubs={lowSubs}
+            subcatAmounts={subcatAmounts}
+            onSetAmount={onSetSub}
+          />
+        )}
+      </div>
+
+      <div className={styles.stepDock}>
+        <button
+          type="button"
+          className={`${styles.dockBtn} ${styles.dockPrimary}`}
+          onClick={onClose}
+        >
+          <IonIcon icon={checkmarkOutline} />
+          {planLocked ? 'Cerrar' : 'Listo'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── WizardFlow (step-by-step crear mode) ───────────────────────────────────────
+
+interface WizardFlowProps {
+  cats: WizardCategory[];
+  goalContribution: number;
+  activeIndex: number;
+  porAsignar: number;
+  totalIncome: number;
+  subcatAmounts: Record<string, number>;
+  onSetSub: (code: string, amt: number) => void;
+  onBack: () => void;
+  onNext: () => void;
+  onClose: () => void;
+}
+
+function WizardFlow({ cats, goalContribution, activeIndex, porAsignar, totalIncome, subcatAmounts, onSetSub, onBack, onNext, onClose }: WizardFlowProps) {
+  const cat = cats[activeIndex];
+  if (!cat) return null;
+  const col = CAT_COLORS[cat.code] ?? { c: '#7A6E5E' };
+  const total = catTotal(cat, subcatAmounts);
+  const isLast = activeIndex >= cats.length - 1;
+  const allocated = totalIncome - porAsignar;
+  const stepLabel = `${activeIndex + 1} / ${cats.length}`;
+  const lowSubs = cat.subcategories.filter((s) => s.confidence === 'low' && !s.locked);
+
+  return (
+    <div className={styles.stepOverlay} style={{ '--cat-c': col.c } as CSSProperties}>
+      <div className={styles.stepTop}>
+        <div className={styles.stepTopRow}>
+          <div className={styles.stepSlot}>
+            <button type="button" className={styles.stepIconBtn} onClick={onBack}>
+              <IonIcon icon={activeIndex === 0 ? closeOutline : arrowBackOutline} />
+            </button>
+          </div>
+          <StepPorAsignar
+            porAsignar={porAsignar}
+            totalIncome={totalIncome}
+            allocated={allocated}
+            step={stepLabel}
+          />
+          <div className={styles.stepSlot} />
+        </div>
+        <div className={styles.stepMeterWrap}>
+          <div
+            className={styles.stepMeterFill}
+            style={{ width: `${((activeIndex + 1) / cats.length) * 100}%` }}
+          />
+        </div>
+      </div>
+
+      <div className={styles.stepBody}>
+        <div className={styles.stepId}>
+          <div className={styles.stepIdGem}>
+            <IonIcon icon={resolveNamedIcon(cat.icon)} />
+          </div>
+          <div className={styles.stepIdMeta}>
+            <div className={styles.stepIdName}>{cat.name}</div>
+            <div className={styles.stepIdDesc}>{cat.description}</div>
+          </div>
+          <div className={styles.stepIdTotal}>{fmt(total)}</div>
+        </div>
+
+        <div className={styles.stepKicker}>Ajustá cada subcategoría</div>
+        <div className={styles.stepSubs}>
+          {cat.subcategories.map((sub) => (
+            <SliderRow
+              key={sub.code}
+              sub={sub}
+              catColor={col.c}
+              amount={subcatAmounts[sub.code] ?? 0}
+              locked={sub.locked}
+              onChange={(amt) => onSetSub(sub.code, amt)}
+            />
+          ))}
+        </div>
+
+        <LowConfBlock
+          lowSubs={lowSubs}
+          subcatAmounts={subcatAmounts}
+          onSetAmount={onSetSub}
+        />
+      </div>
+
+      <div className={styles.stepDock}>
+        <button
+          type="button"
+          className={`${styles.dockBtn} ${styles.dockPrimary}`}
+          onClick={onNext}
+        >
+          {isLast ? (
+            <>
+              <IonIcon icon={sparklesOutline} />
+              Ver mi plan
+            </>
+          ) : (
+            <>
+              Siguiente · {cats[activeIndex + 1]?.name}
+              <IonIcon icon={chevronForwardOutline} />
+            </>
+          )}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── LeftoverSheet ──────────────────────────────────────────────────────────────
+
+interface LeftoverSheetProps {
+  amount: number;
+  goalLabel: string;
+  cats: WizardCategory[];
+  subcatAmounts: Record<string, number>;
+  onGoal: () => void;
+  onCat: (code: string) => void;
+  onSplit: () => void;
+  onKeep: () => void;
+}
+
+function LeftoverSheet({ amount, goalLabel, cats, subcatAmounts, onGoal, onCat, onSplit, onKeep }: LeftoverSheetProps) {
+  const distributableCats = cats.filter((c) => c.code !== 'committed');
+
+  return (
+    <>
+      <div className={styles.leftoverBackdrop} onClick={onKeep} />
+      <div className={styles.leftoverSheet}>
+        <div className={styles.leftoverHandle} />
+        <div className={styles.leftoverHead}>
+          <span className={styles.leftoverAmt}>{fmt(amount)}</span>
+          <span className={styles.leftoverLbl}>sin asignar · ¿dónde va este peso?</span>
+        </div>
+        <div className={styles.destList}>
+          <button
+            type="button"
+            className={styles.destRow}
+            style={{ '--dest-c': '#1A9E4A' } as CSSProperties}
+            onClick={onGoal}
+          >
+            <div className={styles.destGem}>
+              <IonIcon icon={trophyOutline} />
+            </div>
+            <span className={styles.destName}>Acelerar {goalLabel}</span>
+            <span className={styles.destHint}>{fmt(amount)}</span>
+          </button>
+
+          {distributableCats.slice(0, 2).map((cat) => {
+            const col = CAT_COLORS[cat.code] ?? { c: '#7A6E5E' };
+            return (
+              <button
+                key={cat.code}
+                type="button"
+                className={styles.destRow}
+                style={{ '--dest-c': col.c } as CSSProperties}
+                onClick={() => onCat(cat.code)}
+              >
+                <div className={styles.destGem}>
+                  <IonIcon icon={resolveNamedIcon(cat.icon)} />
+                </div>
+                <span className={styles.destName}>Agregar a {cat.name}</span>
+                <span className={styles.destHint}>{fmt(catTotal(cat, subcatAmounts) + amount)}</span>
+              </button>
+            );
+          })}
+
+          <button
+            type="button"
+            className={styles.destRow}
+            style={{ '--dest-c': '#0E96AD' } as CSSProperties}
+            onClick={onSplit}
+          >
+            <div className={styles.destGem}>
+              <IonIcon icon={sparklesOutline} />
+            </div>
+            <span className={styles.destName}>Repartir proporcionalmente</span>
+            <span className={styles.destHint}>{fmt(amount)}</span>
+          </button>
+        </div>
+        <button type="button" className={styles.leftoverKeep} onClick={onKeep}>
+          Dejar sin asignar por ahora
+        </button>
+      </div>
+    </>
+  );
+}
+
+// ── Celebration ────────────────────────────────────────────────────────────────
+
+interface CelebrationProps {
+  totalIncome: number;
+  onDone: () => void;
+}
+
+function Celebration({ totalIncome, onDone }: CelebrationProps) {
+  return (
+    <div className={styles.celebrateOverlay}>
+      <div className={styles.celebrateRing}>✓</div>
+      <div className={styles.celebrateTitle}>Cada peso tiene destino</div>
+      <div className={styles.celebrateBody}>
+        Asignaste {fmt(totalIncome)} completos. Tu plan está equilibrado y listo para ser firmado.
+      </div>
+      <div style={{ marginTop: 32, width: '100%' }}>
+        <button
+          type="button"
+          className={`${styles.dockBtn} ${styles.dockZero}`}
+          onClick={onDone}
+        >
+          <IonIcon icon={checkmarkOutline} />
+          Firmar plan
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── WizardIntro ────────────────────────────────────────────────────────────────
+
+interface WizardIntroProps {
+  totalIncome: number;
+  onStart: () => void;
+  onClose: () => void;
+}
+
+function WizardIntro({ totalIncome, onStart, onClose }: WizardIntroProps) {
+  return (
+    <div className={styles.introOverlay}>
+      <div className={styles.introArt}>
+        <div className={styles.introCoin}>💰</div>
+      </div>
+      <div className={styles.introEyebrow}>Tu primer plan</div>
+      <div className={styles.introTitle}>Cada peso tiene{'\n'}un destino</div>
+      <div className={styles.introAmount}>{fmt(totalIncome)}</div>
+      <div className={styles.introBody}>
+        Vamos a repartir tu ingreso categoría por categoría. Cuando llegues a $0 por asignar, tu presupuesto está listo.
+      </div>
+      <div style={{ flex: 1 }} />
+      <div className={styles.introDock}>
+        <button
+          type="button"
+          className={`${styles.dockBtn} ${styles.dockPrimary}`}
+          onClick={onStart}
+        >
+          Empezar a repartir
+        </button>
+        <button
+          type="button"
+          className={`${styles.dockBtn} ${styles.dockSecondary}`}
+          onClick={onClose}
+        >
+          Ahora no
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Main component ─────────────────────────────────────────────────────────────
 
 export const BudgetWizardModal = ({
   isOpen, onClose, onComplete, wizardData, month,
@@ -328,8 +763,13 @@ export const BudgetWizardModal = ({
   // ── State ──────────────────────────────────────────────────────────────────
   const [subcatAmounts, setSubcatAmounts] = useState<Record<string, number>>({});
   const [activeIndex, setActiveIndex] = useState(0);
-  const [expandedCode, setExpandedCode] = useState<string | null>(null);
+  const [focusCode, setFocusCode] = useState<string | null>(null);
+  const [showIntro, setShowIntro] = useState(false);
+  const [celebrate, setCelebrate] = useState(false);
+  const [leftoverOpen, setLeftoverOpen] = useState(false);
+  const [goalExtra, setGoalExtra] = useState(0);
   const originalAmountsRef = useRef<Record<string, number>>({});
+  const celebratedRef = useRef(false);
 
   useEffect(() => {
     if (!wizardData) return;
@@ -337,11 +777,20 @@ export const BudgetWizardModal = ({
     setSubcatAmounts(init);
     originalAmountsRef.current = init;
     setActiveIndex(0);
-    if (mode === 'replantear' && wizardData.categories.length > 0) {
-      setExpandedCode(wizardData.categories[0].code);
-    }
-    if (mode === 'ajustar') {
-      setExpandedCode(adjustCategoryCode ?? wizardData.categories[0]?.code ?? null);
+    setGoalExtra(0);
+    setCelebrate(false);
+    celebratedRef.current = false;
+    setLeftoverOpen(false);
+
+    if (mode === 'crear') {
+      setShowIntro(true);
+      setFocusCode(null);
+    } else if (mode === 'ajustar') {
+      setFocusCode(adjustCategoryCode ?? wizardData.categories[0]?.code ?? null);
+      setShowIntro(false);
+    } else {
+      setFocusCode(null);
+      setShowIntro(false);
     }
   }, [wizardData, mode]);
 
@@ -349,15 +798,11 @@ export const BudgetWizardModal = ({
   const goalContribution = wizardData?.goal_contribution?.amount ?? 0;
   const goalLabel = wizardData?.goal_contribution?.label ?? 'Objetivo financiero';
   const goalPhase = wizardData?.goal_contribution?.phase;
-  const goalIsSystemDerived = ['debt_payoff', 'emergency_fund'].includes(goalPhase ?? '') &&
-    wizardData?.goal_contribution?.configured === false &&
-    goalContribution > 0;
+  const effectiveGoal = goalContribution + goalExtra;
   const totalPlanned = categories.reduce((s, cat) => s + catTotal(cat, subcatAmounts), 0);
-  const colchon = Math.max(0, totalIncome - totalPlanned - goalContribution);
-  const noAlcanza = totalIncome > 0 && (totalPlanned + goalContribution) > totalIncome * 1.02;
-  const gap = Math.max(0, (totalPlanned + goalContribution) - totalIncome);
-
-
+  const porAsignar = totalIncome - effectiveGoal - totalPlanned;
+  const noAlcanza = totalIncome > 0 && porAsignar < -(totalIncome * 0.02);
+  const gap = Math.max(0, -porAsignar);
 
   const changesCount = Object.keys(subcatAmounts).filter(
     (code) => subcatAmounts[code] !== (originalAmountsRef.current[code] ?? subcatAmounts[code])
@@ -367,12 +812,19 @@ export const BudgetWizardModal = ({
     ? Date.now() - new Date(planConfirmedAt).getTime() < 48 * 60 * 60 * 1000
     : true;
 
+  // ── Celebration trigger ────────────────────────────────────────────────────
+  useEffect(() => {
+    if (porAsignar === 0 && mode === 'replantear' && !celebratedRef.current) {
+      celebratedRef.current = true;
+      const t = setTimeout(() => setCelebrate(true), 320);
+      return () => clearTimeout(t);
+    }
+    if (porAsignar !== 0) celebratedRef.current = false;
+  }, [porAsignar, mode]);
+
+  // ── Actions ────────────────────────────────────────────────────────────────
   const setSub = (code: string, amt: number) =>
     setSubcatAmounts((prev) => ({ ...prev, [code]: Math.max(0, amt) }));
-
-  const discardChanges = () => {
-    setSubcatAmounts(originalAmountsRef.current);
-  };
 
   const handleSave = (overrideAmounts?: Record<string, number>) => {
     if (!wizardData) return;
@@ -381,22 +833,44 @@ export const BudgetWizardModal = ({
     onComplete({ month, total_income: totalIncome, lines, mode: existingMode ?? 'expected' });
   };
 
-  const confirmAndAdvance = () => {
-    if (mode === 'crear') {
-      if (activeIndex < categories.length - 1) {
-        setActiveIndex((i) => i + 1);
-      } else {
-        handleSave();
-      }
-    } else {
-      handleSave();
-    }
+  const addToGoal = () => {
+    if (porAsignar <= 0) return;
+    setGoalExtra((g) => g + porAsignar);
+    setLeftoverOpen(false);
   };
 
-  const activeCategory = categories[activeIndex] ?? null;
-  const isOnLastStep = mode === 'crear' && activeIndex >= categories.length - 1;
+  const sendToCat = (catCode: string) => {
+    if (porAsignar <= 0) return;
+    const cat = categories.find((c) => c.code === catCode);
+    if (!cat || cat.subcategories.length === 0) return;
+    const unlocked = cat.subcategories.filter((s) => !s.locked);
+    if (unlocked.length === 0) return;
+    const share = Math.round(porAsignar / unlocked.length / 10_000) * 10_000;
+    setSubcatAmounts((prev) => {
+      const next = { ...prev };
+      unlocked.forEach((s) => { next[s.code] = (next[s.code] ?? 0) + share; });
+      return next;
+    });
+    setLeftoverOpen(false);
+  };
+
+  const splitEvenly = () => {
+    if (porAsignar <= 0) return;
+    const allUnlocked: WizardSubcategory[] = [];
+    for (const cat of categories) allUnlocked.push(...cat.subcategories.filter((s) => !s.locked));
+    if (allUnlocked.length === 0) return;
+    const share = Math.round(porAsignar / allUnlocked.length / 10_000) * 10_000;
+    setSubcatAmounts((prev) => {
+      const next = { ...prev };
+      allUnlocked.forEach((s) => { next[s.code] = (next[s.code] ?? 0) + share; });
+      return next;
+    });
+    setLeftoverOpen(false);
+  };
 
   // ── Render ─────────────────────────────────────────────────────────────────
+  const allocated = effectiveGoal + totalPlanned;
+  const focusCat = focusCode ? categories.find((c) => c.code === focusCode) ?? null : null;
 
   return (
     <IonModal
@@ -427,410 +901,185 @@ export const BudgetWizardModal = ({
                   </div>
                 </div>
                 <div className={styles.topbarRight}>
-                  {mode === 'crear' && (
-                    <span className={styles.stepPill}>
-                      {Math.min(activeIndex + 1, categories.length)} de {categories.length}
-                    </span>
-                  )}
-                  {mode === 'replantear' && (
-                    <span className={styles.modePillBrand}>historial</span>
-                  )}
-                  {noAlcanza && (
-                    <span className={styles.modePillWarn}>● desbalance</span>
-                  )}
-                  <button type="button" onClick={onClose} className={styles.closeBtn}>
-                    Cerrar
+                  <button type="button" className={styles.topbarClose} onClick={onClose}>
+                    <IonIcon icon={closeOutline} />
                   </button>
                 </div>
               </div>
 
-              {/* ── Scrollable stage ── */}
+              {/* ── Stage ── */}
               <div className={styles.stage}>
 
-                {/* ── NoAlcanza ── */}
-                {noAlcanza && mode !== 'ajustar' ? (
-                  <div className={styles.gavetas}>
-                    <CoachBubble tone="tense">
-                      Te quedan <strong>${fmtK(gap)} cortos</strong> este mes con el plan propuesto.
-                      No es un drama, es un nudo. Tengo 3 caminos —{' '}
-                      <strong>vos elegís</strong>, yo no decido por vos.
-                    </CoachBubble>
+                <PorAsignarHero
+                  porAsignar={porAsignar}
+                  totalIncome={totalIncome}
+                  goalContribution={effectiveGoal}
+                  totalPlanned={totalPlanned}
+                />
 
-                    <div className={styles.balanceBar}>
-                      <div className={styles.balanceRow}>
-                        <span className={styles.balanceLabel}>Lo que entra</span>
-                        <span className={styles.balanceValueGood}>${fmtK(totalIncome)}</span>
-                      </div>
-                      <div className={styles.balanceRow}>
-                        <span className={styles.balanceLabel}>Lo que planeaste gastar</span>
-                        <span className={styles.balanceValueNeutral}>${fmtK(totalPlanned)}</span>
-                      </div>
-                      <div className={styles.balanceTrack}>
-                        <div className={styles.balanceIncome} style={{ width: `${Math.round((totalIncome / totalPlanned) * 100)}%` }} />
-                        <div
-                          className={styles.balanceGap}
-                          style={{ left: `${Math.round((totalIncome / totalPlanned) * 100)}%` }}
-                        >
-                          <span className={styles.balanceGapLabel}>−${fmtK(gap)}</span>
-                        </div>
-                      </div>
+                {effectiveGoal > 0 && (
+                  <>
+                    <div className={styles.secLabel}>
+                      <span className={styles.secLabelText}>Lo primero · tu objetivo</span>
+                      <span className={styles.secLabelHint}>bloqueado</span>
                     </div>
+                    <GoalCard
+                      amount={effectiveGoal}
+                      label={goalLabel}
+                      phase={goalPhase}
+                      totalIncome={totalIncome}
+                    />
+                  </>
+                )}
 
-                    <div className={styles.tradeOffHeader}>
-                      <span className={styles.sectionLabel}>3 caminos</span>
-                      <span className={styles.sectionHint}>cada uno tiene un costo</span>
+                <div className={styles.secLabel}>
+                  <span className={styles.secLabelText}>Reparte el resto</span>
+                  <span className={styles.secLabelHint}>toca para editar</span>
+                </div>
+                <div className={styles.catList}>
+                  {categories.map((cat) => (
+                    <CategoryFlatRow
+                      key={cat.code}
+                      cat={cat}
+                      subcatAmounts={subcatAmounts}
+                      totalIncome={totalIncome}
+                      onClick={() => setFocusCode(cat.code)}
+                    />
+                  ))}
+                </div>
+
+                {noAlcanza && (
+                  <div className={styles.tradeOffSection}>
+                    <div className={styles.coachLine}>
+                      <div className={styles.coachDot}>!</div>
+                      <div className={styles.coachText}>
+                        Tu presupuesto supera el ingreso en {fmt(gap)}. Elegí un camino o ajustá manualmente tocando cualquier categoría.
+                      </div>
                     </div>
-                    <div className={styles.tradeOffs}>
-                      {buildTradeOffs(gap, categories, subcatAmounts).map((t) => (
-                        <TradeOffCard
-                          key={t.tag}
-                          tag={t.tag}
-                          title={t.title}
-                          body={t.body}
-                          cost={t.cost}
-                          color={t.color}
-                          onChoose={() => {
-                            const adjustments = t.action();
-                            const newAmounts = { ...subcatAmounts, ...adjustments };
-                            setSubcatAmounts(newAmounts);
-                            handleSave(newAmounts);
-                          }}
-                        />
-                      ))}
-                    </div>
+                    {buildTradeOffs(gap, categories, subcatAmounts).map((t) => (
+                      <TradeOffCard
+                        key={t.tag}
+                        tag={t.tag}
+                        title={t.title}
+                        body={t.body}
+                        cost={t.cost}
+                        color={t.color}
+                        onChoose={() => {
+                          const changes = t.action();
+                          setSubcatAmounts((prev) => ({ ...prev, ...changes }));
+                        }}
+                      />
+                    ))}
                   </div>
+                )}
 
-                ) : mode === 'crear' ? (
-                  /* ── ModeCrear v2: step through categories, expanded view ── */
-                  <div className={styles.gavetas}>
-                    {goalIsSystemDerived && (
-                      <div className={styles.goalWarningBanner}>
-                        <span className={styles.goalWarningIcon}>🎯</span>
-                        <div className={styles.goalWarningCopy}>
-                          <strong>Aporte al objetivo calculado automáticamente.</strong>
-                          {' '}Ya desconté {goalPhase === 'debt_payoff' ? 'el aporte a tu deuda focal' : 'la cuota para tu fondo de emergencia'}{' '}
-                          antes de distribuir el historial.
-                        </div>
-                      </div>
-                    )}
-                    {activeCategory && (
-                      <CoachBubble>
-                        {getCoachMessage('crear', activeCategory)}
-                      </CoachBubble>
-                    )}
-
-                    <div className={styles.totalsStrip}>
-                      <span className={styles.totalStripLabel}>Llevas en gavetas</span>
-                      <span className={styles.totalStripValue}>
-                        ${fmtK(totalPlanned)}
-                        {totalIncome > 0 && ` de $${fmtK(totalIncome)}`}
-                      </span>
-                    </div>
-
-                    <div className={styles.gavetaStack}>
-                      {goalContribution > 0 && (
-                        <div className={styles.goalCommittedRow}>
-                          <span className={styles.goalCommittedDot} />
-                          <span className={styles.goalCommittedName}>{goalLabel}</span>
-                          <span className={styles.goalCommittedAmt}>${fmtK(goalContribution)}</span>
-                          <span className={styles.goalCommittedChip}>comprometido</span>
-                        </div>
-                      )}
-                      {categories.map((cat, i) => {
-                        const total = catTotal(cat, subcatAmounts);
-
-                        if (i === activeIndex) {
-                          const lowSubs = cat.subcategories.filter((s) => s.confidence === 'low');
-                          return (
-                            <div key={cat.code} className={styles.gavetaCrearActive}>
-                              <GavetaExpandedLocal
-                                cat={cat}
-                                subcatAmounts={subcatAmounts}
-                                highlight
-                                onSetAmount={setSub}
-                              />
-                              {lowSubs.length > 0 && (
-                                <LowConfBlock
-                                  lowSubs={lowSubs}
-                                  subcatAmounts={subcatAmounts}
-                                  onSetAmount={setSub}
-                                />
-                              )}
-                            </div>
-                          );
-                        }
-
-                        if (i < activeIndex) {
-                          return (
-                            <GavetaCollapsedRow
-                              key={cat.code}
-                              cat={cat}
-                              totalAmt={total}
-                              hint="confirmado"
-                              onClick={() => setActiveIndex(i)}
-                            />
-                          );
-                        }
-
-                        return (
-                          <GavetaCollapsedRow
-                            key={cat.code}
-                            cat={cat}
-                            totalAmt={0}
-                            faded
-                          />
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                ) : mode === 'replantear' ? (
-                  /* ── ModeReplantear v2: plan summary + expanded/collapsed gavetas ── */
-                  <div className={styles.gavetas}>
-                    {goalIsSystemDerived && (
-                      <div className={styles.goalWarningBanner}>
-                        <span className={styles.goalWarningIcon}>🎯</span>
-                        <div className={styles.goalWarningCopy}>
-                          <strong>Aporte al objetivo calculado automáticamente.</strong>
-                          {' '}Ya desconté {goalPhase === 'debt_payoff' ? 'el aporte a tu deuda focal' : 'la cuota para tu fondo de emergencia'}{' '}
-                          antes de distribuir el historial. Confirmalo con el agente para fijarlo.
-                        </div>
-                      </div>
-                    )}
-                    <CoachBubble>
-                      {getCoachMessage('replantear', null)}
-                    </CoachBubble>
-
-                    <div className={styles.planSummary}>
-                      <div>
-                        <div className={styles.planSummaryLabel}>Plan</div>
-                        <div className={styles.planSummaryValue}>${fmtK(totalPlanned)}</div>
-                      </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <div className={styles.planSummaryLabel}>Colchón</div>
-                        <div className={`${styles.planSummaryValue} ${styles.planColchon}`}>
-                          ${fmtK(colchon)}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className={styles.gavetaStack}>
-                      {goalContribution > 0 && (
-                        <div className={styles.goalCommittedRow}>
-                          <span className={styles.goalCommittedDot} />
-                          <span className={styles.goalCommittedName}>{goalLabel}</span>
-                          <span className={styles.goalCommittedAmt}>${fmtK(goalContribution)}</span>
-                          <span className={styles.goalCommittedChip}>comprometido</span>
-                        </div>
-                      )}
-                      {categories.map((cat) => {
-                        const total = catTotal(cat, subcatAmounts);
-                        const isExpanded = expandedCode === cat.code;
-                        if (isExpanded) {
-                          return (
-                            <div key={cat.code}>
-                              <GavetaExpandedLocal
-                                cat={cat}
-                                subcatAmounts={subcatAmounts}
-                                highlight
-                                onSetAmount={setSub}
-                              />
-                              <button
-                                type="button"
-                                className={styles.collapseBtn}
-                                onClick={() => setExpandedCode(null)}
-                              >
-                                Colapsar
-                              </button>
-                            </div>
-                          );
-                        }
-                        return (
-                          <GavetaCollapsedRow
-                            key={cat.code}
-                            cat={cat}
-                            totalAmt={total}
-                            onClick={() => setExpandedCode(cat.code)}
-                          />
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                ) : isWithinGraceWindow ? (
-                  /* ── ModeAjustar · Frame E: editable within grace window ── */
-                  <div className={styles.gavetas}>
-                    {/* Grace ribbon */}
-                    <div className={styles.graceRibbon}>
-                      <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="var(--color-brand)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-                      </svg>
-                      <span>Podés ajustar hasta <strong>48h después de firmar</strong>. Luego el plan queda firme.</span>
-                    </div>
-
-                    {/* Plan total + colchón */}
-                    <div className={styles.planSummary}>
-                      <div>
-                        <div className={styles.planSummaryLabel}>Plan total</div>
-                        <div className={styles.planSummaryValue}>${fmtK(totalPlanned)}</div>
-                        {changesCount > 0 && (
-                          <div className={styles.planSummaryDelta}>
-                            {totalPlanned > (categories.reduce((s, cat) => s + cat.subcategories.reduce((ss, sub) => ss + (originalAmountsRef.current[sub.code] ?? 0), 0), 0)) ? '+' : ''}
-                            {fmtK(totalPlanned - categories.reduce((s, cat) => s + cat.subcategories.reduce((ss, sub) => ss + (originalAmountsRef.current[sub.code] ?? 0), 0), 0))} vs firma
-                          </div>
-                        )}
-                      </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <div className={styles.planSummaryLabel}>Colchón</div>
-                        <div className={`${styles.planSummaryValue} ${styles.planColchon}`}>${fmtK(colchon)}</div>
-                      </div>
-                    </div>
-
-                    <div className={styles.sectionHeader}>
-                      <span className={styles.sectionLabel}>Tus gavetas</span>
-                      <span className={styles.sectionHint}>toca para expandir</span>
-                    </div>
-
-                    <div className={styles.gavetaStack}>
-                      {categories.map((cat) => {
-                        const total = catTotal(cat, subcatAmounts);
-                        const isExpanded = expandedCode === cat.code;
-                        if (isExpanded) {
-                          return (
-                            <div key={cat.code}>
-                              <GavetaExpandedLocal
-                                cat={cat}
-                                subcatAmounts={subcatAmounts}
-                                highlight
-                                onSetAmount={setSub}
-                              />
-                              <button type="button" className={styles.collapseBtn} onClick={() => setExpandedCode(null)}>
-                                Colapsar
-                              </button>
-                            </div>
-                          );
-                        }
-                        return (
-                          <GavetaCollapsedRow
-                            key={cat.code}
-                            cat={cat}
-                            totalAmt={total}
-                            onClick={() => setExpandedCode(cat.code)}
-                          />
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                ) : (
-                  /* ── ModeAjustar · Frame F: locked after grace window ── */
-                  <div className={styles.gavetas}>
-                    <CoachBubble>
-                      Tu plan ya está firme. Las correcciones las miramos juntos al cierre del mes — esa es la idea, no editar al calor del momento.
-                    </CoachBubble>
-
-                    <div className={styles.planSummary}>
-                      <div>
-                        <div className={styles.planSummaryLabel}>Plan total</div>
-                        <div className={styles.planSummaryValue}>${fmtK(totalPlanned)}</div>
-                      </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <div className={styles.planSummaryLabel}>Colchón</div>
-                        <div className={`${styles.planSummaryValue} ${styles.planColchon}`}>${fmtK(colchon)}</div>
-                      </div>
-                    </div>
-
-                    <div className={styles.sectionHeader}>
-                      <span className={styles.sectionLabel}>Tus gavetas · solo lectura</span>
-                    </div>
-
-                    <div className={styles.gavetaStack}>
-                      {categories.map((cat) => {
-                        const total = catTotal(cat, subcatAmounts);
-                        const isExpanded = expandedCode === cat.code;
-                        if (isExpanded) {
-                          return (
-                            <div key={cat.code}>
-                              <GavetaExpandedLocal
-                                cat={cat}
-                                subcatAmounts={subcatAmounts}
-                                highlight
-                                planLocked
-                              />
-                              <button type="button" className={styles.collapseBtn} onClick={() => setExpandedCode(null)}>
-                                Colapsar
-                              </button>
-                            </div>
-                          );
-                        }
-                        return (
-                          <GavetaCollapsedRow
-                            key={cat.code}
-                            cat={cat}
-                            totalAmt={total}
-                            onClick={() => setExpandedCode(cat.code)}
-                          />
-                        );
-                      })}
+                {mode === 'replantear' && !noAlcanza && (
+                  <div className={styles.coachLine} style={{ margin: '14px 16px 0' }}>
+                    <div className={styles.coachDot}>✦</div>
+                    <div className={styles.coachText}>
+                      Basado en tu historial. Tocá cualquier categoría para ajustar y firmar cuando estés listo.
                     </div>
                   </div>
                 )}
+
               </div>
 
-              {/* ── Bottom composer ── */}
-              <div className={styles.composer}>
-                {!noAlcanza && mode !== 'ajustar' && (
-                  <button
-                    type="button"
-                    className={styles.composerCta}
-                    onClick={confirmAndAdvance}
-                    disabled={!wizardData}
-                  >
-                    {mode === 'replantear'
-                      ? 'Firmar plan'
-                      : isOnLastStep
-                        ? 'Confirmar plan'
-                        : 'Confirmar y seguir →'}
+              {/* ── Dock ── */}
+              <div className={styles.dock}>
+                {mode === 'ajustar' && isWithinGraceWindow && changesCount > 0 ? (
+                  <button type="button" className={`${styles.dockBtn} ${styles.dockZero}`} onClick={() => handleSave()}>
+                    <IonIcon icon={checkmarkOutline} />
+                    Guardar {changesCount} cambio{changesCount !== 1 ? 's' : ''}
+                  </button>
+                ) : mode === 'ajustar' ? (
+                  <button type="button" className={`${styles.dockBtn} ${styles.dockSecondary}`} onClick={onClose}>
+                    Cerrar
+                  </button>
+                ) : porAsignar > 0 ? (
+                  <button type="button" className={`${styles.dockBtn} ${styles.dockPrimary}`} onClick={() => setLeftoverOpen(true)}>
+                    <IonIcon icon={sparklesOutline} />
+                    Ubicar {fmt(porAsignar)}
+                  </button>
+                ) : porAsignar < 0 ? (
+                  <button type="button" className={`${styles.dockBtn} ${styles.dockOver}`} disabled>
+                    Te pasaste {fmt(-porAsignar)} · ajustá alguna categoría
+                  </button>
+                ) : (
+                  <button type="button" className={`${styles.dockBtn} ${styles.dockZero}`} onClick={() => handleSave()}>
+                    <IonIcon icon={checkmarkOutline} />
+                    {mode === 'replantear' ? 'Firmar plan' : 'Confirmar plan'}
                   </button>
                 )}
-                {!noAlcanza && mode === 'ajustar' && isWithinGraceWindow && (
-                  <div className={styles.ajustarActions}>
-                    <button
-                      type="button"
-                      className={styles.discardBtn}
-                      onClick={() => { discardChanges(); onClose(); }}
-                    >
-                      Cancelar
-                    </button>
-                    <button
-                      type="button"
-                      className={styles.composerCta}
-                      style={{ flex: 1.5 }}
-                      onClick={() => handleSave()}
-                      disabled={changesCount === 0}
-                    >
-                      {changesCount > 0 ? `Guardar ${changesCount} cambio${changesCount !== 1 ? 's' : ''}` : 'Sin cambios'}
-                    </button>
-                  </div>
-                )}
-                <div className={styles.composerInput}>
-                  <input
-                    type="text"
-                    className={styles.composerTextField}
-                    placeholder={
-                      mode === 'ajustar' && !isWithinGraceWindow
-                        ? 'Si es urgente, cuéntale al coach…'
-                        : mode === 'ajustar'
-                          ? 'O pídele al coach que distribuya…'
-                          : mode === 'replantear'
-                            ? 'Pedí cambios al plan…'
-                            : 'O escribime un estimado…'
-                    }
-                    readOnly
-                  />
-                  <div className={styles.composerSend}>↑</div>
-                </div>
               </div>
+
+              {/* ── Overlays ── */}
+
+              {showIntro && mode === 'crear' && (
+                <WizardIntro
+                  totalIncome={totalIncome}
+                  onStart={() => setShowIntro(false)}
+                  onClose={onClose}
+                />
+              )}
+
+              {mode === 'crear' && !showIntro && (
+                <WizardFlow
+                  cats={categories}
+                  goalContribution={effectiveGoal}
+                  activeIndex={activeIndex}
+                  porAsignar={porAsignar}
+                  totalIncome={totalIncome}
+                  subcatAmounts={subcatAmounts}
+                  onSetSub={setSub}
+                  onBack={() => {
+                    if (activeIndex === 0) setShowIntro(true);
+                    else setActiveIndex((i) => i - 1);
+                  }}
+                  onNext={() => {
+                    if (activeIndex >= categories.length - 1) {
+                      handleSave();
+                    } else {
+                      setActiveIndex((i) => i + 1);
+                    }
+                  }}
+                  onClose={onClose}
+                />
+              )}
+
+              {focusCat && mode !== 'crear' && (
+                <FocusEditor
+                  cat={focusCat}
+                  subcatAmounts={subcatAmounts}
+                  porAsignar={porAsignar}
+                  totalIncome={totalIncome}
+                  planLocked={mode === 'ajustar' && !isWithinGraceWindow}
+                  onSetSub={setSub}
+                  onClose={() => setFocusCode(null)}
+                />
+              )}
+
+              {leftoverOpen && porAsignar > 0 && (
+                <LeftoverSheet
+                  amount={porAsignar}
+                  goalLabel={goalLabel}
+                  cats={categories}
+                  subcatAmounts={subcatAmounts}
+                  onGoal={addToGoal}
+                  onCat={sendToCat}
+                  onSplit={splitEvenly}
+                  onKeep={() => setLeftoverOpen(false)}
+                />
+              )}
+
+              {celebrate && (
+                <Celebration
+                  totalIncome={totalIncome}
+                  onDone={() => {
+                    setCelebrate(false);
+                    handleSave();
+                  }}
+                />
+              )}
 
             </div>
           )}
