@@ -141,8 +141,8 @@ export const BudgetsContent = () => {
 
   // ── Page data load ──────────────────────────────────────────────────────────
 
-  const load = async () => {
-    setLoading(true);
+  const load = async (silent = false) => {
+    if (!silent) setLoading(true);
     setError(null);
     try {
       const [budgetsResponse, summaryResponse, categoriesResponse, currentPlanResponse, monthlyPlansResponse, transactionsResponse] =
@@ -206,7 +206,7 @@ export const BudgetsContent = () => {
       }
       setWizardOpen(false);
       setWizardSuccess(true);
-      void load();
+      void load(true);
     } catch (err) {
       setWizardError(
         err instanceof Error
