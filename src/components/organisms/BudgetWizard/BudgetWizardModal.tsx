@@ -81,7 +81,10 @@ function buildPlanLines(categories: WizardCategory[], subcatAmounts: Record<stri
   for (const cat of categories) {
     for (const sub of cat.subcategories) {
       const amt = subcatAmounts[subKey(cat.code, sub.code)] ?? 0;
-      if (amt > 0) lines.push({ subcategory_code: sub.code, amount: amt });
+      // Always include zero amounts so the backend creates a Budget record with
+      // amount_limit=0 — this prevents WizardData from falling back to the
+      // previous month's budget for subcategories the user explicitly removed.
+      lines.push({ subcategory_code: sub.code, amount: amt });
     }
   }
   return lines;
