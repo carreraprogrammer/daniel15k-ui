@@ -928,10 +928,10 @@ export const BudgetWizardModal = ({
 
               {/* ── Dock ── */}
               <div className={styles.dock}>
-                {mode === 'ajustar' && isWithinGraceWindow && changesCount > 0 ? (
+                {mode === 'ajustar' && isWithinGraceWindow ? (
                   <button type="button" className={`${styles.dockBtn} ${styles.dockZero}`} onClick={() => handleSave()}>
                     <IonIcon icon={checkmarkOutline} />
-                    Guardar {changesCount} cambio{changesCount !== 1 ? 's' : ''}
+                    {changesCount > 0 ? `Guardar ${changesCount} cambio${changesCount !== 1 ? 's' : ''}` : 'Guardar plan'}
                   </button>
                 ) : mode === 'ajustar' ? (
                   <button type="button" className={`${styles.dockBtn} ${styles.dockSecondary}`} onClick={onClose}>
