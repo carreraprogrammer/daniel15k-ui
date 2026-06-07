@@ -150,11 +150,10 @@
   place-items: center;
   font-size: 22px;
   color: #fff;
-  background: linear-gradient(140deg, var(--color-committed), color-mix(in srgb, var(--color-committed) 60%, #000));
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
 }
 .nextIconSoon {
-  background: linear-gradient(140deg, var(--color-committed), color-mix(in srgb, var(--color-committed) 50%, #000));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 0 0 2px rgba(255,255,255,0.25);
 }
 .nextIconDone {
   background: linear-gradient(140deg, var(--color-investment), color-mix(in srgb, var(--color-investment) 60%, #000));

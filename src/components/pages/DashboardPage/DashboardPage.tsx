@@ -17,17 +17,17 @@ import {
   shieldOutline,
   calendarOutline,
   checkmarkCircleOutline,
-  ellipseOutline,
   trophyOutline,
   ribbonOutline,
   cardOutline,
 } from 'ionicons/icons';
-import type { AgentInsight, SummaryResponse, Transaction } from '../../../types/finance.types';
+import type { AgentInsight, MonthRecurringObligationExecutionItem, SummaryResponse, Transaction } from '../../../types/finance.types';
 import { useAgentUI } from '../../../contexts/AgentUIContext';
 import { AppLayout } from '../../templates/AppLayout';
 import { Spinner } from '../../atoms/Spinner';
 import { ErrorState } from '../../molecules/ErrorState';
 import { SheetModal } from '../../molecules/SheetModal';
+import { resolveNamedIcon } from '../../organisms/BudgetWizard/iconRegistry';
 import { useDashboardData } from '../../../hooks/useDashboardData';
 import { useAuthStore } from '../../../store/authStore';
 import pageStyles from '../FinancePage.module.css';
@@ -100,14 +100,8 @@ const insightIcon = (kind?: AgentInsight['insight_kind'] | null): string => {
   }
 };
 
-// ── Obligation item type (from month_execution) ────────────────────────────
-interface OblItem {
-  id: number;
-  name: string;
-  due_day?: number | null;
-  expected_amount: number;
-  covered_amount: number;
-}
+// Alias for readability in this file
+type OblItem = MonthRecurringObligationExecutionItem;
 
 // ──────────────────────────────────────────────────────────────────────────
 // HERO CARD — "¿voy bien?"
@@ -219,12 +213,17 @@ const NextObligation = ({ items, today, onOpen }: NextObligationProps) => {
   const next = pending[0];
   const daysAway = (next.due_day ?? 0) - today;
   const soon = daysAway <= 4;
+  const cat = catConfig(next.category_code);
+  const oblIcon = resolveNamedIcon(next.subcategory_icon ?? null) ?? cat.icon;
 
   return (
     <button type="button" className={`${styles.card} ${styles.nextObl}`} onClick={onOpen}>
       <div className={styles.nextTop}>
-        <div className={`${styles.nextIcon} ${soon ? styles.nextIconSoon : ''}`}>
-          <IonIcon icon={ellipseOutline} />
+        <div
+          className={`${styles.nextIcon} ${soon ? styles.nextIconSoon : ''}`}
+          style={{ background: `linear-gradient(140deg, ${cat.color}, color-mix(in srgb, ${cat.color} 60%, #000))` }}
+        >
+          <IonIcon icon={oblIcon} />
         </div>
         <div className={styles.nextBody}>
           <div className={styles.nextEyebrow}>Tu próxima obligación</div>
@@ -660,7 +659,7 @@ const SecHead = ({ label, onMore, moreLabel = 'Ver todo' }: { label: string; onM
 // DASHBOARD CONTENT
 // ──────────────────────────────────────────────────────────────────────────
 export const DashboardContent = () => {
-  const { summary, insight, loading, error, reload, monthTransactions } = useDashboardData();
+  const { summary, insight, completeness, loading, error, reload, monthTransactions } = useDashboardData();
   const history = useHistory();
   const [modal, setModal] = useState<'flow' | 'obl' | 'fund' | null>(null);
 
@@ -682,7 +681,7 @@ export const DashboardContent = () => {
   const nextCycleDay = nextIncomeDayNum ?? nextCycleDate.getDate();
 
   // ── Plan banner ────────────────────────────────────────────────────────
-  const hasPlanPendingConfirmation = false; // summary?.completeness?.pending_confirmation?.includes('monthly_plan') ?? false;
+  const hasPlanPendingConfirmation = completeness?.pending_confirmation?.includes('monthly_plan') ?? false;
   const planMonthLabel = summary?.period
     ? new Intl.DateTimeFormat('es-CO', { month: 'long', year: 'numeric' }).format(
         new Date(summary.period.year, summary.period.month - 1, 1),
@@ -690,7 +689,7 @@ export const DashboardContent = () => {
     : 'este mes';
 
   // ── Obligations ────────────────────────────────────────────────────────
-  const oblItems: OblItem[] = (summary?.month_execution?.recurring_obligations?.items ?? []) as OblItem[];
+  const oblItems: OblItem[] = summary?.month_execution?.recurring_obligations?.items ?? [];
 
   const navigateToInsight = () => {
     const date = insight?.analysis_date

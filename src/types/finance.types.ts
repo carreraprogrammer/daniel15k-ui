@@ -199,6 +199,7 @@ export interface MonthRecurringObligationExecutionItem {
   category_code?: string | null;
   subcategory_id?: number | null;
   subcategory_code?: string | null;
+  subcategory_icon?: string | null;
   source_type?: string | null;
   source_id?: number | null;
 }
