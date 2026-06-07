@@ -145,7 +145,10 @@ export const BudgetsContent = () => {
     if (!silent) setLoading(true);
     setError(null);
     try {
-      const [budgetsResponse, summaryResponse, categoriesResponse, currentPlanResponse, monthlyPlansResponse, transactionsResponse] =
+      const prevMonth = selectedPeriod.month === 1 ? 12 : selectedPeriod.month - 1;
+      const prevYear  = selectedPeriod.month === 1 ? selectedPeriod.year - 1 : selectedPeriod.year;
+
+      const [budgetsResponse, summaryResponse, categoriesResponse, currentPlanResponse, monthlyPlansResponse, transactionsResponse, prevTransactionsResponse] =
         await Promise.all([
           financeService.fetchBudgets({
             ...filters,
@@ -163,13 +166,27 @@ export const BudgetsContent = () => {
             sort_by: 'date',
             sort_dir: 'desc',
           }),
+          financeService.fetchTransactions({
+            month: prevMonth,
+            year: prevYear,
+            per_page: 100,
+            sort_by: 'date',
+            sort_dir: 'desc',
+          }),
         ]);
+
+      const coversThisPeriod = prevTransactionsResponse.data.filter(
+        (tx) =>
+          tx.attributes.covers_period_month === selectedPeriod.month &&
+          tx.attributes.covers_period_year === selectedPeriod.year,
+      );
+
       setBudgets(budgetsResponse.data);
       setSummary(summaryResponse);
       setCurrentPlan(currentPlanResponse);
       setCategories(categoriesResponse.data);
       setPlanHistory(monthlyPlansResponse.data ?? []);
-      setPeriodTransactions(transactionsResponse.data);
+      setPeriodTransactions([...transactionsResponse.data, ...coversThisPeriod]);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : 'No fue posible cargar los presupuestos.',
