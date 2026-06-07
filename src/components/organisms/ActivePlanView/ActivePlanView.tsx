@@ -98,6 +98,8 @@ const resolveBudgetAccent = (categoryCode: string, explicitColor?: string | null
   return `var(--color-${categoryCode})`;
 };
 
+const MONTH_NAMES_ES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
 const paymentLabel = (src: string | null | undefined): string => {
   if (src === 'credit_card') return 'Crédito';
   if (src === 'debit') return 'Débito';
@@ -105,10 +107,17 @@ const paymentLabel = (src: string | null | undefined): string => {
   return '';
 };
 
+const coversPeriodLabel = (tx: Transaction): string => {
+  const { covers_period_month, month } = tx.attributes;
+  if (!covers_period_month) return '';
+  if (covers_period_month === month) return '';
+  return `Cubre ${MONTH_NAMES_ES[covers_period_month - 1]}`;
+};
+
 const buildTransactionRow = (tx: Transaction, icon: string, metaPrefix?: string): DrawerDetailTransaction => {
   const attr = tx.attributes;
   const label = attr.concept || attr.product || 'Movimiento sin nombre';
-  const meta = [metaPrefix, attr.date, paymentLabel(attr.payment_source)]
+  const meta = [metaPrefix, attr.date, paymentLabel(attr.payment_source), coversPeriodLabel(tx)]
     .filter(Boolean)
     .join(' · ');
 
@@ -531,6 +540,11 @@ export const ActivePlanView = ({
     [currentPlan],
   );
 
+  const planEditable = useMemo(() => {
+    if (!currentPlan?.confirmed_at) return true;
+    return Date.now() - new Date(currentPlan.confirmed_at).getTime() < 48 * 60 * 60 * 1000;
+  }, [currentPlan?.confirmed_at]);
+
   if (!currentPlan) {
     return (
       <div className={styles.emptyState}>
@@ -582,7 +596,9 @@ export const ActivePlanView = ({
         </div>
 
         <div className={styles.heroActions}>
-          <Button label="Editar plan" size="sm" variant="secondary" onClick={onEditPlan} />
+          {planEditable && (
+            <Button label="Editar plan" size="sm" variant="secondary" onClick={onEditPlan} />
+          )}
           {onExploreDetail ? (
             <Button label="Ver detalle" size="sm" variant="ghost" onClick={onExploreDetail} />
           ) : null}

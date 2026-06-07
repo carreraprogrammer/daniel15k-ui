@@ -48,6 +48,8 @@ const txnDayLabel = (dateStr: string): string => {
   return parts.slice(0, 2).join('/');
 };
 
+const MONTH_NAMES_ES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
 const paymentLabel = (src: string | null | undefined) => {
   if (src === 'credit_card') return 'Crédito';
   if (src === 'debit') return 'Débito';
@@ -55,9 +57,18 @@ const paymentLabel = (src: string | null | undefined) => {
   return '';
 };
 
+const coversPeriodLabel = (tx: Transaction): string => {
+  const { covers_period_month, month } = tx.attributes;
+  if (!covers_period_month) return '';
+  if (covers_period_month === month) return '';
+  return `Cubre ${MONTH_NAMES_ES[covers_period_month - 1]}`;
+};
+
 const buildTxn = (tx: Transaction, icon: string): DrawerDetailTransaction => {
   const attr = tx.attributes;
-  const meta = [txnDayLabel(attr.date), paymentLabel(attr.payment_source)].filter(Boolean).join(' · ');
+  const meta = [txnDayLabel(attr.date), paymentLabel(attr.payment_source), coversPeriodLabel(tx)]
+    .filter(Boolean)
+    .join(' · ');
 
   return {
     id: tx.id,
@@ -104,10 +115,17 @@ export const BudgetDetailPage = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categoryType]);
 
+  // covers_period transactions may have category_type null if the serializer omits it;
+  // include them anyway since they were explicitly fetched for this period.
   const filtered = useMemo(
-    () => transactions.filter((tx) => tx.attributes.category_type === categoryType),
+    () => transactions.filter(
+      (tx) => tx.attributes.category_type === categoryType ||
+              (tx.attributes.covers_period_month != null && tx.attributes.category_type == null),
+    ),
     [transactions, categoryType],
   );
+
+  const hasCoversPeriod = transactions.some((tx) => tx.attributes.covers_period_month != null);
 
   const daysElapsed = now.getDate();
   const pct = category && category.budget > 0 ? (category.spent / category.budget) * 100 : 0;
@@ -171,7 +189,10 @@ export const BudgetDetailPage = () => {
               ) : undefined)}
               transactions={detailTransactions}
               loading={loading}
-              emptyText="Nada en esta gaveta este mes."
+              emptyText={hasCoversPeriod
+                ? "Las obligaciones de este período fueron cubiertas el mes anterior."
+                : "Nada en esta gaveta este mes."
+              }
             />
           ) : null}
         </div>
