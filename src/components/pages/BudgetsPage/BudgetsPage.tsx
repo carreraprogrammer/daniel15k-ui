@@ -539,8 +539,8 @@ export const BudgetsContent = () => {
                         const planEditable = currentPlan?.confirmed_at
                           ? Date.now() - new Date(currentPlan.confirmed_at).getTime() < 48 * 60 * 60 * 1000
                           : true;
-                        const goalCats = currentPlanWithCategoryColors.categories.filter((c) => c.behavior === 'savings_goal');
-                        const regularCats = currentPlanWithCategoryColors.categories.filter((c) => c.behavior !== 'savings_goal');
+                        const goalCats = currentPlanWithCategoryColors.categories.filter((c) => c.code === 'objetivos');
+                        const regularCats = currentPlanWithCategoryColors.categories.filter((c) => c.code !== 'objetivos');
                         return (
                           <>
                             {goalCats.map((cat) => (
