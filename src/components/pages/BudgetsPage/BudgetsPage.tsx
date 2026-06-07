@@ -239,6 +239,12 @@ export const BudgetsContent = () => {
     setWizardError(null);
   };
 
+  useEffect(() => {
+    if (!wizardSuccess) return;
+    const t = setTimeout(() => setWizardSuccess(false), 3000);
+    return () => clearTimeout(t);
+  }, [wizardSuccess]);
+
   const handleCloseMonth = async (planId: number) => {
     setClosingPlanId(planId);
     try {

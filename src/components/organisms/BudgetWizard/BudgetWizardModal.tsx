@@ -232,11 +232,16 @@ interface GoalCardProps {
   label: string;
   phase?: string | null;
   totalIncome: number;
+  editing?: boolean;
+  onEdit?: () => void;
+  onAmountChange?: (amt: number) => void;
 }
 
-function GoalCard({ amount, label, phase, totalIncome }: GoalCardProps) {
+function GoalCard({ amount, label, phase, totalIncome, editing = false, onEdit, onAmountChange }: GoalCardProps) {
   const pct = totalIncome > 0 ? Math.min(amount / totalIncome, 1) : 0;
   const phaseLabel = phase === 'emergency_fund' ? 'Fondo emergencia' : phase === 'debt_payoff' ? 'Pago deudas' : 'Objetivo';
+  const sliderMax = Math.max(Math.round((Math.max(amount, 100_000) * 3) / 50_000) * 50_000, 500_000);
+  const fillPct = sliderMax > 0 ? Math.min(amount / sliderMax, 1) * 100 : 0;
 
   return (
     <div className={styles.goalCard}>
@@ -249,16 +254,40 @@ function GoalCard({ amount, label, phase, totalIncome }: GoalCardProps) {
             {label}
             <span className={styles.goalTag}>{phaseLabel}</span>
           </div>
-          <div className={styles.goalWhy}>Separado antes de distribuir el resto</div>
+          <div className={styles.goalWhy}>
+            {editing ? 'Deslizá para ajustar el aporte mensual' : 'Separado antes de distribuir el resto'}
+          </div>
         </div>
         <div className={styles.goalRight}>
           <span className={styles.goalAmt}>{fmt(amount)}</span>
-          <IonIcon icon={lockClosedOutline} className={styles.goalLock} />
+          {onEdit && !editing
+            ? <button type="button" className={styles.goalEditBtn} onClick={onEdit}>Editar</button>
+            : <IonIcon icon={lockClosedOutline} className={styles.goalLock} />
+          }
         </div>
       </div>
-      <div className={styles.goalProg}>
-        <div className={styles.goalProgFill} style={{ width: `${pct * 100}%` }} />
-      </div>
+
+      {editing && onAmountChange ? (
+        <div className={styles.sliderTrackWrap} style={{ margin: '12px 0 4px' }}>
+          <div className={styles.sliderTrackBg} />
+          <div className={styles.sliderTrackFill} style={{ width: `${fillPct}%` }} />
+          <div className={styles.sliderThumb} style={{ left: `${fillPct}%` }} />
+          <input
+            type="range"
+            className={styles.sliderInput}
+            min={0}
+            max={sliderMax}
+            step={10_000}
+            value={amount}
+            onChange={(e) => onAmountChange(Number(e.target.value))}
+          />
+        </div>
+      ) : (
+        <div className={styles.goalProg}>
+          <div className={styles.goalProgFill} style={{ width: `${pct * 100}%` }} />
+        </div>
+      )}
+
       <div className={styles.goalMeta}>
         <span>{(pct * 100).toFixed(0)}% del ingreso</span>
         <span>{fmt(amount)} / mes</span>
@@ -732,6 +761,7 @@ export const BudgetWizardModal = ({
   const [celebrate, setCelebrate] = useState(false);
   const [leftoverOpen, setLeftoverOpen] = useState(false);
   const [goalExtra, setGoalExtra] = useState(0);
+  const [editingGoal, setEditingGoal] = useState(false);
   const originalAmountsRef = useRef<Record<string, number>>({});
   const celebratedRef = useRef(false);
 
@@ -742,6 +772,7 @@ export const BudgetWizardModal = ({
     originalAmountsRef.current = init;
     setActiveIndex(0);
     setGoalExtra(0);
+    setEditingGoal(false);
     setCelebrate(false);
     celebratedRef.current = false;
     setLeftoverOpen(false);
@@ -843,7 +874,6 @@ export const BudgetWizardModal = ({
       className={styles.modal}
       isOpen={isOpen}
       onDidDismiss={onClose}
-      keepContentsMounted
       style={{ '--border-radius': '0px', '--width': '100vw', '--height': '100dvh' }}
     >
       <IonContent className={styles.content} scrollY={false}>
@@ -887,13 +917,16 @@ export const BudgetWizardModal = ({
                   <>
                     <div className={styles.secLabel}>
                       <span className={styles.secLabelText}>Lo primero · tu objetivo</span>
-                      <span className={styles.secLabelHint}>bloqueado</span>
+                      <span className={styles.secLabelHint}>{editingGoal ? 'editando' : 'toca para editar'}</span>
                     </div>
                     <GoalCard
                       amount={effectiveGoal}
                       label={goalLabel}
                       phase={goalPhase}
                       totalIncome={totalIncome}
+                      editing={editingGoal}
+                      onEdit={() => setEditingGoal(true)}
+                      onAmountChange={(amt) => setGoalExtra(amt - goalContribution)}
                     />
                   </>
                 )}
@@ -928,7 +961,12 @@ export const BudgetWizardModal = ({
 
               {/* ── Dock ── */}
               <div className={styles.dock}>
-                {mode === 'ajustar' && isWithinGraceWindow ? (
+                {mode === 'ajustar' && isWithinGraceWindow && porAsignar > 0 ? (
+                  <button type="button" className={`${styles.dockBtn} ${styles.dockPrimary}`} onClick={() => setLeftoverOpen(true)}>
+                    <IonIcon icon={sparklesOutline} />
+                    Ubicar {fmt(porAsignar)}
+                  </button>
+                ) : mode === 'ajustar' && isWithinGraceWindow ? (
                   <button type="button" className={`${styles.dockBtn} ${styles.dockZero}`} onClick={() => handleSave()}>
                     <IonIcon icon={checkmarkOutline} />
                     {changesCount > 0 ? `Guardar ${changesCount} cambio${changesCount !== 1 ? 's' : ''}` : 'Guardar plan'}
