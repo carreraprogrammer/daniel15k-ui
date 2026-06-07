@@ -792,7 +792,7 @@ export const BudgetWizardModal = ({
     if (!wizardData) return;
     const amounts = overrideAmounts ?? subcatAmounts;
     const lines = buildPlanLines(categories, amounts);
-    onComplete({ month, total_income: totalIncome, lines, mode: existingMode ?? 'expected' });
+    onComplete({ month, total_income: totalIncome, lines, mode: existingMode ?? 'expected', goal_contribution_amount: effectiveGoal > 0 ? effectiveGoal : undefined });
   };
 
   const addToGoal = () => {

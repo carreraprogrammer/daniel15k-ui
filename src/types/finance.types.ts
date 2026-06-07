@@ -339,6 +339,8 @@ export interface Transaction {
     income_source_id?: number | null;
     sinking_fund_id?: number | null;
     metadata?: Record<string, unknown> | null;
+    covers_period_month?: number | null;
+    covers_period_year?: number | null;
     created_at?: string;
     updated_at?: string;
   };
@@ -858,6 +860,7 @@ export interface BudgetPlanDraft {
   total_income: number;
   lines: BudgetLineItem[];
   mode: 'conservative' | 'expected';
+  goal_contribution_amount?: number;
 }
 
 // ── Agent Insights — coaching card polimórfica ────────────────────────────────

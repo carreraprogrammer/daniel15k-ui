@@ -198,11 +198,11 @@ export const BudgetsContent = () => {
     try {
       if (wizardIsEditMode && currentPlan) {
         // Adjusting existing plan — update lines directly, no regeneration
-        await financeService.confirmMonthlyPlanWithLines(currentPlan.id, draft.lines);
+        await financeService.confirmMonthlyPlanWithLines(currentPlan.id, draft.lines, draft.goal_contribution_amount);
       } else {
         // Creating or re-planning — generate a fresh plan then confirm it
         const plan = await financeService.generateMonthlyPlanForWizard({ mode: draft.mode });
-        await financeService.confirmMonthlyPlanWithLines(plan.id, draft.lines);
+        await financeService.confirmMonthlyPlanWithLines(plan.id, draft.lines, draft.goal_contribution_amount);
       }
       setWizardOpen(false);
       setWizardSuccess(true);
@@ -512,18 +512,23 @@ export const BudgetsContent = () => {
                 <>
                   {currentPlanWithCategoryColors && Array.isArray(currentPlanWithCategoryColors.categories) && currentPlanWithCategoryColors.categories.length > 0 ? (
                     <div className={styles.detailPanel}>
-                      {currentPlanWithCategoryColors.categories.map((cat) => (
-                        <CategoryGroup
-                          key={cat.code ?? cat.name ?? 'unknown'}
-                          category={cat}
-                          transactions={periodTransactions}
-                          categoryLookup={categoryLookup}
-                          onAdjust={(code) => {
-                            setDetailsOpen(false);
-                            handleOpenWizardForEdit(code);
-                          }}
-                        />
-                      ))}
+                      {(() => {
+                        const planEditable = currentPlan?.confirmed_at
+                          ? Date.now() - new Date(currentPlan.confirmed_at).getTime() < 48 * 60 * 60 * 1000
+                          : true;
+                        return currentPlanWithCategoryColors.categories.map((cat) => (
+                          <CategoryGroup
+                            key={cat.code ?? cat.name ?? 'unknown'}
+                            category={cat}
+                            transactions={periodTransactions}
+                            categoryLookup={categoryLookup}
+                            onAdjust={planEditable ? (code) => {
+                              setDetailsOpen(false);
+                              handleOpenWizardForEdit(code);
+                            } : undefined}
+                          />
+                        ));
+                      })()}
                     </div>
                   ) : null}
 
@@ -697,6 +702,7 @@ export const BudgetsContent = () => {
           isEditMode={wizardIsEditMode}
           adjustCategoryCode={wizardAdjustCategory}
           existingMode={currentPlan?.mode}
+          planConfirmedAt={wizardIsEditMode ? (currentPlan?.confirmed_at ?? undefined) : undefined}
         />
 
         {/* Loading overlay shown inside wizard when fetching wizard data */}

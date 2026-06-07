@@ -87,15 +87,19 @@ export const BudgetDetailPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    financeService.fetchTransactions({
-      page: 1,
-      per_page: 50,
-      sort_by: 'date',
-      sort_dir: 'desc',
-      month: now.getMonth() + 1,
-      year: now.getFullYear(),
-    }).then((res) => {
-      setTransactions(res.data);
+    const currentMonth = now.getMonth() + 1;
+    const currentYear = now.getFullYear();
+    const prevMonth = currentMonth === 1 ? 12 : currentMonth - 1;
+    const prevYear = currentMonth === 1 ? currentYear - 1 : currentYear;
+
+    Promise.all([
+      financeService.fetchTransactions({ page: 1, per_page: 100, sort_by: 'date', sort_dir: 'desc', month: currentMonth, year: currentYear }),
+      financeService.fetchTransactions({ page: 1, per_page: 50, sort_by: 'date', sort_dir: 'desc', month: prevMonth, year: prevYear }),
+    ]).then(([currentRes, prevRes]) => {
+      const coversThisPeriod = prevRes.data.filter(
+        (tx) => tx.attributes.covers_period_month === currentMonth && tx.attributes.covers_period_year === currentYear,
+      );
+      setTransactions([...currentRes.data, ...coversThisPeriod]);
     }).catch(() => {}).finally(() => setLoading(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categoryType]);

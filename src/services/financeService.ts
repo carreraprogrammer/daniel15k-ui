@@ -423,8 +423,11 @@ export const financeService = {
    * POST /api/v1/monthly_plans/:id/confirm
    * Wizard variant — sends budget lines shaped as BudgetLineItem[].
    */
-  async confirmMonthlyPlanWithLines(planId: string, lines: BudgetLineItem[]): Promise<void> {
-    await api.post(`/api/v1/monthly_plans/${planId}/confirm`, { lines });
+  async confirmMonthlyPlanWithLines(planId: string, lines: BudgetLineItem[], goalContributionAmount?: number): Promise<void> {
+    await api.post(`/api/v1/monthly_plans/${planId}/confirm`, {
+      lines,
+      ...(goalContributionAmount ? { goal_contribution_amount: goalContributionAmount } : {}),
+    });
   },
 
   /** GET /api/v1/monthly_plans/current — returns null when no plan is active */
