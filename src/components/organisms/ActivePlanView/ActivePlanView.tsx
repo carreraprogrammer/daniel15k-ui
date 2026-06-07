@@ -1,6 +1,6 @@
 import { useMemo, useState, type CSSProperties } from 'react';
 import { IonIcon } from '@ionic/react';
-import { alertCircleOutline, chevronDownOutline, chevronForwardOutline } from 'ionicons/icons';
+import { alertCircleOutline, chevronDownOutline, chevronForwardOutline, trophyOutline } from 'ionicons/icons';
 import type { CurrentPlan, CurrentPlanCategory, CurrentPlanSubcategory, Transaction } from '../../../types/finance.types';
 import { Button } from '../../atoms/Button';
 import { CurrencyValue } from '../../atoms/CurrencyValue';
@@ -523,6 +523,66 @@ export const CategoryGroup = ({ category, defaultExpanded = false, transactions 
     </section>
   );
 };
+
+// ── SavingsGoalHero ───────────────────────────────────────────────────────────
+
+export interface SavingsGoalHeroProps {
+  category: CurrentPlanCategory;
+}
+
+export const SavingsGoalHero = ({ category }: SavingsGoalHeroProps) => {
+  const monthly = category.budgeted ?? 0;
+  const contributed = category.spent ?? 0;
+  const metric = category.primary_metric;
+  const pctIncome = metric?.kind === 'goal_progress' ? Math.round(metric.value) : 0;
+  const fillPct = monthly > 0 ? Math.min(Math.round((contributed / monthly) * 100), 100) : 0;
+  const subcategories = category.subcategories ?? [];
+
+  return (
+    <div className={styles.savingsHero}>
+      <div className={styles.savingsHeroTop}>
+        <div className={styles.savingsHeroGem}>
+          <IonIcon icon={trophyOutline} />
+        </div>
+        <div className={styles.savingsHeroBody}>
+          <div className={styles.savingsHeroEyebrow}>Objetivo prioritario</div>
+          <div className={styles.savingsHeroName}>{category.name ?? 'Objetivo financiero'}</div>
+        </div>
+        <div className={styles.savingsHeroAmt}>{formatCurrencyCompact(monthly)}<span className={styles.savingsHeroMes}>/mes</span></div>
+      </div>
+
+      <div className={styles.savingsHeroBarWrap}>
+        <div className={styles.savingsHeroBarFill} style={{ width: `${fillPct}%` }} />
+      </div>
+
+      <div className={styles.savingsHeroMeta}>
+        <span>{pctIncome > 0 ? `${pctIncome}% del ingreso` : `${fillPct}% aportado este mes`}</span>
+        <span>{formatCurrencyCompact(contributed)} aportado</span>
+      </div>
+
+      {subcategories.length > 0 && (
+        <div className={styles.savingsHeroSubs}>
+          {subcategories.map((sub) => {
+            const subFill = (sub.budgeted ?? 0) > 0
+              ? Math.min(Math.round(((sub.spent ?? 0) / (sub.budgeted ?? 1)) * 100), 100)
+              : 0;
+            return (
+              <div key={sub.code ?? sub.name} className={styles.savingsHeroSub}>
+                <span className={styles.savingsHeroSubName}>{sub.name}</span>
+                <div className={styles.savingsHeroSubBar}>
+                  <div className={styles.savingsHeroSubFill} style={{ width: `${subFill}%` }} />
+                </div>
+                <span className={styles.savingsHeroSubAmt}>{formatCurrencyCompact(sub.budgeted ?? 0)}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ── ActivePlanView ─────────────────────────────────────────────────────────────
 
 interface ActivePlanViewProps {
   currentPlan: CurrentPlan | null;

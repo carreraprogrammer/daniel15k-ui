@@ -15,7 +15,7 @@ import { AppliedFiltersBar } from '../../molecules/AppliedFiltersBar';
 import { SortSheet } from '../../molecules/SortSheet';
 import { BudgetPlanModal } from '../../organisms/BudgetPlanModal/BudgetPlanModal';
 import { BudgetWizardModal } from '../../organisms/BudgetWizard';
-import { ActivePlanView, CategoryGroup } from '../../organisms/ActivePlanView/ActivePlanView';
+import { ActivePlanView, CategoryGroup, SavingsGoalHero } from '../../organisms/ActivePlanView/ActivePlanView';
 import { useWizardData } from '../../../hooks/useWizardData';
 import { financeService } from '../../../services/financeService';
 import type {
@@ -539,18 +539,27 @@ export const BudgetsContent = () => {
                         const planEditable = currentPlan?.confirmed_at
                           ? Date.now() - new Date(currentPlan.confirmed_at).getTime() < 48 * 60 * 60 * 1000
                           : true;
-                        return currentPlanWithCategoryColors.categories.map((cat) => (
-                          <CategoryGroup
-                            key={cat.code ?? cat.name ?? 'unknown'}
-                            category={cat}
-                            transactions={periodTransactions}
-                            categoryLookup={categoryLookup}
-                            onAdjust={planEditable ? (code) => {
-                              setDetailsOpen(false);
-                              handleOpenWizardForEdit(code);
-                            } : undefined}
-                          />
-                        ));
+                        const goalCats = currentPlanWithCategoryColors.categories.filter((c) => c.behavior === 'savings_goal');
+                        const regularCats = currentPlanWithCategoryColors.categories.filter((c) => c.behavior !== 'savings_goal');
+                        return (
+                          <>
+                            {goalCats.map((cat) => (
+                              <SavingsGoalHero key={cat.code ?? 'goal'} category={cat} />
+                            ))}
+                            {regularCats.map((cat) => (
+                              <CategoryGroup
+                                key={cat.code ?? cat.name ?? 'unknown'}
+                                category={cat}
+                                transactions={periodTransactions}
+                                categoryLookup={categoryLookup}
+                                onAdjust={planEditable ? (code) => {
+                                  setDetailsOpen(false);
+                                  handleOpenWizardForEdit(code);
+                                } : undefined}
+                              />
+                            ))}
+                          </>
+                        );
                       })()}
                     </div>
                   ) : null}

@@ -588,3 +588,138 @@
     justify-content: space-between;
   }
 }
+
+/* ── SavingsGoalHero ─────────────────────────────────────────────────────────── */
+
+.savingsHero {
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(26,158,74,0.16) 0%, rgba(26,158,74,0.07) 100%);
+  border: 1px solid rgba(26,158,74,0.32);
+  padding: 18px 18px 14px;
+}
+
+.savingsHeroTop {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.savingsHeroGem {
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  background: rgba(26,158,74,0.22);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  color: #1A9E4A;
+  font-size: 18px;
+}
+
+.savingsHeroBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.savingsHeroEyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: #1A9E4A;
+  margin-bottom: 3px;
+}
+
+.savingsHeroName {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.savingsHeroAmt {
+  font-size: 18px;
+  font-weight: 800;
+  color: #1A9E4A;
+  white-space: nowrap;
+}
+
+.savingsHeroMes {
+  font-size: 12px;
+  font-weight: 500;
+  opacity: 0.7;
+}
+
+.savingsHeroBarWrap {
+  height: 5px;
+  background: rgba(26,158,74,0.14);
+  border-radius: 3px;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.savingsHeroBarFill {
+  height: 100%;
+  background: #1A9E4A;
+  border-radius: 3px;
+  transition: width 600ms ease;
+  min-width: 2px;
+}
+
+.savingsHeroMeta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-bottom: 2px;
+}
+
+.savingsHeroSubs {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px solid rgba(26,158,74,0.15);
+  padding-top: 12px;
+}
+
+.savingsHeroSub {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.savingsHeroSubName {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.savingsHeroSubBar {
+  width: 80px;
+  height: 3px;
+  background: rgba(26,158,74,0.12);
+  border-radius: 2px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.savingsHeroSubFill {
+  height: 100%;
+  background: rgba(26,158,74,0.6);
+  border-radius: 2px;
+}
+
+.savingsHeroSubAmt {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}

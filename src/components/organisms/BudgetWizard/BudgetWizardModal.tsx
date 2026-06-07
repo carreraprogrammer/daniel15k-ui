@@ -961,16 +961,19 @@ export const BudgetWizardModal = ({
 
               {/* ── Dock ── */}
               <div className={styles.dock}>
-                {mode === 'ajustar' && isWithinGraceWindow && porAsignar > 0 ? (
-                  <button type="button" className={`${styles.dockBtn} ${styles.dockPrimary}`} onClick={() => setLeftoverOpen(true)}>
-                    <IonIcon icon={sparklesOutline} />
-                    Ubicar {fmt(porAsignar)}
-                  </button>
-                ) : mode === 'ajustar' && isWithinGraceWindow ? (
-                  <button type="button" className={`${styles.dockBtn} ${styles.dockZero}`} onClick={() => handleSave()}>
-                    <IonIcon icon={checkmarkOutline} />
-                    {changesCount > 0 ? `Guardar ${changesCount} cambio${changesCount !== 1 ? 's' : ''}` : 'Guardar plan'}
-                  </button>
+                {mode === 'ajustar' && isWithinGraceWindow ? (
+                  <>
+                    {porAsignar > 0 && (
+                      <button type="button" className={`${styles.dockBtn} ${styles.dockPrimary}`} onClick={() => setLeftoverOpen(true)}>
+                        <IonIcon icon={sparklesOutline} />
+                        Ubicar {fmt(porAsignar)}
+                      </button>
+                    )}
+                    <button type="button" className={`${styles.dockBtn} ${porAsignar <= 0 ? styles.dockZero : styles.dockSecondary}`} onClick={() => handleSave()}>
+                      <IonIcon icon={checkmarkOutline} />
+                      {changesCount > 0 ? `Guardar ${changesCount} cambio${changesCount !== 1 ? 's' : ''}` : 'Guardar plan'}
+                    </button>
+                  </>
                 ) : mode === 'ajustar' ? (
                   <button type="button" className={`${styles.dockBtn} ${styles.dockSecondary}`} onClick={onClose}>
                     Cerrar
