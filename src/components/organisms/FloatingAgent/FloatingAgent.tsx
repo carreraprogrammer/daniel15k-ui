@@ -104,7 +104,15 @@ export const FloatingAgent = () => {
 
   useEffect(() => {
     if (isOpen || dragRef.current.pointerId !== -1) return
-    syncPosition(positionRef.current)
+    // The chat auto-focuses its textarea, triggering the iOS keyboard.
+    // window.innerHeight shrinks while the keyboard is visible, so running
+    // syncPosition immediately would clamp the avatar to the smaller viewport
+    // (visually "center of screen"). Wait for the keyboard dismiss animation
+    // (~300 ms on iOS) before re-clamping.
+    const id = window.setTimeout(() => {
+      if (dragRef.current.pointerId === -1) syncPosition(positionRef.current)
+    }, 350)
+    return () => window.clearTimeout(id)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen])
 
