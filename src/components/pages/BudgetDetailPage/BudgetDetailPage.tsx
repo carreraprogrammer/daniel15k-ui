@@ -108,7 +108,8 @@ export const BudgetDetailPage = () => {
       financeService.fetchTransactions({ page: 1, per_page: 50, sort_by: 'date', sort_dir: 'desc', month: prevMonth, year: prevYear }),
     ]).then(([currentRes, prevRes]) => {
       const coversThisPeriod = prevRes.data.filter(
-        (tx) => tx.attributes.covers_period_month === currentMonth && tx.attributes.covers_period_year === currentYear,
+        (tx) => tx.attributes.covers_period_month === currentMonth &&
+                (tx.attributes.covers_period_year == null || tx.attributes.covers_period_year === currentYear),
       );
       setTransactions([...currentRes.data, ...coversThisPeriod]);
     }).catch(() => {}).finally(() => setLoading(false));

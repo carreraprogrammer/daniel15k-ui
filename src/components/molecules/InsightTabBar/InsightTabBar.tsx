@@ -31,9 +31,11 @@ export const InsightTabBar = ({ active, date, month, year }: Props) => {
 
   const navigate = (tab: InsightTab) => {
     if (tab === active) return;
-    if (tab === 'nocturno') history.push(`/analisis/${d}`);
-    if (tab === 'mensual')  history.push(`/planes/${y}/${m}`);
-    if (tab === 'anual')    history.push(`/años/${y}`);
+    // replace() instead of push() so tabs don't stack in history —
+    // the back button always returns to the screen before the insight flow.
+    if (tab === 'nocturno') history.replace(`/analisis/${d}`);
+    if (tab === 'mensual')  history.replace(`/planes/${y}/${m}`);
+    if (tab === 'anual')    history.replace(`/años/${y}`);
   };
 
   return (

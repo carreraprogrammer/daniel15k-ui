@@ -233,6 +233,13 @@
   border: 1px solid rgba(var(--color-brand-rgb), 0.25);
 }
 
+/* ── Hide when any Ionic overlay (modal/sheet) is open ── */
+
+:global(body.overlay-open) .root {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 /* ── Mobile ── */
 
 @media (max-width: 1024px) {

@@ -19,6 +19,7 @@ import type {
   ShowAmountEditorPayload,
   ShowCardPayload,
   ShowCategorySelectorPayload,
+  ShowQuickRepliesPayload,
 } from '../../../types/finance.types';
 import { formatCurrencyCompact, formatCurrencyFull } from '../../../utils/formatCurrency';
 import { Button } from '../../atoms/Button';
@@ -197,6 +198,32 @@ const ConfirmCard = ({ event }: { event: AgentUiEvent }) => {
   );
 };
 
+// ─── QuickRepliesCard ────────────────────────────────────────────────────────
+
+const QuickRepliesCard = ({ event }: { event: AgentUiEvent }) => {
+  const { reply, consume } = useAgentUI();
+  const p = event.payload as unknown as ShowQuickRepliesPayload;
+
+  return (
+    <div className={styles.quickReplyContent}>
+      <p className={styles.infoBody}>{renderMarkdown(p.body)}</p>
+      <div className={styles.quickReplyList}>
+        {p.buttons.map((button) => (
+          <Button
+            key={button.callback_data}
+            label={button.text}
+            variant={button.callback_data.startsWith('skip:') ? 'ghost' : 'primary'}
+            onClick={() => void reply(event.id, 'callback', { callback_data: button.callback_data })}
+          />
+        ))}
+      </div>
+      <div className={styles.modalActions}>
+        <Button label="Cerrar" variant="ghost" onClick={() => void consume(event.id)} />
+      </div>
+    </div>
+  );
+};
+
 // ─── CategorySelectorCard ─────────────────────────────────────────────────────
 
 const CategorySelectorCard = ({ event }: { event: AgentUiEvent }) => {
@@ -312,6 +339,7 @@ const renderEventContent = (event: AgentUiEvent) => {
   switch (event.event_type) {
     case 'show_plan_proposal':    return <PlanProposalCard event={event} />;
     case 'show_card':             return <AgentCard event={event} />;
+    case 'show_quick_replies':    return <QuickRepliesCard event={event} />;
     case 'request_confirmation':  return <ConfirmCard event={event} />;
     case 'show_category_selector':return <CategorySelectorCard event={event} />;
     case 'show_amount_editor':    return <AmountEditorCard event={event} />;
@@ -325,6 +353,7 @@ const titleFor = (event: AgentUiEvent | null, isLoading: boolean): string => {
   switch (event.event_type) {
     case 'show_plan_proposal':    return 'Propuesta de plan mensual';
     case 'show_card':             return (event.payload as ShowCardPayload).title;
+    case 'show_quick_replies':    return (event.payload as ShowQuickRepliesPayload).title ?? 'Asistente financiero';
     case 'show_category_selector':return (event.payload as ShowCategorySelectorPayload).title;
     case 'show_amount_editor':    return (event.payload as ShowAmountEditorPayload).title;
     case 'request_confirmation':  return 'Confirmación';
@@ -346,6 +375,7 @@ export const AgentEventRenderer = () => {
     <IonModal
       isOpen={isOpen}
       onDidDismiss={reset}
+      className={styles.agentModal}
       style={{ '--border-radius': '24px', '--width': 'min(640px, 95vw)', '--height': 'min(85dvh, 760px)' }}
     >
       <IonHeader className="ion-no-border">

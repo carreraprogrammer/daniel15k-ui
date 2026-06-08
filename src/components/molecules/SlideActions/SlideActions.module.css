@@ -1,0 +1,34 @@
+.options {
+  background: var(--surface-panel-strong);
+  width: auto;
+}
+
+.wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 144px;
+}
+
+.wrap ion-button {
+  margin: 0;
+  padding: 16px;
+  min-height: 0;
+  --padding-top: 6px;
+  --padding-bottom: 6px;
+}
+
+.wrap ion-button::part(native) {
+  padding: 0;
+  height: 32px;
+  min-height: 24px;
+}
+
+.icon   { font-size: var(--text-2xl); }
+
+.link   { color: var(--color-success); }
+.done   { color: var(--color-success); }
+.edit   { color: var(--color-accent); }
+.unlink { color: var(--color-warning); }
+.delete { color: var(--color-error); }
+.cancel { color: var(--color-error); }

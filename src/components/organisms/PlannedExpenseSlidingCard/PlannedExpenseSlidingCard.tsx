@@ -1,9 +1,10 @@
-import { IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding } from '@ionic/react';
-import { checkmarkDoneOutline, closeOutline, createOutline } from 'ionicons/icons';
+import { IonIcon, IonItem, IonItemSliding } from '@ionic/react';
 import { Badge, type BadgeStatus } from '../../atoms/Badge';
 import type { PlannedExpense } from '../../../types/finance.types';
 import { normalizeFlexibleLabel } from '../../../utils/categoryLabels';
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
+import { SlideActions } from '../../molecules/SlideActions';
+import type { SlideAction } from '../../molecules/SlideActions';
 import styles from './PlannedExpenseSlidingCard.module.css';
 
 const formatDate = (value: string) =>
@@ -66,21 +67,15 @@ export const PlannedExpenseSlidingCard = ({
         </div>
       </IonItem>
 
-      <IonItemOptions side="end">
-        {attrs.status === 'planned' ? (
-          <IonItemOption className={styles.optionDone} onClick={() => onChangeStatus(plannedExpense, 'executed')}>
-            <IonIcon icon={checkmarkDoneOutline} />
-          </IonItemOption>
-        ) : null}
-        {attrs.status === 'planned' ? (
-          <IonItemOption className={styles.optionCancel} onClick={() => onChangeStatus(plannedExpense, 'cancelled')}>
-            <IonIcon icon={closeOutline} />
-          </IonItemOption>
-        ) : null}
-        <IonItemOption className={styles.optionEdit} onClick={() => onEdit(plannedExpense)}>
-          <IonIcon icon={createOutline} />
-        </IonItemOption>
-      </IonItemOptions>
+      <SlideActions actions={[
+        ...(attrs.status === 'planned'
+          ? [
+              { type: 'done',   onPress: () => onChangeStatus(plannedExpense, 'executed') },
+              { type: 'cancel', onPress: () => onChangeStatus(plannedExpense, 'cancelled') },
+            ] satisfies SlideAction[]
+          : []),
+        { type: 'edit', onPress: () => onEdit(plannedExpense) },
+      ]} />
     </IonItemSliding>
   );
 };

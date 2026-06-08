@@ -1,9 +1,9 @@
-import { IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding } from '@ionic/react';
-import { createOutline, linkOutline, trashOutline } from 'ionicons/icons';
+import { IonItem, IonItemSliding } from '@ionic/react';
 import { Badge, type BadgeStatus } from '../../atoms/Badge';
 import type { Debt } from '../../../types/finance.types';
 import { formatDebtStatus, formatDebtType } from '../../../utils/debtLabels';
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
+import { SlideActions } from '../../molecules/SlideActions';
 import styles from './DebtSlidingCard.module.css';
 
 const statusTone: Record<string, BadgeStatus> = {
@@ -44,20 +44,17 @@ export const DebtSlidingCard = ({ debt, linkedObligationLabel, onManageLink, onE
         <div className={styles.secondary}>
           <span className={styles.label}>Saldo</span>
           <strong className={styles.amount}>{formatCurrencyCompact(debt.attributes.current_balance)}</strong>
+          {debt.attributes.interest_rate > 0 && (
+            <span className={styles.meta}>{debt.attributes.interest_rate}% mensual</span>
+          )}
         </div>
       </div>
     </IonItem>
 
-    <IonItemOptions side="end">
-      <IonItemOption className={styles.optionLink} onClick={() => onManageLink(debt)}>
-        <IonIcon icon={linkOutline} />
-      </IonItemOption>
-      <IonItemOption className={styles.optionEdit} onClick={() => onEdit(debt)}>
-        <IonIcon icon={createOutline} />
-      </IonItemOption>
-      <IonItemOption className={styles.optionDelete} onClick={() => onDelete(debt)}>
-        <IonIcon icon={trashOutline} />
-      </IonItemOption>
-    </IonItemOptions>
+    <SlideActions actions={[
+      { type: 'link',   onPress: () => onManageLink(debt) },
+      { type: 'edit',   onPress: () => onEdit(debt) },
+      { type: 'delete', onPress: () => onDelete(debt) },
+    ]} />
   </IonItemSliding>
 );

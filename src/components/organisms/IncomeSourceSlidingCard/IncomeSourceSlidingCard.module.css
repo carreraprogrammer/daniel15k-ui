@@ -3,19 +3,6 @@
   overflow: hidden;
 }
 
-.optionEdit,
-.optionDelete {
-  --color: var(--color-text-primary);
-  min-width: 72px;
-}
-
-.optionEdit {
-  --background: linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.16), rgba(var(--color-brand-rgb), 0.18));
-}
-
-.optionDelete {
-  --background: color-mix(in srgb, var(--color-error) 16%, transparent);
-}
 
 .item {
   --inner-padding-end: 0;

@@ -1,10 +1,11 @@
 import { useRef } from 'react';
-import { IonButton, IonIcon, IonItem, IonItemOptions, IonItemSliding } from '@ionic/react';
-import { createOutline, linkOutline, trashOutline } from 'ionicons/icons';
+import { IonIcon, IonItem, IonItemSliding } from '@ionic/react';
 import type { CategoryLookupItem } from '../../../utils/financeBehavior';
 import type { PaymentSource, Transaction } from '../../../types/finance.types';
 import { resolveNamedIcon } from '../BudgetWizard/iconRegistry';
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
+import { SlideActions } from '../../molecules/SlideActions';
+import type { SlideAction } from '../../molecules/SlideActions';
 import styles from './TransactionSlidingCard.module.css';
 
 const statusLabels: Record<string, string> = {
@@ -69,20 +70,13 @@ export const TransactionSlidingCard = ({ transaction, category, linkedLabel, onE
   const metaParts = [formatTransactionDate(transaction.attributes.date), paymentLabel, transaction.attributes.product]
     .filter((part): part is string => Boolean(part && part.trim()));
 
-  const handleEdit = () => {
-    void slidingRef.current?.close();
-    onEdit(transaction);
-  };
+  const close = () => void slidingRef.current?.close();
 
-  const handleDelete = () => {
-    void slidingRef.current?.close();
-    onDelete(transaction);
-  };
-
-  const handleLink = () => {
-    void slidingRef.current?.close();
-    onLink?.(transaction);
-  };
+  const actions: SlideAction[] = [
+    ...(onLink ? [{ type: 'link' as const, onPress: () => { close(); onLink(transaction); } }] : []),
+    { type: 'edit',   onPress: () => { close(); onEdit(transaction); } },
+    { type: 'delete', onPress: () => { close(); onDelete(transaction); } },
+  ];
 
   return (
     <IonItemSliding ref={slidingRef} className={[styles.sliding, isGrouped ? styles.grouped : ''].filter(Boolean).join(' ')}>
@@ -135,21 +129,7 @@ export const TransactionSlidingCard = ({ transaction, category, linkedLabel, onE
         </div>
       </IonItem>
 
-      <IonItemOptions side="end" className={styles.options}>
-        <div className={styles.buttonsWrapper}>
-          {onLink ? (
-            <IonButton fill="clear" onClick={handleLink}>
-              <IonIcon icon={linkOutline} className={`${styles.buttonIcon} ${styles.linkIcon}`} />
-            </IonButton>
-          ) : null}
-          <IonButton fill="clear" onClick={handleEdit}>
-            <IonIcon icon={createOutline} className={`${styles.buttonIcon} ${styles.editIcon}`} />
-          </IonButton>
-          <IonButton fill="clear" onClick={handleDelete}>
-            <IonIcon icon={trashOutline} className={`${styles.buttonIcon} ${styles.deleteIcon}`} />
-          </IonButton>
-        </div>
-      </IonItemOptions>
+      <SlideActions actions={actions} />
     </IonItemSliding>
   );
 };

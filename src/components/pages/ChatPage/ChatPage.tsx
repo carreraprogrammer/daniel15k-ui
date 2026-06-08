@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useAgentUI } from '../../../contexts/AgentUIContext'
 import { Buddy } from '../../atoms/Buddy'
@@ -292,6 +292,14 @@ export const ChatPage = ({ onClose }: Props) => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [history, state.status])
 
+  // Auto-grow textarea
+  useLayoutEffect(() => {
+    const el = inputRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = Math.min(el.scrollHeight, 132) + 'px'
+  }, [input])
+
   // Focus input on open
   useEffect(() => {
     setTimeout(() => inputRef.current?.focus(), 300)
@@ -314,6 +322,8 @@ export const ChatPage = ({ onClose }: Props) => {
 
   const isLoading = state.status === 'loading'
 
+  const SUG_CHIPS = ['¿Cómo voy este mes?', 'Cierra mi mes', '¿Cuánto puedo abonar?', 'Crea una meta']
+
   return (
     <div className={styles.overlay} role="dialog" aria-modal="true">
       {/* Grain */}
@@ -325,16 +335,21 @@ export const ChatPage = ({ onClose }: Props) => {
 
       {/* Header */}
       <header className={styles.header}>
+        <div className={styles.headerAvatar}>
+          <Buddy persona={persona} emotion={isLoading ? 'think' : 'calm'} size={34} />
+        </div>
+        <div className={styles.headerMeta}>
+          <p className={styles.headerName}>Nilo</p>
+          <p className={styles.headerSub}>
+            <span className={styles.liveDot} aria-hidden="true" />
+            {isLoading ? 'escribiendo…' : 'tu asistente · finanzas'}
+          </p>
+        </div>
         <button className={styles.closeBtn} onClick={onClose} aria-label="Cerrar">
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-            <path d="M1 1L17 17M17 1L1 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <path d="M6 6l12 12M18 6L6 18"/>
           </svg>
         </button>
-        <div className={styles.headerAvatar}>
-          <Buddy persona={persona} emotion="calm" size={32} />
-        </div>
-        <p className={styles.headerName}>Tu asistente</p>
-        <p className={styles.headerSub}>Finanzas personales</p>
       </header>
 
       {/* Messages */}
@@ -380,6 +395,19 @@ export const ChatPage = ({ onClose }: Props) => {
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Suggestion chips */}
+      <div className={styles.chips}>
+        {SUG_CHIPS.map((q) => (
+          <button
+            key={q}
+            className={styles.chip}
+            onClick={() => { setInput(q); setTimeout(() => inputRef.current?.focus(), 0) }}
+          >
+            {q}
+          </button>
+        ))}
+      </div>
+
       {/* Input */}
       <div className={styles.inputBar}>
         <div className={styles.inputWrap}>
@@ -394,13 +422,13 @@ export const ChatPage = ({ onClose }: Props) => {
             disabled={isLoading}
           />
           <button
-            className={styles.sendBtn}
+            className={`${styles.sendBtn}${input.trim() ? ` ${styles.sendBtnReady}` : ''}`}
             onClick={() => void send()}
             disabled={!input.trim() || isLoading}
             aria-label="Enviar"
           >
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-              <path d="M9 15V3M9 3L3 9M9 3L15 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 19V5M5 12l7-7 7 7"/>
             </svg>
           </button>
         </div>

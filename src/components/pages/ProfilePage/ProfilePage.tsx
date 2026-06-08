@@ -5,9 +5,11 @@ import { useAuthStore } from '../../../store/authStore';
 import { Button } from '../../atoms/Button';
 import { useThemeStore, type ThemePreference } from '../../../store/themeStore';
 import { useAccentStore, ACCENT_PRESETS } from '../../../store/accentStore';
-import { useProgressStore, LEVEL_NAMES } from '../../../store/progressStore';
+import { useProgressStore } from '../../../store/progressStore';
 import { useEmailConnectionStore } from '../../../store/emailConnectionStore';
-import { AvatarNucleus } from '../../atoms/AvatarNucleus';
+import { Buddy } from '../../atoms/Buddy';
+import { useBuddyStore, PERSONAS } from '../../../store/buddyStore';
+import type { Persona } from '../../../store/buddyStore';
 import { api } from '../../../services/api';
 import { adminService, type AdminAccount } from '../../../services/adminService';
 import { DataState } from '../../molecules/DataState/DataState';
@@ -33,7 +35,7 @@ const STRATEGY_LABEL: Record<string, string> = {
   avalanche: 'Avalancha (mayor interés primero)',
 };
 
-const AVATAR_SAMPLE_OFFSETS = [-8, -4, -2, -1, 0, 1, 2, 4, 8, 13, 21, 34];
+const PERSONA_ORDER: Persona[] = ['nilo', 'pip', 'teo'];
 
 export const ProfileContent = () => {
   const user    = useAuthStore((state) => state.user);
@@ -43,7 +45,8 @@ export const ProfileContent = () => {
   const setThemePreference = useThemeStore((state) => state.setPreference);
   const accentPreset = useAccentStore((state) => state.preset);
   const setAccentPreset = useAccentStore((state) => state.setPreset);
-  const { data: progressData, fetchProgress, setPreviewLevel, getEffectiveLevel } = useProgressStore();
+  const { fetchProgress } = useProgressStore();
+  const { persona, setPersona } = useBuddyStore();
   const {
     connected: gmailConnected,
     bankSenders,
@@ -61,7 +64,6 @@ export const ProfileContent = () => {
   const [financialContext, setFinancialContext] = useState<FinancialCtx | null>(null);
   const [contextLoading, setContextLoading] = useState(true);
   const [contextError, setContextError] = useState<string | null>(null);
-  const [avatarSampleUserId, setAvatarSampleUserId] = useState('1');
   const startImpersonation = useAuthStore((state) => state.startImpersonation);
   const [accounts, setAccounts] = useState<AdminAccount[]>([]);
   const [accountsLoading, setAccountsLoading] = useState(false);
@@ -128,29 +130,6 @@ export const ProfileContent = () => {
     [user?.name, user?.city],
   );
 
-  const normalizedAvatarUserId = avatarSampleUserId.trim() || '1';
-  const avatarPreviewSeed = useMemo(
-    () => `${progressData?.avatarSeed ?? 'seed'}:sample-user:${normalizedAvatarUserId}`,
-    [normalizedAvatarUserId, progressData?.avatarSeed],
-  );
-  const avatarNearbyUserIds = useMemo(() => {
-    const numericId = Number.parseInt(normalizedAvatarUserId, 10);
-    if (Number.isFinite(numericId)) {
-      return AVATAR_SAMPLE_OFFSETS
-        .map((offset) => Math.max(1, numericId + offset))
-        .filter((sampleId, index, ids) => ids.indexOf(sampleId) === index)
-        .map(String);
-    }
-
-    return [
-      normalizedAvatarUserId,
-      `${normalizedAvatarUserId}-a`,
-      `${normalizedAvatarUserId}-b`,
-      `${normalizedAvatarUserId}-c`,
-      `${normalizedAvatarUserId}-d`,
-      `${normalizedAvatarUserId}-e`,
-    ];
-  }, [normalizedAvatarUserId]);
 
   return (
     <IonContent className={styles.pageContent}>
@@ -221,61 +200,34 @@ export const ProfileContent = () => {
               </div>
             </div>
 
-            {progressData?.bypassReadiness && (
-              <div className={styles.preferenceBlock}>
-                <div>
-                  <span className={styles.metaLabel}>Vista previa de avatar</span>
-                  <strong>
-                    Usuario {normalizedAvatarUserId} · Nivel {getEffectiveLevel()} — {LEVEL_NAMES[getEffectiveLevel()]}
-                  </strong>
-                </div>
-                <div className={styles.levelPreview}>
-                  <AvatarNucleus
-                    seed={avatarPreviewSeed}
-                    level={getEffectiveLevel()}
-                    size={28}
-                  />
-                </div>
-                <div className={styles.avatarControlGroup}>
-                  <span className={styles.controlLabel}>Usuario simulado</span>
-                  <input
-                    className={styles.avatarSeedInput}
-                    type="text"
-                    inputMode="numeric"
-                    value={avatarSampleUserId}
-                    onChange={(event) => setAvatarSampleUserId(event.target.value)}
-                    placeholder="Ej: 1042"
-                    aria-label="ID de usuario simulado"
-                  />
-                </div>
-                <div className={styles.levelSwitch} role="group" aria-label="Nivel de vista previa">
-                  {LEVEL_NAMES.map((name, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      className={`${styles.levelOption} ${getEffectiveLevel() === idx ? styles.levelOptionActive : ''}`}
-                      onClick={() => setPreviewLevel(idx)}
-                      aria-pressed={getEffectiveLevel() === idx}
-                      title={name}
-                    >
-                      {idx}
-                    </button>
-                  ))}
-                </div>
-                <div className={styles.avatarMatrix} aria-label="Comparación de avatar por usuario simulado">
-                  {avatarNearbyUserIds.map((sampleUserId) => (
-                    <div key={sampleUserId} className={styles.avatarMatrixItem}>
-                      <AvatarNucleus
-                        seed={`${progressData.avatarSeed}:sample-user:${sampleUserId}`}
-                        level={getEffectiveLevel()}
-                        size={18}
-                      />
-                      <span>U{sampleUserId}</span>
-                    </div>
-                  ))}
-                </div>
+            <div className={styles.preferenceBlock}>
+              <div>
+                <span className={styles.metaLabel}>Tu coach</span>
+                <strong>¿Quién te acompaña?</strong>
               </div>
-            )}
+              <div className={styles.personaPicker} role="group" aria-label="Elige tu coach">
+                {PERSONA_ORDER.map((p) => {
+                  const P = PERSONAS[p];
+                  return (
+                    <button
+                      key={p}
+                      type="button"
+                      className={`${styles.personaCard} ${persona === p ? styles.personaCardActive : ''}`}
+                      style={{ '--persona-color': P.color } as React.CSSProperties}
+                      onClick={() => setPersona(p)}
+                      aria-pressed={persona === p}
+                    >
+                      <div className={styles.personaBuddy}>
+                        <Buddy persona={p} emotion="calm" size={64} idleBlinkSeed={PERSONA_ORDER.indexOf(p) + 1} />
+                      </div>
+                      <span className={styles.personaName}>{P.name}</span>
+                      <span className={styles.personaTrait}>{P.trait}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              <p className={styles.personaVoice}>{PERSONAS[persona].voice}</p>
+            </div>
 
             {user?.superAdmin && (
               <div className={styles.preferenceBlock}>

@@ -1,7 +1,31 @@
 /* ── Toolbar ──────────────────────────────────────────────────────────────── */
 
+.agentModal {
+  --backdrop-opacity: 0.72;
+}
+
+.agentModal::part(backdrop) {
+  background:
+    var(--surface-glow),
+    color-mix(in srgb, var(--color-bg-primary) 90%, transparent);
+  backdrop-filter: blur(14px);
+}
+
+.agentModal::part(content) {
+  border: 1px solid var(--surface-border);
+  border-radius: 24px;
+  background:
+    var(--surface-highlight),
+    var(--surface-glow),
+    var(--surface-panel-strong);
+  box-shadow: 0 28px 72px rgba(0, 0, 0, 0.4), var(--shadow-surface);
+  color: var(--color-text-primary);
+  overflow: hidden;
+}
+
 .toolbar {
-  --background: #10131a;
+  --background: var(--surface-panel-strong);
+  --border-color: var(--surface-border-muted);
   --color: var(--color-text-primary);
   padding-top: env(safe-area-inset-top);
 }
@@ -21,7 +45,7 @@
 /* ── Step bar ─────────────────────────────────────────────────────────────── */
 
 .stepBarWrap {
-  background: #10131a;
+  background: var(--surface-panel-strong);
   padding: 0.75rem 1.25rem 1rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.07);
 }
@@ -96,8 +120,11 @@
 /* ── Modal body ───────────────────────────────────────────────────────────── */
 
 .modalBody {
-  --background: #10131a;
+  --background: transparent;
   --color: var(--color-text-primary);
+  background:
+    var(--surface-highlight),
+    var(--surface-panel-strong);
 }
 
 /* ── Loading state ────────────────────────────────────────────────────────── */
@@ -290,6 +317,21 @@
   font-size: var(--type-body-small-size);
   line-height: 1.6;
   font-style: italic;
+}
+
+/* ── Quick replies ───────────────────────────────────────────────────────── */
+
+.quickReplyContent {
+  display: grid;
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+.quickReplyList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
 }
 
 /* ── Category selector ────────────────────────────────────────────────────── */

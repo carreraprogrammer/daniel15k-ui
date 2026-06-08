@@ -128,11 +128,8 @@ export function AgentUIProvider({ children }: { children: ReactNode }) {
   );
 
   const poll = useCallback(async () => {
-    const sid = sessionIdRef.current;
-    if (!sid) return;
-
     try {
-      const pending = await financeService.getPendingAgentEvents(sid);
+      const pending = await financeService.getPendingAgentEvents();
       if (!pending.length) return;
 
       const navigateEvents = pending.filter((e) => e.event_type === 'navigate');
@@ -164,13 +161,12 @@ export function AgentUIProvider({ children }: { children: ReactNode }) {
   const startPolling = useCallback(() => {
     stopPolling();
     timerRef.current = setInterval(() => void poll(), POLL_MS);
-    timeoutRef.current = setTimeout(() => {
-      stopPolling();
-      dispatch({ type: 'RESET' });
-    }, 90_000);
   }, [poll, stopPolling]);
 
-  useEffect(() => () => stopPolling(), [stopPolling]);
+  useEffect(() => {
+    startPolling();
+    return () => stopPolling();
+  }, [startPolling, stopPolling]);
 
   // ─── Public API ─────────────────────────────────────────────────────────────
 
@@ -180,7 +176,6 @@ export function AgentUIProvider({ children }: { children: ReactNode }) {
       try {
         const result = await financeService.startWebChat(message, source);
         dispatch({ type: 'CHAT_STARTED', payload: { sessionId: result.session_id } });
-        startPolling();
         return true;
       } catch (err) {
         ERR('startChat error:', err);
@@ -197,11 +192,16 @@ export function AgentUIProvider({ children }: { children: ReactNode }) {
       type: AgentReplyType,
       data?: Record<string, unknown>,
     ) => {
-      const sid = sessionIdRef.current;
-      if (!sid) { ERR('reply called without sessionId'); return; }
       dispatch({ type: 'CHAT_LOADING' });
       try {
+        let sid = sessionIdRef.current;
+        if (!sid) {
+          const result = await financeService.startWebChat('', 'web');
+          sid = result.session_id;
+          dispatch({ type: 'CHAT_STARTED', payload: { sessionId: sid } });
+        }
         await financeService.replyWebChat(sid, eventId, type, data);
+        await financeService.consumeAgentEvent(eventId).catch(() => null);
         dispatch({ type: 'EVENT_CONSUMED', payload: { id: eventId } });
         // Keep status='loading' — typing dots stay until brain emits next events via polling
       } catch (err) {

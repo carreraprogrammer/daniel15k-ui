@@ -1,8 +1,8 @@
 .anchor {
   position: fixed;
   z-index: calc(var(--z-modal) - 1);
-  width: var(--agent-bubble-width);
-  height: var(--agent-bubble-height);
+  width: 56px;
+  height: 56px;
   pointer-events: none;
 }
 
@@ -11,17 +11,15 @@
   width: 100%;
   height: 100%;
   padding: 0;
-  border: 1px solid color-mix(in srgb, rgba(var(--color-brand-rgb), 0.34) 65%, var(--surface-border));
+  border: none;
   border-radius: 999px;
-  background:
-    radial-gradient(circle at 22% 18%, rgba(var(--color-accent-rgb), 0.18), transparent 38%),
-    linear-gradient(135deg, rgba(var(--color-brand-rgb), 0.16), rgba(var(--color-accent-rgb), 0.08) 42%, transparent 82%),
-    var(--surface-panel-strong);
+  background: rgba(16, 16, 20, 0.76);
+  backdrop-filter: blur(14px) saturate(1.3);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
   box-shadow:
-    0 14px 30px rgba(0, 0, 0, 0.2),
-    0 0 0 1px rgba(var(--color-brand-rgb), 0.12),
-    inset 0 1px 0 color-mix(in srgb, var(--text-on-surface) 10%, transparent);
-  color: var(--color-text-primary);
+    0 8px 32px rgba(0, 0, 0, 0.48),
+    0 2px 8px rgba(0, 0, 0, 0.32),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.09);
   cursor: grab;
   pointer-events: auto;
   display: flex;
@@ -31,58 +29,19 @@
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
-  transition:
-    transform 0.18s ease,
-    box-shadow 0.18s ease,
-    border-color 0.18s ease;
+  transition: box-shadow 0.18s ease, transform 0.18s ease;
 }
 
 .bubble:hover {
-  transform: translateY(-1px);
-  border-color: rgba(var(--color-brand-rgb), 0.42);
+  transform: translateY(-2px) scale(1.04);
   box-shadow:
-    0 16px 34px rgba(0, 0, 0, 0.24),
-    0 0 0 1px rgba(var(--color-brand-rgb), 0.16),
-    inset 0 1px 0 color-mix(in srgb, var(--text-on-surface) 12%, transparent);
+    0 14px 40px rgba(0, 0, 0, 0.52),
+    0 4px 12px rgba(0, 0, 0, 0.36),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.13);
 }
 
 .bubble:active,
 .bubbleDragging {
   cursor: grabbing;
-  transform: scale(0.985);
-}
-
-.avatarSlot {
-  position: relative;
-  z-index: 1;
-  width: var(--agent-avatar-bounds);
-  height: var(--agent-avatar-bounds);
-  display: grid;
-  place-items: center;
-  flex: 0 0 auto;
-}
-
-.glowBadge {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.95), rgba(var(--color-brand-rgb), 0.82));
-  box-shadow: 0 0 10px rgba(var(--color-brand-rgb), 0.42);
-  pointer-events: none;
-}
-
-.insightDot {
-  position: absolute;
-  top: 3px;
-  right: 3px;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: var(--color-error, #E74C3C);
-  border: 1.5px solid var(--color-bg-primary, #0B0B0E);
-  pointer-events: none;
-  z-index: 2;
+  transform: scale(0.96);
 }

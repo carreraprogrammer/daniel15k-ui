@@ -3,24 +3,6 @@
   overflow: hidden;
 }
 
-.optionEdit,
-.optionLink,
-.optionDelete {
-  --color: var(--color-text-primary);
-  min-width: 72px;
-}
-
-.optionLink {
-  --background: color-mix(in srgb, var(--color-success) 16%, transparent);
-}
-
-.optionEdit {
-  --background: linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.16), rgba(var(--color-brand-rgb), 0.18));
-}
-
-.optionDelete {
-  --background: color-mix(in srgb, var(--color-error) 16%, transparent);
-}
 
 .item {
   --inner-padding-end: 0;

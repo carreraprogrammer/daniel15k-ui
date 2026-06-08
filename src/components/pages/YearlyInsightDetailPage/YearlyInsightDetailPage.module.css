@@ -64,6 +64,13 @@
   padding: 0 var(--space-5) calc(var(--ion-safe-area-bottom, 20px) + 80px);
 }
 
+.loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+}
+
 .empty {
   padding: var(--space-12) 0;
   text-align: center;

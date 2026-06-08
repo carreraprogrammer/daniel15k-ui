@@ -26,15 +26,24 @@
 .uppercase { text-transform: uppercase; }
 .truncate  { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+/* Display-level text uses Sora per design spec */
 .type-display,
 .type-page-title,
 .type-section-title,
 .type-card-title,
 .type-amount-large,
 .type-amount-medium {
-  font-family: var(--font-sans);
+  font-family: var(--font-display);
   color: var(--color-text-primary);
   letter-spacing: var(--tracking-normal);
+}
+
+/* Body and label text uses DM Sans */
+.type-body,
+.type-body-small,
+.type-label,
+.type-caption {
+  font-family: var(--font-sans);
 }
 
 .type-display {

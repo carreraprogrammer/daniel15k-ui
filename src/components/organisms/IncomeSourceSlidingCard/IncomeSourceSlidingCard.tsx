@@ -1,8 +1,9 @@
-import { IonIcon, IonItem, IonItemOption, IonItemOptions, IonItemSliding } from '@ionic/react';
-import { cashOutline, createOutline, trashOutline } from 'ionicons/icons';
+import { IonIcon, IonItem, IonItemSliding } from '@ionic/react';
+import { cashOutline } from 'ionicons/icons';
 import type { IncomeSource } from '../../../types/finance.types';
 import { cadenceLabel, classificationLabel, incomeWindowLabel, reliabilityLabel } from '../../../utils/incomeProfile';
 import { formatCurrencyCompact } from '../../../utils/formatCurrency';
+import { SlideActions } from '../../molecules/SlideActions';
 import styles from './IncomeSourceSlidingCard.module.css';
 
 export interface IncomeSourceSlidingCardProps {
@@ -36,13 +37,9 @@ export const IncomeSourceSlidingCard = ({ source, onEdit, onDelete }: IncomeSour
       </div>
     </IonItem>
 
-    <IonItemOptions side="end">
-      <IonItemOption className={styles.optionEdit} onClick={() => onEdit(source)}>
-        <IonIcon icon={createOutline} />
-      </IonItemOption>
-      <IonItemOption className={styles.optionDelete} onClick={() => onDelete(source)}>
-        <IonIcon icon={trashOutline} />
-      </IonItemOption>
-    </IonItemOptions>
+    <SlideActions actions={[
+      { type: 'edit',   onPress: () => onEdit(source) },
+      { type: 'delete', onPress: () => onDelete(source) },
+    ]} />
   </IonItemSliding>
 );

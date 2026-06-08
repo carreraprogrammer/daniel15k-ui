@@ -2,6 +2,9 @@
 
 .brand-alert {
   --backdrop-opacity: 0.72;
+  --background: var(--surface-panel-strong);
+  --color: var(--color-text-primary);
+  --max-width: min(420px, calc(100vw - 32px));
 }
 
 .brand-alert::part(backdrop) {
@@ -13,10 +16,15 @@
 }
 
 .brand-alert .alert-wrapper {
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--surface-border);
   border-radius: 28px;
-  background: var(--surface-panel-strong);
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.32);
+  background:
+    var(--surface-highlight),
+    var(--surface-glow),
+    var(--surface-panel-strong);
+  color: var(--color-text-primary);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.32), var(--shadow-surface);
+  overflow: hidden;
 }
 
 .brand-alert .alert-head,
@@ -36,7 +44,7 @@
 }
 
 .brand-alert .alert-button-group {
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid var(--surface-border-muted);
 }
 
 .brand-alert .alert-button {

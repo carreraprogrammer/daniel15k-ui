@@ -1,0 +1,249 @@
+/* ══════════════════════════════════════════════════════════════
+   Buddy — the living companion. Port of ASCENT avatar.css.
+   Persona color = --c (inline style). Tint shifts per emotion.
+   ══════════════════════════════════════════════════════════════ */
+
+.buddy {
+  --ink: color-mix(in oklch, var(--c) 24%, #1c1409);
+  --tint: var(--c);
+  width: var(--size);
+  height: var(--size);
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+
+.buddy.worry { --tint: color-mix(in oklch, var(--c) 36%, #E2922C); }
+.buddy.sleep  { --tint: color-mix(in oklch, var(--c) 80%, #5b6a86); }
+
+/* Stage — the part that floats / hops / tilts (shadow stays grounded).
+   Use calc(var(--size) * 0.78) instead of 78% to avoid CSS Grid's
+   percentage-height resolution failure in auto-sized tracks. */
+.stage {
+  position: relative;
+  width: calc(var(--size) * 0.78);
+  height: calc(var(--size) * 0.78);
+  display: grid;
+  place-items: center;
+  animation: bdBreathe var(--dur) ease-in-out infinite;
+  will-change: transform;
+}
+.buddy.calm  .stage { animation-name: bdBreathe; }
+.buddy.happy .stage { animation-name: bdHop; }
+.buddy.think .stage { animation-name: bdTilt; }
+.buddy.worry .stage { animation-name: bdFret; }
+.buddy.cheer .stage { animation-name: bdCheer; }
+.buddy.sleep .stage { animation-name: bdSnooze; }
+
+/* The soft glowing orb body.
+   Width and height explicit via --size so percentages inside resolve correctly.
+   Glow radii use calc(var(--size) * factor) so they stay proportional at any size
+   (fixed px values like 34px are enormous relative to a 44px float orb). */
+.body {
+  position: relative;
+  width: calc(var(--size) * 0.78);
+  height: calc(var(--size) * 0.78 * var(--round));
+  border-radius: 50%;
+  background:
+    radial-gradient(58% 50% at 34% 27%, color-mix(in oklch, var(--tint) 12%, #ffffff) 0%, transparent 46%),
+    radial-gradient(120% 130% at 50% 128%, color-mix(in oklch, var(--tint) 62%, #000) 0%, transparent 62%),
+    radial-gradient(100% 100% at 50% 38%, color-mix(in oklch, var(--tint) 86%, #fff) 0%, var(--tint) 70%);
+  box-shadow:
+    0 0 calc(var(--size) * 0.15 * var(--glow)) color-mix(in oklch, var(--tint) calc(72% * var(--glow)), transparent),
+    0 calc(var(--size) * 0.04 * var(--glow)) calc(var(--size) * 0.11 * var(--glow)) color-mix(in oklch, var(--tint) calc(40% * var(--glow)), transparent),
+    inset 0 calc(var(--size) * -0.03) calc(var(--size) * 0.06) color-mix(in oklch, var(--tint) 55%, #000),
+    inset 0 calc(var(--size) * 0.02) calc(var(--size) * 0.04) color-mix(in oklch, #fff 28%, transparent);
+  animation: bdSquish var(--dur) ease-in-out infinite;
+  transition: filter 0.4s ease;
+}
+.buddy.happy .body { animation-name: bdSquishHop; }
+.buddy.cheer .body { animation-name: bdSquishHop; }
+.buddy.sleep .body { animation-name: bdSquishSleep; }
+.buddy.worry .body { animation-name: bdSquishFret; }
+
+/* Top glossy highlight */
+.shine {
+  position: absolute;
+  top: 9%;
+  left: 20%;
+  width: 42%;
+  height: 30%;
+  border-radius: 50%;
+  background: radial-gradient(60% 60% at 40% 35%, rgba(255, 255, 255, 0.7), transparent 70%);
+  filter: blur(1px);
+  pointer-events: none;
+}
+
+/* .facet removed — the inner ring looked like a leftover from the old nucleus */
+
+/* SVG face */
+.face {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.eyes {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: bdBlink 5s var(--blink-delay) ease-in-out infinite;
+}
+
+/* Blush cheeks */
+.cheek {
+  position: absolute;
+  top: 58%;
+  width: 15%;
+  height: 9%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 150, 140, 0.5), transparent 75%);
+  pointer-events: none;
+}
+.cheekL { left: 13%; }
+.cheekR { right: 13%; }
+
+/* Ground shadow */
+.shadow {
+  position: absolute;
+  bottom: 4%;
+  width: 50%;
+  height: 9%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(0, 0, 0, 0.45), transparent 78%);
+  filter: blur(2px);
+  animation: bdShadow var(--dur) ease-in-out infinite;
+}
+
+/* ── Extras: thinking dots / Zzz / sparkles ── */
+.extras {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.thinkDot {
+  position: absolute;
+  top: 4%;
+  left: 64%;
+  width: 7%;
+  height: 7%;
+  border-radius: 50%;
+  background: color-mix(in oklch, var(--c) 75%, #fff);
+  opacity: 0;
+  animation: bdThink 2.4s ease-in-out infinite;
+}
+.thinkDot:nth-child(1) { left: 60%; animation-delay: 0s; }
+.thinkDot:nth-child(2) { left: 71%; top: -3%; width: 9%; height: 9%; animation-delay: 0.25s; }
+.thinkDot:nth-child(3) { left: 83%; top: -12%; width: 11%; height: 11%; animation-delay: 0.5s; }
+
+.zLetter {
+  position: absolute;
+  font-weight: 600;
+  color: color-mix(in oklch, var(--c) 60%, #fff);
+  opacity: 0;
+  animation: bdZzz 3.4s ease-in-out infinite;
+}
+.zLetter:nth-child(1) { top: 26%; left: 70%; font-size: calc(var(--size) * 0.1);  animation-delay: 0s; }
+.zLetter:nth-child(2) { top: 14%; left: 78%; font-size: calc(var(--size) * 0.13); animation-delay: 0.5s; }
+.zLetter:nth-child(3) { top: -1%; left: 86%; font-size: calc(var(--size) * 0.16); animation-delay: 1s; }
+
+.spark {
+  position: absolute;
+  width: 8%;
+  height: 8%;
+  background: color-mix(in oklch, var(--c) 60%, #fff);
+  clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%);
+  opacity: 0;
+  animation: bdSpark 1.5s ease-out infinite;
+}
+.spark:nth-child(1) { top: 6%;  left: 8%;  animation-delay: 0s; }
+.spark:nth-child(2) { top: 0%;  left: 78%; width: 11%; height: 11%; animation-delay: 0.35s; }
+.spark:nth-child(3) { top: 30%; left: 92%; width: 6%;  height: 6%;  animation-delay: 0.7s; }
+
+/* ── Keyframes ── */
+@keyframes bdBreathe {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%       { transform: translateY(calc(var(--amp) * -1)) scale(1.015); }
+}
+@keyframes bdSquish {
+  0%, 100% { transform: scale(1, 1); }
+  50%      { transform: scale(0.985, 1.02); }
+}
+@keyframes bdHop {
+  0%, 100% { transform: translateY(0); }
+  12%      { transform: translateY(calc(var(--amp) * 0.15)); }
+  40%      { transform: translateY(calc(var(--amp) * -1)); }
+  60%      { transform: translateY(calc(var(--amp) * -0.86)); }
+  80%      { transform: translateY(0); }
+}
+@keyframes bdSquishHop {
+  0%, 100% { transform: scale(1.06, 0.94); }
+  12%      { transform: scale(1.1, 0.88); }
+  40%      { transform: scale(0.92, 1.1); }
+  62%      { transform: scale(0.96, 1.05); }
+  80%      { transform: scale(1.06, 0.94); }
+}
+@keyframes bdTilt {
+  0%, 100% { transform: rotate(-4deg) translateY(0); }
+  50%      { transform: rotate(3deg) translateY(calc(var(--amp) * -1)); }
+}
+@keyframes bdFret {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  20%      { transform: translateX(calc(var(--amp) * -1)) translateY(calc(var(--amp) * 0.3)); }
+  40%      { transform: translateX(calc(var(--amp) * 1)); }
+  60%      { transform: translateX(calc(var(--amp) * -0.7)); }
+  80%      { transform: translateX(calc(var(--amp) * 0.5)); }
+}
+@keyframes bdSquishFret {
+  0%, 100% { transform: scale(1.01, 0.99); }
+  50%      { transform: scale(0.98, 1.02); }
+}
+@keyframes bdCheer {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50%      { transform: translateY(calc(var(--amp) * -1)) rotate(2deg); }
+}
+@keyframes bdSnooze {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%      { transform: translateY(calc(var(--amp) * 0.5)) scale(1.01); }
+}
+@keyframes bdSquishSleep {
+  0%, 100% { transform: scale(1.04, 0.96); }
+  50%      { transform: scale(1.07, 0.93); }
+}
+@keyframes bdShadow {
+  0%, 100% { transform: scale(1);    opacity: 0.5; }
+  50%      { transform: scale(0.86); opacity: 0.32; }
+}
+@keyframes bdBlink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95%           { transform: scaleY(0.08); }
+  97%           { transform: scaleY(1); }
+}
+@keyframes bdThink {
+  0%       { opacity: 0; transform: translateY(4px) scale(0.6); }
+  40%, 60% { opacity: 1; transform: translateY(0) scale(1); }
+  100%     { opacity: 0; transform: translateY(-3px) scale(0.7); }
+}
+@keyframes bdZzz {
+  0%   { opacity: 0;    transform: translate(0, 4px) scale(0.7); }
+  35%  { opacity: 0.95; }
+  100% { opacity: 0;    transform: translate(6px, -10px) scale(1.1); }
+}
+@keyframes bdSpark {
+  0%   { opacity: 0; transform: scale(0.2) rotate(0deg); }
+  35%  { opacity: 1; transform: scale(1) rotate(40deg); }
+  100% { opacity: 0; transform: scale(0.3) rotate(90deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage,
+  .body,
+  .shadow,
+  .eyes,
+  .thinkDot,
+  .zLetter,
+  .spark { animation: none !important; }
+}

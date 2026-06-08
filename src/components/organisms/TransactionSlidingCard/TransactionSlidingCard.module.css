@@ -7,39 +7,6 @@
   border-radius: 0;
 }
 
-.options {
-  background: var(--surface-panel-strong);
-  width: auto;
-}
-
-.buttonsWrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 144px;
-}
-
-.buttonsWrapper ion-button {
-  margin: 0;
-  padding: 16px;
-  min-height: 0;
-  --padding-top: 6px;
-  --padding-bottom: 6px;
-}
-
-.buttonsWrapper ion-button::part(native) {
-  padding: 0;
-  height: 32px;
-  min-height: 24px;
-}
-
-.buttonIcon {
-  font-size: var(--text-2xl);
-}
-
-.linkIcon   { color: var(--color-success); }
-.editIcon   { color: var(--color-accent); }
-.deleteIcon { color: var(--color-error); }
 
 /* ── Card shell ─────────────────────────────────────────────────────────── */
 
