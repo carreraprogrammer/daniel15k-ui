@@ -94,7 +94,7 @@ export const QuickCapturePage = () => {
     const el = inputRef.current;
     if (!el) return;
     el.style.height = 'auto';
-    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+    el.style.height = Math.max(24, Math.min(el.scrollHeight, 120)) + 'px';
   }, [quickText]);
 
   useEffect(() => {
