@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useAgentUI } from '../../../contexts/AgentUIContext'
-import { AvatarNucleus } from '../../atoms/AvatarNucleus'
-import { useProgressStore } from '../../../store/progressStore'
+import { Buddy } from '../../atoms/Buddy'
+import { useBuddyStore } from '../../../store/buddyStore'
 import { formatCurrencyCompact } from '../../../utils/formatCurrency'
 import { financeService } from '../../../services/financeService'
 import type {
@@ -235,14 +235,11 @@ const TypingDots = () => (
 
 interface Props {
   onClose: () => void
-  seed: string
-  level: number
 }
 
-export const ChatPage = ({ onClose, seed, level }: Props) => {
+export const ChatPage = ({ onClose }: Props) => {
   const { state, startChat } = useAgentUI()
-  const { getEffectiveLevel } = useProgressStore()
-  const effectiveLevel = getEffectiveLevel()
+  const persona = useBuddyStore((s) => s.persona)
 
   const [history, setHistory] = useState<ChatEntry[]>([])
   const [input, setInput] = useState('')
@@ -253,7 +250,14 @@ export const ChatPage = ({ onClose, seed, level }: Props) => {
 
   // Hydrate from DB on first open
   useEffect(() => {
+    // Snapshot existing event IDs at mount time — these are already reflected in DB history
+    const existingEventIds = new Set(state.events.map((e) => e.id))
+
     financeService.fetchChatHistory(30).then((msgs) => {
+      // Pre-seed seenEventIds so events already in context don't duplicate DB history entries
+      for (const id of existingEventIds) {
+        seenEventIds.current.add(id)
+      }
       const entries: ChatEntry[] = msgs.map((m, i) => ({
         kind: m.role === 'user' ? 'user' : 'assistant-text',
         text: m.content,
@@ -265,6 +269,7 @@ export const ChatPage = ({ onClose, seed, level }: Props) => {
     }).finally(() => {
       setHistoryLoaded(true)
     })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Capture incoming events into local history
@@ -326,10 +331,10 @@ export const ChatPage = ({ onClose, seed, level }: Props) => {
           </svg>
         </button>
         <div className={styles.headerAvatar}>
-          <AvatarNucleus seed={seed} level={level} size={18} />
+          <Buddy persona={persona} emotion="calm" size={32} />
         </div>
         <p className={styles.headerName}>Tu asistente</p>
-        <p className={styles.headerSub}>Nivel {effectiveLevel} · Finanzas personales</p>
+        <p className={styles.headerSub}>Finanzas personales</p>
       </header>
 
       {/* Messages */}
