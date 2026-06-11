@@ -298,8 +298,11 @@ export const financeService = {
     await api.patch(`/api/v1/transactions/${id}`, payload);
   },
 
-  async confirmTransaction(id: string): Promise<void> {
-    await api.patch(`/api/v1/transactions/${id}`, { status: 'confirmed' });
+  async confirmTransaction(id: string, subcategoryCode?: string): Promise<void> {
+    await api.patch(`/api/v1/transactions/${id}`, {
+      status: 'confirmed',
+      ...(subcategoryCode ? { subcategory_code: subcategoryCode } : {}),
+    });
   },
 
   async dismissTransactionFlag(id: string): Promise<void> {

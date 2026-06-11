@@ -274,6 +274,41 @@ export const TransactionsContent = () => {
       const catObj = categories.find(c => String(c.id) === String(target.category_id));
       return { ...target, color: catObj?.attributes.color };
     }, [summary, categories]);
+  // ── Confirmación de un tap: candidatas del agente por código ─────────────
+  const subcategoryNameByCode = useMemo(() => {
+    const map: Record<string, string> = {};
+    categories.forEach((category) => {
+      (category.relationships?.subcategories?.data ?? []).forEach((sub) => {
+        if (sub.attributes?.code) map[sub.attributes.code] = sub.attributes.name ?? sub.attributes.code;
+      });
+    });
+    return map;
+  }, [categories]);
+
+  const suggestedFor = useCallback((transaction: Transaction) => {
+    const raw = transaction.attributes.metadata?.suggested_subcategories;
+    if (!Array.isArray(raw)) return undefined;
+    const items = raw
+      .filter((code): code is string => typeof code === 'string' && code.length > 0)
+      .map((code) => ({ code, name: subcategoryNameByCode[code] ?? code }));
+    return items.length > 0 ? items : undefined;
+  }, [subcategoryNameByCode]);
+
+  const handleQuickConfirm = useCallback(async (transaction: Transaction, subcategoryCode?: string) => {
+    try {
+      await financeService.confirmTransaction(transaction.id, subcategoryCode);
+      void presentToast({ message: 'Confirmada ✓', duration: 1500, position: 'bottom' });
+      void reload();
+    } catch (err) {
+      void presentToast({
+        message: err instanceof Error ? err.message : 'No fue posible confirmar la transacción.',
+        duration: 2500,
+        position: 'bottom',
+        color: 'danger',
+      });
+    }
+  }, [reload]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const selectedCategoryId = filters.category_id ? String(filters.category_id) : '';
   const categoryFilters = useMemo(
     () => categories.map((category) => ({
@@ -780,6 +815,8 @@ export const TransactionsContent = () => {
                             void requestDelete(selectedTransaction);
                           }}
                           onLink={(tx) => { handleOpenLink(tx); }}
+                          onQuickConfirm={(tx, code) => { void handleQuickConfirm(tx, code); }}
+                          suggestedSubcategories={suggestedFor(transaction)}
                         />
                       ))}
                     </div>

@@ -249,3 +249,31 @@
     font-size: var(--text-base);
   }
 }
+
+/* ── Confirmación de un tap (pendientes) ──────────────────────────────────── */
+.confirmRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.45rem;
+}
+
+.confirmChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.32rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-color, rgba(127, 127, 127, 0.35));
+  background: transparent;
+  color: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.confirmChipSuggested {
+  border-color: var(--cat-color, var(--color-primary));
+  background: color-mix(in srgb, var(--cat-color, var(--color-primary)) 14%, transparent);
+}

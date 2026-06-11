@@ -30,6 +30,7 @@ import { SheetModal } from '../../molecules/SheetModal';
 import { resolveNamedIcon } from '../../organisms/BudgetWizard/iconRegistry';
 import { useDashboardData } from '../../../hooks/useDashboardData';
 import { useAuthStore } from '../../../store/authStore';
+import { financeService } from '../../../services/financeService';
 import pageStyles from '../FinancePage.module.css';
 import styles from './DashboardPage.module.css';
 
@@ -666,6 +667,14 @@ export const DashboardContent = () => {
   const { dataVersion } = useAgentUI();
   useEffect(() => { if (dataVersion > 0) void reload(); }, [dataVersion]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ── Pendientes por confirmar (capturadas por el agente) ──────────────────
+  const [pendingCount, setPendingCount] = useState(0);
+  useEffect(() => {
+    financeService.fetchPendingTransactions()
+      .then((res) => setPendingCount(res.data.length))
+      .catch(() => setPendingCount(0));
+  }, [dataVersion]);
+
   // ── Date calculations ──────────────────────────────────────────────────
   const today = new Date();
   const todayNum = today.getDate();
@@ -714,6 +723,20 @@ export const DashboardContent = () => {
                   Tu plan de {planMonthLabel} está listo para revisar.
                 </p>
                 <button type="button" className={styles.planBannerBtn} onClick={() => history.push('/budgets')}>
+                  Revisar
+                </button>
+              </div>
+            ) : null}
+
+            {/* ── Pendientes por confirmar ─────────────────────────────── */}
+            {pendingCount > 0 ? (
+              <div className={styles.planBanner}>
+                <p className={styles.planBannerText}>
+                  {pendingCount === 1
+                    ? 'Encontré 1 movimiento. Confírmalo en un tap.'
+                    : `Encontré ${pendingCount} movimientos. Confírmalos en un tap.`}
+                </p>
+                <button type="button" className={styles.planBannerBtn} onClick={() => history.push('/transactions')}>
                   Revisar
                 </button>
               </div>

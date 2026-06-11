@@ -44,6 +44,11 @@ const formatTransactionDate = (value: string) => {
   return value;
 };
 
+export interface SuggestedSubcategory {
+  code: string;
+  name: string;
+}
+
 export interface TransactionSlidingCardProps {
   transaction: Transaction;
   category: CategoryLookupItem;
@@ -51,10 +56,14 @@ export interface TransactionSlidingCardProps {
   onEdit: (transaction: Transaction) => void;
   onDelete: (transaction: Transaction) => void;
   onLink?: (transaction: Transaction) => void;
+  /** Confirmación de un tap para pendientes; con código asigna subcategoría + confirma. */
+  onQuickConfirm?: (transaction: Transaction, subcategoryCode?: string) => void;
+  /** Candidatas que dedujo el agente (metadata.suggested_subcategories). */
+  suggestedSubcategories?: SuggestedSubcategory[];
   variant?: 'default' | 'grouped';
 }
 
-export const TransactionSlidingCard = ({ transaction, category, linkedLabel, onEdit, onDelete, onLink, variant = 'default' }: TransactionSlidingCardProps) => {
+export const TransactionSlidingCard = ({ transaction, category, linkedLabel, onEdit, onDelete, onLink, onQuickConfirm, suggestedSubcategories, variant = 'default' }: TransactionSlidingCardProps) => {
   const slidingRef = useRef<HTMLIonItemSlidingElement | null>(null);
 
   const status   = transaction.attributes.status ?? 'confirmed';
@@ -110,7 +119,37 @@ export const TransactionSlidingCard = ({ transaction, category, linkedLabel, onE
             {linkedLabel ? (
               <span className={styles.linked}>{linkedLabel}</span>
             ) : null}
-            {isGrouped && status === 'pending' ? (
+            {status === 'pending' && onQuickConfirm ? (
+              <div className={styles.confirmRow}>
+                {(suggestedSubcategories ?? []).slice(0, 2).map((s) => (
+                  <button
+                    key={s.code}
+                    type="button"
+                    className={`${styles.confirmChip} ${styles.confirmChipSuggested}`}
+                    onClick={(e) => { e.stopPropagation(); onQuickConfirm(transaction, s.code); }}
+                  >
+                    ✓ {s.name}
+                  </button>
+                ))}
+                {(suggestedSubcategories?.length ?? 0) > 0 ? (
+                  <button
+                    type="button"
+                    className={styles.confirmChip}
+                    onClick={(e) => { e.stopPropagation(); onEdit(transaction); }}
+                  >
+                    Otra
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className={styles.confirmChip}
+                    onClick={(e) => { e.stopPropagation(); onQuickConfirm(transaction); }}
+                  >
+                    Confirmar
+                  </button>
+                )}
+              </div>
+            ) : isGrouped && status === 'pending' ? (
               <span className={styles.pendingInline}>Falta confirmar</span>
             ) : null}
           </div>
