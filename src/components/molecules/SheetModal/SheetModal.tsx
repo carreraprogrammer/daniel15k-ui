@@ -21,6 +21,7 @@ export const SheetModal = ({ isOpen, title, children, onClose, height = 'tall' }
     initialBreakpoint={height === 'compact' ? 0.46 : 0.72}
     backdropBreakpoint={0.24}
     handle
+    expandToScroll={false}
     className={`sheet-modal sheet-modal--${height}`}
   >
     <IonContent>

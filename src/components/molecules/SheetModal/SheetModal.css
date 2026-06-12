@@ -45,6 +45,18 @@
   display: grid;
   gap: 1rem;
   padding: 0.9rem 1rem 1.1rem;
+  /* El contenido nunca debe desbordar horizontalmente el sheet */
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+.sheet-modal__shell > * {
+  min-width: 0;
+}
+
+.sheet-modal__shell :is(p, span, strong, h2, h3) {
+  overflow-wrap: anywhere;
 }
 
 .sheet-modal__topbar {

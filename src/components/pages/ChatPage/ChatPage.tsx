@@ -325,7 +325,7 @@ export const ChatPage = ({ onClose }: Props) => {
   const SUG_CHIPS = ['¿Cómo voy este mes?', 'Cierra mi mes', '¿Cuánto puedo abonar?', 'Crea una meta']
 
   return (
-    <div className={styles.overlay} role="dialog" aria-modal="true">
+    <div className={styles.overlay} role="dialog" aria-modal="true" data-app-overlay="chat">
       {/* Grain */}
       <div className={styles.grain} aria-hidden="true" />
 

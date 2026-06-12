@@ -26,8 +26,21 @@ const STATUS_LABEL: Record<string, string> = {
 export const CompletenessIndicator = () => {
   const [data, setData] = useState<CompletenessResponse | null>(null);
   const [open, setOpen] = useState(false);
+  const [overlayOpen, setOverlayOpen] = useState(false);
   const [incomeWizardOpen, setIncomeWizardOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
+
+  // Ocultarse cuando hay cualquier overlay encima (sheets de Ionic, chat, etc.).
+  // La regla CSS con body.overlay-open nunca funcionó porque nadie ponía la clase.
+  useEffect(() => {
+    const check = () => setOverlayOpen(
+      Boolean(document.querySelector('ion-modal.show-modal, ion-popover.show-modal, [data-app-overlay]')),
+    );
+    const observer = new MutationObserver(check);
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+    check();
+    return () => observer.disconnect();
+  }, []);
 
   const loadCompleteness = () => {
     financeService.fetchCompleteness().then(setData).catch(() => null);
@@ -48,7 +61,7 @@ export const CompletenessIndicator = () => {
     return () => document.removeEventListener('mousedown', handler);
   }, [open]);
 
-  if (!data) return null;
+  if (!data || overlayOpen) return null;
 
   const gaps = [...data.missing, ...data.partial, ...data.stale, ...data.conflicting];
   if (gaps.length === 0) return null;
@@ -118,7 +131,6 @@ export const CompletenessIndicator = () => {
             onClick={() => setOpen((v) => !v)}
             aria-label={`${gaps.length} datos incompletos`}
           >
-            <span className={styles.pulseRing} />
             <IonIcon className={styles.bubbleIcon} icon={warningOutline} aria-hidden="true" />
             <span className={styles.bubbleCount}>{gaps.length}</span>
           </button>

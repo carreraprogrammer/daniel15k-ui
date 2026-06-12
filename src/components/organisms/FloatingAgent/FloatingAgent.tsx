@@ -1,6 +1,7 @@
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { useLocation } from 'react-router-dom'
 import { Buddy } from '../../atoms/Buddy'
 import { useAuthStore } from '../../../store/authStore'
 import { useBuddyStore } from '../../../store/buddyStore'
@@ -61,12 +62,19 @@ function readStoredPosition() {
 export const FloatingAgent = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
   const persona = useBuddyStore((state) => state.persona)
+  const location = useLocation()
   const [isOpen, setIsOpen] = useState(false)
   const [wizardOpen, setWizardOpen] = useState(() => document.body.hasAttribute('data-wizard-open'))
   const [emotion, setEmotion] = useState<Emotion>('calm')
   const [position, setPosition] = useState<Point | null>(readStoredPosition)
   const [isDragging, setIsDragging] = useState(false)
   const positionRef = useRef<Point | null>(position)
+  // Posición que el usuario eligió (drag) — solo se actualiza al soltar el drag.
+  // Los clamps transitorios (teclado abierto, viewport reducido) ajustan la
+  // posición visible pero nunca pisan esta preferencia.
+  const preferredRef = useRef<Point | null>(position)
+  // La captura rápida tiene su propio Buddy como protagonista — el orbe sobra ahí.
+  const hiddenRoute = location.pathname.startsWith('/quick')
   const suppressClickRef = useRef(false)
   const dragRef = useRef({
     pointerId: -1,
@@ -97,7 +105,9 @@ export const FloatingAgent = () => {
     if (typeof window === 'undefined') return
     const bounds = getViewportBounds()
     const fallback = { x: bounds.right, y: bounds.bottom }
-    const next = clampPoint(candidate ?? positionRef.current ?? fallback, bounds)
+    const preferred = candidate ?? preferredRef.current ?? fallback
+    if (!preferredRef.current) preferredRef.current = preferred
+    const next = clampPoint(preferred, bounds)
     positionRef.current = next
     setPosition(next)
   }
@@ -110,7 +120,7 @@ export const FloatingAgent = () => {
     // (visually "center of screen"). Wait for the keyboard dismiss animation
     // (~300 ms on iOS) before re-clamping.
     const id = window.setTimeout(() => {
-      if (dragRef.current.pointerId === -1) syncPosition(positionRef.current)
+      if (dragRef.current.pointerId === -1) syncPosition()
     }, 350)
     return () => window.clearTimeout(id)
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -119,7 +129,7 @@ export const FloatingAgent = () => {
   useEffect(() => {
     const handleResize = () => {
       if (isOpen || dragRef.current.pointerId !== -1) return
-      syncPosition(positionRef.current)
+      syncPosition()
     }
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
@@ -129,7 +139,7 @@ export const FloatingAgent = () => {
   useEffect(() => {
     const observer = new MutationObserver(() => {
       if (isOpen || dragRef.current.pointerId !== -1) return
-      syncPosition(positionRef.current)
+      syncPosition()
     })
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['style'] })
     return () => observer.disconnect()
@@ -138,8 +148,6 @@ export const FloatingAgent = () => {
 
   useEffect(() => {
     positionRef.current = position
-    if (!position) return
-    window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(position))
   }, [position])
 
   const handlePointerMove = (event: PointerEvent) => {
@@ -169,6 +177,10 @@ export const FloatingAgent = () => {
     if (dragRef.current.moved) {
       suppressClickRef.current = true
       window.setTimeout(() => { suppressClickRef.current = false }, 0)
+      if (positionRef.current) {
+        preferredRef.current = positionRef.current
+        window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(positionRef.current))
+      }
     }
     dragRef.current.pointerId = -1
     dragRef.current.moved = false
@@ -212,7 +224,7 @@ export const FloatingAgent = () => {
       {isOpen && <ChatPortal onClose={() => setIsOpen(false)} />}
 
       {createPortal(
-        <div className={styles.anchor} style={{ ...style, display: (isOpen || wizardOpen) ? 'none' : 'block' }}>
+        <div className={styles.anchor} style={{ ...style, display: (isOpen || wizardOpen || hiddenRoute) ? 'none' : 'block' }}>
           <button
             className={`${styles.bubble} ${isDragging ? styles.bubbleDragging : ''}`}
             onClick={handleClick}
