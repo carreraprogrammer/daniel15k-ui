@@ -725,3 +725,36 @@
   background: var(--color-committed);
   transition: width 400ms ease;
 }
+
+/* ── Transparencia de cálculos ────────────────────────────────────────────── */
+.kpiTap {
+  appearance: none;
+  border: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.kpiHint {
+  margin-top: 0.3rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  opacity: 0.85;
+}
+
+.explain {
+  margin: 0;
+  padding: 0.7rem 0.85rem;
+  border-radius: 14px;
+  background: var(--surface-control);
+  color: var(--color-text-secondary);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.explainWarn {
+  background: color-mix(in srgb, var(--color-warning) 12%, transparent);
+  color: var(--color-warning);
+}

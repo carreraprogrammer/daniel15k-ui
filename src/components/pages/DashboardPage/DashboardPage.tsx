@@ -442,11 +442,31 @@ interface FlowModalProps {
 }
 
 const FlowModal = ({ isOpen, onClose, runway, nextCycleLabel }: FlowModalProps) => {
-  const rows = [
-    { lbl: 'Saldo confirmado', hint: 'Lo que tienes hoy', val: runway.confirmed_balance },
-    { lbl: 'Obligaciones hasta la quincena', hint: `Vencen antes del ${nextCycleLabel}`, val: -(runway.confirmed_balance - (runway.commitment_gap ?? 0)) },
-  ];
+  // Desglose real del margen libre (glosario-calculos.md):
+  // margen = lo que tienes hoy − pagos antes del próximo ingreso − (ritmo × días)
+  const days = runway.days_to_next_income ?? 0;
+  const dailyBurn = runway.daily_necessary_burn ?? 0;
+  const burnUntilIncome = dailyBurn * days;
+  const committed = runway.committed_before_next_income ?? 0;
   const margin = runway.commitment_gap ?? 0;
+
+  const rows = [
+    {
+      lbl: 'Lo que tienes hoy',
+      hint: 'Ingresos menos gastos confirmados, más lo que arrastraste del mes pasado',
+      val: runway.confirmed_balance,
+    },
+    {
+      lbl: 'Pagos que ya prometiste',
+      hint: `Compromisos fijos que vencen antes del ${nextCycleLabel}`,
+      val: -committed,
+    },
+    {
+      lbl: 'Tu día a día hasta esa fecha',
+      hint: `≈ ${money(dailyBurn)}/día × ${days} días — mercado, transporte, comida`,
+      val: -burnUntilIncome,
+    },
+  ];
 
   return (
     <SheetModal isOpen={isOpen} title="Tu flujo hasta la quincena" onClose={onClose} height="compact">
@@ -463,7 +483,7 @@ const FlowModal = ({ isOpen, onClose, runway, nextCycleLabel }: FlowModalProps) 
         <div className={`${styles.flowRow} ${styles.flowRowTotal}`}>
           <div className={styles.flowL}>
             <span className={`${styles.flowLbl} ${styles.flowLblTotal}`}>Margen libre</span>
-            <span className={styles.flowHint}>Lo que puedes mover sin riesgo</span>
+            <span className={styles.flowHint}>Lo que puedes mover sin poner en riesgo nada de lo de arriba</span>
           </div>
           <span className={`${styles.flowVal} ${styles.flowValAccent}`}>{moneyFull(margin)}</span>
         </div>
@@ -471,6 +491,40 @@ const FlowModal = ({ isOpen, onClose, runway, nextCycleLabel }: FlowModalProps) 
     </SheetModal>
   );
 };
+
+// ──────────────────────────────────────────────────────────────────────────
+// BURN MODAL — ¿de dónde sale tu ritmo?
+// ──────────────────────────────────────────────────────────────────────────
+interface BurnModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  runway: NonNullable<SummaryResponse['cash_flow_runway']>;
+}
+
+const BurnModal = ({ isOpen, onClose, runway }: BurnModalProps) => (
+  <SheetModal isOpen={isOpen} title="Tu ritmo diario" onClose={onClose} height="compact">
+    <div className={styles.modalBody}>
+      <div className={styles.fundModalCenter}>
+        <div className={styles.fundModalAmount}>{moneyFull(runway.daily_necessary_burn)}</div>
+        <div className={styles.fundModalSub}>promedio de tus gastos del día a día</div>
+      </div>
+      <p className={styles.explain}>
+        Se calcula con tus gastos necesarios — mercado, transporte, comida — de los
+        últimos 30 días, divididos entre 30.
+      </p>
+      <p className={styles.explain}>
+        Tus pagos fijos (arriendo, cuotas, suscripciones) <strong>no entran aquí</strong>:
+        esos se cuentan aparte como compromisos, para no contarlos dos veces.
+      </p>
+      {!runway.has_sufficient_history ? (
+        <p className={`${styles.explain} ${styles.explainWarn}`}>
+          Todavía no tienes 14 días de historial, así que por ahora usamos un estimado
+          de $30.000/día. Se afina solo a medida que registras.
+        </p>
+      ) : null}
+    </div>
+  </SheetModal>
+);
 
 // ──────────────────────────────────────────────────────────────────────────
 // OBLIGATIONS MODAL — checklist completa
@@ -662,7 +716,7 @@ const SecHead = ({ label, onMore, moreLabel = 'Ver todo' }: { label: string; onM
 export const DashboardContent = () => {
   const { summary, insight, completeness, loading, error, reload, monthTransactions } = useDashboardData();
   const history = useHistory();
-  const [modal, setModal] = useState<'flow' | 'obl' | 'fund' | null>(null);
+  const [modal, setModal] = useState<'flow' | 'obl' | 'fund' | 'burn' | null>(null);
 
   const { dataVersion } = useAgentUI();
   useEffect(() => { if (dataVersion > 0) void reload(); }, [dataVersion]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -773,13 +827,14 @@ export const DashboardContent = () => {
                     <div className={styles.kpiLbl}>Gastado este mes</div>
                     <div className={styles.kpiVal}>{money(summary.balance.expense_confirmed)}</div>
                   </div>
-                  <div className={styles.kpi}>
+                  <button type="button" className={`${styles.kpi} ${styles.kpiTap}`} onClick={() => setModal('burn')}>
                     <div className={styles.kpiLbl}>Ritmo diario</div>
                     <div className={styles.kpiVal}>
                       {money(runway?.daily_necessary_burn ?? 0)}
                       <span className={styles.kpiUnit}>/día</span>
                     </div>
-                  </div>
+                    <div className={styles.kpiHint}>¿De dónde sale?</div>
+                  </button>
                 </div>
               </>
             ) : null}
@@ -832,6 +887,14 @@ export const DashboardContent = () => {
         items={oblItems}
         today={todayNum}
       />
+
+      {runway ? (
+        <BurnModal
+          isOpen={modal === 'burn'}
+          onClose={() => setModal(null)}
+          runway={runway}
+        />
+      ) : null}
 
       {summary ? (
         <FundModal

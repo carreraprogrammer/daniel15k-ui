@@ -31,7 +31,7 @@ export const AuthLayout = ({ title, children }: { title: string; children: React
               </div>
               <div className={styles.metricCard}>
                 <strong>Señales útiles</strong>
-                <span>Burn rate claro y lectura conductual del mes.</span>
+                <span>Tu ritmo de gasto claro y una lectura honesta del mes.</span>
               </div>
             </div>
 
