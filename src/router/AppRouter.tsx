@@ -1,5 +1,5 @@
 import { IonIcon, IonLabel, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs } from '@ionic/react';
-import { useEffect, type ComponentType } from 'react';
+import { useEffect, useState, type ComponentType } from 'react';
 import { Redirect, Route, useLocation } from 'react-router-dom';
 import {
   calendarOutline,
@@ -74,6 +74,59 @@ const OnboardingRoute = () => {
         if (!isAuthenticated) return <Redirect to="/login" />;
         if (onboardingDone === true) return <Redirect to="/dashboard" />;
         return <OnboardingPage />;
+      }}
+    />
+  );
+};
+
+// Dev/superadmin only — testing affordances that never risk real data.
+const useDevAccess = (): boolean => {
+  const isSuper = useAuthStore((state) => state.user?.superAdmin) ?? false;
+  return isSuper || import.meta.env.DEV;
+};
+
+// Runs the full flow with zero writes; safe to repeat on any account.
+const OnboardingPreviewRoute = () => {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const allow = useDevAccess();
+  return (
+    <Route
+      exact
+      path="/onboarding/preview"
+      render={() => {
+        if (!isAuthenticated) return <Redirect to="/login" />;
+        if (!allow) return <Redirect to="/dashboard" />;
+        return <OnboardingPage preview />;
+      }}
+    />
+  );
+};
+
+// Clears the local "completed" flag and bounces to /onboarding. The gate then
+// re-checks the backend: onboarding only reappears if financial_context is
+// actually gone (i.e. the account was reset), so real accounts stay protected.
+const OnboardingResetInner = () => {
+  const userId = useAuthStore((state) => state.user?.id);
+  const reset = useOnboardingStore((state) => state.reset);
+  const [done, setDone] = useState(false);
+  useEffect(() => {
+    if (userId != null) reset(userId);
+    setDone(true);
+  }, [userId, reset]);
+  return done ? <Redirect to="/onboarding" /> : null;
+};
+
+const OnboardingResetRoute = () => {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const allow = useDevAccess();
+  return (
+    <Route
+      exact
+      path="/onboarding/reset"
+      render={() => {
+        if (!isAuthenticated) return <Redirect to="/login" />;
+        if (!allow) return <Redirect to="/dashboard" />;
+        return <OnboardingResetInner />;
       }}
     />
   );
@@ -170,6 +223,8 @@ export const AppRouter = () => {
         <GuestRoute exact path="/login" component={LoginPage} />
         <GuestRoute exact path="/register" component={RegisterPage} />
         <Route exact path="/auth/callback" component={OAuthCallbackPage} />
+        <OnboardingPreviewRoute />
+        <OnboardingResetRoute />
         <OnboardingRoute />
         <ProtectedRoute exact path="/dashboard" component={DashboardPage} />
         <ProtectedRoute exact path="/transactions" component={TransactionsPage} />
