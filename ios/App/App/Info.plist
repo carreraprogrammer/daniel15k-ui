@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>Daniel 15K</string>
+        <string>Ascent</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -45,6 +45,10 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>ASCENT usa el micrófono para que dictes tus gastos en voz alta durante la configuración.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>ASCENT convierte tu voz en texto para registrar tus gastos sin que tengas que escribirlos uno por uno.</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

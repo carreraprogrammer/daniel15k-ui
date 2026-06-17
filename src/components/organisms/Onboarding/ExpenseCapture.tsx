@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Persona } from '../../../store/buddyStore'
 import { onboardingService } from '../../../services/onboardingService'
+import { isVoiceSupported, startVoiceDictation } from '../../../services/voiceInput'
+import type { VoiceSession } from '../../../services/voiceInput'
 import { Icon } from './OnboardingIcons'
 import { fmtCOP, parseMoney } from './helpers'
 import { guessExpense } from './expenseHeuristics'
@@ -8,28 +10,6 @@ import type { OnbExpense } from './types'
 
 type Mode = 'voz' | 'foto' | 'form'
 type VoiceState = 'idle' | 'rec' | 'parsing'
-type PhotoState = 'idle' | 'scan'
-
-// Minimal typing for the Web Speech API (not in lib.dom defaults).
-interface SpeechRecognitionLike {
-  lang: string
-  interimResults: boolean
-  continuous: boolean
-  onresult: ((e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null
-  onerror: ((e: unknown) => void) | null
-  onend: (() => void) | null
-  start: () => void
-  stop: () => void
-}
-
-function getSpeechRecognition(): SpeechRecognitionLike | null {
-  const w = window as unknown as {
-    SpeechRecognition?: new () => SpeechRecognitionLike
-    webkitSpeechRecognition?: new () => SpeechRecognitionLike
-  }
-  const Ctor = w.SpeechRecognition || w.webkitSpeechRecognition
-  return Ctor ? new Ctor() : null
-}
 
 export function ExpenseCapture({
   coach: _coach,
@@ -40,49 +20,42 @@ export function ExpenseCapture({
   hasItems: boolean
   onParsed: (expenses: OnbExpense[]) => void
 }) {
-  const speechSupported = useRef(Boolean(getSpeechRecognition())).current
-  const [mode, setMode] = useState<Mode>(speechSupported ? 'voz' : 'form')
+  const [speechSupported, setSpeechSupported] = useState(true)
+  const [mode, setMode] = useState<Mode>('voz')
   const [voice, setVoice] = useState<VoiceState>('idle')
-  const [photo, setPhoto] = useState<PhotoState>('idle')
+  const [photo, setPhoto] = useState<'idle' | 'scan'>('idle')
   const [transcript, setTranscript] = useState('')
   const [error, setError] = useState('')
-  const recRef = useRef<SpeechRecognitionLike | null>(null)
+  const sessionRef = useRef<VoiceSession | null>(null)
   const fileRef = useRef<HTMLInputElement | null>(null)
 
   // manual mini-form
   const [mName, setMName] = useState('')
   const [mAmount, setMAmount] = useState('')
 
-  useEffect(() => () => { try { recRef.current?.stop() } catch { /* noop */ } }, [])
+  useEffect(() => {
+    let cancelled = false
+    isVoiceSupported().then((ok) => {
+      if (cancelled) return
+      setSpeechSupported(ok)
+      if (!ok) setMode((m) => (m === 'voz' ? 'form' : m))
+    })
+    return () => { cancelled = true; void sessionRef.current?.stop() }
+  }, [])
 
   // ── voice ────────────────────────────────────────────────────────────────
-  const startVoice = () => {
+  const startVoice = async () => {
     setError('')
-    const rec = getSpeechRecognition()
-    if (!rec) { setMode('form'); return }
-    recRef.current = rec
-    rec.lang = 'es-CO'
-    rec.interimResults = true
-    rec.continuous = true
-    let finalText = ''
-    rec.onresult = (e) => {
-      let interim = ''
-      for (let i = 0; i < e.results.length; i++) {
-        const r = e.results[i] as ArrayLike<{ transcript: string }> & { isFinal?: boolean }
-        const chunk = r[0]?.transcript ?? ''
-        if (r.isFinal) finalText += chunk
-        else interim += chunk
-      }
-      setTranscript((finalText + ' ' + interim).trim())
-    }
-    rec.onerror = () => { setError('No pude escucharte bien. Probá de nuevo o escríbelos.'); setVoice('idle') }
-    rec.onend = () => { if (finalText.trim()) void parse(finalText.trim()) ; else setVoice('idle') }
     setTranscript('')
     setVoice('rec')
-    try { rec.start() } catch { setVoice('idle') }
+    sessionRef.current = await startVoiceDictation({
+      onPartial: setTranscript,
+      onFinal: (text) => { if (text) void parse(text); else setVoice('idle') },
+      onError: (m) => { setError(m); setVoice('idle') },
+    })
   }
 
-  const stopVoice = () => { try { recRef.current?.stop() } catch { /* noop */ } }
+  const stopVoice = async () => { await sessionRef.current?.stop() }
 
   const parse = async (text: string) => {
     setVoice('parsing')
@@ -91,14 +64,14 @@ export function ExpenseCapture({
       if (parsed.length) onParsed(parsed)
       else setError('No reconocí gastos ahí. Probá otra vez o agrégalos a mano.')
     } catch {
-      setError('No pude procesar el audio. Agrégalos a mano por ahora.')
+      setError('No pude procesar lo que dijiste. Agrégalos a mano por ahora.')
       setMode('form')
     } finally {
       setVoice('idle'); setTranscript('')
     }
   }
 
-  // ── photo ──────────────────────────────────────────────────────────────
+  // ── photo (capture → backend parse; OCR server-side pending) ──────────────
   const onPickPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -107,7 +80,7 @@ export function ExpenseCapture({
       const base64 = await fileToBase64(file)
       const parsed = await onboardingService.parseExpenses({ imageBase64: base64 })
       if (parsed.length) onParsed(parsed)
-      else setError('No pude leer el extracto. Probá con otra foto o agrégalos a mano.')
+      else setError('Todavía no puedo leer fotos. Dímelos por voz o agrégalos a mano.')
     } catch {
       setError('No pude leer la imagen. Agrégalos a mano por ahora.')
       setMode('form')
@@ -156,7 +129,7 @@ export function ExpenseCapture({
           ) : speechSupported ? (
             <div className="d-hint">Toca y dímelos seguido:<br /><i>“arriendo 1.200.000, la cuota del carro 620 mil, Netflix…”</i></div>
           ) : (
-            <div className="d-hint">El dictado no está disponible en este dispositivo. Usa “Foto” o “Uno a uno”.</div>
+            <div className="d-hint">El dictado no está disponible aquí. Usa “Uno a uno”.</div>
           )}
           {transcript && <div className="ob2-transcript"><span className="typed">{transcript}</span></div>}
         </div>

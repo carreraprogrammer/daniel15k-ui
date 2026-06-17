@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { Persona } from '../../../store/buddyStore'
 import { Buddy } from '../../atoms/Buddy/Buddy'
 import { Icon } from './OnboardingIcons'
+import { startVoiceDictation } from '../../../services/voiceInput'
+import type { VoiceSession } from '../../../services/voiceInput'
 import { fmtCOP, parseMoney } from './helpers'
 import type {
   ExpenseCategory,
@@ -125,6 +127,17 @@ export function MotivationScreen({ data, update, coach }: ScreenProps) {
     update({ motivation: { ...data.motivation, chips: next } })
   }
   const setNote = (v: string) => update({ motivation: { ...data.motivation, note: v } })
+  const [rec, setRec] = useState(false)
+  const sessionRef = useRef<VoiceSession | null>(null)
+  const toggleRec = async () => {
+    if (rec) { await sessionRef.current?.stop(); return }
+    setRec(true)
+    sessionRef.current = await startVoiceDictation({
+      onPartial: setNote,
+      onFinal: (t) => { if (t) setNote(t); setRec(false) },
+      onError: () => setRec(false),
+    })
+  }
 
   return (
     <div className="ob2-scroll">
@@ -155,7 +168,15 @@ export function MotivationScreen({ data, update, coach }: ScreenProps) {
             onChange={(e) => setNote(e.target.value)}
             placeholder="Habla o escribe… ej: “quiero darle algo mejor a mis hijos”."
           />
+          <button className={`ob2-mic ${rec ? 'rec' : ''}`} onClick={toggleRec} aria-label="Dictar">
+            <Icon.Mic size={18} />
+          </button>
         </div>
+        {rec && (
+          <div style={{ fontSize: 12.5, color: 'var(--committed)', marginTop: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ width: 7, height: 7, borderRadius: 99, background: 'var(--committed)' }} /> Escuchando…
+          </div>
+        )}
       </div>
 
       <WhyAsk>
