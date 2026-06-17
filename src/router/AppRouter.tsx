@@ -10,6 +10,9 @@ import {
   swapHorizontalOutline,
 } from 'ionicons/icons';
 import { useAuthStore } from '../store/authStore';
+import { useOnboardingStore } from '../store/onboardingStore';
+import { useOnboardingStatus } from '../hooks/useOnboardingStatus';
+import { OnboardingPage } from '../components/pages/OnboardingPage/OnboardingPage';
 import { LoginPage } from '../components/pages/LoginPage/LoginPage';
 import { RegisterPage } from '../components/pages/RegisterPage/RegisterPage';
 import { DashboardPage } from '../components/pages/DashboardPage';
@@ -30,6 +33,11 @@ import { QuickCapturePage } from '../components/pages/QuickCapturePage';
 import { getLastAuthPath } from '../utils/navigation';
 import styles from './AppRouter.module.css';
 
+const useOnboardingComplete = (): boolean | undefined => {
+  const userId = useAuthStore((state) => state.user?.id);
+  return useOnboardingStore((state) => (userId != null ? state.completed[userId] : undefined));
+};
+
 const ProtectedRoute = ({
   component: Component,
   ...rest
@@ -39,11 +47,34 @@ const ProtectedRoute = ({
   component: ComponentType;
 }) => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const onboardingDone = useOnboardingComplete();
 
   return (
     <Route
       {...rest}
-      render={() => (isAuthenticated ? <Component /> : <Redirect to="/login" />)}
+      render={() => {
+        if (!isAuthenticated) return <Redirect to="/login" />;
+        if (onboardingDone === undefined) return null; // resolving — avoid flicker
+        if (onboardingDone === false) return <Redirect to="/onboarding" />;
+        return <Component />;
+      }}
+    />
+  );
+};
+
+const OnboardingRoute = () => {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const onboardingDone = useOnboardingComplete();
+
+  return (
+    <Route
+      exact
+      path="/onboarding"
+      render={() => {
+        if (!isAuthenticated) return <Redirect to="/login" />;
+        if (onboardingDone === true) return <Redirect to="/dashboard" />;
+        return <OnboardingPage />;
+      }}
     />
   );
 };
@@ -93,7 +124,11 @@ const AUTH_PATHS = [
 export const AppRouter = () => {
   const location = useLocation();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const showTabs = isAuthenticated && (AUTH_PATHS.includes(location.pathname) || location.pathname.startsWith('/budgets/'));
+  // Resolve first-run onboarding status once for the whole router.
+  useOnboardingStatus();
+  const showTabs = isAuthenticated
+    && location.pathname !== '/onboarding'
+    && (AUTH_PATHS.includes(location.pathname) || location.pathname.startsWith('/budgets/'));
 
   useEffect(() => {
     const root = document.documentElement;
@@ -135,6 +170,7 @@ export const AppRouter = () => {
         <GuestRoute exact path="/login" component={LoginPage} />
         <GuestRoute exact path="/register" component={RegisterPage} />
         <Route exact path="/auth/callback" component={OAuthCallbackPage} />
+        <OnboardingRoute />
         <ProtectedRoute exact path="/dashboard" component={DashboardPage} />
         <ProtectedRoute exact path="/transactions" component={TransactionsPage} />
         <ProtectedRoute exact path="/debts" component={DebtsPage} />

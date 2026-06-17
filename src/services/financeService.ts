@@ -13,6 +13,7 @@ import type {
   Debt,
   DebtPayload,
   DebtQueryParams,
+  FinancialContextSummary,
   IncomeSource,
   IncomeSourcePayload,
   IncomeSourceQueryParams,
@@ -202,6 +203,18 @@ export const financeService = {
 
   async deleteIncomeSource(id: string): Promise<void> {
     await api.delete(`/api/v1/income_sources/${id}`);
+  },
+
+  async fetchFinancialContext(): Promise<FinancialContextSummary | null> {
+    const { data } = await api.get('/api/v1/financial_context');
+    return (data?.data ?? null) as FinancialContextSummary | null;
+  },
+
+  async updateFinancialContext(
+    payload: Partial<FinancialContextSummary> & { reward_pct?: number; debts_confirmed_at?: string | null },
+  ): Promise<FinancialContextSummary> {
+    const { data } = await api.patch('/api/v1/financial_context', payload);
+    return data?.data as FinancialContextSummary;
   },
 
   async fetchRecurringObligations(
