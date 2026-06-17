@@ -49,6 +49,10 @@
 	<string>ASCENT usa el micrófono para que dictes tus gastos en voz alta durante la configuración.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>ASCENT convierte tu voz en texto para registrar tus gastos sin que tengas que escribirlos uno por uno.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>ASCENT usa la cámara para leer tus extractos o recibos y registrar tus gastos automáticamente.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>ASCENT lee la foto de un extracto o pago que elijas para registrar tus gastos automáticamente.</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

@@ -63,6 +63,18 @@ export const onboardingService = {
     const caseId = deriveCaseId(ctx)
     const nowIso = new Date().toISOString()
 
+    // 0 · opening balance — seeds account.confirmed_balance as a confirmed inflow
+    if (data.balance && data.balance > 0) {
+      await financeService.createTransaction({
+        date: nowIso.slice(0, 10),
+        concept: 'Saldo inicial',
+        amount: data.balance,
+        transaction_type: 'income',
+        status: 'confirmed',
+        source: 'manual',
+      })
+    }
+
     // 1 · income source
     await financeService.createIncomeSource({
       name: 'Mi ingreso principal',

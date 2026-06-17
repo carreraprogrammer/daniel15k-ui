@@ -3,6 +3,7 @@ import type { Persona } from '../../../store/buddyStore'
 import { onboardingService } from '../../../services/onboardingService'
 import { isVoiceSupported, startVoiceDictation } from '../../../services/voiceInput'
 import type { VoiceSession } from '../../../services/voiceInput'
+import { capturePhotoText, isPhotoOcrSupported } from '../../../services/photoInput'
 import { Icon } from './OnboardingIcons'
 import { fmtCOP, parseMoney } from './helpers'
 import { guessExpense } from './expenseHeuristics'
@@ -27,7 +28,7 @@ export function ExpenseCapture({
   const [transcript, setTranscript] = useState('')
   const [error, setError] = useState('')
   const sessionRef = useRef<VoiceSession | null>(null)
-  const fileRef = useRef<HTMLInputElement | null>(null)
+  const photoOcr = isPhotoOcrSupported()
 
   // manual mini-form
   const [mName, setMName] = useState('')
@@ -71,22 +72,21 @@ export function ExpenseCapture({
     }
   }
 
-  // ── photo (capture → backend parse; OCR server-side pending) ──────────────
-  const onPickPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setError(''); setPhoto('scan')
+  // ── photo → on-device OCR → text parser ───────────────────────────────────
+  const runPhoto = async () => {
+    if (!photoOcr) { setError('La foto funciona en la app. Dímelos por voz o agrégalos a mano.'); return }
+    setError('')
     try {
-      const base64 = await fileToBase64(file)
-      const parsed = await onboardingService.parseExpenses({ imageBase64: base64 })
+      const text = await capturePhotoText()
+      if (!text) return // user cancelled the camera/picker
+      setPhoto('scan')
+      const parsed = await onboardingService.parseExpenses({ transcript: text })
       if (parsed.length) onParsed(parsed)
-      else setError('Todavía no puedo leer fotos. Dímelos por voz o agrégalos a mano.')
+      else setError('No reconocí gastos en la foto. Probá con otra o agrégalos a mano.')
     } catch {
-      setError('No pude leer la imagen. Agrégalos a mano por ahora.')
-      setMode('form')
+      setError('No pude leer la imagen. Dímelos por voz o agrégalos a mano.')
     } finally {
       setPhoto('idle')
-      if (fileRef.current) fileRef.current.value = ''
     }
   }
 
@@ -137,19 +137,15 @@ export function ExpenseCapture({
 
       {/* PHOTO */}
       {mode === 'foto' && (
-        <div className="ob2-photo" onClick={() => fileRef.current?.click()}>
+        <div className="ob2-photo" onClick={photo === 'scan' ? undefined : runPhoto}>
           <div className="p-ic"><Icon.Calendar size={22} /></div>
           <div className="p-t">{photo === 'scan' ? 'Leyendo tu extracto…' : 'Toma o sube una foto'}</div>
-          <div className="p-s">Un extracto, la cuota del banco o una captura de un pago. Yo saco los datos.</div>
+          <div className="p-s">
+            {photoOcr
+              ? 'Un extracto, la cuota del banco o una captura de un pago. Yo saco los datos.'
+              : 'Disponible en la app. Aquí en el navegador, dímelos por voz o agrégalos a mano.'}
+          </div>
           <div className="ob2-photo-strip">{photo === 'scan' ? 'reconociendo texto…' : 'extracto / pantallazo'}</div>
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/*"
-            capture="environment"
-            style={{ display: 'none' }}
-            onChange={onPickPhoto}
-          />
         </div>
       )}
 
@@ -181,13 +177,4 @@ export function ExpenseCapture({
       {error && <div className="ob2-error"><Icon.Bell size={13} /> {error}</div>}
     </>
   )
-}
-
-function fileToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(String(reader.result))
-    reader.onerror = reject
-    reader.readAsDataURL(file)
-  })
 }
