@@ -13,10 +13,12 @@ import { IonApp } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import { isPlatform } from '@ionic/react';
 import { App as CapacitorApp } from '@capacitor/app';
+import { Browser } from '@capacitor/browser';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { AppRouter } from './router/AppRouter';
 import { AgentUIProvider } from './contexts/AgentUIContext';
 import { FloatingAgent } from './components/organisms/FloatingAgent';
+import { GmailReconnectBanner } from './components/molecules/GmailReconnectBanner';
 import { QuickCaptureShortcut } from './plugins/quickCaptureShortcut';
 import { applyThemeMode, getThemeMediaQuery, useThemeStore } from './store/themeStore';
 import { applyAccent, useAccentStore } from './store/accentStore';
@@ -38,6 +40,10 @@ const handleDeepLink = (rawUrl: string) => {
     if (hostname === 'auth' && path === '/gmail') {
       const status = url.searchParams.get('status') ?? 'error';
       const reason = url.searchParams.get('reason');
+      // El redirect a daniel15k:// abre la app pero deja el SFSafariViewController
+      // (Browser.open) encima — por eso el botón "Volver a la aplicación" parecía no
+      // hacer nada. Cerrarlo nos devuelve a la app sin que el usuario tenga que tocarlo.
+      void Browser.close().catch(() => { /* no estaba abierto */ });
       useEmailConnectionStore.getState().handleDeepLinkResult(status, reason);
       window.location.assign('/profile');
       return;
@@ -111,6 +117,7 @@ export default function App() {
     <IonApp>
       <IonReactRouter>
         <AgentUIProvider>
+          <GmailReconnectBanner />
           <AppRouter />
           <FloatingAgent />
         </AgentUIProvider>

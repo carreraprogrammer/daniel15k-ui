@@ -5,6 +5,8 @@ import { api } from '../services/api'
 interface EmailConnectionState {
   /** null = todavía no cargado, true/false = conocido */
   connected: boolean | null
+  /** true cuando el refresh token murió y el usuario debe reconectar Gmail */
+  needsReconnect: boolean
   /** remitentes bancarios guardados — [] = modo keyword automático */
   bankSenders: string[]
   /** cargando el status inicial */
@@ -23,6 +25,7 @@ interface EmailConnectionState {
 
 export const useEmailConnectionStore = create<EmailConnectionState>((set) => ({
   connected: null,
+  needsReconnect: false,
   bankSenders: [],
   loading: false,
   actionLoading: false,
@@ -32,9 +35,10 @@ export const useEmailConnectionStore = create<EmailConnectionState>((set) => ({
     set({ loading: true, error: null })
     try {
       const { data } = await api.get('/api/v1/me/email_connection')
-      const d = data as { data: { connected: boolean; bank_senders?: string[] } }
+      const d = data as { data: { connected: boolean; bank_senders?: string[]; needs_reconnect?: boolean } }
       set({
         connected: d.data.connected,
+        needsReconnect: d.data.needs_reconnect ?? false,
         bankSenders: d.data.bank_senders ?? [],
         loading: false,
       })
@@ -61,7 +65,7 @@ export const useEmailConnectionStore = create<EmailConnectionState>((set) => ({
     set({ actionLoading: true, error: null })
     try {
       await api.delete('/api/v1/me/email_connection')
-      set({ connected: false, bankSenders: [], actionLoading: false })
+      set({ connected: false, needsReconnect: false, bankSenders: [], actionLoading: false })
     } catch {
       set({ actionLoading: false, error: 'No se pudo desconectar Gmail.' })
     }
@@ -81,7 +85,7 @@ export const useEmailConnectionStore = create<EmailConnectionState>((set) => ({
   handleDeepLinkResult: (status: string, reason?: string | null) => {
     if (status === 'connected') {
       // Re-fetch so bank_senders (empty on first connect) loads from the server
-      set({ connected: true, error: null })
+      set({ connected: true, needsReconnect: false, error: null })
       // Fire-and-forget — don't await; App.tsx will navigate to /profile anyway
       useEmailConnectionStore.getState().fetchStatus()
     } else {
