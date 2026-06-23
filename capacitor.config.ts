@@ -2,15 +2,17 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.daniel15k.app',
-  appName: 'Daniel 15K',
+  appName: 'Ascent',
   webDir: 'dist',
   plugins: {
-    GoogleAuth: {
-      clientId: '224259448673-ec625g235gj916acod4i7u0suql0a5eh.apps.googleusercontent.com',
-      iosClientId: '224259448673-ec625g235gj916acod4i7u0suql0a5eh.apps.googleusercontent.com',
-      serverClientId: '224259448673-i6p90gblvcj46j179r6vi0l13vkoqvod.apps.googleusercontent.com',
-      forceCodeForRefreshToken: true,
-      scopes: ['profile', 'email'],
+    // Solo Google: evita linkear los SDKs de Facebook/Apple/Twitter que no usamos.
+    SocialLogin: {
+      providers: {
+        google: true,
+        facebook: false,
+        apple: false,
+        twitter: false,
+      },
     },
     SplashScreen: {
       launchShowDuration: 1800,

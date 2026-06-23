@@ -1,5 +1,5 @@
 import { isPlatform } from '@ionic/react';
-import { GoogleAuth } from '@southdevs/capacitor-google-auth';
+import { SocialLogin } from '@capgo/capacitor-social-login';
 import { api, apiBaseUrl } from './api';
 import type { AuthResponse, LoginCredentials, RegisterPayload } from '../types/auth.types';
 import type { AuthUser } from '../types/authorization.types';
@@ -56,30 +56,33 @@ export const startGoogleOAuth = (): void => {
 };
 
 export const initGoogleAuth = (): void => {
-  void GoogleAuth.initialize({
-    clientId: GOOGLE_IOS_CLIENT_ID,
-    scopes: ['profile', 'email'],
-    grantOfflineAccess: true,
+  void SocialLogin.initialize({
+    google: {
+      iOSClientId: GOOGLE_IOS_CLIENT_ID,
+      // webClientId = server client ID: fija el audience del idToken para que el backend lo valide.
+      webClientId: GOOGLE_SERVER_CLIENT_ID,
+      mode: 'online',
+    },
   });
 };
 
 export const loginWithGoogleMobile = async (): Promise<AuthResponse> => {
-  const user = await GoogleAuth.signIn({
-    scopes: ['profile', 'email'],
-    serverClientId: GOOGLE_SERVER_CLIENT_ID,
-    grantOfflineAccess: true,
+  const { result } = await SocialLogin.login({
+    provider: 'google',
+    options: { scopes: ['profile', 'email'] },
   });
-  const payload = {
-    access_token: user.authentication?.accessToken,
-    idToken: user.authentication?.idToken,
-    serverAuthCode: user.serverAuthCode,
-  };
+
+  // Modo online → { idToken, accessToken: { token }, profile }
+  const payload: { access_token?: string; idToken?: string } = {};
+  if (result.responseType === 'online') {
+    payload.access_token = result.accessToken?.token;
+    payload.idToken = result.idToken ?? undefined;
+  }
 
   console.info('[GoogleAuth] mobile credentials ready', {
     apiBaseUrl,
     hasAccessToken: Boolean(payload.access_token),
     hasIdToken: Boolean(payload.idToken),
-    hasServerAuthCode: Boolean(payload.serverAuthCode),
   });
 
   try {
