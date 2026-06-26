@@ -35,7 +35,15 @@ const buildHeroCopy = (currentPlan: CurrentPlan, categories: CurrentPlanCategory
   const { outOfRangeCount, positiveCount, topRisk } = getPlanHealth(categories);
   const topRiskOverrun = topRisk ? Math.max((topRisk.spent ?? 0) - (topRisk.budgeted ?? 0), 0) : 0;
   const assigned = categories.reduce((sum, category) => sum + (category.budgeted ?? 0), 0);
-  const remainingTotal = categories.reduce((sum, category) => sum + ((category.budgeted ?? 0) - (category.spent ?? 0)), 0);
+  // "Disponible frente al plan": el exceso solo resta cuando es presión de consumo
+  // real (signal_kind 'attention' = discrecional). Un exceso en deuda o construcción
+  // es despliegue de prioridades, no sobregasto — el backend ya lo marca positive/neutral.
+  // Así un abono extra o un aporte al colchón no hunde el titular a negativo (presupuesto.md §7).
+  const remainingTotal = categories.reduce((sum, category) => {
+    const delta = (category.budgeted ?? 0) - (category.spent ?? 0);
+    if (delta >= 0) return sum + delta;
+    return category.signal_kind === 'attention' ? sum + delta : sum;
+  }, 0);
   const freeMargin = (currentPlan.total_income ?? 0) - assigned;
 
   return {
