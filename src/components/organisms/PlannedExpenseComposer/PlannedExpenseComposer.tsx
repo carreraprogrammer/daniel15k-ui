@@ -20,6 +20,7 @@ interface Values {
   subcategoryId: string;
   notes: string;
   autoDebit: boolean;
+  debitDay: number | '';
 }
 
 const emptyValues: Values = {
@@ -32,6 +33,7 @@ const emptyValues: Values = {
   subcategoryId: '',
   notes: '',
   autoDebit: false,
+  debitDay: 1,
 };
 
 const valuesFromExpense = (expense: PlannedExpense | null): Values => {
@@ -49,6 +51,7 @@ const valuesFromExpense = (expense: PlannedExpense | null): Values => {
     subcategoryId: expense.attributes.subcategory_id ? String(expense.attributes.subcategory_id) : '',
     notes: expense.attributes.notes ?? '',
     autoDebit: Boolean(expense.attributes.sinking_fund?.auto_debit),
+    debitDay: expense.attributes.sinking_fund?.debit_day ?? 1,
   };
 };
 
@@ -122,6 +125,7 @@ export const PlannedExpenseComposer = ({
       subcategory_id: Number(values.subcategoryId),
       notes: values.notes.trim(),
       auto_debit: values.autoDebit,
+      debit_day: values.autoDebit ? Number(values.debitDay || 1) : undefined,
     };
 
     setError(null);
@@ -251,6 +255,16 @@ export const PlannedExpenseComposer = ({
               onChange={(autoDebit) => setValues((current) => ({ ...current, autoDebit }))}
             />
           </div>
+          {values.autoDebit ? (
+            <NumberInput
+              name="planned-expense-debit-day"
+              label="Día del débito (1-28)"
+              value={values.debitDay}
+              onChange={(debitDay) => setValues((current) => ({ ...current, debitDay }))}
+              min={1}
+              max={28}
+            />
+          ) : null}
         </div>
       </div>
 

@@ -609,6 +609,7 @@ export interface SinkingFund {
   budget_category?: string | null;
   planned_expense_id?: number | null;
   auto_debit?: boolean;
+  debit_day?: number;
   last_auto_debit_on?: string | null;
   notes?: string | null;
   active: boolean;
@@ -625,6 +626,7 @@ export interface SinkingFundPayload {
   budget_category?: string | null;
   planned_expense_id?: number | null;
   auto_debit?: boolean;
+  debit_day?: number;
   notes?: string | null;
   active?: boolean;
 }
@@ -639,6 +641,7 @@ export interface PlannedExpensePayload {
   subcategory_id?: number | null;
   notes?: string;
   auto_debit?: boolean;
+  debit_day?: number;
 }
 
 export interface JsonApiCollection<T> {

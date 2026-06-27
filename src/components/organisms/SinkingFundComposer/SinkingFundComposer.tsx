@@ -26,6 +26,7 @@ interface Values {
   currentBalance: number | '';
   budgetCategory: string;
   autoDebit: boolean;
+  debitDay: number | '';
   notes: string;
 }
 
@@ -37,6 +38,7 @@ const emptyValues: Values = {
   currentBalance: '',
   budgetCategory: '',
   autoDebit: false,
+  debitDay: 1,
   notes: '',
 };
 
@@ -53,6 +55,7 @@ const valuesFromFund = (fund: SinkingFund | null): Values => {
     currentBalance: fund.current_balance,
     budgetCategory: fund.budget_category ?? '',
     autoDebit: Boolean(fund.auto_debit),
+    debitDay: fund.debit_day ?? 1,
     notes: fund.notes ?? '',
   };
 };
@@ -99,6 +102,7 @@ export const SinkingFundComposer = ({
       monthly_contribution: Number(values.monthlyContribution),
       budget_category: values.budgetCategory,
       auto_debit: values.autoDebit,
+      debit_day: values.autoDebit ? Number(values.debitDay || 1) : undefined,
       target_amount: values.targetAmount === '' ? null : Number(values.targetAmount),
       target_date: values.targetDate || null,
       notes: values.notes.trim() || null,
@@ -201,6 +205,16 @@ export const SinkingFundComposer = ({
               onChange={(autoDebit) => setValues((current) => ({ ...current, autoDebit }))}
             />
           </div>
+          {values.autoDebit ? (
+            <NumberInput
+              name="sinking-fund-debit-day"
+              label="Día del débito (1-28)"
+              value={values.debitDay}
+              onChange={(debitDay) => setValues((current) => ({ ...current, debitDay }))}
+              min={1}
+              max={28}
+            />
+          ) : null}
           <div className={styles.spanTwo}>
             <TextareaInput
               name="sinking-fund-notes"
