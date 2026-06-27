@@ -28,6 +28,7 @@ import type {
   SavingsGoal,
   SavingsGoalPayload,
   SinkingFund,
+  SinkingFundPayload,
   SubcategoryCreateParams,
   SubcategoryCreated,
   SummaryResponse,
@@ -251,6 +252,29 @@ export const financeService = {
   async getSinkingFunds(): Promise<SinkingFund[]> {
     const { data } = await api.get('/api/v1/sinking_funds');
     return ((data as { data?: SinkingFund[] }).data ?? []) as SinkingFund[];
+  },
+
+  async createSinkingFund(payload: SinkingFundPayload): Promise<SinkingFund> {
+    const { data } = await api.post('/api/v1/sinking_funds', payload);
+    return (data.data ?? data) as SinkingFund;
+  },
+
+  async updateSinkingFund(id: number, payload: Partial<SinkingFundPayload>): Promise<SinkingFund> {
+    const { data } = await api.patch(`/api/v1/sinking_funds/${id}`, payload);
+    return (data.data ?? data) as SinkingFund;
+  },
+
+  async deleteSinkingFund(id: number): Promise<void> {
+    await api.delete(`/api/v1/sinking_funds/${id}`);
+  },
+
+  async withdrawSinkingFund(id: number, amount?: number): Promise<SinkingFund> {
+    const { data } = await api.post(
+      `/api/v1/sinking_funds/${id}/withdraw`,
+      amount != null ? { amount } : {},
+    );
+    const body = (data.data ?? data) as { sinking_fund?: SinkingFund };
+    return (body.sinking_fund ?? body) as SinkingFund;
   },
 
   async fetchCompleteness(month = defaultMonth, year = defaultYear): Promise<CompletenessResponse> {

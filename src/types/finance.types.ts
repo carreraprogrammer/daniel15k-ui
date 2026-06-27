@@ -614,6 +614,18 @@ export interface SinkingFund {
   updated_at?: string;
 }
 
+export interface SinkingFundPayload {
+  name: string;
+  monthly_contribution: number;
+  target_amount?: number | null;
+  target_date?: string | null;
+  current_balance?: number;
+  budget_category?: string | null;
+  planned_expense_id?: number | null;
+  notes?: string | null;
+  active?: boolean;
+}
+
 export interface PlannedExpensePayload {
   name: string;
   amount_estimated: number | '';

@@ -1,6 +1,6 @@
 {
-  "name": "Daniel 15K",
-  "short_name": "Daniel15K",
+  "name": "Ascent",
+  "short_name": "Ascent",
   "description": "Panel financiero personal con captura en tiempo real y lectura conductual.",
   "start_url": "/",
   "scope": "/",

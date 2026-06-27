@@ -28,7 +28,7 @@ export const SheetModal = ({ isOpen, title, children, onClose, height = 'tall' }
       <div className="sheet-modal__shell">
         <div className="sheet-modal__topbar">
           <div className="sheet-modal__copy">
-            <span className="sheet-modal__eyebrow">Daniel 15K</span>
+            <span className="sheet-modal__eyebrow">Ascent</span>
             <h2 className="sheet-modal__title">{title}</h2>
           </div>
           <button type="button" className="sheet-modal__close" onClick={onClose}>

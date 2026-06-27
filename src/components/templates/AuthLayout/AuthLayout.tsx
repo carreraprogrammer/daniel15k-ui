@@ -12,7 +12,7 @@ export const AuthLayout = ({ title, children }: { title: string; children: React
             <div className={styles.brandLockup}>
               <BrandMark variant="monoline" size="lg" />
               <div className={styles.brandText}>
-                <span className={styles.eyebrow}>Daniel 15K</span>
+                <span className={styles.eyebrow}>Ascent</span>
                 <strong className={styles.brandTitle}>Ascent Finance</strong>
               </div>
             </div>

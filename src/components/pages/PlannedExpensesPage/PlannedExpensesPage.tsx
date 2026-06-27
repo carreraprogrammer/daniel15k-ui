@@ -14,6 +14,7 @@ import { AppliedFiltersBar } from '../../molecules/AppliedFiltersBar';
 import { SortSheet } from '../../molecules/SortSheet';
 import { PlannedExpenseComposer } from '../../organisms/PlannedExpenseComposer';
 import { PlannedExpenseSlidingCard } from '../../organisms/PlannedExpenseSlidingCard';
+import { SinkingFundComposer } from '../../organisms/SinkingFundComposer';
 import { useToast } from '../../../hooks/useToast';
 import { financeService } from '../../../services/financeService';
 import { getCategoryDisplayName } from '../../../utils/categoryLabels';
@@ -24,6 +25,7 @@ import type {
   PlannedExpensePayload,
   PlannedExpenseQueryParams,
   SinkingFund,
+  SinkingFundPayload,
 } from '../../../types/finance.types';
 import styles from '../FinancePage.module.css';
 
@@ -62,6 +64,8 @@ export const PlannedExpensesContent = () => {
   const [sortOpen, setSortOpen] = useState(false);
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [editingExpense, setEditingExpense] = useState<PlannedExpense | null>(null);
+  const [fundComposerOpen, setFundComposerOpen] = useState(false);
+  const [editingFund, setEditingFund] = useState<SinkingFund | null>(null);
   const [filters, setFilters] = useState<PlannedExpenseQueryParams>(initialFilters);
   const [activeTab, setActiveTab] = useState<DetailTab>('planned');
   const { showError, showSuccess, toast } = useToast();
@@ -153,6 +157,70 @@ export const PlannedExpensesContent = () => {
 
   const handleChangeStatus = async (plannedExpense: PlannedExpense, status: PlannedExpense['attributes']['status']) => {
     await handleUpdate(plannedExpense.id, { status });
+  };
+
+  const handleCreateFund = async (payload: SinkingFundPayload) => {
+    setSubmitting(true);
+    try {
+      await financeService.createSinkingFund(payload);
+      setFundComposerOpen(false);
+      await load();
+      showSuccess('Bolsillo creado.');
+    } catch (nextError) {
+      showError(nextError instanceof Error ? nextError.message : 'No fue posible crear el bolsillo.');
+      throw nextError;
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleUpdateFund = async (id: number, payload: Partial<SinkingFundPayload>) => {
+    setSubmitting(true);
+    try {
+      await financeService.updateSinkingFund(id, payload);
+      setEditingFund(null);
+      setFundComposerOpen(false);
+      await load();
+      showSuccess('Bolsillo actualizado.');
+    } catch (nextError) {
+      showError(nextError instanceof Error ? nextError.message : 'No fue posible actualizar el bolsillo.');
+      throw nextError;
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDeleteFund = async (fund: SinkingFund) => {
+    if (!window.confirm(`¿Borrar el bolsillo "${fund.name}"? El saldo no se devuelve automáticamente.`)) return;
+    try {
+      await financeService.deleteSinkingFund(fund.id);
+      await load();
+      showSuccess('Bolsillo borrado.');
+    } catch (nextError) {
+      showError(nextError instanceof Error ? nextError.message : 'No fue posible borrar el bolsillo.');
+    }
+  };
+
+  const handleWithdrawFund = async (fund: SinkingFund) => {
+    const raw = window.prompt(
+      `Retirar de "${fund.name}" (saldo ${formatCurrencyCompact(fund.current_balance)}). ` +
+        'Monto a retirar; deja vacío para retirar todo:',
+      '',
+    );
+    if (raw === null) return;
+    const trimmed = raw.trim();
+    const amount = trimmed === '' ? undefined : Number(trimmed.replace(/[^\d]/g, ''));
+    if (amount !== undefined && (!Number.isFinite(amount) || amount <= 0)) {
+      showError('Monto inválido.');
+      return;
+    }
+    try {
+      await financeService.withdrawSinkingFund(fund.id, amount);
+      await load();
+      showSuccess('Retiro realizado. Se devolvió al flujo de caja.');
+    } catch (nextError) {
+      showError(nextError instanceof Error ? nextError.message : 'No fue posible retirar del bolsillo.');
+    }
   };
 
   const appliedChips = useMemo(() => {
@@ -252,6 +320,15 @@ export const PlannedExpensesContent = () => {
                     onClick={() => {
                       setEditingExpense(null);
                       setComposerOpen(true);
+                    }}
+                  />
+                  <Button
+                    label="Nuevo bolsillo"
+                    variant="ghost"
+                    iconLeft={<IonIcon icon={addOutline} />}
+                    onClick={() => {
+                      setEditingFund(null);
+                      setFundComposerOpen(true);
                     }}
                   />
                   <Button label="Explorar detalle" variant="ghost" onClick={() => setDetailsOpen(true)} />
@@ -372,9 +449,12 @@ export const PlannedExpensesContent = () => {
           {!loading && !error && activeTab === 'pockets' && !sinkingFunds.length ? (
             <EmptyState
               title="No hay bolsillos activos"
-              description="Todavía no existen bolsillos vinculados a gastos planeados. Revisa los planeados abiertos para empezar a fondearlos." 
-              actionLabel="Ver planeados"
-              onAction={() => setActiveTab('planned')}
+              description="Crea un bolsillo para apartar dinero cada mes hacia un gasto futuro puntual (SOAT, mantenimiento, ropa)."
+              actionLabel="Crear bolsillo"
+              onAction={() => {
+                setEditingFund(null);
+                setFundComposerOpen(true);
+              }}
             />
           ) : null}
 
@@ -434,6 +514,30 @@ export const PlannedExpensesContent = () => {
                         <span className={styles.pocketFooterItem}>· {linkedExpense.attributes.name}</span>
                       ) : null}
                     </div>
+                    <div className={styles.focusActions}>
+                      <Button
+                        label="Editar"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setEditingFund(fund);
+                          setFundComposerOpen(true);
+                        }}
+                      />
+                      <Button
+                        label="Retirar"
+                        variant="ghost"
+                        size="sm"
+                        disabled={fund.current_balance <= 0}
+                        onClick={() => void handleWithdrawFund(fund)}
+                      />
+                      <Button
+                        label="Borrar"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => void handleDeleteFund(fund)}
+                      />
+                    </div>
                   </article>
                 );
               })}
@@ -476,6 +580,27 @@ export const PlannedExpensesContent = () => {
             onCancel={() => {
               setComposerOpen(false);
               setEditingExpense(null);
+            }}
+          />
+        </CrudModal>
+
+        <CrudModal
+          isOpen={fundComposerOpen}
+          title={editingFund ? 'Editar bolsillo' : 'Nuevo bolsillo'}
+          subtitle="Aparta dinero cada mes hacia un gasto futuro puntual. El bolsillo pertenece a una de tus categorías y acumula hasta que llega el gasto."
+          onClose={() => {
+            setFundComposerOpen(false);
+            setEditingFund(null);
+          }}
+        >
+          <SinkingFundComposer
+            fund={editingFund}
+            loading={submitting}
+            onCreate={handleCreateFund}
+            onUpdate={handleUpdateFund}
+            onCancel={() => {
+              setFundComposerOpen(false);
+              setEditingFund(null);
             }}
           />
         </CrudModal>

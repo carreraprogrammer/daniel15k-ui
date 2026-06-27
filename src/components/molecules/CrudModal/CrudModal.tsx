@@ -19,7 +19,7 @@ export const CrudModal = ({ isOpen, title, subtitle, children, onClose }: CrudMo
       <div className="crud-modal__shell">
         <div className="crud-modal__topbar">
           <div className="crud-modal__copy">
-            <span className="crud-modal__eyebrow">Daniel 15K</span>
+            <span className="crud-modal__eyebrow">Ascent</span>
             <h2 className="crud-modal__title">{title}</h2>
             {subtitle ? <p className="crud-modal__subtitle">{subtitle}</p> : null}
           </div>

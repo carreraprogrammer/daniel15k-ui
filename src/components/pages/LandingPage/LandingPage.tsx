@@ -49,7 +49,7 @@ const systemSignals = [
 export const LandingPage = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const primaryPath = isAuthenticated ? '/dashboard' : '/login';
-  const primaryLabel = isAuthenticated ? 'Abrir dashboard' : 'Entrar a Daniel 15K';
+  const primaryLabel = isAuthenticated ? 'Abrir dashboard' : 'Entrar a Ascent';
   const navLabel = isAuthenticated ? 'Dashboard' : 'Entrar';
 
   return (
@@ -59,7 +59,7 @@ export const LandingPage = () => {
           <Link className={styles.brand} to="/">
             <BrandMark variant="monoline" size="md" />
             <span className={styles.brandText}>
-              <span>Daniel 15K</span>
+              <span>Ascent</span>
               <strong>Ascent Finance</strong>
             </span>
           </Link>
@@ -84,7 +84,7 @@ export const LandingPage = () => {
 
             <div className={styles.heroCopy}>
               <p className={styles.eyebrow}>Sistema financiero personal con agente</p>
-              <h1>Daniel 15K</h1>
+              <h1>Ascent</h1>
               <p className={styles.heroText}>
                 Un tablero privado que entiende caja, deuda, presupuesto vivo y decisiones diarias como partes del mismo sistema.
               </p>

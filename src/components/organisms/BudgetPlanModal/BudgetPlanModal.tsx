@@ -133,7 +133,7 @@ export const BudgetPlanModal = ({ isOpen, onClose, onSaved }: Props) => {
             <div className={styles.topbarBrand}>
               <BrandMark variant="monoline" size="md" />
               <div className={styles.topbarCopy}>
-                <span className={styles.topbarEyebrow}>Daniel 15K</span>
+                <span className={styles.topbarEyebrow}>Ascent</span>
                 <div className={styles.topbarTitleRow}>
                   <h2 className={styles.topbarTitle}>Plan mensual</h2>
                   {proposal?.mode === 'provisional' && (
