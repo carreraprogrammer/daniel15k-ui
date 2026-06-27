@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Button } from '../../atoms/Button';
+import { CheckboxInput } from '../../atoms/CheckboxInput';
 import { DateInput } from '../../atoms/DateInput';
 import { NumberInput } from '../../atoms/NumberInput';
 import { SelectInput } from '../../atoms/SelectInput';
@@ -24,6 +25,7 @@ interface Values {
   targetDate: string;
   currentBalance: number | '';
   budgetCategory: string;
+  autoDebit: boolean;
   notes: string;
 }
 
@@ -34,6 +36,7 @@ const emptyValues: Values = {
   targetDate: '',
   currentBalance: '',
   budgetCategory: '',
+  autoDebit: false,
   notes: '',
 };
 
@@ -49,6 +52,7 @@ const valuesFromFund = (fund: SinkingFund | null): Values => {
     targetDate: fund.target_date ?? '',
     currentBalance: fund.current_balance,
     budgetCategory: fund.budget_category ?? '',
+    autoDebit: Boolean(fund.auto_debit),
     notes: fund.notes ?? '',
   };
 };
@@ -94,6 +98,7 @@ export const SinkingFundComposer = ({
       name: values.name.trim(),
       monthly_contribution: Number(values.monthlyContribution),
       budget_category: values.budgetCategory,
+      auto_debit: values.autoDebit,
       target_amount: values.targetAmount === '' ? null : Number(values.targetAmount),
       target_date: values.targetDate || null,
       notes: values.notes.trim() || null,
@@ -188,6 +193,14 @@ export const SinkingFundComposer = ({
               min={0}
             />
           ) : null}
+          <div className={styles.spanTwo}>
+            <CheckboxInput
+              name="sinking-fund-auto-debit"
+              label="Débito automático mensual (aparta la cuota cada mes)"
+              checked={values.autoDebit}
+              onChange={(autoDebit) => setValues((current) => ({ ...current, autoDebit }))}
+            />
+          </div>
           <div className={styles.spanTwo}>
             <TextareaInput
               name="sinking-fund-notes"

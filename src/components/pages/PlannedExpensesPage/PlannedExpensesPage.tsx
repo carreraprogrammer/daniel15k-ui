@@ -159,6 +159,17 @@ export const PlannedExpensesContent = () => {
     await handleUpdate(plannedExpense.id, { status });
   };
 
+  const handleDeleteExpense = async (plannedExpense: PlannedExpense) => {
+    if (!window.confirm(`¿Borrar el plan "${plannedExpense.attributes.name}"? Se borra también su bolsillo.`)) return;
+    try {
+      await financeService.deletePlannedExpense(plannedExpense.id);
+      await load();
+      showSuccess('Plan borrado.');
+    } catch (nextError) {
+      showError(nextError instanceof Error ? nextError.message : 'No fue posible borrar el plan.');
+    }
+  };
+
   const handleCreateFund = async (payload: SinkingFundPayload) => {
     setSubmitting(true);
     try {
@@ -470,6 +481,9 @@ export const PlannedExpensesContent = () => {
                   onEdit={(nextExpense) => {
                     setEditingExpense(nextExpense);
                     setComposerOpen(true);
+                  }}
+                  onDelete={(nextExpense) => {
+                    void handleDeleteExpense(nextExpense);
                   }}
                 />
               ))}

@@ -33,15 +33,18 @@ export interface PlannedExpenseSlidingCardProps {
   plannedExpense: PlannedExpense;
   onChangeStatus: (plannedExpense: PlannedExpense, status: PlannedExpense['attributes']['status']) => void;
   onEdit: (plannedExpense: PlannedExpense) => void;
+  onDelete?: (plannedExpense: PlannedExpense) => void;
 }
 
 export const PlannedExpenseSlidingCard = ({
   plannedExpense,
   onChangeStatus,
   onEdit,
+  onDelete,
 }: PlannedExpenseSlidingCardProps) => {
   const attrs = plannedExpense.attributes;
   const categoryCode = attrs.category_code ?? 'necessary';
+  const autoDebit = Boolean(attrs.sinking_fund?.auto_debit);
 
   return (
     <IonItemSliding className={styles.sliding}>
@@ -56,6 +59,7 @@ export const PlannedExpenseSlidingCard = ({
             <div className={styles.chipRow}>
               {attrs.category_name ? <span className={styles.catChip}>{normalizeFlexibleLabel(attrs.category_name)}</span> : null}
               {attrs.subcategory_name ? <span className={styles.subChip}>{attrs.subcategory_name}</span> : null}
+              {autoDebit ? <span className={styles.subChip}>Débito automático</span> : null}
             </div>
             <span className={styles.meta}>Objetivo {formatDate(attrs.target_date)}</span>
           </div>
@@ -75,6 +79,9 @@ export const PlannedExpenseSlidingCard = ({
             ] satisfies SlideAction[]
           : []),
         { type: 'edit', onPress: () => onEdit(plannedExpense) },
+        ...(onDelete
+          ? [ { type: 'delete', onPress: () => onDelete(plannedExpense) } ] satisfies SlideAction[]
+          : []),
       ]} />
     </IonItemSliding>
   );

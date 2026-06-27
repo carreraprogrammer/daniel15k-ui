@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Button } from '../../atoms/Button';
+import { CheckboxInput } from '../../atoms/CheckboxInput';
 import { DateInput } from '../../atoms/DateInput';
 import { NumberInput } from '../../atoms/NumberInput';
 import { SelectInput } from '../../atoms/SelectInput';
@@ -18,6 +19,7 @@ interface Values {
   categoryId: string;
   subcategoryId: string;
   notes: string;
+  autoDebit: boolean;
 }
 
 const emptyValues: Values = {
@@ -29,6 +31,7 @@ const emptyValues: Values = {
   categoryId: '',
   subcategoryId: '',
   notes: '',
+  autoDebit: false,
 };
 
 const valuesFromExpense = (expense: PlannedExpense | null): Values => {
@@ -45,6 +48,7 @@ const valuesFromExpense = (expense: PlannedExpense | null): Values => {
     categoryId: expense.attributes.category_id ? String(expense.attributes.category_id) : '',
     subcategoryId: expense.attributes.subcategory_id ? String(expense.attributes.subcategory_id) : '',
     notes: expense.attributes.notes ?? '',
+    autoDebit: Boolean(expense.attributes.sinking_fund?.auto_debit),
   };
 };
 
@@ -117,6 +121,7 @@ export const PlannedExpenseComposer = ({
       category_id: Number(values.categoryId),
       subcategory_id: Number(values.subcategoryId),
       notes: values.notes.trim(),
+      auto_debit: values.autoDebit,
     };
 
     setError(null);
@@ -236,6 +241,14 @@ export const PlannedExpenseComposer = ({
               value={values.notes}
               onChange={(notes) => setValues((current) => ({ ...current, notes }))}
               rows={4}
+            />
+          </div>
+          <div className={styles.spanTwo}>
+            <CheckboxInput
+              name="planned-expense-auto-debit"
+              label="Débito automático mensual (aparta la cuota en el bolsillo cada mes)"
+              checked={values.autoDebit}
+              onChange={(autoDebit) => setValues((current) => ({ ...current, autoDebit }))}
             />
           </div>
         </div>

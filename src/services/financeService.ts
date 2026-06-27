@@ -396,6 +396,10 @@ export const financeService = {
     return normalizeSingle<PlannedExpense['attributes']>(data) as PlannedExpense;
   },
 
+  async deletePlannedExpense(id: string): Promise<void> {
+    await api.delete(`/api/v1/planned_expenses/${id}`);
+  },
+
   async getPendingAgentEvents(sessionId?: string): Promise<AgentUiEvent[]> {
     const params = sessionId ? { session_id: sessionId } : {};
     const { data } = await api.get('/api/v1/agent_events/pending', { params });
