@@ -4,6 +4,7 @@ import { Redirect, Route, useLocation } from 'react-router-dom';
 import {
   calendarOutline,
   cardOutline,
+  flagOutline,
   homeOutline,
   pieChartOutline,
   repeatOutline,
@@ -162,6 +163,7 @@ const TAB_ITEMS = [
   { tab: 'budgets', to: '/budgets', label: 'Presupuesto', icon: pieChartOutline },
   { tab: 'debts', to: '/debts', label: 'Deudas', icon: cardOutline },
   { tab: 'plans', to: '/planned-expenses', label: 'Planes', icon: calendarOutline },
+  { tab: 'goals', to: '/savings-goals', label: 'Metas', icon: flagOutline },
   { tab: 'recurring', to: '/recurring', label: 'Recurrentes', icon: repeatOutline },
 ];
 
