@@ -757,6 +757,14 @@ export interface BudgetProposal {
   mode: 'data_driven' | 'provisional';
   warnings: string[];
   existing_plan: Record<string, unknown> | null;
+  phase_explanation?: {
+    phase: string;
+    reason: string;
+    committed_monthly: number;
+    ef_balance: number;
+    ef_months: number | null;
+    has_active_debts: boolean;
+  };
   month: number;
   year: number;
 }

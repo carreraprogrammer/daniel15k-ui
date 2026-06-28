@@ -21,6 +21,7 @@ import { financeService } from '../../../services/financeService';
 import type {
   Budget,
   BudgetPlanDraft,
+  BudgetProposal,
   BudgetQueryParams,
   CategoryResource,
   CurrentPlan,
@@ -70,6 +71,13 @@ const planStatusLabel = (plan: MonthlyPlanHistory): string => {
   return plan.status;
 };
 
+const PHASE_LABELS: Record<string, string> = {
+  emergency_fund: 'Fondo de emergencia',
+  debt_payoff: 'Salir de deudas',
+  investing: 'Invertir',
+  wealth_building: 'Construir patrimonio',
+};
+
 const primaryMetricValueLabel = (metric: FinancialPrimaryMetric): string => {
   if (metric.kind === 'goal_progress' || metric.kind === 'spiky_context' || metric.kind === 'debt_progress') {
     return `${Math.round(metric.value)}%`;
@@ -115,6 +123,7 @@ export const BudgetsContent = () => {
   const [wizardSaving, setWizardSaving] = useState(false);
   const [wizardError, setWizardError] = useState<string | null>(null);
   const [wizardSuccess, setWizardSuccess] = useState(false);
+  const [coachProposal, setCoachProposal] = useState<BudgetProposal | null>(null);
   const [detailTab, setDetailTab] = useState<'detail' | 'history'>('detail');
 
   const [filters, setFilters] = useState<BudgetQueryParams>(initialFilters);
@@ -262,6 +271,27 @@ export const BudgetsContent = () => {
     return () => clearTimeout(t);
   }, [wizardSuccess]);
 
+  // Cuando no hay plan del mes, el coach SIEMPRE tiene una propuesta deducida de
+  // tu situación. La traemos para mostrarla con protagonismo (no se "pide").
+  useEffect(() => {
+    if (loading || currentPlan) {
+      setCoachProposal(null);
+      return;
+    }
+    let cancelled = false;
+    financeService
+      .proposeBudgetPlan({ includeVariable: false, month: selectedPeriod.month, year: selectedPeriod.year })
+      .then((proposal) => {
+        if (!cancelled) setCoachProposal(proposal);
+      })
+      .catch(() => {
+        if (!cancelled) setCoachProposal(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [loading, currentPlan, selectedPeriod.month, selectedPeriod.year]);
+
   const handleCloseMonth = async (planId: number) => {
     setClosingPlanId(planId);
     try {
@@ -408,6 +438,39 @@ export const BudgetsContent = () => {
                 </div>
               ) : (
                 <div className={`${styles.focusCard} ${styles.focusCardFull} ${styles.focusCardCentered}`}>
+                  {/* ── Propuesta deducida del coach (cuando no hay plan del mes) ── */}
+                  {!detailsOpen && coachProposal ? (
+                    <section className={styles.focusSupport} style={{ marginBottom: '1rem' }}>
+                      <div className={styles.focusSupportHeader}>
+                        <h3 className={styles.focusSupportTitle}>Tu coach te propone este plan</h3>
+                        <span className={styles.focusSupportValue}>
+                          {PHASE_LABELS[coachProposal.phase_explanation?.phase ?? ''] ?? 'Propuesta'}
+                        </span>
+                      </div>
+                      {coachProposal.phase_explanation?.reason ? (
+                        <p className={styles.focusSupportText}>
+                          <strong>Por qué esta fase:</strong> {coachProposal.phase_explanation.reason}
+                        </p>
+                      ) : null}
+                      <div className={styles.focusMeta}>
+                        <span className={styles.focusBadge}>
+                          Ingreso {formatCurrencyCompact(coachProposal.income.planning_income)}
+                        </span>
+                        <span className={styles.focusBadge}>
+                          Comprometido {formatCurrencyCompact(coachProposal.committed.total)}
+                        </span>
+                        <span className={styles.focusBadge}>
+                          Margen {formatCurrencyCompact(coachProposal.free_margin)}
+                        </span>
+                      </div>
+                      <p className={styles.focusSupportText}>
+                        Es la deducción de tu coach a partir de tu situación. Revísala y confírmala, o ajústala — tú decides.
+                      </p>
+                      <div className={styles.focusActions}>
+                        <Button label="Revisar y confirmar" onClick={handleOpenWizard} />
+                      </div>
+                    </section>
+                  ) : null}
                   {/* Burn-rate focus card (pre-plan state) */}
                   {!detailsOpen ? (
                     <div className={styles.focusGrid}>
