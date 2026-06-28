@@ -17,6 +17,7 @@ const NAV_ITEMS = [
   { to: '/transactions', label: 'Transacciones' },
   { to: '/debts', label: 'Deudas' },
   { to: '/planned-expenses', label: 'Planes' },
+  { to: '/savings-goals', label: 'Metas' },
   { to: '/recurring', label: 'Recurrentes' },
   { to: '/budgets', label: 'Presupuestos' },
   { to: '/profile', label: 'Mi perfil' },
