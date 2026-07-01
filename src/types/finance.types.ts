@@ -843,12 +843,14 @@ export interface SubcategoryCreateParams {
   name: string;
   category_ids: (string | number)[];
   icon: string;
+  description?: string;
 }
 
 export interface SubcategoryUpdateParams {
   category_ids?: (string | number)[];
   name?: string;
   icon?: string;
+  description?: string;
 }
 
 // Chip: una categoría (tier) a la que pertenece la subcategoría.
@@ -867,6 +869,7 @@ export interface ManageableSubcategory {
   is_system: boolean;
   user_id?: number | null;
   transaction_count: number;
+  description?: string;
   categories: SubcategoryTierChip[];
 }
 

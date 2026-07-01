@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { IonContent, IonSelect, IonSelectOption } from '@ionic/react';
+import { IonContent, IonList, IonSelect, IonSelectOption } from '@ionic/react';
 import { AppLayout } from '../../templates/AppLayout';
 import { Button } from '../../atoms/Button';
 import { TextInput } from '../../atoms/TextInput';
+import { IconPicker } from '../../molecules/IconPicker';
 import { CrudModal } from '../../molecules/CrudModal';
 import { DataState } from '../../molecules/DataState/DataState';
+import { SubcategorySlidingCard } from '../../organisms/SubcategorySlidingCard';
 import { financeService } from '../../../services/financeService';
 import type { CategoryResource, ManageableSubcategory } from '../../../types/finance.types';
 import pageStyles from '../FinancePage.module.css';
@@ -20,8 +22,8 @@ const TIER_LABEL: Record<string, string> = {
 
 type Tier = { id: number; type: string; label: string; color: string };
 
-type Form = { name: string; icon: string; categoryIds: number[] };
-const emptyForm: Form = { name: '', icon: 'pricetagOutline', categoryIds: [] };
+type Form = { name: string; icon: string; description: string; categoryIds: number[] };
+const emptyForm: Form = { name: '', icon: 'pricetagOutline', description: '', categoryIds: [] };
 
 export const SubcategoriesContent = () => {
   const [subs, setSubs] = useState<ManageableSubcategory[]>([]);
@@ -69,7 +71,12 @@ export const SubcategoriesContent = () => {
 
   const openEdit = (s: ManageableSubcategory) => {
     setEditing(s);
-    setForm({ name: s.name, icon: s.icon ?? 'pricetagOutline', categoryIds: s.categories.map((c) => c.id) });
+    setForm({
+      name: s.name,
+      icon: s.icon ?? 'pricetagOutline',
+      description: s.description ?? '',
+      categoryIds: s.categories.map((c) => c.id),
+    });
     setFormError(null);
     setFormOpen(true);
   };
@@ -86,10 +93,16 @@ export const SubcategoriesContent = () => {
     setSubmitting(true);
     setFormError(null);
     try {
+      const payload = {
+        name: form.name,
+        icon: form.icon,
+        description: form.description.trim(),
+        category_ids: form.categoryIds,
+      };
       if (editing) {
-        await financeService.updateSubcategory(editing.id, { name: form.name, icon: form.icon, category_ids: form.categoryIds });
+        await financeService.updateSubcategory(editing.id, payload);
       } else {
-        await financeService.createSubcategory({ name: form.name, icon: form.icon, category_ids: form.categoryIds });
+        await financeService.createSubcategory(payload);
       }
       setFormOpen(false);
       await load();
@@ -130,7 +143,7 @@ export const SubcategoriesContent = () => {
               <p className={pageStyles.focusQuestion}>¿Qué funciones agrupan tus gastos y a qué tiers pertenecen?</p>
               <h2 className={pageStyles.focusTitle}>{subs.length} subcategorías</h2>
               <p className={pageStyles.focusText}>
-                Una función (ej. "salud") puede pertenecer a varios tiers. Los colores muestran a cuáles.
+                Una función (ej. "salud") puede pertenecer a varios tiers. Deslizá una tarjeta para editarla o borrarla.
               </p>
             </div>
             <div className={pageStyles.focusActions}>
@@ -150,35 +163,16 @@ export const SubcategoriesContent = () => {
           onRetry={() => void load()}
         >
           {(items) => (
-            <div className={pageStyles.list}>
+            <IonList className={styles.list}>
               {items.map((s) => (
-                <article key={s.id} className={pageStyles.listItem}>
-                  <div className={pageStyles.listPrimary}>
-                    <span className={pageStyles.listLabel}>{s.name}</span>
-                    <div className={styles.chips}>
-                      {s.categories.map((c) => (
-                        <span
-                          key={c.id}
-                          className={styles.chip}
-                          style={{ backgroundColor: `${c.color ?? '#5B7280'}22`, color: c.color ?? '#5B7280', borderColor: `${c.color ?? '#5B7280'}55` }}
-                        >
-                          {TIER_LABEL[c.category_type] ?? c.category_type}
-                        </span>
-                      ))}
-                    </div>
-                    <span className={pageStyles.listMeta}>{s.transaction_count} transacciones</span>
-                  </div>
-                  <div className={pageStyles.listSecondary}>
-                    <div className={styles.actions}>
-                      <Button label="Editar" variant="ghost" size="sm" onClick={() => openEdit(s)} />
-                      {!s.is_system && (
-                        <Button label="Borrar" variant="danger" size="sm" onClick={() => { setDeleting(s); setReassignTo(''); }} />
-                      )}
-                    </div>
-                  </div>
-                </article>
+                <SubcategorySlidingCard
+                  key={s.id}
+                  subcategory={s}
+                  onEdit={openEdit}
+                  onDelete={(sub) => { setDeleting(sub); setReassignTo(''); }}
+                />
               ))}
-            </div>
+            </IonList>
           )}
         </DataState>
       </section>
@@ -192,8 +186,17 @@ export const SubcategoriesContent = () => {
       >
         <div className={styles.form}>
           <TextInput name="subcategory_name" label="Nombre" value={form.name} onChange={(v) => setForm((f) => ({ ...f, name: v }))} />
-          <TextInput name="subcategory_icon" label="Ícono (Ionicon)" value={form.icon} onChange={(v) => setForm((f) => ({ ...f, icon: v }))} />
-          <span className={pageStyles.listMeta}>Categorías (tiers)</span>
+          <TextInput
+            name="subcategory_description"
+            label="Descripción (para clasificar más fácil)"
+            value={form.description}
+            onChange={(v) => setForm((f) => ({ ...f, description: v }))}
+          />
+
+          <span className={styles.fieldLabel}>Ícono</span>
+          <IconPicker value={form.icon} onChange={(icon) => setForm((f) => ({ ...f, icon }))} />
+
+          <span className={styles.fieldLabel}>Categorías (tiers)</span>
           <div className={styles.chips}>
             {tiers.map((t) => {
               const active = form.categoryIds.includes(t.id);

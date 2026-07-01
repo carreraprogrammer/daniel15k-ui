@@ -34,3 +34,14 @@
   color: var(--color-committed, #C0392B);
   font-size: 13px;
 }
+
+.fieldLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+}

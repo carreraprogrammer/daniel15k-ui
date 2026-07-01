@@ -526,6 +526,7 @@ export const financeService = {
         is_system: Boolean(a.is_system),
         user_id: (a.user_id as number | null | undefined) ?? null,
         transaction_count: Number(a.transaction_count ?? 0),
+        description: (a.description as string | undefined) ?? undefined,
         categories: ((a.categories as SubcategoryTierChip[] | undefined) ?? []),
       } satisfies ManageableSubcategory;
     });
