@@ -73,9 +73,9 @@ Cada categoría es un **elemento del mundo**. Los colores son versiones profunda
 |---|---|---|---|---|
 | Comprometido | `committed` | `#C0392B` | Granada | Piedra / hierro — peso, inamovilidad |
 | Necesario | `necessary` | `#D4732A` | Ámbar | Tierra / sustento — calidez, vida |
-| Discrecional | `discretionary` | `#C9980A` | Oro | Llama / elección — brillo, libertad |
-| Inversión | `investment` | `#1A9E4A` | Esmeralda | Bosque / crecimiento — profundidad |
-| Social | `social` | `#8A4FD8` | Amatista | Magia / vínculo — misterio cálido |
+| Flexible | `discretionary` | `#14B8A6` | Teal | Frío / libre de elegir — contrasta con committed/necessary cálidos (RFC-0001) |
+| ~~Inversión~~ | ~~`investment`~~ | — | — | Deprecado (RFC-0001): → módulo Patrimonio |
+| ~~Social~~ | ~~`social`~~ | — | — | Deprecado (RFC-0001): → subcategoría bajo Flexible |
 | Ingreso | `income` | `#0E96AD` | Zafiro | Agua / flujo — claridad, movimiento |
 | Desconocido | `unknown` | `#5B7280` | Niebla | Bruma — neutro, pendiente |
 
@@ -86,8 +86,8 @@ Cada categoría es un **elemento del mundo**. Los colores son versiones profunda
 --color-committed-subtle:   #2D0A0A;
 --color-necessary:          #D4732A;
 --color-necessary-subtle:   #2D1500;
---color-discretionary:      #C9980A;
---color-discretionary-subtle: #2D1F00;
+--color-discretionary:      #14B8A6;
+--color-discretionary-subtle: #04312C;
 --color-investment:         #1A9E4A;
 --color-investment-subtle:  #052E16;
 --color-social:             #8A4FD8;

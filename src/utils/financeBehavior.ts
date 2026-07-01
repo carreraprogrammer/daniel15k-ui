@@ -1,6 +1,8 @@
 import type { CategoryResource, Transaction } from '../types/finance.types';
 
-export type BehaviorTone = 'committed' | 'necessary' | 'discretionary' | 'investment' | 'social' | 'income' | 'unknown';
+// RFC-0001: 3 tiers de agencia (+ income/unknown). `discretionary` = "Flexible" (code aún
+// no renombrado). investment/social dejaron de ser tiers.
+export type BehaviorTone = 'committed' | 'necessary' | 'discretionary' | 'income' | 'unknown';
 
 export interface CategoryLookupItem {
   categoryId: string;
@@ -32,8 +34,6 @@ export const behaviorCopy: Record<BehaviorTone, { label: string; cue: string }> 
   committed: { label: 'Comprometido', cue: 'Carga fija' },
   necessary: { label: 'Necesario', cue: 'Mantené control' },
   discretionary: { label: 'Flexible', cue: 'Elegido por vos' },
-  investment: { label: 'Inversión', cue: 'Construye futuro' },
-  social: { label: 'Social', cue: 'Relación / vínculo' },
   income: { label: 'Ingreso', cue: 'Entrada de caja' },
   unknown: { label: 'Sin clasificar', cue: 'Revisar criterio' },
 };
@@ -96,8 +96,6 @@ const behaviorTones: BehaviorTone[] = [
   'committed',
   'necessary',
   'discretionary',
-  'investment',
-  'social',
   'income',
   'unknown',
 ];
@@ -135,25 +133,15 @@ export const summarizeBehavior = (
 export const buildBehaviorSignals = (summary: BehaviorSummary): BehaviorSignal[] => {
   const signals: BehaviorSignal[] = [];
   const discretionary = summary.totals.discretionary;
-  const investment = summary.totals.investment;
   const committed = summary.totals.committed;
   const necessary = summary.totals.necessary;
-  const social = summary.totals.social;
   const expenseBase = Math.max(summary.expenseTotal, 1);
 
-  if (discretionary > 0 && discretionary > investment * 2) {
+  if (discretionary / expenseBase >= 0.35) {
     signals.push({
       tone: 'discretionary',
       title: 'Fricción en gasto flexible',
-      message: `Tu gasto elegido va muy por encima de lo que está construyendo futuro este mes.`,
-    });
-  }
-
-  if (investment === 0 && summary.expenseTotal > 0) {
-    signals.push({
-      tone: 'investment',
-      title: 'Construcción en cero',
-      message: 'Todavía no aparece gasto tipo inversión en el período. El sistema no está reforzando futuro.',
+      message: 'Tu gasto elegido pesa fuerte en el mes. Es la gaveta con más margen de recorte si hace falta.',
     });
   }
 
@@ -165,19 +153,11 @@ export const buildBehaviorSignals = (summary: BehaviorSummary): BehaviorSignal[]
     });
   }
 
-  if (necessary > discretionary && necessary > social) {
+  if (necessary > discretionary) {
     signals.push({
       tone: 'necessary',
       title: 'Mes de mantenimiento',
       message: 'La mayor parte del gasto se está yendo a sostener el sistema actual. El margen para maniobrar es limitado.',
-    });
-  }
-
-  if (social > discretionary && social > 0) {
-    signals.push({
-      tone: 'social',
-      title: 'Peso relacional visible',
-      message: 'Una parte relevante del gasto está yendo a vínculo y familia. Vale la pena verlo con conciencia, no como ruido.',
     });
   }
 

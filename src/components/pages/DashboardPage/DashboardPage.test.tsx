@@ -21,7 +21,7 @@ vi.mock('../../../hooks/useDashboardData', () => ({
     obligations: [],
     loading: false,
     error: null,
-    behaviorSummary: { totals: { discretionary: 0, investment: 0 } },
+    behaviorSummary: { totals: { discretionary: 0 } },
     behaviorSignals: [],
     reload: vi.fn(),
   }),

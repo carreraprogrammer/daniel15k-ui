@@ -176,8 +176,8 @@
   --color-committed-subtle:    #2D0A0A;
   --color-necessary:           #D4732A;   /* Ámbar — tierra, sustento */
   --color-necessary-subtle:    #2D1500;
-  --color-discretionary:       #C9980A;   /* Oro — llama, elección */
-  --color-discretionary-subtle: #2D1F00;
+  --color-discretionary:       #14B8A6;   /* Teal — flexible, libre de elegir (frío: contrasta con committed/necessary cálidos) */
+  --color-discretionary-subtle: #04312C;
   --color-investment:          #1A9E4A;   /* Esmeralda — bosque, crecimiento */
   --color-investment-subtle:   #052E16;
   --color-social:              #8A4FD8;   /* Amatista — magia, vínculo */
@@ -271,7 +271,7 @@
 
   --color-committed-subtle:    #FCE3E0;
   --color-necessary-subtle:    #F8E5D3;
-  --color-discretionary-subtle: #F6E8C7;
+  --color-discretionary-subtle: #CFF5EF;
   --color-investment-subtle:   #DDF6E7;
   --color-social-subtle:       #EEE5FA;
   --color-income-subtle:       #DDF3F6;
