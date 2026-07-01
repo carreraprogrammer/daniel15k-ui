@@ -75,7 +75,7 @@ export const AddSubcategorySheet = ({
     try {
       const created = await financeService.createSubcategory({
         name: name.trim(),
-        category_id: categoryId,
+        category_ids: [categoryId],
         icon,
       });
 

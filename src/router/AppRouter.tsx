@@ -30,6 +30,7 @@ import { NightAnalysisDetailPage } from '../components/pages/NightAnalysisDetail
 import { MonthlyInsightDetailPage } from '../components/pages/MonthlyInsightDetailPage/MonthlyInsightDetailPage';
 import { YearlyInsightDetailPage } from '../components/pages/YearlyInsightDetailPage/YearlyInsightDetailPage';
 import { SavingsGoalsPage } from '../components/pages/SavingsGoalsPage';
+import { SubcategoriesPage } from '../components/pages/SubcategoriesPage';
 import { QuickCapturePage } from '../components/pages/QuickCapturePage';
 import { getLastAuthPath } from '../utils/navigation';
 import styles from './AppRouter.module.css';
@@ -172,6 +173,7 @@ const AUTH_PATHS = [
   ...TAB_PATHS,
   '/planned-expenses',
   '/recurring',
+  '/subcategories',
   '/profile',
   '/quick',
 ];
@@ -240,6 +242,7 @@ export const AppRouter = () => {
         <ProtectedRoute exact path="/años/:year" component={YearlyInsightDetailPage} />
         <ProtectedRoute exact path="/budgets/:year/:month" component={BudgetsPage} />
         <ProtectedRoute exact path="/savings-goals" component={SavingsGoalsPage} />
+        <ProtectedRoute exact path="/subcategories" component={SubcategoriesPage} />
         <ProtectedRoute exact path="/profile" component={ProfilePage} />
         <ProtectedRoute exact path="/quick" component={QuickCapturePage} />
         <Route component={NotFoundPage} />

@@ -841,8 +841,33 @@ export interface WizardCategory {
 
 export interface SubcategoryCreateParams {
   name: string;
-  category_id: string;
+  category_ids: (string | number)[];
   icon: string;
+}
+
+export interface SubcategoryUpdateParams {
+  category_ids?: (string | number)[];
+  name?: string;
+  icon?: string;
+}
+
+// Chip: una categoría (tier) a la que pertenece la subcategoría.
+export interface SubcategoryTierChip {
+  id: number;
+  category_type: string;
+  color?: string;
+}
+
+// Subcategoría en la pantalla de gestión (many-to-many + conteo).
+export interface ManageableSubcategory {
+  id: string;
+  name: string;
+  code: string;
+  icon?: string;
+  is_system: boolean;
+  user_id?: number | null;
+  transaction_count: number;
+  categories: SubcategoryTierChip[];
 }
 
 export interface SubcategoryCreated {

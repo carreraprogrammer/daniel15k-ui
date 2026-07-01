@@ -31,6 +31,9 @@ import type {
   SinkingFundPayload,
   SubcategoryCreateParams,
   SubcategoryCreated,
+  SubcategoryUpdateParams,
+  ManageableSubcategory,
+  SubcategoryTierChip,
   SummaryResponse,
   UserMilestone,
   Transaction,
@@ -507,6 +510,35 @@ export const financeService = {
       icon: String(resource.attributes.icon ?? ''),
       category_id: String(resource.attributes.category_id ?? ''),
     };
+  },
+
+  /** GET /api/v1/subcategories — gestión (chips por tier + conteo) */
+  async fetchSubcategories(): Promise<ManageableSubcategory[]> {
+    const { data } = await api.get('/api/v1/subcategories');
+    const rows = (data as { data?: { id: string | number; attributes: Record<string, unknown> }[] }).data ?? [];
+    return rows.map((r) => {
+      const a = r.attributes;
+      return {
+        id: String(r.id),
+        name: String(a.name ?? ''),
+        code: String(a.code ?? ''),
+        icon: (a.icon as string | undefined) ?? undefined,
+        is_system: Boolean(a.is_system),
+        user_id: (a.user_id as number | null | undefined) ?? null,
+        transaction_count: Number(a.transaction_count ?? 0),
+        categories: ((a.categories as SubcategoryTierChip[] | undefined) ?? []),
+      } satisfies ManageableSubcategory;
+    });
+  },
+
+  /** PATCH /api/v1/subcategories/:id — editar vínculos (tiers), nombre, ícono */
+  async updateSubcategory(id: string, params: SubcategoryUpdateParams): Promise<void> {
+    await api.patch(`/api/v1/subcategories/${id}`, params);
+  },
+
+  /** DELETE /api/v1/subcategories/:id?reassign_to= — borra migrando a otra subcategoría */
+  async deleteSubcategory(id: string, reassignTo: string): Promise<void> {
+    await api.delete(`/api/v1/subcategories/${id}`, { params: { reassign_to: reassignTo } });
   },
 
   async fetchMilestones(): Promise<UserMilestone[]> {

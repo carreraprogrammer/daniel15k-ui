@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react';
-import { IonContent, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, useIonAlert, useIonToast } from '@ionic/react';
+import { IonContent, IonIcon, IonInfiniteScroll, IonInfiniteScrollContent, useIonAlert, useIonRouter, useIonToast } from '@ionic/react';
 import { addOutline, optionsOutline, warningOutline } from 'ionicons/icons';
 import { AppLayout } from '../../templates/AppLayout';
 import { useAppToolbar } from '../../templates/AppLayout/AppLayoutContext';
@@ -160,6 +160,7 @@ const periodOptionsFor = (transaction: Transaction | null) => {
 type ExpenseLinkKind = 'recurring_obligation' | 'sinking_fund';
 
 export const TransactionsContent = () => {
+  const ionRouter = useIonRouter();
   const [composerOpen, setComposerOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -733,6 +734,11 @@ export const TransactionsContent = () => {
                   label="Explorar detalle"
                   variant="ghost"
                   onClick={() => setDetailsOpen(true)}
+                />
+                <Button
+                  label="Subcategorías"
+                  variant="ghost"
+                  onClick={() => ionRouter.push('/subcategories', 'forward')}
                 />
               </div>
 
