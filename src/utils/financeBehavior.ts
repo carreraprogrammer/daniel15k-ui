@@ -76,19 +76,30 @@ export const resolveTransactionCategory = (
     transaction.relationships?.category?.data?.id ??
     (transaction.attributes.category_id != null ? String(transaction.attributes.category_id) : undefined);
 
-  if (subcategoryId && lookup[`subcategory:${subcategoryId}`]) {
-    return lookup[`subcategory:${subcategoryId}`];
-  }
+  // RFC-0001 desacople función↔tier: el TIER (agencia) sale de la categoría de la
+  // transacción; la FUNCIÓN (nombre/ícono de subcategoría) sale de la subcategoría.
+  // Antes se devolvía el item de subcategoría entero, que arrastraba la categoría "hogar"
+  // de la subcategoría — mostraba mal el tier cuando una función abarca varios tiers
+  // (ej. tratamiento = flexible/salud se veía como necessary).
+  const categoryItem = categoryId ? lookup[`category:${categoryId}`] : undefined;
+  const subItem = subcategoryId ? lookup[`subcategory:${subcategoryId}`] : undefined;
+  const tier = categoryItem ?? subItem; // fallback: si no hay categoría, usar la de la subcat
 
-  if (categoryId && lookup[`category:${categoryId}`]) {
-    return lookup[`category:${categoryId}`];
+  if (!tier && !subItem) {
+    return { categoryId: '', categoryName: 'Sin categoría', categoryCode: 'unknown', categoryType: 'unknown' };
   }
 
   return {
-    categoryId: '',
-    categoryName: 'Sin categoría',
-    categoryCode: 'unknown',
-    categoryType: 'unknown',
+    categoryId: tier?.categoryId ?? '',
+    categoryName: tier?.categoryName ?? 'Sin categoría',
+    categoryCode: tier?.categoryCode ?? 'unknown',
+    categoryType: tier?.categoryType ?? 'unknown',
+    categoryColor: tier?.categoryColor,
+    categoryIcon: tier?.categoryIcon,
+    subcategoryId: subItem?.subcategoryId,
+    subcategoryName: subItem?.subcategoryName,
+    subcategoryCode: subItem?.subcategoryCode,
+    subcategoryIcon: subItem?.subcategoryIcon,
   };
 };
 
