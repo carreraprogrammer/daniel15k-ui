@@ -906,6 +906,25 @@ export interface WizardData {
     phase: string | null;
     configured: boolean;
   };
+  extraordinary_income?: {
+    detected_recent: number;
+    months: { month: string; surplus: number }[];
+    hint: string | null;
+  };
+  carryover_from_previous?: number;
+  phase?: string | null;
+  meta?: {
+    income_total: number;
+    goal_contribution: number;
+    available_pool: number;
+    committed_total: number;
+    flexible_total: number;
+    assigned_total: number;
+    unassigned: number;
+    por_asignar: number;
+    overassigned: boolean;
+    excluded_windfall_months?: string[];
+  };
 }
 
 export interface BudgetLineItem {
