@@ -7,22 +7,27 @@ import { resolveNamedIcon } from './iconRegistry';
 import styles from './BudgetCategoryStep.module.css';
 
 const CONFIDENCE_LABELS: Record<WizardSubcategory['confidence'], string> = {
-  high:   '●',
-  medium: '◐',
-  low:    '○',
+  high:      '●',
+  confirmed: '●',
+  medium:    '◐',
+  low:       '○',
 };
 
 const CONFIDENCE_TITLES: Record<WizardSubcategory['confidence'], string> = {
-  high:   'Confirmado por recurrentes',
-  medium: 'Estimado por historial',
-  low:    'Referencia de benchmark',
+  high:      'Confirmado por recurrentes',
+  confirmed: 'Monto del plan confirmado',
+  medium:    'Estimado por historial',
+  low:       'Sin fuente estructural',
 };
 
 const SOURCE_LABELS: Record<NonNullable<WizardSubcategory['source']>, string> = {
   recurring: 'Fijo',
+  confirmed_budget: 'Plan del mes',
   planned_expense: 'Planeado',
   history: 'Historial',
+  prev_plan: 'Mes anterior',
   benchmark: 'Referencia',
+  none: 'Sin datos',
 };
 
 // ── Types ────────────────────────────────────────────────────────────────────

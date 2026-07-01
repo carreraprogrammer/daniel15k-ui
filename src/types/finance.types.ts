@@ -821,11 +821,13 @@ export interface WizardSubcategory {
   name: string;
   icon: string;
   suggested_amount: number;
-  confidence: 'high' | 'medium' | 'low';
-  source?: 'recurring' | 'planned_expense' | 'history' | 'benchmark';
+  confidence: 'high' | 'medium' | 'low' | 'confirmed';
+  source?: 'recurring' | 'confirmed_budget' | 'planned_expense' | 'history' | 'prev_plan' | 'benchmark' | 'none';
   locked?: boolean;
-  source_of_truth?: 'recurring_obligations' | 'planned_expenses' | 'transactions' | 'benchmarks';
+  source_of_truth?: 'recurring_obligations' | 'budgets' | 'planned_expenses' | 'transactions' | 'benchmarks' | 'none';
   edit_hint?: string;
+  funding_status?: 'covered' | 'pending';
+  paid_this_month?: number;
 }
 
 export interface WizardCategory {
@@ -837,6 +839,7 @@ export interface WizardCategory {
   description: string;
   subcategories: WizardSubcategory[];
   suggested_total: number;
+  unassigned_recurring?: number;
 }
 
 export interface SubcategoryCreateParams {

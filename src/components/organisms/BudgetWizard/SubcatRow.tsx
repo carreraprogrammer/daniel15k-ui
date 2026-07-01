@@ -14,8 +14,11 @@ const SOURCE_CONFIG: Record<string, { label: string; icon: string; dashed: boole
   transactions:          { label: 'promedio 3m',  icon: '●',  dashed: false, cls: 'brand'   },
   history:               { label: 'promedio 3m',  icon: '●',  dashed: false, cls: 'brand'   },
   prev_month:            { label: 'mes anterior', icon: '●',  dashed: false, cls: 'brand'   },
+  prev_plan:             { label: 'mes anterior', icon: '●',  dashed: false, cls: 'brand'   },
+  confirmed_budget:      { label: 'plan del mes', icon: '●',  dashed: false, cls: 'success' },
   benchmarks:            { label: 'estimado base',icon: '○',  dashed: true,  cls: 'warn'    },
   benchmark:             { label: 'estimado base',icon: '○',  dashed: true,  cls: 'warn'    },
+  none:                  { label: 'sin datos',    icon: '○',  dashed: true,  cls: 'muted'   },
   imprevisto:            { label: 'sistema',      icon: '┄',  dashed: true,  cls: 'muted'   },
 };
 
@@ -48,7 +51,7 @@ interface SubcatRowProps {
   amt: number;
   icon?: string | null;
   source?: SourceKey;
-  confidence?: 'high' | 'medium' | 'low';
+  confidence?: 'high' | 'medium' | 'low' | 'confirmed';
   locked?: boolean;
   hint?: string | null;
   deltaProposed?: number | null;
