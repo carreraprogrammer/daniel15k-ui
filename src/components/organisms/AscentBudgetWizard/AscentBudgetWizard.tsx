@@ -50,6 +50,8 @@ export const AscentBudgetWizard = ({
   const [step, setStep] = useState<Step>('intro');
   const [amounts, setAmounts] = useState<Record<string, number>>({});
   const [active, setActive] = useState<string | null>(null);
+  // Fantasmas: 'keep' = tratar como decisión normal · 'drop' = ocultar este mes.
+  const [ghostState, setGhostState] = useState<Record<string, 'keep' | 'drop'>>({});
 
   const monthLabel = useMemo(() => {
     const [y, m] = month.split('-').map(Number);
@@ -216,6 +218,31 @@ export const AscentBudgetWizard = ({
     );
   };
 
+  const GhostGuard = ({ sub, color }: { sub: WizardSubcategory; color: string }) => {
+    const g = sub.ghost!;
+    return (
+      <div className="ghost" style={{ ['--flexible' as string]: color }}>
+        <div className="ghost-head">
+          <span className="ghost-gem"><IonIcon icon={resolveNamedIcon(sub.icon ?? 'pricetagOutline')} /></span>
+          <span className="ghost-main">
+            <span className="ghost-name">{sub.name}</span>
+            <span className="ghost-badge"><IonIcon icon={informationCircleOutline} /> $0 gastado en {g.months_budgeted} meses</span>
+          </span>
+        </div>
+        <p className="ghost-q">
+          Llevas {g.months_budgeted} meses apartando {g.last_budgeted != null ? <b>{pesoK(g.last_budgeted)}</b> : 'algo'} aquí y no has gastado nada.
+          No es un error — pero cada peso apartado aquí es un peso que no está decidiendo otra cosa. <b>¿La mantienes este mes?</b>
+        </p>
+        <div className="ghost-actions">
+          <button className="ghost-btn drop" onClick={() => setGhostState((s) => ({ ...s, [sub.code]: 'drop' }))}>
+            Soltarla{g.last_budgeted != null ? ` · liberar ${pesoK(g.last_budgeted)}` : ''}
+          </button>
+          <button className="ghost-btn keep" onClick={() => setGhostState((s) => ({ ...s, [sub.code]: 'keep' }))}>Mantenerla</button>
+        </div>
+      </div>
+    );
+  };
+
   const LockedRow = ({ r }: { r: { name: string; icon?: string; amount: number; src: string } }) => (
     <div className="lrow">
       <span className="lrow-gem"><IonIcon icon={resolveNamedIcon(r.icon ?? 'walletOutline')} /></span>
@@ -283,7 +310,11 @@ export const AscentBudgetWizard = ({
               <span className="sec-l" style={{ color: c.color }}>{TIER_LABEL[c.code] ?? c.name}</span>
               <span className="sec-hint">{pesoK(c.decisions.reduce((a, s) => a + (amounts[s.code] ?? 0), 0))} asignado</span>
             </div>
-            {c.decisions.map((s) => <CategoryRow key={s.code} sub={s} color={c.color} />)}
+            {c.decisions.map((s) => {
+              if (s.ghost && !ghostState[s.code]) return <GhostGuard key={s.code} sub={s} color={c.color} />;
+              if (s.ghost && ghostState[s.code] === 'drop') return null;
+              return <CategoryRow key={s.code} sub={s} color={c.color} />;
+            })}
           </div>
         ))}
       </div>

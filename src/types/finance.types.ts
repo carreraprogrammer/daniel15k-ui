@@ -834,6 +834,11 @@ export interface WizardSubcategory {
     spent?: number | null;    // gasto típico (mediana limpia)
     atypical?: boolean;       // la referencia se apoya en un mes de prima
   };
+  // Guardia anti-fantasma: presupuestada varios meses con $0 de gasto.
+  ghost?: {
+    months_budgeted: number;
+    last_budgeted?: number | null;
+  };
 }
 
 export interface WizardCategory {
