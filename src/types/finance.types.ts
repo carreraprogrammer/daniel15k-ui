@@ -821,13 +821,19 @@ export interface WizardSubcategory {
   name: string;
   icon: string;
   suggested_amount: number;
-  confidence: 'high' | 'medium' | 'low' | 'confirmed';
-  source?: 'recurring' | 'confirmed_budget' | 'planned_expense' | 'history' | 'prev_plan' | 'benchmark' | 'none';
+  confidence: 'high' | 'medium' | 'low' | 'confirmed' | 'none';
+  source?: 'recurring' | 'confirmed_budget' | 'planned_expense' | 'history' | 'prev_plan' | 'benchmark' | 'none' | 'user_decision';
   locked?: boolean;
-  source_of_truth?: 'recurring_obligations' | 'budgets' | 'planned_expenses' | 'transactions' | 'benchmarks' | 'none';
+  source_of_truth?: 'recurring_obligations' | 'budgets' | 'planned_expenses' | 'transactions' | 'benchmarks' | 'none' | 'user';
   edit_hint?: string;
   funding_status?: 'covered' | 'pending';
   paid_this_month?: number;
+  // ZBB: la referencia (susurro), nunca el prellenado del monto.
+  reference?: {
+    budgeted?: number | null; // lo que destinaste el mes pasado
+    spent?: number | null;    // gasto típico (mediana limpia)
+    atypical?: boolean;       // la referencia se apoya en un mes de prima
+  };
 }
 
 export interface WizardCategory {

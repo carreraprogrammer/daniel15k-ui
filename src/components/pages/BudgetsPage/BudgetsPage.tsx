@@ -14,7 +14,7 @@ import { LoadingOverlay } from '../../molecules/LoadingOverlay/LoadingOverlay';
 import { AppliedFiltersBar } from '../../molecules/AppliedFiltersBar';
 import { SortSheet } from '../../molecules/SortSheet';
 import { BudgetPlanModal } from '../../organisms/BudgetPlanModal/BudgetPlanModal';
-import { BudgetWizardModal } from '../../organisms/BudgetWizard';
+import { AscentBudgetWizard } from '../../organisms/AscentBudgetWizard';
 import { ActivePlanView, CategoryGroup, SavingsGoalHero } from '../../organisms/ActivePlanView/ActivePlanView';
 import { useWizardData } from '../../../hooks/useWizardData';
 import { financeService } from '../../../services/financeService';
@@ -787,7 +787,7 @@ export const BudgetsContent = () => {
         </section>
 
         {/* ── Budget Wizard Modal ── */}
-        <BudgetWizardModal
+        <AscentBudgetWizard
           isOpen={wizardOpen}
           onClose={handleCloseWizard}
           onComplete={(draft: BudgetPlanDraft) => void handleWizardComplete(draft)}

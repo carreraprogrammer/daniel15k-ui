@@ -11,6 +11,7 @@ const CONFIDENCE_LABELS: Record<WizardSubcategory['confidence'], string> = {
   confirmed: '●',
   medium:    '◐',
   low:       '○',
+  none:      '○',
 };
 
 const CONFIDENCE_TITLES: Record<WizardSubcategory['confidence'], string> = {
@@ -18,6 +19,7 @@ const CONFIDENCE_TITLES: Record<WizardSubcategory['confidence'], string> = {
   confirmed: 'Monto del plan confirmado',
   medium:    'Estimado por historial',
   low:       'Sin fuente estructural',
+  none:      'Tú decides el monto',
 };
 
 const SOURCE_LABELS: Record<NonNullable<WizardSubcategory['source']>, string> = {
@@ -27,6 +29,7 @@ const SOURCE_LABELS: Record<NonNullable<WizardSubcategory['source']>, string> = 
   history: 'Historial',
   prev_plan: 'Mes anterior',
   benchmark: 'Referencia',
+  user_decision: 'Tú decides',
   none: 'Sin datos',
 };
 
