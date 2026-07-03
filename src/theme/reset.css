@@ -63,3 +63,17 @@ a {
 a:hover {
   color: var(--color-brand-hover);
 }
+
+/* ── Modales: default temático ──
+   Ionic deja el fondo del modal en blanco si no se define --background, lo que en
+   modo oscuro produce texto claro sobre fondo blanco (ilegible). Este default fuerza
+   el fondo elevado + texto del tema en TODOS los ion-modal. Los modales con su propio
+   fondo (CrudModal/SheetModal usan `background` en ::part(content)) siguen ganando. */
+ion-modal {
+  --background: var(--color-bg-elevated);
+  --color: var(--color-text-primary);
+}
+ion-modal::part(content) {
+  background: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+}
