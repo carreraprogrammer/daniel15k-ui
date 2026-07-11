@@ -299,6 +299,16 @@
   overflow-wrap: anywhere;
 }
 
+.cardBody strong { font-weight: 700; color: var(--color-text-primary); }
+.cardBody em { font-style: italic; }
+.cardBody code {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.92em;
+  padding: 1px 5px;
+  border-radius: 5px;
+  background: rgba(var(--color-brand-rgb), 0.1);
+}
+
 .cardContext {
   margin: 0;
   font-size: var(--text-xs, 12px);

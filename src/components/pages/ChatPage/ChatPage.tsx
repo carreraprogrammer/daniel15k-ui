@@ -31,6 +31,14 @@ const escapeHtml = (s: string) =>
 
 const inlineHtml = (s: string) =>
   escapeHtml(s)
+    // The agent formats for Telegram HTML (normalize_telegram_html → <b>/<i>, plus <code>/<br>).
+    // Un-escape that safe subset so it renders instead of showing raw tags.
+    .replace(/&lt;(\/?)(?:b|strong)&gt;/gi, (_m, slash: string) => `<${slash}strong>`)
+    .replace(/&lt;(\/?)(?:i|em)&gt;/gi, (_m, slash: string) => `<${slash}em>`)
+    .replace(/&lt;(\/?)(?:u)&gt;/gi, (_m, slash: string) => `<${slash}u>`)
+    .replace(/&lt;(\/?)code&gt;/gi, (_m, slash: string) => `<${slash}code>`)
+    .replace(/&lt;br\s*\/?&gt;/gi, '<br/>')
+    // Markdown fallbacks (in case a channel sends raw markdown)
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
 
