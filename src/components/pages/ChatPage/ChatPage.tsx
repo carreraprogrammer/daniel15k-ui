@@ -1,5 +1,7 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
+import { IonIcon } from '@ionic/react'
+import { cardOutline, walletOutline, cashOutline } from 'ionicons/icons'
 import { useAgentUI } from '../../../contexts/AgentUIContext'
 import { Buddy } from '../../atoms/Buddy'
 import { useBuddyStore } from '../../../store/buddyStore'
@@ -24,14 +26,94 @@ type ChatEntry =
 
 // ─── Markdown ─────────────────────────────────────────────────────────────────
 
-const renderMarkdown = (text: string) => {
-  const escaped = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-  const html = escaped
+const escapeHtml = (s: string) =>
+  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+
+const inlineHtml = (s: string) =>
+  escapeHtml(s)
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    .replace(/\n/g, '<br/>')
+
+const Inline = ({ text }: { text: string }) => (
   // eslint-disable-next-line react/no-danger
-  return <span dangerouslySetInnerHTML={{ __html: html }} />
+  <span dangerouslySetInnerHTML={{ __html: inlineHtml(text).replace(/\n/g, '<br/>') }} />
+)
+
+// A GitHub-style separator row: only pipes/dashes/colons/spaces, at least one dash and one pipe.
+const isTableSeparator = (line: string) => {
+  const t = line.trim()
+  return t.includes('|') && t.includes('-') && /^[\s|:-]+$/.test(t)
+}
+
+const splitRow = (line: string): string[] =>
+  line.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map((c) => c.trim())
+
+const renderMarkdown = (text: string): ReactNode => {
+  const lines = text.split('\n')
+  const blocks: ReactNode[] = []
+  let para: string[] = []
+  let k = 0
+
+  const flush = () => {
+    if (para.length) {
+      blocks.push(<Inline key={`p${k++}`} text={para.join('\n')} />)
+      para = []
+    }
+  }
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]
+    const next = lines[i + 1]
+    const looksLikeRow = line.includes('|') && line.trim().length > 0
+    if (looksLikeRow && next !== undefined && isTableSeparator(next)) {
+      flush()
+      const header = splitRow(line)
+      const rows: string[][] = []
+      i += 2 // skip the header and separator rows
+      while (i < lines.length && lines[i].includes('|') && lines[i].trim().length > 0) {
+        rows.push(splitRow(lines[i]))
+        i++
+      }
+      i-- // the for-loop re-increments
+      blocks.push(
+        <div className={styles.tableWrap} key={`t${k++}`}>
+          <table className={styles.mdTable}>
+            <thead>
+              <tr>{header.map((h, hi) => <th key={hi}><Inline text={h} /></th>)}</tr>
+            </thead>
+            <tbody>
+              {rows.map((r, ri) => (
+                <tr key={ri}>
+                  {header.map((_, ci) => <td key={ci}><Inline text={r[ci] ?? ''} /></td>)}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>,
+      )
+      continue
+    }
+    para.push(line)
+  }
+  flush()
+  return <>{blocks}</>
+}
+
+// ─── Payment-method quick replies (branded grid, matches QuickCapture) ──────────
+
+const PAY_ICON: Record<string, string> = {
+  credit_card: cardOutline,
+  debit: walletOutline,
+  cash: cashOutline,
+}
+const PAY_LABEL: Record<string, string> = {
+  credit_card: 'Tarjeta',
+  debit: 'Débito',
+  cash: 'Efectivo',
+}
+const paymentSource = (callbackData: string): string | null => {
+  const m = /^pay:[^:]+:(credit_card|debit|cash)$/.exec(callbackData)
+  return m ? m[1] : null
 }
 
 // ─── Inline event cards ────────────────────────────────────────────────────────
@@ -46,28 +128,49 @@ const InlineCard = ({ event }: { event: AgentUiEvent }) => {
       return (
         <div className={styles.card}>
           {p.title && <p className={styles.cardTitle}>{p.title}</p>}
-          <p className={styles.cardBody}>{renderMarkdown(p.body)}</p>
+          <div className={styles.cardBody}>{renderMarkdown(p.body)}</div>
         </div>
       )
     }
 
     case 'show_quick_replies': {
       const p = event.payload as unknown as ShowQuickRepliesPayload
+      const sources = p.buttons.map((b) => paymentSource(b.callback_data))
+      const isPaymentGrid = sources.length > 0 && sources.every((s) => s !== null)
       return (
         <div className={styles.card}>
           {p.title && <p className={styles.cardTitle}>{p.title}</p>}
-          <p className={styles.cardBody}>{renderMarkdown(p.body)}</p>
-          <div className={styles.cardActions}>
-            {p.buttons.map((button) => (
-              <button
-                key={button.callback_data}
-                className={styles.cardBtn}
-                onClick={() => void reply(event.id, 'callback', { callback_data: button.callback_data })}
-              >
-                {button.text}
-              </button>
-            ))}
-          </div>
+          <div className={styles.cardBody}>{renderMarkdown(p.body)}</div>
+          {isPaymentGrid ? (
+            <div className={styles.pmRow}>
+              {p.buttons.map((button, i) => {
+                const source = sources[i] as string
+                return (
+                  <button
+                    key={button.callback_data}
+                    type="button"
+                    className={styles.pmBtn}
+                    onClick={() => void reply(event.id, 'callback', { callback_data: button.callback_data })}
+                  >
+                    <IonIcon icon={PAY_ICON[source]} className={styles.pmIcon} aria-hidden="true" />
+                    <span>{PAY_LABEL[source]}</span>
+                  </button>
+                )
+              })}
+            </div>
+          ) : (
+            <div className={styles.cardActions}>
+              {p.buttons.map((button) => (
+                <button
+                  key={button.callback_data}
+                  className={styles.cardBtn}
+                  onClick={() => void reply(event.id, 'callback', { callback_data: button.callback_data })}
+                >
+                  {button.text}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )
     }
@@ -372,7 +475,7 @@ export const ChatPage = ({ onClose }: Props) => {
               <div className={styles.agentRow}>
                 <div className={styles.agentContent}>
                   <div className={styles.card}>
-                    <p className={styles.cardBody}>{renderMarkdown(entry.text)}</p>
+                    <div className={styles.cardBody}>{renderMarkdown(entry.text)}</div>
                   </div>
                 </div>
               </div>

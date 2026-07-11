@@ -334,6 +334,84 @@
   align-items: center;
 }
 
+/* Payment-method grid (mirrors QuickCapture branding) */
+.pmRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.pmBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 13px 6px;
+  border-radius: 15px;
+  cursor: pointer;
+  background: var(--surface-control, rgba(255, 255, 255, 0.06));
+  border: 1px solid var(--surface-border, rgba(255, 255, 255, 0.1));
+  color: var(--text-on-surface-soft);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.pmBtn:hover {
+  border-color: rgba(var(--color-brand-rgb), 0.45);
+  color: var(--color-text-primary);
+}
+
+.pmBtn:active { transform: scale(0.97); }
+
+.pmIcon {
+  font-size: 21px;
+  color: var(--text-on-surface-muted);
+  transition: color 0.15s;
+}
+
+.pmBtn:hover .pmIcon { color: var(--color-accent); }
+
+/* ── Markdown table ──────────────────────────────────────────────────────── */
+
+.tableWrap {
+  overflow-x: auto;
+  border: 1px solid var(--surface-border);
+  border-radius: 10px;
+}
+
+.mdTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--type-body-small-size, 12.5px);
+  color: var(--color-text-primary);
+}
+
+.mdTable th,
+.mdTable td {
+  padding: 8px 11px;
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+.mdTable thead th {
+  font-weight: 700;
+  color: var(--color-accent);
+  background: rgba(var(--color-brand-rgb), 0.07);
+  white-space: nowrap;
+}
+
+.mdTable tbody tr + tr td {
+  border-top: 1px solid var(--surface-border);
+}
+
+.mdTable tbody td:not(:first-child),
+.mdTable thead th:not(:first-child) {
+  text-align: right;
+}
+
 /* ── Category selector ────────────────────────────────────────────────────── */
 
 .selectorSubtitle {
