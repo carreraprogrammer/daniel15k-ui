@@ -405,14 +405,19 @@
 
 /* Markdown table */
 .tableWrap {
+  min-width: 0; /* allow the flex child to shrink so overflow scrolls internally */
+  max-width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   margin: 2px 0;
   border: 1px solid var(--surface-border);
   border-radius: 10px;
 }
 
 .mdTable {
-  width: 100%;
+  /* Grow to content and scroll instead of squishing to fit the chat width */
+  width: max-content;
+  min-width: 100%;
   border-collapse: collapse;
   font-size: var(--text-xs, 12.5px);
   color: var(--text-on-surface-soft);
@@ -423,7 +428,7 @@
   padding: 8px 11px;
   text-align: left;
   vertical-align: top;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
 }
 
 .mdTable thead th {
