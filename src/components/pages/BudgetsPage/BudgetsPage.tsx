@@ -7,6 +7,7 @@ import {
   arrowForwardOutline,
   walletOutline,
   trophyOutline,
+  alertCircleOutline,
 } from 'ionicons/icons';
 import { useHistory, useParams } from 'react-router-dom';
 import { AppLayout } from '../../templates/AppLayout';
@@ -93,6 +94,16 @@ const transactionSubcategoryId = (tx: Transaction): string | null => {
   if (relationshipId) return String(relationshipId);
   const attributeId = tx.attributes.subcategory_id;
   return attributeId == null ? null : String(attributeId);
+};
+
+// Resolve which category (by code) a transaction belongs to, preferring the
+// subcategory→category lookup, then the category relationship, then the raw attr.
+const transactionCategoryType = (tx: Transaction, lookup: Record<string, CategoryLookupItem>): string | null => {
+  const subId = transactionSubcategoryId(tx);
+  if (subId && lookup[`subcategory:${subId}`]?.categoryType) return lookup[`subcategory:${subId}`].categoryType;
+  const relCatId = tx.relationships?.category?.data?.id;
+  if (relCatId && lookup[`category:${relCatId}`]?.categoryType) return lookup[`category:${relCatId}`].categoryType;
+  return tx.attributes.category_type ?? null;
 };
 
 // ── Hero ─────────────────────────────────────────────────────────────────────────
@@ -205,9 +216,12 @@ interface CategoryGroupProps {
   open: boolean;
   onToggle: (code: string) => void;
   onOpenSub: (cat: CurrentPlanCategory, sub: CurrentPlanSubcategory) => void;
+  onOpenPlanless: (cat: CurrentPlanCategory, amount: number, txns: Transaction[]) => void;
+  transactions: Transaction[];
+  categoryLookup: Record<string, CategoryLookupItem>;
 }
 
-const CategoryGroup = ({ cat, open, onToggle, onOpenSub }: CategoryGroupProps) => {
+const CategoryGroup = ({ cat, open, onToggle, onOpenSub, onOpenPlanless, transactions, categoryLookup }: CategoryGroupProps) => {
   const code = cat.code ?? 'unknown';
   const color = cat.color ?? `var(--color-${code})`;
   const tone = toneFor(cat.signal_kind);
@@ -219,6 +233,22 @@ const CategoryGroup = ({ cat, open, onToggle, onOpenSub }: CategoryGroupProps) =
   const remaining = budget - spent;
   const subs = cat.subcategories ?? [];
   const toneColor = tone === 'good' ? 'var(--investment)' : tone === 'warn' ? 'var(--necessary)' : 'var(--text)';
+
+  // Gastos de esta categoría que no caen en ninguna subcategoría presupuestada.
+  const budgetedSubIds = new Set(
+    subs.map((s) => s.id).filter((id): id is number => typeof id === 'number').map(String),
+  );
+  const planlessTxns = transactions.filter((tx) => {
+    if (tx.attributes.transaction_type === 'income') return false;
+    if (transactionCategoryType(tx, categoryLookup) !== code) return false;
+    const subId = transactionSubcategoryId(tx);
+    return !(subId && budgetedSubIds.has(subId));
+  });
+  const accountedSpent = subs.reduce((sum, s) => sum + (s.spent ?? 0), 0);
+  const unbudgetedSpent = Math.max(
+    spent - accountedSpent,
+    planlessTxns.reduce((sum, tx) => sum + (tx.attributes.amount ?? 0), 0),
+  );
 
   return (
     <div className={`bp-cat ${open ? 'is-open' : ''}`} style={{ '--c': color } as CSSProperties}>
@@ -250,11 +280,24 @@ const CategoryGroup = ({ cat, open, onToggle, onOpenSub }: CategoryGroupProps) =
             <div className="cell"><span className="l">Restante</span><span className={`v ${remaining < 0 ? 'over' : ''}`}>{peso(Math.abs(remaining))}</span></div>
             <div className="cell"><span className="l">Estado</span><span className="v tone" style={{ color: toneColor }}>{badge}</span></div>
           </div>
-          {subs.length ? (
+          {subs.length || unbudgetedSpent > 0 ? (
             <div className="bp-cat-subs">
               {subs.map((s) => (
                 <SubCard key={s.id ?? s.code ?? s.name} sub={s} color={color} onOpen={() => onOpenSub(cat, s)} />
               ))}
+              {unbudgetedSpent > 0 ? (
+                <button
+                  className="bp-sub"
+                  style={{ '--c': 'var(--color-warning)' } as CSSProperties}
+                  onClick={() => onOpenPlanless(cat, unbudgetedSpent, planlessTxns)}
+                  title="Gasto sin línea de presupuesto asignada"
+                >
+                  <span className="bp-sub-gem"><IonIcon icon={alertCircleOutline} /></span>
+                  <span className="bp-sub-name">Sin presupuesto</span>
+                  <span className="bp-sub-amt">{pesoK(unbudgetedSpent)}</span>
+                  <span className="bp-sub-bar"><span className="fill" style={{ width: '100%' }} /></span>
+                </button>
+              ) : null}
             </div>
           ) : (
             <div className="bp-empty-subs">Esta categoría no tiene subcategorías activas para este plan.</div>
@@ -282,22 +325,23 @@ const SubCard = ({ sub, color, onOpen }: { sub: CurrentPlanSubcategory; color: s
 
 // ── Subcategory drawer ────────────────────────────────────────────────────────────
 
-interface DrawerProps {
-  cat: CurrentPlanCategory;
-  sub: CurrentPlanSubcategory;
-  txns: Transaction[];
-  onClose: () => void;
-}
+type DrawerData =
+  | { mode: 'sub'; cat: CurrentPlanCategory; sub: CurrentPlanSubcategory }
+  | { mode: 'planless'; cat: CurrentPlanCategory; amount: number; txns: Transaction[] };
 
-const SubDrawer = ({ cat, sub, txns, onClose }: DrawerProps) => {
-  const color = cat.color ?? `var(--color-${cat.code ?? 'unknown'})`;
-  const budget = sub.budgeted ?? 0;
-  const spent = sub.spent ?? 0;
-  const pct = budget > 0 ? Math.min(100, pctOf(spent, budget)) : 0;
-  const over = spent > budget;
-  const remaining = budget - spent;
-  const covered = budget > 0 && spent >= budget;
-  const subIcon = resolveNamedIcon(sub.icon) ?? walletOutline;
+const SubDrawer = ({ data, txns, onClose }: { data: DrawerData; txns: Transaction[]; onClose: () => void }) => {
+  const planless = data.mode === 'planless';
+  const cat = data.cat;
+  const color = planless ? 'var(--color-warning)' : (cat.color ?? `var(--color-${cat.code ?? 'unknown'})`);
+  const icon = planless ? alertCircleOutline : (resolveNamedIcon(data.sub.icon) ?? walletOutline);
+  const name = planless ? 'Sin presupuesto' : (data.sub.name ?? data.sub.code ?? 'Subcategoría');
+
+  const spent = planless ? data.amount : (data.sub.spent ?? 0);
+  const budget = planless ? null : (data.sub.budgeted ?? 0);
+  const pct = budget && budget > 0 ? Math.min(100, pctOf(spent, budget)) : 100;
+  const over = budget != null && spent > budget;
+  const remaining = budget != null ? budget - spent : 0;
+  const covered = !planless && budget != null && budget > 0 && spent >= budget;
 
   return (
     <>
@@ -306,31 +350,45 @@ const SubDrawer = ({ cat, sub, txns, onClose }: DrawerProps) => {
         <div className="bp-sheet-handle" />
         <div className="bp-drawer-card" style={{ '--c': color } as CSSProperties}>
           <div className="bp-drawer-head">
-            <span className="bp-drawer-gem"><IonIcon icon={subIcon} /></span>
+            <span className="bp-drawer-gem"><IonIcon icon={icon} /></span>
             <div className="bp-drawer-main">
               <span className="bp-drawer-eyebrow">{cat.name}</span>
-              <span className="bp-drawer-name">{sub.name ?? sub.code ?? 'Subcategoría'}</span>
+              <span className="bp-drawer-name">{name}</span>
             </div>
             <button className="bp-drawer-close" onClick={onClose} aria-label="Cerrar"><IonIcon icon={closeOutline} /></button>
           </div>
 
           <div className="bp-drawer-amt">
             <span className="cur">$</span>{Math.round(spent).toLocaleString('es-CO')}
-            <span className="of"> de {peso(budget)}</span>
+            {budget != null ? <span className="of"> de {peso(budget)}</span> : null}
           </div>
 
-          <div className="bp-drawer-track"><div className={`bp-drawer-fill ${over ? 'over' : ''}`} style={{ width: `${pct}%` }} /></div>
+          <div className="bp-drawer-track"><div className={`bp-drawer-fill ${over || planless ? 'over' : ''}`} style={{ width: `${pct}%` }} /></div>
 
           <div className="bp-drawer-stats">
             <div className="cell"><span className="l">Gastado</span><span className="v">{peso(spent)}</span></div>
-            <div className="cell"><span className="l">Presupuesto</span><span className="v">{peso(budget)}</span></div>
-            <div className="cell"><span className="l">{remaining >= 0 ? 'Restante' : 'De más'}</span><span className={`v ${remaining < 0 ? 'over' : 'ok'}`}>{peso(Math.abs(remaining))}</span></div>
+            {planless ? (
+              <>
+                <div className="cell"><span className="l">Presupuesto</span><span className="v">—</span></div>
+                <div className="cell"><span className="l">Movimientos</span><span className="v">{txns.length}</span></div>
+              </>
+            ) : (
+              <>
+                <div className="cell"><span className="l">Presupuesto</span><span className="v">{peso(budget ?? 0)}</span></div>
+                <div className="cell"><span className="l">{remaining >= 0 ? 'Restante' : 'De más'}</span><span className={`v ${remaining < 0 ? 'over' : 'ok'}`}>{peso(Math.abs(remaining))}</span></div>
+              </>
+            )}
           </div>
 
-          {covered ? (
+          {planless ? (
+            <div className="bp-drawer-note">
+              <span className="ic"><IonIcon icon={alertCircleOutline} /></span>
+              Estos gastos no tienen una línea de presupuesto asignada en {cat.name}.
+            </div>
+          ) : covered ? (
             <div className="bp-drawer-note">
               <span className="ic"><IonIcon icon={sparklesOutline} /></span>
-              {sub.name} ya está cubierto este mes.
+              {data.sub.name} ya está cubierto este mes.
             </div>
           ) : null}
         </div>
@@ -345,7 +403,7 @@ const SubDrawer = ({ cat, sub, txns, onClose }: DrawerProps) => {
             const metaBits = [attr.date, paymentLabel(attr.payment_source)].filter(Boolean).join(' · ');
             return (
               <div key={tx.id} className="bp-txn">
-                <span className="bp-txn-gem" style={{ '--c': color } as CSSProperties}><IonIcon icon={subIcon} /></span>
+                <span className="bp-txn-gem" style={{ '--c': color } as CSSProperties}><IonIcon icon={icon} /></span>
                 <span className="bp-txn-main">
                   <span className="bp-txn-name">{attr.concept || attr.product || 'Movimiento sin nombre'}</span>
                   <span className="bp-txn-meta">{metaBits}</span>
@@ -456,7 +514,7 @@ export const BudgetsContent = () => {
 
   const [tab, setTab] = useState<'detalle' | 'historial'>('detalle');
   const [openCat, setOpenCat] = useState<string | null>(null);
-  const [drawer, setDrawer] = useState<{ cat: CurrentPlanCategory; sub: CurrentPlanSubcategory } | null>(null);
+  const [drawer, setDrawer] = useState<DrawerData | null>(null);
   const [planModalOpen, setPlanModalOpen] = useState(false);
 
   // Wizard state (unchanged behaviour)
@@ -546,7 +604,9 @@ export const BudgetsContent = () => {
   const regularCats = useMemo(() => planWithColors?.categories.filter((c) => c.code !== 'objetivos') ?? [], [planWithColors]);
 
   const drawerTxns = useMemo(() => {
-    if (!drawer?.sub?.id) return [];
+    if (!drawer) return [];
+    if (drawer.mode === 'planless') return drawer.txns;
+    if (drawer.sub.id == null) return [];
     const subId = String(drawer.sub.id);
     return periodTransactions.filter((tx) => tx.attributes.transaction_type !== 'income' && transactionSubcategoryId(tx) === subId);
   }, [drawer, periodTransactions]);
@@ -634,7 +694,10 @@ export const BudgetsContent = () => {
                         cat={cat}
                         open={openCat === (cat.code ?? '')}
                         onToggle={(code) => setOpenCat((c) => (c === code ? null : code))}
-                        onOpenSub={(c, s) => setDrawer({ cat: c, sub: s })}
+                        onOpenSub={(c, s) => setDrawer({ mode: 'sub', cat: c, sub: s })}
+                        onOpenPlanless={(c, amount, txns) => setDrawer({ mode: 'planless', cat: c, amount, txns })}
+                        transactions={periodTransactions}
+                        categoryLookup={categoryLookup}
                       />
                     ))}
                   </div>
@@ -672,7 +735,7 @@ export const BudgetsContent = () => {
           </>
         )}
 
-        {drawer ? <SubDrawer cat={drawer.cat} sub={drawer.sub} txns={drawerTxns} onClose={() => setDrawer(null)} /> : null}
+        {drawer ? <SubDrawer data={drawer} txns={drawerTxns} onClose={() => setDrawer(null)} /> : null}
       </div>
 
       {/* ── Wizard (sin cambios) ── */}
