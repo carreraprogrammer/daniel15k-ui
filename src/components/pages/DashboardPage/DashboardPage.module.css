@@ -242,9 +242,9 @@
   display: grid;
   place-items: center;
   font-size: 22px;
-  color: #fff;
-  background: linear-gradient(140deg, var(--f-col, var(--color-committed)), color-mix(in srgb, var(--f-col, var(--color-committed)) 60%, #000));
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
+  color: var(--f-col, var(--color-committed));
+  background: color-mix(in srgb, var(--f-col, var(--color-committed)) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--f-col, var(--color-committed)) 22%, transparent);
 }
 .fundBody { flex: 1; min-width: 0; }
 .fundHead { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -458,9 +458,9 @@
   display: grid;
   place-items: center;
   font-size: 18px;
-  color: #fff;
-  background: linear-gradient(140deg, var(--c-col, var(--color-brand)), color-mix(in srgb, var(--c-col, var(--color-brand)) 60%, #000));
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.18);
+  color: var(--c-col, var(--color-brand));
+  background: color-mix(in srgb, var(--c-col, var(--color-brand)) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--c-col, var(--color-brand)) 22%, transparent);
 }
 .catMain { min-width: 0; }
 .catName {
@@ -758,3 +758,157 @@
   background: color-mix(in srgb, var(--color-warning) 12%, transparent);
   color: var(--color-warning);
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   DASHBOARD v2 — "El ascenso"
+   Menos tarjetas, más listas nativas. Tokens del prototipo mapeados a los del app.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* Contenedor de widgets: el espaciado lo controlan los márgenes de cada widget. */
+.d2Scroll { display: flex; flex-direction: column; }
+
+/* ── Estado general — una línea, sin melodrama ── */
+.d2Status {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 2px; margin-top: 4px;
+  cursor: pointer; background: none; border: none; width: 100%; text-align: left;
+}
+.d2StatusDot {
+  width: 9px; height: 9px; border-radius: 999px; flex-shrink: 0;
+  background: var(--state-c, var(--color-brand));
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--state-c, var(--color-brand)) 16%, transparent);
+}
+.d2StatusOk   { --state-c: var(--color-investment); }
+.d2StatusWarn { --state-c: #D9A521; }
+.d2StatusRisk { --state-c: var(--color-committed); }
+.d2StatusText { flex: 1; font-size: 15px; font-weight: 500; color: var(--color-text-primary); letter-spacing: -0.005em; }
+.d2StatusChev { color: rgba(240,240,248,0.3); flex-shrink: 0; font-size: 15px; }
+
+/* ── Ascenso — widget centro ── */
+.d2Ascent { margin-top: 6px; }
+.d2AscentHead { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
+.d2AscentEyebrow { font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-on-surface-muted); }
+.d2AscentStage { font-family: var(--font-display); font-size: 15px; font-weight: 600; color: var(--color-brand); }
+
+.d2MtnWrap {
+  position: relative; height: 168px; border-radius: 24px; overflow: hidden;
+  border: none; width: 100%; cursor: pointer; display: block; padding: 0;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--color-brand) 14%, var(--color-bg-secondary)) 0%, var(--color-bg-secondary) 78%);
+}
+.d2MtnGlow { position: absolute; inset: 0; background: radial-gradient(60% 50% at 78% 15%, rgba(230,182,86,0.35), transparent 70%); }
+.d2MtnPathSvg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.d2MtnPeakShape { fill: var(--surface-panel-strong); }
+.d2MtnTick { stroke: var(--surface-border); stroke-width: 0.5; stroke-dasharray: 2 2; vector-effect: non-scaling-stroke; }
+.d2MtnSlopeDone {
+  stroke: var(--color-brand); stroke-width: 2; stroke-linecap: round; vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--color-brand) 55%, transparent));
+}
+.d2MtnFlag { position: absolute; transform: translate(-50%, -20%); z-index: 2; }
+.d2MtnTickLbl { position: absolute; right: 10px; font-family: var(--font-mono); font-size: 9.5px; color: rgba(240,240,248,0.3); }
+.d2MtnTickLblTop { top: 10%; }
+.d2MtnTickLblBottom { bottom: 30%; }
+.d2MtnAvatar {
+  position: absolute; width: 28px; height: 28px; border-radius: 999px;
+  transform: translate(-50%, 40%);
+  background: radial-gradient(60% 60% at 30% 25%, rgba(255,255,255,0.6), transparent 60%), var(--color-brand);
+  box-shadow: 0 6px 16px rgba(230,182,86,0.4), 0 0 0 4px var(--color-bg-secondary);
+  display: grid; place-items: center; z-index: 3;
+  animation: d2AvatarBob 3.2s ease-in-out infinite;
+}
+.d2MtnAvatarSm { width: 20px; height: 20px; }
+.d2MtnAvatarEyes { width: 15px; height: 15px; overflow: visible; }
+.d2MtnAvatarSm .d2MtnAvatarEyes { width: 11px; height: 11px; }
+.d2Pupil { fill: var(--text-on-accent); animation: d2Blink 4.6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.d2Catch { fill: rgba(255,255,255,0.92); }
+@keyframes d2AvatarBob { 0%, 100% { margin-top: 0; } 50% { margin-top: -3px; } }
+@keyframes d2Blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(0.1); } }
+@media (prefers-reduced-motion: reduce) {
+  .d2MtnAvatar, .d2Pupil { animation: none !important; }
+}
+.d2MtnFoot { position: absolute; left: 16px; right: 16px; bottom: 12px; z-index: 4; display: flex; align-items: flex-end; justify-content: space-between; }
+.d2MtnFootVal { font-family: var(--font-display); font-size: 22px; font-weight: 600; letter-spacing: -0.02em; color: var(--color-text-primary); }
+.d2MtnFootValMuted { font-size: 13px; color: var(--text-on-surface-muted); font-weight: 500; }
+.d2MtnFootLbl { display: block; font-size: 11.5px; color: var(--text-on-surface-muted); margin-top: 2px; }
+.d2MtnFootPct { font-family: var(--font-mono); font-size: 15px; font-weight: 600; color: var(--color-brand); }
+
+.d2AscentStages { display: flex; gap: 6px; margin-top: 12px; padding: 0 2px; }
+.d2AscentChip {
+  flex: 1; text-align: center; font-size: 10px; font-weight: 600;
+  padding: 6px 4px; border-radius: 10px; color: rgba(240,240,248,0.3);
+  background: var(--surface-panel-soft);
+  display: flex; align-items: center; justify-content: center; gap: 3px;
+}
+.d2AscentChipDone { color: var(--color-investment); background: var(--color-investment-subtle); }
+.d2AscentChipActive { color: var(--text-on-accent); background: var(--color-brand); }
+.d2AscentChipLocked { opacity: 0.45; }
+
+/* ── Ritmo diario + gastado ── */
+.d2Stats { display: flex; margin-top: 26px; }
+.d2Stat { flex: 1; padding: 0 14px 0 0; background: none; border: none; font: inherit; color: inherit; text-align: left; }
+.d2Stat + .d2Stat { border-left: 1px solid var(--surface-border); padding-left: 14px; padding-right: 0; }
+.d2StatTap { cursor: pointer; }
+.d2StatLbl { font-size: 11.5px; color: var(--text-on-surface-muted); font-weight: 500; }
+.d2StatVal { font-family: var(--font-display); font-size: 26px; font-weight: 600; letter-spacing: -0.02em; color: var(--color-text-primary); margin-top: 5px; font-variant-numeric: tabular-nums; }
+.d2StatUnit { font-family: var(--font-sans); font-size: 12px; font-weight: 500; color: var(--text-on-surface-muted); }
+.d2StatHint { font-size: 11px; color: var(--text-on-surface-muted); margin-top: 4px; }
+
+/* ── Sección + lista nativa (obligaciones / gavetas / transacciones) ── */
+.d2Widget { display: block; }
+.d2Sec { display: flex; align-items: baseline; justify-content: space-between; margin: 28px 2px 10px; }
+.d2SecLabel { font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-on-surface-muted); }
+.d2SecMore { display: inline-flex; align-items: center; gap: 3px; font-size: 12.5px; font-weight: 500; color: var(--text-on-surface-muted); background: none; border: none; cursor: pointer; padding: 0; }
+
+.d2List { display: flex; flex-direction: column; }
+.d2Row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 2px; position: relative; width: 100%;
+  background: none; border: none; text-align: left; cursor: pointer;
+}
+.d2Row + .d2Row::before { content: ''; position: absolute; top: 0; left: 46px; right: 0; height: 1px; background: var(--surface-border-muted); }
+.d2RowIcon {
+  width: 34px; height: 34px; border-radius: 11px; flex-shrink: 0;
+  display: grid; place-items: center; font-size: 16px;
+  color: var(--r-col, var(--color-brand));
+  background: color-mix(in srgb, var(--r-col, var(--color-brand)) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--r-col, var(--color-brand)) 22%, transparent);
+}
+.d2RowBody { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.d2RowName { font-size: 14.5px; font-weight: 500; color: var(--color-text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.d2RowSub { font-family: var(--font-mono); font-size: 11.5px; color: var(--text-on-surface-muted); margin-top: 2px; }
+.d2RowRight { text-align: right; flex-shrink: 0; }
+.d2RowAmt { font-family: var(--font-mono); font-size: 14px; font-weight: 600; color: var(--color-text-primary); white-space: nowrap; }
+.d2RowAmtIn { color: var(--color-investment); }
+.d2RowMeta { font-size: 11px; color: var(--text-on-surface-muted); flex-shrink: 0; }
+.d2RowMetaSoon { color: var(--color-committed); font-weight: 600; }
+.d2RowBar { position: absolute; left: 46px; right: 0; bottom: 4px; height: 3px; border-radius: 999px; background: var(--surface-control-hover); overflow: hidden; }
+.d2RowBarFill { display: block; height: 100%; border-radius: 999px; background: var(--r-col, var(--color-brand)); transition: width 400ms ease; }
+.d2RowBarFillOver { background: var(--color-committed); }
+.d2RowHasBar { padding-bottom: 17px; }
+
+.d2OblSummary { display: flex; align-items: center; justify-content: space-between; padding: 0 2px 10px; }
+.d2OblSummaryL { font-size: 13px; color: var(--text-on-surface-soft); }
+.d2OblSummaryL b { color: var(--color-text-primary); font-weight: 600; }
+.d2OblSummaryR { font-family: var(--font-mono); font-size: 12.5px; color: var(--text-on-surface-muted); }
+
+/* ── Personalizar (dentro del SheetModal) ── */
+.d2CzSub { margin: 0 0 14px; font-size: 12.5px; color: var(--text-on-surface-muted); }
+.d2CzReset {
+  width: 100%; padding: 10px 12px; border-radius: 12px; margin-bottom: 12px;
+  background: none; border: 1px solid var(--surface-border); color: var(--text-on-surface-muted);
+  font-size: 12.5px; font-weight: 500; cursor: pointer;
+}
+.d2CzBody { display: flex; flex-direction: column; gap: 8px; }
+.d2CzRow {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px; border-radius: 16px;
+  background: var(--surface-panel-soft); border: 1px solid var(--surface-border);
+  user-select: none;
+}
+.d2CzRowDragging { opacity: 0.5; }
+.d2CzRowHidden { opacity: 0.5; }
+.d2CzGrip { display: grid; place-items: center; color: rgba(240,240,248,0.3); flex-shrink: 0; cursor: grab; touch-action: none; padding: 4px; font-size: 16px; }
+.d2CzLabel { flex: 1; font-size: 14.5px; font-weight: 500; color: var(--color-text-primary); }
+.d2CzToggle { position: relative; width: 40px; height: 24px; border: 0; border-radius: 999px; background: var(--surface-control-hover); flex-shrink: 0; cursor: pointer; }
+.d2CzToggleOn { background: var(--color-investment); }
+.d2CzKnob { position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 999px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.3); transition: transform 160ms ease; }
+.d2CzToggleOn .d2CzKnob { transform: translateX(16px); }
