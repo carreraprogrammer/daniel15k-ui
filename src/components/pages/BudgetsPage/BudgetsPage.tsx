@@ -654,7 +654,7 @@ export const BudgetsContent = () => {
 
   // ── Render ───────────────────────────────────────────────────────────────────
   return (
-    <IonContent>
+    <IonContent className="bp-content">
       <div className="bp-root">
         {loading ? (
           <div className="bp-centered"><Spinner size="lg" /></div>

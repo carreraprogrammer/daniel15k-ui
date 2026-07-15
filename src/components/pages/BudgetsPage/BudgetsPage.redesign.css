@@ -41,9 +41,20 @@
   min-height: 100%;
   color: var(--text);
   font-family: var(--f-sans);
-  background:
-    radial-gradient(90% 40% at 50% -6%, rgba(230, 182, 86, 0.10), transparent 62%),
-    radial-gradient(70% 40% at 100% 106%, rgba(14, 150, 173, 0.07), transparent 60%);
+  /* Sin fondo propio: se deja ver el shell de la app (coherente con las demás páginas). */
+}
+
+/* IonContent transparente para mostrar el fondo del shell, como el resto de páginas. */
+.bp-content {
+  --background: transparent;
+}
+.bp-content::part(scroll) {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.bp-content::part(scroll)::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
 /* ─── Tabs Detalle / Historial ─── */
