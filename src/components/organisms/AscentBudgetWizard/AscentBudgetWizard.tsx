@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { IonIcon, IonModal } from '@ionic/react';
 import {
   alertCircleOutline, arrowDownOutline, arrowForward, checkmarkCircle,
@@ -27,6 +27,184 @@ const TIER_LABEL: Record<string, string> = {
 
 const prefilled = (s: WizardSubcategory) =>
   Boolean(s.locked) || s.source === 'planned_expense' || s.source === 'confirmed_budget';
+
+type FixedRow = { code: string; name: string; icon?: string; amount: number; src: string };
+
+// ── UI atoms ────────────────────────────────────────────────────────────────
+// OJO: viven en scope de módulo a propósito. Si se definen dentro del wizard,
+// cada render crea un tipo de componente nuevo y React remonta todo el árbol —
+// el contenedor scrolleable se recrea y la lista salta al tope en cada toque.
+
+const Nav = ({ eyebrow, title, stepLabel, onClose }: {
+  eyebrow: string; title: string; stepLabel?: string; onClose: () => void;
+}) => (
+  <div className="awz-nav">
+    <button className="awz-navbtn" onClick={onClose} aria-label="Cerrar"><IonIcon icon={closeIcon} /></button>
+    <div className="awz-navttl"><span className="awz-eyebrow">{eyebrow}</span><span className="awz-h">{title}</span></div>
+    {stepLabel && <span className="awz-step">{stepLabel}</span>}
+  </div>
+);
+
+const PorBar = ({ por, startPool, pending }: { por: number; startPool: number; pending: number }) => {
+  const state = por === 0 ? 'is-zero' : por < 0 ? 'is-over' : 'is-pos';
+  const placed = startPool - Math.max(0, por);
+  const pct = startPool > 0 ? Math.max(0, Math.min(100, (placed / startPool) * 100)) : 0;
+  return (
+    <div className={`por ${state}`}>
+      <div className="por-top">
+        <span className="por-lbl">Por asignar</span>
+        <span className="por-count">{pending} sin decidir</span>
+      </div>
+      <div className="por-amt">
+        {por < 0 ? <span className="neg">−</span> : <span className="cur">$</span>}
+        {Math.abs(por).toLocaleString('es-CO')}
+      </div>
+      <div className="por-status">
+        <span className="ic"><IonIcon icon={por === 0 ? checkmarkCircle : por < 0 ? alertCircleOutline : arrowDownOutline} /></span>
+        {por === 0 ? 'Cada peso tiene un destino' : por < 0 ? 'Asignaste de más — baja alguna decisión' : 'Reparte hasta llegar a cero, a tu ritmo'}
+      </div>
+      <div className="por-meter"><div className="por-meter-fill" style={{ width: `${pct}%` }} /></div>
+      <div className="por-foot">
+        <span>Repartido <b>{pesoK(placed)}</b></span>
+        <span>De <b>{pesoK(startPool)}</b> variables</span>
+      </div>
+    </div>
+  );
+};
+
+const CategoryRow = ({ sub, color, amount, isActive, onToggle, onAmount, onDone }: {
+  sub: WizardSubcategory; color: string; amount: number; isActive: boolean;
+  onToggle: () => void; onAmount: (n: number) => void; onDone: () => void;
+}) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const rowRef = useRef<HTMLDivElement>(null);
+  const decidedRow = amount > 0;
+  const ref = sub.reference;
+
+  // Al abrir la fila: enfocar el input (abre el teclado numérico) y dejarla
+  // visible por encima del teclado.
+  useEffect(() => {
+    if (!isActive) return;
+    inputRef.current?.focus();
+    rowRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [isActive]);
+
+  const display = amount.toLocaleString('es-CO');
+  const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const digits = e.target.value.replace(/\D/g, '').slice(0, 12);
+    onAmount(digits ? Number(digits) : 0);
+  };
+  // preventDefault en mousedown evita que el chip robe el foco y cierre el teclado.
+  const keepFocus = (e: React.MouseEvent) => e.preventDefault();
+  const chip = (d: number) => onAmount(Math.max(0, amount + d));
+
+  return (
+    <div ref={rowRef} className={`crow ${isActive ? 'active' : decidedRow ? '' : 'undecided'}`} style={{ ['--c' as string]: color }}>
+      <button className="crow-head" onClick={onToggle}>
+        <span className="crow-gem"><IonIcon icon={resolveNamedIcon(sub.icon ?? 'pricetagOutline')} /></span>
+        <span className="crow-main">
+          <span className="crow-name">{sub.name}</span>
+          <span className="crow-ref">
+            {ref && (ref.budgeted != null || ref.spent != null) ? (
+              <span>
+                {ref.budgeted != null && <>destinaste <b>{pesoK(ref.budgeted)}</b></>}
+                {ref.budgeted != null && ref.spent != null && ' · '}
+                {ref.spent != null && <>gastaste <b>{pesoK(ref.spent)}</b></>}
+              </span>
+            ) : (
+              <span>sin referencia aún — tú defines</span>
+            )}
+            {ref?.atypical && <><span className="dot" /><span className="atyp"><IonIcon icon={informationCircleOutline} /> mes atípico</span></>}
+          </span>
+        </span>
+        <span className="crow-amt">
+          <span className={`val ${decidedRow ? '' : 'zero'}`}>{peso(amount)}</span>
+          {decidedRow ? <span className="tag">asignado</span> : <span className="tag dim">decidir ›</span>}
+        </span>
+      </button>
+      {isActive && (
+        <div className="crow-editor">
+          <label className="crow-bignum">
+            <span className="cur">$</span>
+            <input
+              ref={inputRef}
+              className="n"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              enterKeyHint="done"
+              autoComplete="off"
+              aria-label={`Monto para ${sub.name}`}
+              value={display}
+              onChange={handleInput}
+              onFocus={(e) => e.currentTarget.select()}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.currentTarget.blur(); onDone(); } }}
+              style={{ width: `${Math.max(display.length, 1)}ch` }}
+            />
+          </label>
+          {ref && (ref.budgeted != null || ref.spent != null) && (
+            <div className="crow-refline">
+              {ref.budgeted != null && <>El mes pasado destinaste <b>{pesoK(ref.budgeted)}</b></>}
+              {ref.spent != null && <> y gastaste <b>{pesoK(ref.spent)}</b></>}
+              {ref.atypical && ' — fue mes atípico (prima)'}
+            </div>
+          )}
+          <div className="chips">
+            <button className="chip minus" onMouseDown={keepFocus} onClick={() => chip(-50000)}>−50 mil</button>
+            <button className="chip minus" onMouseDown={keepFocus} onClick={() => chip(-25000)}>−25 mil</button>
+            <button className="chip plus" onMouseDown={keepFocus} onClick={() => chip(25000)}>+25 mil</button>
+            <button className="chip plus" onMouseDown={keepFocus} onClick={() => chip(50000)}>+50 mil</button>
+          </div>
+          <div className="crow-actions">
+            {amount > 0 && <button className="crow-clear" onMouseDown={keepFocus} onClick={() => onAmount(0)}>Volver a $0</button>}
+            <button className="crow-set" onClick={onDone}><IonIcon icon={checkmarkCircle} /> Listo</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const GhostGuard = ({ sub, color, onKeep, onDrop }: {
+  sub: WizardSubcategory; color: string; onKeep: () => void; onDrop: () => void;
+}) => {
+  const g = sub.ghost!;
+  return (
+    <div className="ghost" style={{ ['--flexible' as string]: color }}>
+      <div className="ghost-head">
+        <span className="ghost-gem"><IonIcon icon={resolveNamedIcon(sub.icon ?? 'pricetagOutline')} /></span>
+        <span className="ghost-main">
+          <span className="ghost-name">{sub.name}</span>
+          <span className="ghost-badge"><IonIcon icon={informationCircleOutline} /> $0 gastado en {g.months_budgeted} meses</span>
+        </span>
+      </div>
+      <p className="ghost-q">
+        Llevas {g.months_budgeted} meses apartando {g.last_budgeted != null ? <b>{pesoK(g.last_budgeted)}</b> : 'algo'} aquí y no has gastado nada.
+        No es un error — pero cada peso apartado aquí es un peso que no está decidiendo otra cosa. <b>¿La mantienes este mes?</b>
+      </p>
+      <div className="ghost-actions">
+        <button className="ghost-btn drop" onClick={onDrop}>
+          Soltarla{g.last_budgeted != null ? ` · liberar ${pesoK(g.last_budgeted)}` : ''}
+        </button>
+        <button className="ghost-btn keep" onClick={onKeep}>Mantenerla</button>
+      </div>
+    </div>
+  );
+};
+
+const LockedRow = ({ r }: { r: FixedRow }) => (
+  <div className="lrow">
+    <span className="lrow-gem"><IonIcon icon={resolveNamedIcon(r.icon ?? 'walletOutline')} /></span>
+    <span className="lrow-main">
+      <span className="lrow-name">{r.name}</span>
+      <span className="lrow-src">{r.src}</span>
+    </span>
+    <span className="lrow-r">
+      <span className="lrow-amt">{peso(r.amount)}</span>
+      <span className="lrow-lock"><IonIcon icon={lockClosedOutline} /></span>
+    </span>
+  </div>
+);
 
 export interface AscentBudgetWizardProps {
   isOpen: boolean;
@@ -67,7 +245,7 @@ export const AscentBudgetWizard = ({
 
   // Líneas fijas (prefijadas) de todas las categorías + el aporte a ahorro.
   const fixedRows = useMemo(() => {
-    const rows: { code: string; name: string; icon?: string; amount: number; src: string }[] = [];
+    const rows: FixedRow[] = [];
     cats.forEach((c) => c.subcategories.filter(prefilled).forEach((s) => {
       rows.push({
         code: s.code, name: s.name, icon: s.icon, amount: s.suggested_amount,
@@ -92,8 +270,7 @@ export const AscentBudgetWizard = ({
   const totalDecisions = decisionCats.reduce((a, c) => a + c.decisions.length, 0);
   const decided = decisionCats.reduce((a, c) => a + c.decisions.filter((s) => (amounts[s.code] ?? 0) > 0).length, 0);
 
-  const chip = (code: string, d: number) => setAmounts((m) => ({ ...m, [code]: Math.max(0, (m[code] ?? 0) + d) }));
-  const clear = (code: string) => setAmounts((m) => ({ ...m, [code]: 0 }));
+  const setAmount = (code: string, n: number) => setAmounts((m) => ({ ...m, [code]: n }));
 
   const tierTotals = useMemo(() => {
     const t: Record<string, number> = { committed: 0, necessary: 0, flexible: 0 };
@@ -122,145 +299,10 @@ export const AscentBudgetWizard = ({
     });
   };
 
-  // ── UI atoms ──────────────────────────────────────────────────────────────
-  const Nav = ({ eyebrow, title, stepLabel }: { eyebrow: string; title: string; stepLabel?: string }) => (
-    <div className="awz-nav">
-      <button className="awz-navbtn" onClick={onClose} aria-label="Cerrar"><IonIcon icon={closeIcon} /></button>
-      <div className="awz-navttl"><span className="awz-eyebrow">{eyebrow}</span><span className="awz-h">{title}</span></div>
-      {stepLabel && <span className="awz-step">{stepLabel}</span>}
-    </div>
-  );
-
-  const PorBar = ({ compact }: { compact?: boolean }) => {
-    const state = por === 0 ? 'is-zero' : por < 0 ? 'is-over' : 'is-pos';
-    const placed = startPool - Math.max(0, por);
-    const pct = startPool > 0 ? Math.max(0, Math.min(100, (placed / startPool) * 100)) : 0;
-    const count = totalDecisions - decided;
-    return (
-      <div className={`por ${state} ${compact ? 'compact' : ''}`}>
-        <div className="por-top">
-          <span className="por-lbl">Por asignar</span>
-          <span className="por-count">{count} sin decidir</span>
-        </div>
-        <div className="por-amt">
-          {por < 0 ? <span className="neg">−</span> : <span className="cur">$</span>}
-          {Math.abs(por).toLocaleString('es-CO')}
-        </div>
-        <div className="por-status">
-          <span className="ic"><IonIcon icon={por === 0 ? checkmarkCircle : por < 0 ? alertCircleOutline : arrowDownOutline} /></span>
-          {por === 0 ? 'Cada peso tiene un destino' : por < 0 ? 'Asignaste de más — baja alguna decisión' : 'Reparte hasta llegar a cero, a tu ritmo'}
-        </div>
-        <div className="por-meter"><div className="por-meter-fill" style={{ width: `${pct}%` }} /></div>
-        <div className="por-foot">
-          <span>Repartido <b>{pesoK(placed)}</b></span>
-          <span>De <b>{pesoK(startPool)}</b> variables</span>
-        </div>
-      </div>
-    );
-  };
-
-  const CategoryRow = ({ sub, color }: { sub: WizardSubcategory; color: string }) => {
-    const amt = amounts[sub.code] ?? 0;
-    const isActive = active === sub.code;
-    const decidedRow = amt > 0;
-    const ref = sub.reference;
-    return (
-      <div className={`crow ${isActive ? 'active' : decidedRow ? '' : 'undecided'}`} style={{ ['--c' as string]: color }}>
-        <button className="crow-head" onClick={() => setActive((a) => (a === sub.code ? null : sub.code))}>
-          <span className="crow-gem"><IonIcon icon={resolveNamedIcon(sub.icon ?? 'pricetagOutline')} /></span>
-          <span className="crow-main">
-            <span className="crow-name">{sub.name}</span>
-            <span className="crow-ref">
-              {ref && (ref.budgeted != null || ref.spent != null) ? (
-                <span>
-                  {ref.budgeted != null && <>destinaste <b>{pesoK(ref.budgeted)}</b></>}
-                  {ref.budgeted != null && ref.spent != null && ' · '}
-                  {ref.spent != null && <>gastaste <b>{pesoK(ref.spent)}</b></>}
-                </span>
-              ) : (
-                <span>sin referencia aún — tú defines</span>
-              )}
-              {ref?.atypical && <><span className="dot" /><span className="atyp"><IonIcon icon={informationCircleOutline} /> mes atípico</span></>}
-            </span>
-          </span>
-          <span className="crow-amt">
-            <span className={`val ${decidedRow ? '' : 'zero'}`}>{peso(amt)}</span>
-            {decidedRow ? <span className="tag">asignado</span> : <span className="tag dim">decidir ›</span>}
-          </span>
-        </button>
-        {isActive && (
-          <div className="crow-editor">
-            <div className="crow-bignum">
-              <span className="cur">$</span>
-              <span className="n">{amt.toLocaleString('es-CO')}</span>
-              <span className="caret" />
-            </div>
-            {ref && (ref.budgeted != null || ref.spent != null) && (
-              <div className="crow-refline">
-                {ref.budgeted != null && <>El mes pasado destinaste <b>{pesoK(ref.budgeted)}</b></>}
-                {ref.spent != null && <> y gastaste <b>{pesoK(ref.spent)}</b></>}
-                {ref.atypical && ' — fue mes atípico (prima)'}
-              </div>
-            )}
-            <div className="chips">
-              <button className="chip minus" onClick={() => chip(sub.code, -50000)}>−50 mil</button>
-              <button className="chip minus" onClick={() => chip(sub.code, -25000)}>−25 mil</button>
-              <button className="chip plus" onClick={() => chip(sub.code, 25000)}>+25 mil</button>
-              <button className="chip plus" onClick={() => chip(sub.code, 50000)}>+50 mil</button>
-            </div>
-            <div className="crow-actions">
-              {amt > 0 && <button className="crow-clear" onClick={() => clear(sub.code)}>Volver a $0</button>}
-              <button className="crow-set" onClick={() => setActive(null)}><IonIcon icon={checkmarkCircle} /> Listo</button>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  const GhostGuard = ({ sub, color }: { sub: WizardSubcategory; color: string }) => {
-    const g = sub.ghost!;
-    return (
-      <div className="ghost" style={{ ['--flexible' as string]: color }}>
-        <div className="ghost-head">
-          <span className="ghost-gem"><IonIcon icon={resolveNamedIcon(sub.icon ?? 'pricetagOutline')} /></span>
-          <span className="ghost-main">
-            <span className="ghost-name">{sub.name}</span>
-            <span className="ghost-badge"><IonIcon icon={informationCircleOutline} /> $0 gastado en {g.months_budgeted} meses</span>
-          </span>
-        </div>
-        <p className="ghost-q">
-          Llevas {g.months_budgeted} meses apartando {g.last_budgeted != null ? <b>{pesoK(g.last_budgeted)}</b> : 'algo'} aquí y no has gastado nada.
-          No es un error — pero cada peso apartado aquí es un peso que no está decidiendo otra cosa. <b>¿La mantienes este mes?</b>
-        </p>
-        <div className="ghost-actions">
-          <button className="ghost-btn drop" onClick={() => setGhostState((s) => ({ ...s, [sub.code]: 'drop' }))}>
-            Soltarla{g.last_budgeted != null ? ` · liberar ${pesoK(g.last_budgeted)}` : ''}
-          </button>
-          <button className="ghost-btn keep" onClick={() => setGhostState((s) => ({ ...s, [sub.code]: 'keep' }))}>Mantenerla</button>
-        </div>
-      </div>
-    );
-  };
-
-  const LockedRow = ({ r }: { r: { name: string; icon?: string; amount: number; src: string } }) => (
-    <div className="lrow">
-      <span className="lrow-gem"><IonIcon icon={resolveNamedIcon(r.icon ?? 'walletOutline')} /></span>
-      <span className="lrow-main">
-        <span className="lrow-name">{r.name}</span>
-        <span className="lrow-src">{r.src}</span>
-      </span>
-      <span className="lrow-r">
-        <span className="lrow-amt">{peso(r.amount)}</span>
-        <span className="lrow-lock"><IonIcon icon={lockClosedOutline} /></span>
-      </span>
-    </div>
-  );
-
   // ── Screens ─────────────────────────────────────────────────────────────────
-  const Intro = () => (
+  const renderIntro = () => (
     <>
-      <Nav eyebrow={/* first plan? */ 'Tu plan'} title={monthLabel} />
+      <Nav eyebrow={/* first plan? */ 'Tu plan'} title={monthLabel} onClose={onClose} />
       <div className="intro">
         <span className="intro-eyebrow">Llegó tu ingreso</span>
         <h1 className="intro-h">Vamos a darle un destino a cada peso.</h1>
@@ -293,10 +335,10 @@ export const AscentBudgetWizard = ({
     </>
   );
 
-  const List = () => (
+  const renderList = () => (
     <>
-      <Nav eyebrow="Repartiendo" title={monthLabel} stepLabel={`${decided}/${totalDecisions}`} />
-      <PorBar />
+      <Nav eyebrow="Repartiendo" title={monthLabel} stepLabel={`${decided}/${totalDecisions}`} onClose={onClose} />
+      <PorBar por={por} startPool={startPool} pending={totalDecisions - decided} />
       <div className="awz-body">
         {fixedRows.length > 0 && (
           <>
@@ -311,9 +353,30 @@ export const AscentBudgetWizard = ({
               <span className="sec-hint">{pesoK(c.decisions.reduce((a, s) => a + (amounts[s.code] ?? 0), 0))} asignado</span>
             </div>
             {c.decisions.map((s) => {
-              if (s.ghost && !ghostState[s.code]) return <GhostGuard key={s.code} sub={s} color={c.color} />;
+              if (s.ghost && !ghostState[s.code]) {
+                return (
+                  <GhostGuard
+                    key={s.code}
+                    sub={s}
+                    color={c.color}
+                    onKeep={() => setGhostState((g) => ({ ...g, [s.code]: 'keep' }))}
+                    onDrop={() => setGhostState((g) => ({ ...g, [s.code]: 'drop' }))}
+                  />
+                );
+              }
               if (s.ghost && ghostState[s.code] === 'drop') return null;
-              return <CategoryRow key={s.code} sub={s} color={c.color} />;
+              return (
+                <CategoryRow
+                  key={s.code}
+                  sub={s}
+                  color={c.color}
+                  amount={amounts[s.code] ?? 0}
+                  isActive={active === s.code}
+                  onToggle={() => setActive((a) => (a === s.code ? null : s.code))}
+                  onAmount={(n) => setAmount(s.code, n)}
+                  onDone={() => setActive(null)}
+                />
+              );
             })}
           </div>
         ))}
@@ -333,12 +396,12 @@ export const AscentBudgetWizard = ({
     </>
   );
 
-  const Summary = () => {
+  const renderSummary = () => {
     const over = por < 0;
     const hasPrima = (extra?.detected_recent ?? 0) > 0;
     return (
       <>
-        <Nav eyebrow="Resumen" title={`Plan de ${monthLabel}`} />
+        <Nav eyebrow="Resumen" title={`Plan de ${monthLabel}`} onClose={onClose} />
         <div className="awz-body">
           <div className="sum-hero">
             <div className={`sum-ring ${over ? 'over' : ''}`}><IonIcon icon={over ? alertCircleOutline : checkmarkCircle} style={{ fontSize: 40 }} /></div>
@@ -431,7 +494,7 @@ export const AscentBudgetWizard = ({
   return (
     <IonModal isOpen={isOpen} onDidDismiss={onClose}>
       <div className="awz">
-        {!wizardData ? null : step === 'intro' ? <Intro /> : step === 'list' ? <List /> : <Summary />}
+        {!wizardData ? null : step === 'intro' ? renderIntro() : step === 'list' ? renderList() : renderSummary()}
       </div>
     </IonModal>
   );
